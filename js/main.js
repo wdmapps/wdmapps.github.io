@@ -51,28 +51,31 @@ document.addEventListener('DOMContentLoaded', function() {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const formData = new FormData(this);
-            const name = formData.get('name');
-            const email = formData.get('email');
-            
-            // Simple validation
-            if (!name || !email) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return;
-            }
-
-            // Simulate form submission
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Enviando...';
             submitBtn.disabled = true;
 
-            setTimeout(function() {
-                alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
-                contactForm.reset();
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: new FormData(this)
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
+                    contactForm.reset();
+                } else {
+                    alert('Erro ao enviar. Tente novamente.');
+                }
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
-            }, 1500);
+            })
+            .catch(function() {
+                alert('Erro de conexão. Tente novamente.');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         });
     }
 
