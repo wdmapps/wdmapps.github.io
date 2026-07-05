@@ -342,7 +342,11 @@
                     </div>
                 </div>
                 <div class="contact-form-wrapper">
-                    <form class="contact-form" id="contactForm">
+                    <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+                        <input type="hidden" name="access_key" value="SUA_ACCESS_KEY_AQUI">
+                        <input type="hidden" name="subject" value="Novo contato - WDM Apps">
+                        <input type="hidden" name="from_name" value="WDM Apps Website">
+                        <input type="hidden" name="email" value="contato@wdmapps.com.br">
                         <div class="form-group">
                             <label for="name">Nome</label>
                             <input type="text" id="name" name="name" required placeholder="Seu nome completo">
