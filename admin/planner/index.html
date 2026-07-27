@@ -1,89 +1,2683 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="default">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner - WDM Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #0066ff;
-            --bg: #0a1628;
-            --bg-light: #0f1f3d;
-            --bg-card: #132244;
-            --border: #1e3a5f;
-            --text: #e2e8f0;
-            --text-light: #94a3b8;
-            --radius: 8px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-        .header {
-            background: var(--bg-light);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header h1 { font-size: 1.25rem; font-weight: 700; }
-        .header h1 span { color: var(--primary); }
-        .btn {
-            padding: 8px 20px;
-            border-radius: var(--radius);
-            font-size: 0.85rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            text-decoration: none;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-        }
-        .btn-outline {
-            background: transparent;
-            color: var(--text-light);
-            border: 1px solid var(--border);
-        }
-        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-        iframe {
-            width: 100%;
-            border: none;
-        }
-        .placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 60vh;
-            flex-direction: column;
-            gap: 16px;
-            padding: 24px;
-            text-align: center;
-        }
-        .placeholder h2 { font-size: 1.5rem; }
-        .placeholder p { color: var(--text-light); max-width: 400px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner 360 - Sistema de Produtividade</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ═══════════════════ CSS VARIABLES / THEMES ═══════════════════ */
+:root {
+  --bg-primary:#080b16;
+  --bg-secondary:#0f1322;
+  --bg-card:#161b30;
+  --bg-glass:rgba(255,255,255,0.03);
+  --border:rgba(255,255,255,0.06);
+  --accent:#7c3aed;
+  --accent2:#ff6b8b;
+  --accent3:#22c55e;
+  --accent4:#f59e0b;
+  --accent5:#ef4444;
+  --text-primary:#f8fafc;
+  --text-secondary:#94a3b8;
+  --text-muted:#64748b;
+  --shadow:0 20px 60px rgba(0,0,0,0.5);
+  --shadow-card:0 8px 32px rgba(0,0,0,0.35);
+  --radius:20px;
+  --radius-sm:12px;
+  --font-display:'Poppins', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'Inter', sans-serif;
+  --grad1:linear-gradient(135deg,#7c3aed,#ff6b8b);
+  --grad2:linear-gradient(135deg,#7c3aed,#3b82f6);
+  --grad3:linear-gradient(135deg,#22c55e,#10b981);
+  --accent-glow:rgba(124,58,237,0.35);
+  --accent2-glow:rgba(255,107,139,0.35);
+  --accent3-glow:rgba(34,197,94,0.35);
+  --accent4-glow:rgba(245,158,11,0.35);
+  --accent-trans:rgba(124,58,237,0.1);
+  --accent2-trans:rgba(255,107,139,0.1);
+  --accent3-trans:rgba(34,197,94,0.1);
+  --accent4-trans:rgba(245,158,11,0.1);
+  --accent5-trans:rgba(239,68,68,0.1);
+  --transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+[data-theme="midnight"] {
+  --bg-primary:#020617;
+  --bg-secondary:#0b0f19;
+  --bg-card:#0f172a;
+  --bg-glass:rgba(255,255,255,0.03);
+  --border:rgba(59,130,246,0.12);
+  --accent:#3b82f6;
+  --accent2:#06b6d4;
+  --accent3:#10b981;
+  --accent4:#eab308;
+  --accent5:#ef4444;
+  --text-primary:#f8fafc;
+  --text-secondary:#94a3b8;
+  --text-muted:#64748b;
+  --shadow:0 20px 60px rgba(0,0,0,0.5);
+  --shadow-card:0 8px 32px rgba(0,0,0,0.35);
+  --grad1:linear-gradient(135deg,#3b82f6,#06b6d4);
+  --grad2:linear-gradient(135deg,#2563eb,#3b82f6);
+  --grad3:linear-gradient(135deg,#10b981,#06b6d4);
+  --accent-glow:rgba(59,130,246,0.35);
+  --accent2-glow:rgba(6,182,212,0.35);
+  --accent3-glow:rgba(16,185,129,0.35);
+  --accent4-glow:rgba(234,179,8,0.35);
+  --accent-trans:rgba(59,130,246,0.1);
+  --accent2-trans:rgba(6,182,212,0.1);
+  --accent3-trans:rgba(16,185,129,0.1);
+  --accent4-trans:rgba(234,179,8,0.1);
+  --accent5-trans:rgba(239,68,68,0.1);
+}
+[data-theme="rose"] {
+  --bg-primary:#18060a;
+  --bg-secondary:#240911;
+  --bg-card:#320f18;
+  --bg-glass:rgba(255,255,255,0.03);
+  --border:rgba(255,107,139,0.15);
+  --accent:#ff6b8b;
+  --accent2:#ec4899;
+  --accent3:#14b8a6;
+  --accent4:#f59e0b;
+  --accent5:#f43f5e;
+  --text-primary:#fff1f2;
+  --text-secondary:#fda4af;
+  --text-muted:#f43f5e;
+  --shadow:0 20px 60px rgba(0,0,0,0.5);
+  --shadow-card:0 8px 32px rgba(0,0,0,0.35);
+  --grad1:linear-gradient(135deg,#ff6b8b,#ec4899);
+  --grad2:linear-gradient(135deg,#ff6b8b,#f43f5e);
+  --grad3:linear-gradient(135deg,#14b8a6,#0d9488);
+  --accent-glow:rgba(255,107,139,0.35);
+  --accent2-glow:rgba(236,72,153,0.35);
+  --accent3-glow:rgba(20,184,166,0.35);
+  --accent4-glow:rgba(245,158,11,0.35);
+  --accent-trans:rgba(255,107,139,0.1);
+  --accent2-trans:rgba(236,72,153,0.1);
+  --accent3-trans:rgba(20,184,166,0.1);
+  --accent4-trans:rgba(245,158,11,0.1);
+  --accent5-trans:rgba(244,63,94,0.1);
+}
+[data-theme="emerald"] {
+  --bg-primary:#022c22;
+  --bg-secondary:#064e3b;
+  --bg-card:#065f46;
+  --bg-glass:rgba(255,255,255,0.03);
+  --border:rgba(16,185,129,0.15);
+  --accent:#10b981;
+  --accent2:#34d399;
+  --accent3:#3b82f6;
+  --accent4:#eab308;
+  --accent5:#f43f5e;
+  --text-primary:#ecfdf5;
+  --text-secondary:#a7f3d0;
+  --text-muted:#34d399;
+  --shadow:0 20px 60px rgba(0,0,0,0.5);
+  --shadow-card:0 8px 32px rgba(0,0,0,0.35);
+  --grad1:linear-gradient(135deg,#10b981,#34d399);
+  --grad2:linear-gradient(135deg,#047857,#10b981);
+  --grad3:linear-gradient(135deg,#34d399,#059669);
+  --accent-glow:rgba(16,185,129,0.35);
+  --accent2-glow:rgba(52,211,153,0.35);
+  --accent3-glow:rgba(59,130,246,0.35);
+  --accent4-glow:rgba(234,179,8,0.35);
+  --accent-trans:rgba(16,185,129,0.1);
+  --accent2-trans:rgba(52,211,153,0.1);
+  --accent3-trans:rgba(59,130,246,0.1);
+  --accent4-trans:rgba(234,179,8,0.1);
+  --accent5-trans:rgba(244,63,94,0.1);
+}
+[data-theme="pearl"] {
+  --bg-primary:#f8fafc;
+  --bg-secondary:#f1f5f9;
+  --bg-card:#ffffff;
+  --bg-glass:rgba(0,0,0,0.02);
+  --border:rgba(15,23,42,0.08);
+  --accent:#7c3aed;
+  --accent2:#ff6b8b;
+  --accent3:#22c55e;
+  --accent4:#f59e0b;
+  --accent5:#ef4444;
+  --text-primary:#0f172a;
+  --text-secondary:#475569;
+  --text-muted:#64748b;
+  --shadow:0 20px 60px rgba(124,58,237,0.06);
+  --shadow-card:0 8px 30px rgba(0,0,0,0.03);
+  --grad1:linear-gradient(135deg,#7c3aed,#ff6b8b);
+  --grad2:linear-gradient(135deg,#7c3aed,#3b82f6);
+  --grad3:linear-gradient(135deg,#22c55e,#10b981);
+  --accent-glow:rgba(124,58,237,0.22);
+  --accent2-glow:rgba(255,107,139,0.22);
+  --accent3-glow:rgba(34,197,94,0.22);
+  --accent4-glow:rgba(245,158,11,0.22);
+  --accent-trans:rgba(124,58,237,0.08);
+  --accent2-trans:rgba(255,107,139,0.08);
+  --accent3-trans:rgba(34,197,94,0.08);
+  --accent4-trans:rgba(245,158,11,0.08);
+  --accent5-trans:rgba(239,68,68,0.08);
+}
+/* ═══════════════════ RESET & BASE ═══════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background-color:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body)}
+h1,h2,h3,h4,h5,h6{color:var(--text-primary)}
+
+/* ═══════════════════ SCROLLBAR ═══════════════════ */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+/* ═══════════════════ KEYFRAMES ═══════════════════ */
+@keyframes heartbeat{
+  0%,100%{transform:scale(1)}
+  14%{transform:scale(1.15)}
+  28%{transform:scale(1)}
+  42%{transform:scale(1.1)}
+  56%{transform:scale(1)}
+}
+@keyframes pulse-ring{
+  0%{transform:scale(0.9);opacity:0.8}
+  70%{transform:scale(1.4);opacity:0}
+  100%{transform:scale(1.4);opacity:0}
+}
+@keyframes float{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(-8px)}
+}
+@keyframes shimmer{
+  0%{background-position:-200% center}
+  100%{background-position:200% center}
+}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes fadeInLeft{
+  from{opacity:0;transform:translateX(-30px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes slideInRight{
+  from{opacity:0;transform:translateX(60px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes barGrow{
+  from{transform:scaleY(0);opacity:0}
+  to{transform:scaleY(1);opacity:1}
+}
+@keyframes ringFill{
+  from{stroke-dashoffset:283}
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 20px var(--accent-glow)}
+  50%{box-shadow:0 0 40px var(--accent-glow),0 0 80px var(--accent-glow)}
+}
+@keyframes tickerScroll{
+  from{transform:translateX(100%)}
+  to{transform:translateX(-100%)}
+}
+@keyframes waveform{
+  0%,100%{height:8px}
+  50%{height:28px}
+}
+@keyframes orbit{
+  from{transform:rotate(0deg) translateX(50px) rotate(0deg)}
+  to{transform:rotate(360deg) translateX(50px) rotate(-360deg)}
+}
+@keyframes numberCount{
+  from{opacity:0;transform:translateY(20px) scale(0.8)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+/* ═══════════════════ LAYOUT ═══════════════════ */
+.app-wrapper{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:0 20px 40px}
+/* ═══════════════════ TOP NAV ═══════════════════ */
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;margin-bottom:8px;
+  background:var(--bg-glass);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:var(--radius);
+  position:sticky;top:10px;z-index:100;
+  animation:fadeInUp 0.6s ease both;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--font-display);font-size:1.35rem;font-weight:900;
+  letter-spacing:0.22px;color:var(--accent);
+}
+.nav-logo .logo-icon{
+  width:38px;height:38px;background:var(--grad1);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;animation:heartbeat 2s ease-in-out infinite;
+  box-shadow:0 0 20px var(--accent-glow);
+}
+.nav-controls{display:flex;align-items:center;gap:12px}
+.btn{
+  padding:9px 20px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--bg-glass);color:var(--text-primary);cursor:pointer;
+  font-family:var(--font-body);font-size:0.85rem;font-weight:500;
+  transition:var(--transition);backdrop-filter:blur(10px);
+  display:inline-flex;align-items:center;gap:7px;
+}
+.btn:hover{background:var(--accent);color:#000;border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow)}
+.btn-primary{background:var(--grad1);border:none;color:#000;font-weight:600;box-shadow:0 4px 20px var(--accent-glow)}
+.btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 32px var(--accent-glow);color:#000;background:var(--grad1)}
+.btn-icon{width:38px;height:38px;padding:0;border-radius:50%;justify-content:center;font-size:1rem}
+/* ═══════════════════ WEEK HEADER ═══════════════════ */
+.week-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 28px;margin:12px 0;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);
+  animation:fadeInUp 0.7s ease 0.1s both;
+}
+.week-title{font-family:var(--font-display);font-size:1.9rem;font-weight:700;
+  background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.week-nav{display:flex;align-items:center;gap:10px}
+.week-badge{
+  background:var(--bg-glass);border:1px solid var(--border);
+  padding:6px 16px;border-radius:20px;font-size:0.8rem;
+  color:var(--text-secondary);font-weight:500;
+}
+/* ═══════════════════ STATS ROW ═══════════════════ */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  margin:14px 0;animation:fadeInUp 0.7s ease 0.2s both;
+}
+.stat-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px 22px;
+  position:relative;overflow:hidden;cursor:pointer;
+  transition:var(--transition);
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--grad1);opacity:0;transition:opacity 0.3s;
+}
+.stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-card)}
+.stat-card:hover::before{opacity:1}
+.stat-card:nth-child(2)::before{background:var(--grad2)}
+.stat-card:nth-child(3)::before{background:var(--grad3)}
+.stat-card:nth-child(4)::before{background:linear-gradient(135deg,var(--accent5),var(--accent2))}
+.stat-label{font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.stat-value{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--accent);line-height:1}
+.stat-value.s2{color:var(--accent2)}
+.stat-value.s3{color:var(--accent3)}
+.stat-value.s4{color:var(--accent5)}
+.stat-sub{font-size:0.8rem;color:var(--text-muted);margin-top:4px}
+.stat-icon{
+  position:absolute;right:18px;top:18px;width:40px;height:40px;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;animation:heartbeat 2.5s ease-in-out infinite;
+}
+.stat-icon.i1{background:var(--accent4-trans);animation-delay:0s}
+.stat-icon.i2{background:var(--accent2-trans);animation-delay:0.3s}
+.stat-icon.i3{background:var(--accent3-trans);animation-delay:0.6s}
+.stat-icon.i4{background:var(--accent5-trans);animation-delay:0.9s}
+/* ═══════════════════ MAIN GRID ═══════════════════ */
+.main-grid{
+  display:grid;grid-template-columns:1fr 340px;gap:14px;
+  animation:fadeInUp 0.7s ease 0.3s both;
+}
+/* ═══════════════════ WEEKLY PLANNER ═══════════════════ */
+.planner-panel{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.panel-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-glass);
+}
+.panel-title{font-size:1rem;font-weight:600;letter-spacing:0.5px;color:var(--text-primary)}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
+.day-col{border-right:1px solid var(--border);min-height:500px;position:relative}
+.day-col:last-child{border-right:none}
+.day-header{
+  padding:12px 8px;text-align:center;border-bottom:1px solid var(--border);
+  position:relative;
+}
+.day-name{font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-secondary);font-weight:600}
+.day-date{
+  font-family:var(--font-mono);font-size:1.4rem;font-weight:700;
+  margin-top:3px;transition:var(--transition);color:var(--text-primary);
+}
+.day-col.today .day-date{
+  color:var(--accent);text-shadow:0 0 20px var(--accent-glow);
+  animation:heartbeat 2s ease-in-out infinite;
+}
+.day-col.today .day-header{background:var(--accent-trans)}
+.day-col.today::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--grad1);
+}
+.tasks-container{padding:8px 6px;display:flex;flex-direction:column;gap:5px;min-height:420px}
+.task-item{
+  background:var(--bg-glass);border:1px solid var(--border);
+  border-radius:8px;padding:8px 9px;cursor:pointer;
+  transition:var(--transition);position:relative;overflow:hidden;
+  animation:fadeInLeft 0.3s ease both;
+}
+.task-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--accent);border-radius:2px 0 0 2px;
+}
+.task-item:nth-child(2n)::before{background:var(--accent2)}
+.task-item:nth-child(3n)::before{background:var(--accent3)}
+.task-item:nth-child(4n)::before{background:var(--accent5)}
+.task-item:hover{transform:scale(1.02);background:rgba(255,255,255,0.07);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.task-item.completed{opacity:0.5}
+.task-item.completed .task-text{text-decoration:line-through;color:var(--text-muted)}
+.task-text{font-size:0.73rem;font-weight:500;word-break:break-word;line-height:1.4;color:var(--text-primary)}
+.task-time{font-size:0.62rem;color:var(--text-secondary);margin-top:2px}
+.task-actions{
+  display:none;position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  gap:3px;
+}
+.task-item:hover .task-actions{display:flex}
+.task-btn{
+  width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:0.65rem;
+  transition:var(--transition);
+}
+.task-btn.check{background:rgba(74,244,178,0.2);color:#4af4b2}
+.task-btn.del{background:rgba(255,107,107,0.2);color:#ff6b6b}
+.task-btn:hover{transform:scale(1.2)}
+.add-task-btn{
+  margin:6px;padding:7px;border-radius:8px;border:1px dashed var(--border);
+  background:transparent;color:var(--text-muted);cursor:pointer;
+  width:calc(100% - 12px);font-size:0.72rem;transition:var(--transition);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.add-task-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-trans)}
+/* ═══════════════════ RIGHT SIDEBAR ═══════════════════ */
+.sidebar{display:flex;flex-direction:column;gap:14px}
+/* Progress Ring Card */
+.progress-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+  position:relative;overflow:hidden;
+}
+.progress-rings{display:flex;align-items:center;justify-content:center;gap:0;position:relative;margin:10px 0}
+.ring-container{position:relative;display:flex;align-items:center;justify-content:center}
+.ring-center-text{
+  position:absolute;text-align:center;
+  font-family:var(--font-mono);font-size:1.5rem;font-weight:700;
+  color:var(--accent);animation:heartbeat 2.2s ease-in-out infinite;
+}
+.ring-center-label{font-size:0.62rem;color:var(--text-secondary);display:block;margin-top:2px;font-family:var(--font-body)}
+svg.ring-svg circle{transition:stroke-dashoffset 1.5s cubic-bezier(0.23,1,0.32,1)}
+.ring-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-secondary)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:heartbeat 2s ease-in-out infinite}
+/* Habits Card */
+.habits-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+}
+.habit-item{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);cursor:pointer;
+  transition:var(--transition);
+}
+.habit-item:last-child{border-bottom:none}
+.habit-item:hover{transform:translateX(4px)}
+.habit-check{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);flex-shrink:0;font-size:0.7rem;
+}
+.habit-item.done .habit-check{
+  background:var(--accent3);border-color:var(--accent3);
+  animation:heartbeat 0.5s ease;color:#000;
+}
+.habit-name{font-size:0.83rem;font-weight:500;flex:1;color:var(--text-primary)}
+.habit-streak{
+  font-family:var(--font-mono);font-size:0.78rem;color:var(--accent);
+  background:var(--accent4-trans);padding:2px 8px;border-radius:10px;
+}
+.add-habit-btn{
+  width:100%;margin-top:10px;padding:9px;border-radius:8px;
+  border:1px dashed var(--border);background:transparent;
+  color:var(--text-muted);cursor:pointer;font-size:0.8rem;
+  transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.add-habit-btn:hover{border-color:var(--accent3);color:var(--accent3)}
+/* ═══════════════════ ANALYTICS ROW ═══════════════════ */
+.analytics-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-top:14px;animation:fadeInUp 0.7s ease 0.4s both;
+}
+/* Bar Chart */
+.bar-chart-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+}
+.bar-chart-inner{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:8px;height:120px;margin:16px 0 8px;padding-bottom:4px;
+}
+.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.bar-track{
+  width:100%;border-radius:6px 6px 0 0;
+  position:relative;overflow:hidden;
+  background:var(--bg-secondary);height:100%;
+  display:flex;align-items:flex-end;
+}
+.bar-fill{
+  width:100%;border-radius:6px 6px 0 0;
+  background:var(--grad1);transform-origin:bottom;
+  animation:barGrow 1.2s cubic-bezier(0.23,1,0.32,1) both;
+  position:relative;overflow:hidden;
+  transition:height 0.6s cubic-bezier(0.23,1,0.32,1);
+}
+.bar-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.15),transparent);
+}
+.bar-fill.c2{background:var(--grad2)}
+.bar-fill.c3{background:var(--grad3)}
+.bar-fill.c4{background:linear-gradient(135deg,var(--accent5),var(--accent2))}
+.bar-pct{font-size:0.68rem;font-family:var(--font-mono);color:var(--accent);font-weight:700}
+.bar-label{font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
+/* Waffle Chart */
+.waffle-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+}
+.waffle-grid{
+  display:grid;grid-template-columns:repeat(10,1fr);gap:3px;
+  margin:14px 0;
+}
+.waffle-cell{
+  aspect-ratio:1;border-radius:3px;
+  background:var(--bg-secondary);transition:all 0.3s ease;cursor:pointer;
+}
+.waffle-cell.filled{background:var(--accent);box-shadow:0 0 6px var(--accent-glow)}
+.waffle-cell.filled:nth-child(3n){background:var(--accent2)}
+.waffle-cell.filled:nth-child(5n){background:var(--accent3)}
+.waffle-cell:hover{transform:scale(1.3);z-index:2;position:relative}
+/* Gauge / Speed Chart */
+.gauge-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+}
+.gauge-wrap{
+  display:flex;align-items:center;justify-content:center;
+  position:relative;margin:8px 0;
+}
+.gauge-svg{overflow:visible}
+.gauge-needle{
+  transform-origin:50% 85%;
+  transition:transform 1.5s cubic-bezier(0.23,1,0.32,1);
+}
+.gauge-value{
+  font-family:var(--font-mono);font-size:1.8rem;font-weight:700;
+  color:var(--accent);text-align:center;animation:heartbeat 2.5s ease-in-out infinite;
+}
+.gauge-label-text{font-size:0.72rem;color:var(--text-secondary);text-align:center}
+/* ═══════════════════ PRODUCTIVITY TICKER ═══════════════════ */
+.ticker{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 22px;margin:14px 0;
+  overflow:hidden;animation:fadeInUp 0.7s ease 0.5s both;
+  display:flex;align-items:center;gap:14px;
+}
+.ticker-label{
+  font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;
+  color:var(--accent);white-space:nowrap;flex-shrink:0;
+  padding:4px 12px;background:var(--accent-trans);border-radius:6px;
+}
+.ticker-track{overflow:hidden;flex:1}
+.ticker-inner{
+  display:flex;gap:40px;white-space:nowrap;
+  animation:tickerScroll 25s linear infinite;
+  font-size:0.78rem;color:var(--text-secondary);
+}
+.ticker-item{display:flex;align-items:center;gap:8px}
+.ticker-item span{color:var(--accent3);font-family:var(--font-mono)}
+/* ═══════════════════ SOUNDWAVE ═══════════════════ */
+.waveform{display:flex;align-items:center;gap:3px;height:36px}
+.wave-bar{
+  width:3px;border-radius:2px;background:var(--accent);opacity:0.7;
+  animation:waveform 0.8s ease-in-out infinite alternate;
+}
+.wave-bar:nth-child(2n){background:var(--accent2);animation-delay:0.1s}
+.wave-bar:nth-child(3n){background:var(--accent3);animation-delay:0.2s}
+.wave-bar:nth-child(4n){animation-delay:0.3s}
+.wave-bar:nth-child(5n){animation-delay:0.15s;background:var(--accent4)}
+/* ═══════════════════ SETTINGS PANEL ═══════════════════ */
+.settings-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;
+}
+.settings-overlay.open{display:flex;animation:fadeInUp 0.3s ease}
+.settings-panel{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:32px;width:min(480px,90vw);
+  box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;
+  animation:slideInRight 0.4s ease;
+}
+.settings-title{font-family:var(--font-display);font-size:1.4rem;margin-bottom:24px;
+  background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.settings-section{margin-bottom:24px}
+.settings-section-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--text-secondary);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.theme-btn{
+  aspect-ratio:1;border-radius:10px;border:2px solid transparent;cursor:pointer;
+  transition:var(--transition);position:relative;overflow:hidden;
+}
+.theme-btn.active{border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow)}
+.theme-btn span{
+  position:absolute;bottom:0;left:0;right:0;
+  font-size:0.55rem;text-align:center;padding:3px;
+  background:rgba(0,0,0,0.5);color:#fff;
+}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.settings-row:last-child{border-bottom:none}
+.settings-row-label{font-size:0.85rem;font-weight:500}
+.toggle{
+  width:44px;height:24px;border-radius:12px;background:var(--bg-secondary);
+  position:relative;cursor:pointer;transition:var(--transition);border:1px solid var(--border);
+}
+.toggle.on{background:var(--accent)}
+.toggle::after{
+  content:'';position:absolute;width:18px;height:18px;border-radius:50%;
+  background:#fff;top:2px;left:2px;transition:var(--transition);
+}
+.toggle.on::after{left:22px}
+/* ═══════════════════ MODAL (Add Task) ═══════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;
+  backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;animation:fadeInUp 0.3s ease}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;width:min(420px,90vw);
+  box-shadow:var(--shadow);animation:slideInRight 0.3s ease;
+}
+.modal-title{font-size:1.1rem;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--text-secondary);margin-bottom:6px;display:block}
+.form-input, .form-select, .form-textarea{
+  width:100%;padding:11px 14px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--bg-secondary);
+  color:var(--text-primary);font-family:var(--font-body);font-size:0.85rem;
+  transition:var(--transition);
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-trans);
+}
+.form-select option{background:var(--bg-card)}
+.form-textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+/* ═══════════════════ COLOR DOTS ═══════════════════ */
+.color-picker{display:flex;gap:8px;flex-wrap:wrap}
+.color-dot{
+  width:24px;height:24px;border-radius:50%;cursor:pointer;
+  transition:var(--transition);border:2px solid transparent;
+}
+.color-dot:hover,.color-dot.selected{transform:scale(1.25);border-color:#fff}
+/* ═══════════════════ FLOATING ACTION BUTTON ═══════════════════ */
+.fab{
+  position:fixed;bottom:30px;right:30px;z-index:150;
+  width:56px;height:56px;border-radius:50%;border:none;
+  background:var(--grad1);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;color:#000;
+  box-shadow:0 8px 32px var(--accent-glow);
+  transition:var(--transition);animation:glowPulse 2s ease-in-out infinite;
+}
+.fab:hover{transform:scale(1.1) rotate(45deg);box-shadow:0 12px 40px var(--accent-glow)}
+.fab-menu{
+  position:fixed;bottom:100px;right:30px;z-index:150;
+  display:none;flex-direction:column;gap:10px;align-items:flex-end;
+}
+.fab-menu.open{display:flex;animation:fadeInUp 0.3s ease}
+.fab-option{
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  animation:fadeInUp 0.3s ease both;
+}
+.fab-option-btn{
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);
+  transition:var(--transition);box-shadow:var(--shadow-card);
+}
+.fab-option-label{
+  background:var(--bg-card);border:1px solid var(--border);
+  padding:5px 12px;border-radius:20px;font-size:0.78rem;white-space:nowrap;
+  color:var(--text-primary);
+}
+/* ═══════════════════ PULSE RINGS ═══════════════════ */
+.pulse-wrapper{position:relative;display:inline-flex}
+.pulse-ring{
+  position:absolute;inset:-8px;border-radius:50%;
+  border:2px solid var(--accent);animation:pulse-ring 2s ease-out infinite;
+  pointer-events:none;
+}
+
+/* ═══════════════════ PROFESSIONAL APP SHELL / SIDEBAR UPGRADE ═══════════════════ */
+.app-shell{position:relative;min-height:100vh}
+.pro-sidebar{position:fixed;left:16px;top:16px;bottom:16px;width:260px;z-index:180;background:linear-gradient(180deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:16px;backdrop-filter:blur(24px);animation:fadeInLeft .55s ease both}
+.pro-brand{display:flex;align-items:center;gap:12px;padding:10px;border-radius:18px;background:var(--bg-glass);border:1px solid var(--border)}
+.pro-brand-icon{width:44px;height:44px;border-radius:15px;background:var(--grad1);display:flex;align-items:center;justify-content:center;color:#000;font-size:1.25rem;box-shadow:0 0 28px color-mix(in srgb,var(--accent) 45%,transparent);animation:float 3s ease-in-out infinite}
+.pro-brand-title{font-family:var(--font-display);letter-spacing:0.25px;font-weight:900;color:var(--accent);font-size:1.15rem}
+.pro-brand-sub{font-size:.68rem;color:var(--text-secondary);margin-top:2px}
+.pro-menu{display:grid;gap:8px;margin-top:4px}
+.pro-nav-item{width:100%;border:1px solid transparent;background:transparent;color:var(--text-secondary);padding:12px 12px;border-radius:15px;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;font-family:var(--font-body);font-weight:700;transition:var(--transition)}
+.pro-nav-item span:first-child{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg-glass);border:1px solid var(--border);font-size:.92rem}
+.pro-nav-item:hover,.pro-nav-item.active{background:var(--bg-glass);border-color:var(--border);color:var(--text-primary);transform:translateX(4px);box-shadow:var(--shadow-card)}
+.pro-nav-item.active span:first-child{background:var(--grad1);color:#000;border-color:transparent}
+.sidebar-card{margin-top:auto;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--accent2) 10%,transparent));border:1px solid var(--border);border-radius:18px;padding:14px}
+.sidebar-card-title{font-weight:800;font-size:.85rem;margin-bottom:4px;color:var(--text-primary)}.sidebar-card-sub{font-size:.72rem;color:var(--text-secondary);line-height:1.4}
+.app-main{margin-left:292px;max-width:none;width:calc(100% - 292px);padding-top:16px}
+.app-view{display:none;animation:fadeInUp .45s ease both}.app-view.active{display:block}
+.view-hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent));border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:16px;overflow:hidden;position:relative}.view-hero:before{content:'';position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 26%,transparent),transparent 70%);animation:float 6s ease-in-out infinite}.view-hero>*{position:relative}.view-kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-weight:900;margin-bottom:6px}.view-title{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.6rem);line-height:1.1}.view-sub{color:var(--text-secondary);font-size:.9rem;margin-top:6px;max-width:650px}/De/dashboard-actions{display:flex;gap:10px;flex-wrap:wrap}
+.mobile-header{display:none;position:sticky;top:0;z-index:170;margin:0;padding:12px;background:color-mix(in srgb,var(--bg-primary) 88%,transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.mobile-header-inner{display:flex;align-items:center;justify-content:space-between;gap:10px}.mobile-title{font-family:var(--font-display);font-weight:900;color:var(--accent);letter-spacing:0.3px}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:175;backdrop-filter:blur(3px)}
+.light-quick{width:100%;justify-content:center;margin-top:8px}
+[data-theme="pearl"] body::before, body[data-theme="pearl"]::before{background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(108,71,255,0.12),transparent),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(255,107,107,0.09),transparent),radial-gradient(ellipse 50% 60% at 50% 50%,rgba(0,200,150,0.05),transparent)}
+@media(max-width:1100px){.pro-sidebar{transform:translateX(-115%);transition:transform .35s cubic-bezier(.23,1,.32,1);left:10px;top:10px;bottom:10px}.pro-sidebar.open{transform:translateX(0)}.sidebar-overlay.open{display:block}.app-main{margin-left:0;width:100%;padding-top:10px}.mobile-header{display:block}.nav{display:none}.view-hero{flex-direction:column;align-items:flex-start}.days-grid{grid-template-columns:repeat(2,1fr)!important}.day-col{min-height:360px}.tasks-container{min-height:290px}}
+@media(max-width:680px){.app-wrapper{padding:0 10px 28px}.week-header{flex-direction:column;align-items:flex-start}.week-nav{width:100%;flex-wrap:wrap}.stats-row{grid-template-columns:1fr!important}.days-grid{grid-template-columns:1fr!important}.main-grid{grid-template-columns:1fr!important}.analytics-row,.features-row{grid-template-columns:1fr!important}.panel-header{flex-direction:column;align-items:flex-start;gap:10px}.btn{padding:9px 14px}.pro-sidebar{width:min(290px,calc(100vw - 20px))}.fab{right:18px;bottom:22px}.fab-menu{right:18px;bottom:88px}}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media(max-width:1200px){
+  .analytics-row{grid-template-columns:1fr 1fr}
+  .gauge-card{display:none}
+}
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .days-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .days-grid{grid-template-columns:repeat(3,1fr)}
+  .analytics-row{grid-template-columns:1fr}
+  .week-title{font-size:1.3rem}
+  .nav-logo span{display:none}
+  .app-wrapper{padding:0 10px 30px}
+}
+@media(max-width:400px){
+  .days-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* CUSTOMER-NEEDED EXTRA SECTIONS */
+.goal-roadmap,.budget-board,.resource-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.roadmap-card,.budget-card,.resource-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-card);position:relative;overflow:hidden;transition:var(--transition)}
+.roadmap-card:hover,.budget-card:hover,.resource-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 14px 40px color-mix(in srgb,var(--accent) 16%,transparent)}
+.roadmap-card:before,.budget-card:before,.resource-card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--grad1)}
+.progress-line{height:9px;background:var(--bg-secondary);border-radius:999px;overflow:hidden;margin:12px 0}.progress-line span{display:block;height:100%;border-radius:inherit;background:var(--grad1);animation:barGrow 1s ease both}
+.money-row,.link-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.86rem}.money-row:last-child,.link-row:last-child{border-bottom:none}
+.money-row b{color:var(--accent);font-family:var(--font-mono)}.resource-tag{font-size:.68rem;color:var(--accent);border:1px solid var(--border);border-radius:999px;padding:3px 8px;background:var(--bg-glass)}
+
+/* ═══════════════════ UTILITY ═══════════════════ */
+.flex{display:flex}.flex-between{justify-content:space-between}.items-center{align-items:center}
+.gap-8{gap:8px}.mt-8{margin-top:8px}.text-sm{font-size:0.8rem}.text-accent{color:var(--accent)}
+.glow{animation:glowPulse 2s ease-in-out infinite}
+
+
+/* ═══════════════════ PREMIUM POLISH + 2 NEW FEATURES ═══════════════════ */
+body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% 50%, color-mix(in srgb,var(--accent) 16%, transparent), transparent 62%);filter:blur(28px);animation:ambientGlow 8s ease-in-out infinite alternate}
+@keyframes ambientGlow{from{transform:translateY(20px) scale(.96);opacity:.45}to{transform:translateY(-18px) scale(1.05);opacity:.85}}
+.nav,.week-header,.planner-panel,.progress-card,.habits-card,.bar-chart-card,.waffle-card,.gauge-card,.feature-card{box-shadow:var(--shadow-card)}
+.nav::before,.week-header::before,.planner-panel::before,.progress-card::before,.habits-card::before,.bar-chart-card::before,.waffle-card::before,.gauge-card::before,.feature-card::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 55%,transparent),transparent 35%,color-mix(in srgb,var(--accent2) 45%,transparent));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.55}
+.nav,.week-header,.planner-panel,.progress-card,.habits-card,.bar-chart-card,.waffle-card,.gauge-card,.feature-card{position:relative}
+.features-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;animation:fadeInUp .7s ease .55s both}
+.feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;overflow:hidden}
+.feature-card::after{content:'';position:absolute;right:-40px;top:-45px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 20%,transparent),transparent 70%);animation:orbitGlow 9s linear infinite;pointer-events:none}
+@keyframes orbitGlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.feature-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+.feature-title{font-size:1rem;font-weight:700;letter-spacing:.4px;color:var(--text-primary)}.feature-sub{font-size:.74rem;color:var(--text-secondary);margin-top:2px}
+.timer-display{font-family:var(--font-mono);font-size:1.85rem;line-height:1;font-weight:700;text-align:center;letter-spacing:1px;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px color-mix(in srgb,var(--accent) 25%,transparent);animation:numberCount .45s ease both}
+.timer-ring{width:150px;height:150px;margin:8px auto 14px;position:relative;display:grid;place-items:center}.timer-ring svg{position:absolute;inset:0;filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--accent) 25%,transparent))}.timer-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.notes-wrap{display:grid;gap:10px}.note-input{width:100%;min-height:92px;resize:vertical;padding:13px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:var(--font-body);outline:none;transition:var(--transition)}.note-input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent2) 18%,transparent)}
+.note-list{display:grid;gap:8px;max-height:190px;overflow:auto;padding-right:3px}.note-item{display:flex;align-items:flex-start;gap:9px;background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:10px 11px;animation:fadeInLeft .3s ease both}.note-item span{flex:1;font-size:.82rem;line-height:1.45;color:var(--text-primary);word-break:break-word}.note-del{border:none;background:rgba(255,107,107,.16);color:var(--accent5);width:24px;height:24px;border-radius:50%;cursor:pointer;transition:var(--transition)}.note-del:hover{transform:scale(1.12);background:var(--accent5);color:#fff}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:999px;padding:10px 18px;box-shadow:var(--shadow);z-index:500;opacity:0;pointer-events:none;transition:.3s ease}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){.features-row{grid-template-columns:1fr}.timer-display{font-size:1.6rem}}
+
+/* ═══════════════════ CUSTOM SECTIONS + DEMO CONTENT POLISH ═══════════════════ */
+.content-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}.content-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;box-shadow:var(--shadow-card);animation:fadeInUp .55s ease both}.content-card:before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 45%,transparent),transparent,color-mix(in srgb,var(--accent2) 35%,transparent));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.5}.content-title{font-weight:800;font-size:.95rem;margin-bottom:10px;color:var(--text-primary)}.mini-list{display:grid;gap:9px}.mini-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--border);background:var(--bg-glass);border-radius:12px;transition:var(--transition)}.mini-item:hover{transform:translateY(-2px);border-color:var(--accent)}.mini-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 55%,transparent);flex:0 0 auto}.mini-text{font-size:.82rem;color:var(--text-primary);line-height:1.35}.mini-sub{font-size:.7rem;color:var(--text-secondary);margin-top:2px}.pill-row{display:flex;flex-wrap:wrap;gap:8px}.pill{padding:7px 11px;border:1px solid var(--border);background:var(--bg-glass);border-radius:999px;font-size:.75rem;color:var(--text-primary)}.pill b{color:var(--accent)}.custom-section-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}.custom-block{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-card);animation:fadeInUp .45s ease both}.custom-block h3{font-size:1.05rem;margin-bottom:8px;color:var(--text-primary)}.custom-block p{color:var(--text-secondary);font-size:.9rem;line-height:1.65;white-space:pre-wrap}.custom-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.add-section-btn{width:100%;justify-content:center;margin-top:10px}.section-form{display:grid;gap:12px}.section-form input,.section-form textarea,.section-form select{width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:var(--font-body)}.section-form textarea{min-height:120px;resize:vertical}.empty-premium{border:1px dashed var(--border);background:var(--bg-glass);border-radius:var(--radius);padding:22px;text-align:center;color:var(--text-secondary)}@media(max-width:1100px){.content-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.content-grid{grid-template-columns:1fr}.mini-item{align-items:flex-start}.custom-section-list{grid-template-columns:1fr}}
+
+
+/* ═══════════════════ PREMIUM AI REVIEW + ANIMATED 3D GRAPHS ═══════════════════ */
+.ai-review-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin:14px 0}.ai-card{background:linear-gradient(145deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 82%,var(--accent) 8%));border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-card);position:relative;overflow:hidden;animation:fadeInUp .6s ease both}.ai-card:after{content:'';position:absolute;right:-80px;top:-80px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 25%,transparent),transparent 70%);pointer-events:none}.ai-score{font-family:var(--font-mono);font-size:3rem;line-height:1;color:var(--accent);text-shadow:0 0 28px color-mix(in srgb,var(--accent) 35%,transparent);animation:heartbeat 2.4s ease-in-out infinite}.ai-insight{display:flex;gap:12px;padding:12px;border:1px solid var(--border);background:var(--bg-glass);border-radius:14px;margin-top:10px}.ai-insight b{color:var(--accent)}.ai-icon{width:34px;height:34px;border-radius:12px;background:var(--grad1);display:grid;place-items:center;color:#000;flex:0 0 auto}.three-d-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-card);overflow:hidden}
+
+/* SaaS Premium Bar Chart */
+.saas-graph-container{height:280px;position:relative;background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:30px 20px 10px 48px;margin-top:12px;overflow:visible}.saas-grid-lines{position:absolute;top:30px;bottom:44px;left:48px;right:20px;pointer-events:none}.saas-grid-line{position:absolute;left:0;right:0;border-top:1px solid color-mix(in srgb,var(--border) 40%,transparent)}.saas-grid-label{position:absolute;left:-40px;transform:translateY(-50%);font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);font-weight:600}.saas-bars-container{position:absolute;top:30px;bottom:44px;left:48px;right:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;overflow:visible}.saas-bar-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;transition:var(--transition)}.saas-bar-fill-wrapper{width:70%;max-width:44px;min-width:14px;height:100%;display:flex;align-items:flex-end}.saas-bar-fill{width:100%;border-radius:6px 6px 0 0;position:relative;transition:height 1s cubic-bezier(0.23,1,0.32,1);display:flex;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:saasBarGrow 1.2s cubic-bezier(.23,1,.32,1) both}@keyframes saasBarGrow{from{height:0!important;opacity:0}to{opacity:1}}.saas-bar-fill.c1{background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#000))}.saas-bar-fill.c2{background:linear-gradient(180deg,var(--accent2),color-mix(in srgb,var(--accent2) 70%,#000))}.saas-bar-fill.c3{background:linear-gradient(180deg,var(--accent3),color-mix(in srgb,var(--accent3) 70%,#000))}.saas-bar-fill.c4{background:linear-gradient(180deg,var(--accent4),color-mix(in srgb,var(--accent4) 70%,#000))}.saas-bar-fill.c5{background:linear-gradient(180deg,var(--accent5),color-mix(in srgb,var(--accent5) 70%,#000))}.saas-bar-fill:hover{transform:scaleY(1.03);filter:brightness(1.15);box-shadow:0 6px 20px var(--accent-glow)}.saas-bar-value{position:absolute;top:-24px;font-family:var(--font-mono);font-size:.74rem;font-weight:700;color:var(--text-primary);opacity:.85;transition:var(--transition)}.saas-bar-col:hover .saas-bar-value{opacity:1;transform:scale(1.1);color:var(--accent)}.saas-bar-label{position:absolute;bottom:-24px;font-size:.75rem;font-weight:600;color:var(--text-secondary)}.saas-bar-tooltip{position:absolute;bottom:calc(100% + 10px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.74rem;color:var(--text-primary);box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(5px) scale(.95);transition:all .2s cubic-bezier(.23,1,.32,1);white-space:nowrap;z-index:10;text-align:center}.saas-bar-col:hover .saas-bar-tooltip{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+
+.orbit-chart{height:230px;position:relative;display:grid;place-items:center}.orbit-center{width:105px;height:105px;border-radius:50%;background:var(--grad1);display:grid;place-items:center;color:#000;font-family:var(--font-mono);font-size:1.5rem;font-weight:900;box-shadow:0 0 45px color-mix(in srgb,var(--accent) 40%,transparent);animation:float 3s ease-in-out infinite}.orbit-dot{position:absolute;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--bg-glass);border:1px solid var(--border);box-shadow:var(--shadow-card);animation:orbitPremium 8s linear infinite}.orbit-dot:nth-child(2){animation-delay:-2s}.orbit-dot:nth-child(3){animation-delay:-4s}.orbit-dot:nth-child(4){animation-delay:-6s}.premium-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.premium-kpi{border:1px solid var(--border);background:var(--bg-glass);border-radius:16px;padding:14px}.premium-kpi b{display:block;font-family:var(--font-mono);font-size:1.35rem;color:var(--accent);margin-bottom:4px}.premium-kpi span{font-size:.72rem;color:var(--text-secondary)}@keyframes orbitPremium{from{transform:rotate(0deg) translateX(92px) rotate(0deg)}to{transform:rotate(360deg) translateX(92px) rotate(-360deg)}}@media(max-width:1000px){.ai-review-grid{grid-template-columns:1fr}.premium-kpi-row{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.saas-graph-container{padding-left:36px;padding-right:10px;height:240px}.saas-bars-container,.saas-grid-lines{left:36px;right:10px}.saas-grid-label{left:-32px;font-size:.65rem}.saas-bar-fill-wrapper{width:85%}.saas-bar-value{font-size:.65rem;top:-20px}.saas-bar-label{font-size:.65rem}.premium-kpi-row{grid-template-columns:1fr}.ai-score{font-size:2.35rem}}
+
+
+/* ═══════════════════ FINAL UI FIX: SIDEBAR SCROLL + SETTINGS VISIBILITY ═══════════════════ */
+.pro-sidebar{overflow:hidden!important;max-height:calc(100vh - 32px)!important}
+.pro-menu{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:5px!important;scrollbar-width:thin}
+.pro-menu::-webkit-scrollbar{width:5px}.pro-menu::-webkit-scrollbar-track{background:transparent}.pro-menu::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px}
+.sidebar-card{flex:0 0 auto!important;margin-top:0!important}
+.settings-overlay{z-index:2000!important}.settings-panel{position:relative;z-index:2001!important}
+.sidebar-card .btn,.light-quick{min-height:38px}
+.mobile-header .btn{flex:0 0 auto}
+.pro-nav-item b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1100px){.pro-sidebar{max-height:calc(100vh - 20px)!important}}
+
+
+
+/* ═══════════════════ ANIMATED MONTHLY CALENDAR SECTION ═══════════════════ */
+.calendar-shell{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-top:14px}.month-card,.month-side-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-card);overflow:hidden;animation:fadeInUp .55s ease both}.month-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--bg-glass)}.month-title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.month-nav{display:flex;gap:8px;align-items:center}.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);padding:1px}.month-dow{background:var(--bg-secondary);padding:12px 6px;text-align:center;font-size:.68rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-secondary);font-weight:800}.month-day{min-height:112px;background:var(--bg-card);padding:10px;position:relative;overflow:hidden;transition:var(--transition);cursor:pointer;animation:calendarPop .45s ease both}.month-day:hover{transform:translateY(-3px) scale(1.01);z-index:2;box-shadow:0 12px 34px rgba(0,0,0,.22);background:color-mix(in srgb,var(--bg-card) 88%,var(--accent) 12%)}.month-day.other{opacity:.38}.month-day.today{outline:2px solid var(--accent);outline-offset:-2px}.month-day.has-event:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad1)}.month-num{font-family:var(--font-mono);font-size:.9rem;font-weight:900;color:var(--text-primary);display:flex;justify-content:space-between}.month-num span:last-child{font-size:.65rem;color:var(--accent)}.month-events{display:grid;gap:5px;margin-top:8px}.month-event{font-size:.67rem;line-height:1.25;padding:5px 7px;border-radius:8px;background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:fadeInLeft .35s ease both}.month-event.pink{background:color-mix(in srgb,var(--accent2) 14%,transparent);border-color:color-mix(in srgb,var(--accent2) 24%,transparent)}.month-event.green{background:color-mix(in srgb,var(--accent3) 14%,transparent);border-color:color-mix(in srgb,var(--accent3) 24%,transparent)}.month-event.blue{background:color-mix(in srgb,var(--accent4) 14%,transparent);border-color:color-mix(in srgb,var(--accent4) 24%,transparent)}.month-side-card{padding:20px}.calendar-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.calendar-stat{background:var(--bg-glass);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}.calendar-stat b{display:block;font-family:var(--font-mono);font-size:1.35rem;color:var(--accent)}.calendar-stat span{font-size:.68rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px}.agenda-list{display:grid;gap:9px;margin-top:12px}.agenda-item{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--border);border-radius:14px;background:var(--bg-glass);transition:var(--transition);animation:fadeInUp .4s ease both}.agenda-item:hover{transform:translateX(4px);border-color:var(--accent)}.agenda-date{min-width:46px;text-align:center;border-radius:12px;background:var(--grad1);color:#000;padding:7px 5px;font-weight:900;font-family:var(--font-mono);font-size:.78rem}.agenda-title{font-size:.82rem;font-weight:800}.agenda-sub{font-size:.7rem;color:var(--text-secondary);margin-top:2px}.calendar-form{display:grid;gap:10px;margin-top:14px}.calendar-form input,.calendar-form select{width:100%;padding:11px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary)}@keyframes calendarPop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}@media(max-width:1100px){.calendar-shell{grid-template-columns:1fr}.month-day{min-height:98px}}@media(max-width:680px){.month-toolbar{flex-direction:column;align-items:flex-start}.month-grid{grid-template-columns:repeat(2,1fr);gap:8px;background:transparent;padding:0}.month-dow{display:none}.month-day{border:1px solid var(--border);border-radius:14px;min-height:115px}.calendar-stat-grid{grid-template-columns:1fr 1fr}}
+
+
+
+/* ═══════════════════ MOBILE MENU PROFESSIONAL FIX ═══════════════════ */
+.mobile-menu-close{display:none;margin-left:auto;width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:1rem;font-weight:900;cursor:pointer;transition:var(--transition)}
+.mobile-menu-close:hover{background:var(--accent);color:#000;transform:scale(1.04)}
+@media(max-width:1100px){
+  body.menu-open{overflow:hidden!important}
+  .sidebar-overlay.open{display:block;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);z-index:175}
+  .pro-sidebar{
+    left:0!important;top:0!important;bottom:0!important;width:100vw!important;max-width:100vw!important;
+    height:100dvh!important;max-height:100dvh!important;border-radius:0!important;border:0!important;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom))!important;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--bg-primary) 96%,#fff 4%),var(--bg-secondary))!important;
+    box-shadow:none!important;transform:translateX(-100%);z-index:220!important;overflow:hidden!important;
+  }
+  .pro-sidebar.open{transform:translateX(0)!important}
+  .mobile-menu-close{display:flex;align-items:center;justify-content:center}
+  .pro-brand{padding:14px!important;border-radius:22px!important;background:var(--bg-glass);border:1px solid var(--border);box-shadow:var(--shadow-card)}
+  .pro-menu{
+    flex:1 1 auto!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;padding:4px 2px 10px!important;margin-top:4px!important;
+    scrollbar-width:none!important;align-content:start;
+  }
+  .pro-menu::-webkit-scrollbar{display:none!important}
+  .pro-nav-item{
+    min-height:86px!important;padding:12px 8px!important;border-radius:22px!important;flex-direction:column!important;
+    justify-content:center!important;text-align:center!important;gap:8px!important;background:var(--bg-glass)!important;
+    border:1px solid var(--border)!important;transform:none!important;box-shadow:0 8px 26px rgba(0,0,0,.18)!important;
+  }
+  .pro-nav-item:hover,.pro-nav-item.active{transform:translateY(-2px)!important;border-color:color-mix(in srgb,var(--accent) 55%,transparent)!important;background:color-mix(in srgb,var(--bg-card) 80%,var(--accent) 9%)!important}
+  .pro-nav-item span:first-child{width:40px!important;height:40px!important;border-radius:16px!important;font-size:1.15rem!important;margin:0 auto!important}
+  .pro-nav-item b{font-size:.78rem!important;line-height:1.15!important;white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #customNavItems{display:contents!important}
+  .pro-menu > .pro-nav-item:nth-last-child(-n+2){grid-column:span 1}
+  .sidebar-card{margin-top:0!important;border-radius:22px!important;padding:14px!important;box-shadow:var(--shadow-card)!important;flex:0 0 auto!important}
+  .sidebar-card .btn{width:100%;justify-content:center;margin-top:8px}
+  .app-main{filter:none!important}
+}
+@media(max-width:420px){
+  .pro-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}
+  .pro-nav-item{min-height:78px!important;border-radius:18px!important}
+  .pro-nav-item span:first-child{width:34px!important;height:34px!important;border-radius:13px!important;font-size:1rem!important}
+  .pro-nav-item b{font-size:.72rem!important}
+  .sidebar-card-sub{display:none!important}
+}
+
+
+
+/* ═══════════════════ FINAL ANDROID/iOS RESPONSIVE DRAWER FIX ═══════════════════ */
+.mobile-hamburger{width:46px;height:46px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(145deg,var(--bg-glass),color-mix(in srgb,var(--bg-card) 70%,transparent));display:none;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:var(--shadow-card);cursor:pointer;transition:var(--transition);-webkit-tap-highlight-color:transparent}
+.mobile-hamburger span{width:22px;height:3px;border-radius:999px;background:var(--text-primary);display:block;box-shadow:0 0 10px color-mix(in srgb,var(--accent) 22%,transparent)}
+.mobile-hamburger:active{transform:scale(.96)}
+.pro-brand-text{min-width:0;flex:1}
+@media(max-width:1100px){
+  html,body{max-width:100%;overflow-x:hidden!important}
+  .mobile-header{display:block!important;position:sticky!important;top:0!important;z-index:210!important;padding:10px 12px calc(10px + env(safe-area-inset-top,0px))!important;background:color-mix(in srgb,var(--bg-primary) 94%,transparent)!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important;border-bottom:1px solid var(--border)!important}
+  .mobile-header-inner{min-height:50px!important}
+  .mobile-hamburger{display:flex!important}
+  .mobile-title{font-size:.96rem!important;letter-spacing:1.6px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:var(--accent)!important}
+  .mobile-header .btn-icon{width:42px!important;height:42px!important;border-radius:15px!important;padding:0!important}
+  .sidebar-overlay.open{display:block!important;background:rgba(0,0,0,.62)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;z-index:220!important}
+  body.menu-open{overflow:hidden!important;touch-action:none!important}
+  .pro-sidebar{
+    width:min(86vw,360px)!important;max-width:360px!important;height:100dvh!important;max-height:100dvh!important;
+    left:0!important;top:0!important;bottom:auto!important;border-radius:0 28px 28px 0!important;border:0!important;border-right:1px solid var(--border)!important;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important;
+    transform:translateX(-105%)!important;transition:transform .38s cubic-bezier(.23,1,.32,1)!important;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--bg-card) 97%,#fff 3%) 0%,color-mix(in srgb,var(--bg-primary) 96%,#000 4%) 100%)!important;
+    box-shadow:28px 0 80px rgba(0,0,0,.5)!important;z-index:230!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:12px!important;
+  }
+  .pro-sidebar.open{transform:translateX(0)!important}
+  .pro-brand{flex:0 0 auto!important;padding:12px!important;border-radius:20px!important;gap:11px!important;background:linear-gradient(145deg,var(--bg-glass),color-mix(in srgb,var(--accent) 6%,transparent))!important;box-shadow:0 10px 32px rgba(0,0,0,.16)!important}
+  .pro-brand-icon{width:44px!important;height:44px!important;border-radius:16px!important;flex:0 0 auto!important}
+  .pro-brand-title{font-size:.86rem!important;letter-spacing:0.25px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .pro-brand-sub{font-size:.68rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .mobile-menu-close{display:flex!important;align-items:center!important;justify-content:center!important;margin-left:auto!important;flex:0 0 auto!important;width:40px!important;height:40px!important;border-radius:14px!important;background:var(--bg-glass)!important;color:var(--text-primary)!important;border:1px solid var(--border)!important;font-size:1.05rem!important}
+  .pro-menu{display:flex!important;flex-direction:column!important;gap:7px!important;flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:4px 2px 8px!important;margin:0!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;align-content:unset!important}
+  .pro-menu::-webkit-scrollbar{display:none!important}
+  #customNavItems{display:block!important}
+  .pro-nav-item{width:100%!important;min-height:54px!important;border-radius:16px!important;padding:10px 12px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;gap:12px!important;background:color-mix(in srgb,var(--bg-glass) 76%,transparent)!important;border:1px solid var(--border)!important;box-shadow:none!important;transform:none!important;color:var(--text-secondary)!important;-webkit-tap-highlight-color:transparent!important}
+  .pro-nav-item span:first-child{width:36px!important;height:36px!important;border-radius:13px!important;font-size:1rem!important;margin:0!important;flex:0 0 auto!important;background:color-mix(in srgb,var(--bg-card) 70%,transparent)!important;border:1px solid var(--border)!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .pro-nav-item b{font-size:.88rem!important;font-weight:800!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block!important;color:inherit!important}
+  .pro-nav-item:hover,.pro-nav-item.active{transform:none!important;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent))!important;border-color:color-mix(in srgb,var(--accent) 52%,transparent)!important;color:var(--text-primary)!important;box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 10%,transparent)!important}
+  .pro-nav-item.active span:first-child{background:var(--grad1)!important;color:#000!important;border-color:transparent!important}
+  .sidebar-card{flex:0 0 auto!important;margin:0!important;border-radius:20px!important;padding:13px!important;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,transparent),color-mix(in srgb,var(--accent2) 9%,transparent))!important;box-shadow:0 12px 30px rgba(0,0,0,.16)!important}
+  .sidebar-card-title{font-size:.9rem!important}.sidebar-card-sub{font-size:.72rem!important;display:block!important}.sidebar-card .btn{width:100%!important;justify-content:center!important;min-height:42px!important;border-radius:14px!important}
+  .app-main{width:100%!important;margin-left:0!important;padding-top:6px!important}
+  .app-wrapper{padding-left:12px!important;padding-right:12px!important}
+}
+@media(max-width:430px){
+  .pro-sidebar{width:88vw!important;max-width:340px!important;border-radius:0 24px 24px 0!important}
+  .pro-nav-item{min-height:52px!important;padding:9px 10px!important;border-radius:15px!important}
+  .pro-nav-item span:first-child{width:34px!important;height:34px!important;border-radius:12px!important}
+  .pro-nav-item b{font-size:.82rem!important}
+  .sidebar-card-sub{display:none!important}
+}
+@media(max-width:360px){.pro-sidebar{width:92vw!important}.mobile-title{font-size:.82rem!important}.mobile-header .btn-icon{width:38px!important;height:38px!important}.mobile-hamburger{width:42px!important;height:42px!important}}
+
+
+
+/* ═══════════════════ FINAL PREMIUM DASHBOARD: SCROLL RESULTS + 3D GRAPHS ═══════════════════ */
+.dashboard-jump-row{display:flex;gap:10px;flex-wrap:wrap;margin:-4px 0 14px}.dash-jump{padding:10px 14px;border:1px solid var(--border);background:var(--bg-glass);border-radius:999px;color:var(--text-secondary);font-size:.78rem;font-weight:800;letter-spacing:.2px;cursor:pointer;transition:var(--transition);backdrop-filter:blur(14px)}.dash-jump:hover{color:#000;background:var(--accent);border-color:var(--accent);transform:translateY(-2px);box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 28%,transparent)}
+.dashboard-pro-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;margin:14px 0}.dash-section{background:linear-gradient(145deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 84%,var(--accent) 6%));border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-card);position:relative;overflow:hidden;scroll-margin-top:92px;animation:fadeInUp .65s ease both}.dash-section:before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 55%,transparent),transparent 42%,color-mix(in srgb,var(--accent2) 45%,transparent));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.6}.dash-section:after{content:'';position:absolute;right:-75px;top:-85px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 20%,transparent),transparent 70%);animation:float 7s ease-in-out infinite;pointer-events:none}.dash-section>*{position:relative;z-index:1}.dash-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}.dash-kicker{font-size:.66rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:900;margin-bottom:4px}.dash-title{font-family:var(--font-display);font-size:1.38rem;font-weight:900;color:var(--text-primary)}.dash-sub{font-size:.82rem;color:var(--text-secondary);line-height:1.55;margin-top:4px}.dash-chip{border:1px solid var(--border);background:var(--bg-glass);border-radius:999px;padding:7px 10px;font-size:.72rem;color:var(--accent);font-family:var(--font-mono);white-space:nowrap}.dash-chart-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini-progress-card{border:1px solid var(--border);background:var(--bg-glass);border-radius:16px;padding:14px;overflow:hidden}.mini-progress-card b{display:block;font-family:var(--font-mono);font-size:1.35rem;color:var(--accent);margin-bottom:4px}.mini-progress-card span{font-size:.72rem;color:var(--text-secondary)}.premium-meter{height:9px;border-radius:999px;background:var(--bg-secondary);overflow:hidden;margin-top:12px}.premium-meter i{display:block;height:100%;width:var(--w);border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:meterFill 1.4s cubic-bezier(.23,1,.32,1) both}.result-timeline{display:grid;gap:10px}.result-row{display:grid;grid-template-columns:82px 1fr auto;gap:10px;align-items:center;border:1px solid var(--border);background:var(--bg-glass);border-radius:14px;padding:11px;transition:var(--transition)}.result-row:hover{transform:translateX(4px);border-color:var(--accent)}.result-day{font-family:var(--font-mono);font-size:.78rem;color:var(--accent);font-weight:900}.result-bar{height:11px;border-radius:999px;background:var(--bg-secondary);overflow:hidden}.result-bar i{display:block;width:var(--w);height:100%;border-radius:999px;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 65%,#fff));animation:meterFill 1.2s cubic-bezier(.23,1,.32,1) both}.result-val{font-family:var(--font-mono);font-size:.78rem;color:var(--text-primary);font-weight:900}.dash-3d-stage{min-height:330px;display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:34px 16px 46px;perspective:1000px;border:1px solid var(--border);background:radial-gradient(ellipse at 50% 100%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 68%),linear-gradient(180deg,color-mix(in srgb,var(--bg-glass) 80%,transparent),transparent);border-radius:20px;overflow:hidden}.dash3dbar{width:64px;height:var(--h);position:relative;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-34deg);animation:dashRise 1.15s cubic-bezier(.23,1,.32,1) both;animation-delay:var(--d);filter:drop-shadow(20px 24px 20px rgba(0,0,0,.35))}.dash3dbar .f{position:absolute;inset:0;border-radius:10px 10px 5px 5px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 94%,#fff),color-mix(in srgb,var(--c) 55%,#000))}.dash3dbar .s{position:absolute;right:-18px;top:0;width:18px;height:100%;background:color-mix(in srgb,var(--c) 55%,#000);transform:skewY(45deg);transform-origin:left}.dash3dbar .t{position:absolute;left:0;top:-18px;width:100%;height:18px;background:color-mix(in srgb,var(--c) 86%,#fff);transform:skewX(45deg);transform-origin:bottom}.dash3dbar .v{position:absolute;top:-52px;left:50%;transform:translateX(-50%) rotateZ(34deg) rotateX(-58deg);font-family:var(--font-mono);font-size:.78rem;color:var(--accent);font-weight:900;white-space:nowrap}.dash3dbar .l{position:absolute;bottom:-46px;left:50%;transform:translateX(-50%) rotateZ(34deg) rotateX(-58deg);font-size:.72rem;color:var(--text-secondary);font-weight:900;white-space:nowrap}.donut-dashboard{display:grid;place-items:center;min-height:250px}.donut-shell{width:210px;height:210px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) 0 78%,var(--accent2) 78% 91%,var(--bg-secondary) 91% 100%);box-shadow:0 0 45px color-mix(in srgb,var(--accent) 24%,transparent);position:relative;animation:spinGlow 8s linear infinite}.donut-shell:before{content:'';position:absolute;inset:22px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border)}.donut-inner{position:relative;text-align:center}.donut-inner b{display:block;font-family:var(--font-mono);font-size:2.15rem;color:var(--accent)}.donut-inner span{font-size:.72rem;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase}.line-chart-card{border:1px solid var(--border);background:var(--bg-glass);border-radius:18px;padding:14px;overflow:hidden}.line-chart-svg{width:100%;height:170px}.line-glow{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 60%,transparent));stroke-dasharray:700;stroke-dashoffset:700;animation:drawLine 2s ease forwards}.dotPulse{animation:heartbeat 2s ease-in-out infinite}.section-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.stacked-bars{display:grid;gap:12px}.stack-row{display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:center}.stack-label{font-size:.74rem;color:var(--text-secondary);font-weight:800}.stack-track{height:18px;background:var(--bg-secondary);border-radius:999px;overflow:hidden;display:flex}.stack-track i{display:block;height:100%;width:var(--w);background:var(--c);animation:meterFill 1.25s ease both}.dashboard-note{border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent));padding:16px;color:var(--text-secondary);font-size:.88rem;line-height:1.65}.dashboard-note b{color:var(--accent)}
+@keyframes meterFill{from{width:0}to{width:var(--w)}}@keyframes dashRise{from{height:0;opacity:0;transform:rotateX(58deg) rotateZ(-34deg) translateY(60px)}to{height:var(--h);opacity:1;transform:rotateX(58deg) rotateZ(-34deg) translateY(0)}}@keyframes spinGlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes drawLine{to{stroke-dashoffset:0}}
+@media(max-width:1100px){.dashboard-pro-grid{grid-template-columns:1fr}.dash-chart-row{grid-template-columns:repeat(3,1fr)}.section-result-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.dashboard-jump-row{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;scrollbar-width:none}.dashboard-jump-row::-webkit-scrollbar{display:none}.dash-jump{flex:0 0 auto}.dash-section{padding:17px;border-radius:20px;scroll-margin-top:76px}.dash-head{flex-direction:column}.dash-chart-row{grid-template-columns:1fr}.result-row{grid-template-columns:62px 1fr 44px;padding:10px}.dash-3d-stage{min-height:260px;gap:10px;padding:28px 6px 42px}.dash3dbar{width:36px}.dash3dbar .s{right:-12px;width:12px}.dash3dbar .t{top:-12px;height:12px}.dash3dbar .v{font-size:.62rem;top:-42px}.dash3dbar .l{font-size:.6rem;bottom:-40px}.donut-shell{width:178px;height:178px}.donut-inner b{font-size:1.85rem}.line-chart-svg{height:145px}.stack-row{grid-template-columns:66px 1fr}.dashboard-pro-grid{gap:12px}}
+
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1><span>WDM</span> Planner</h1>
-        <div>
-            <a href="/admin/dashboard.html" class="btn btn-outline">← Dashboard</a>
+
+<!-- ████ NAV ████ -->
+<div class="app-shell">
+<aside class="pro-sidebar" id="proSidebar">
+  <div class="pro-brand"><div class="pro-brand-icon">✦</div><div class="pro-brand-text"><div class="pro-brand-title" style="font-weight: 800;">Planner 360</div><div class="pro-brand-sub" style="font-size: 0.65rem;">Sistema de Produtividade</div></div><button class="mobile-menu-close" onclick="window.closeMobileSidebar()" aria-label="Fechar menu">✕</button></div>
+  <div class="pro-menu">
+    <button class="pro-nav-item active" data-view="dashboard" onclick="window.navigateView('dashboard',this)"><span>🏠</span><b>Dashboard</b></button>
+    <button class="pro-nav-item" data-view="planner" onclick="window.navigateView('planner',this)"><span>📅</span><b>Planejador Semanal</b></button>
+    <button class="pro-nav-item" data-view="calendar" onclick="window.navigateView('calendar',this)"><span>🗓️</span><b>Calendário Mensal</b></button>
+    <button class="pro-nav-item" data-view="analytics" onclick="window.navigateView('analytics',this)"><span>📊</span><b>Análise & Progresso</b></button>
+    <button class="pro-nav-item" data-view="review" onclick="window.navigateView('review',this)"><span>🤖</span><b>Revisão de IA</b></button>
+    <button class="pro-nav-item" data-view="focus" onclick="window.navigateView('focus',this)"><span>⏱</span><b>Foco & Notas</b></button>
+    <button class="pro-nav-item" data-view="goals" onclick="window.navigateView('goals',this)"><span>🎯</span><b>Roteiro de Metas</b></button>
+    <button class="pro-nav-item" data-view="budget" onclick="window.navigateView('budget',this)"><span>💰</span><b>Finanças & Orçamento</b></button>
+    <button class="pro-nav-item" data-view="resources" onclick="window.navigateView('resources',this)"><span>🔗</span><b>Central de Recursos</b></button>
+    <div id="customNavItems"></div>
+    <button class="pro-nav-item" onclick="window.openSectionModal();window.closeMobileSidebar()"><span>➕</span><b>Adicionar Seção</b></button>
+    <button class="pro-nav-item" onclick="window.openSettings();window.closeMobileSidebar()"><span>⚙️</span><b>Configurações</b></button>
+  </div>
+  <div class="sidebar-card"><div class="sidebar-card-title">Modo Claro / Escuro</div><div class="sidebar-card-sub">Alterne entre o sofisticado modo escuro e o elegante modo claro pérola.</div><button class="btn light-quick" onclick="window.toggleLightMode()">🌗 Alternar Tema</button></div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="window.closeMobileSidebar()"></div>
+<header class="mobile-header"><div class="mobile-header-inner"><button class="mobile-hamburger" onclick="window.openMobileSidebar()" aria-label="Abrir menu"><span></span><span></span><span></span></button><div class="mobile-title">Planner 360</div><div style="display:flex;gap:8px"><button class="btn btn-icon" onclick="window.openSettings()">⚙️</button><button class="btn btn-icon" onclick="window.toggleLightMode()">🌗</button></div></div></header>
+<main class="app-wrapper app-main">
+<section class="app-view active" id="view-dashboard">
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="logo-icon">★</div>
+    <span>Planner 360</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="waveform" id="waveform"></div>
+  </div>
+  <div class="nav-controls">
+    <button class="btn btn-icon" id="notifBtn" title="Notificações">🔔</button>
+    <button class="btn btn-icon" id="settingsBtn" title="Configurações" onclick="window.openSettings()">⚙️</button>
+    <button class="btn btn-primary" onclick="window.openAddTask()">+ Nova Tarefa</button>
+  </div>
+</nav>
+
+<div class="view-hero" style="display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+  <div style="flex: 1;">
+    <div class="view-kicker" style="color: var(--accent); font-weight: 700;">Sua Central de Produtividade</div>
+    <div class="view-title" style="font-family: var(--font-display); font-size: 2.15rem; font-weight: 800; margin-bottom: 12px; line-height: 1.25;">Planner 360</div>
+    <div class="view-sub" style="font-size: 0.95rem; line-height: 1.6; max-width: 580px; margin-bottom: 20px; color: var(--text-secondary);">Um sistema completo para organizar tarefas, gerenciar hábitos, acompanhar metas e analisar seu desempenho com inteligência.</div>
+    <div class="dashboard-actions" style="display: flex; gap: 12px;">
+      <button class="btn btn-primary" onclick="window.navigateView('planner')" style="padding: 11px 24px; font-weight: 600; border-radius: 12px; background: var(--grad1); border: none; color: white; cursor: pointer; transition: var(--transition);">Abrir Planejador</button>
+      <button class="btn" onclick="window.navigateView('focus')" style="padding: 11px 24px; font-weight: 600; border-radius: 12px; background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-primary); cursor: pointer; transition: var(--transition);">Modo de Foco</button>
+    </div>
+  </div>
+  <div class="hero-3d-graphic" style="flex-shrink: 0; display: block; filter: drop-shadow(0 15px 35px rgba(124, 58, 237, 0.25)); transform: perspective(800px) rotateY(-5deg) rotateX(5deg);">
+    <svg width="220" height="150" viewBox="0 0 220 150" fill="none">
+      <path d="M10 110 L110 50 L210 110 L110 170 ZM10 80 L110 20 L210 80" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" />
+      <circle cx="170" cy="40" r="16" fill="url(#sphereGrad)" style="animation: float 5s ease-in-out infinite;" />
+      <circle cx="50" cy="110" r="10" fill="url(#sphereGrad2)" style="animation: float 4s ease-in-out infinite alternate;" />
+      <g class="iso-bar" style="transform: translate(75px, 95px);">
+        <path d="M0 0 L-18 10 L-18 -45 L0 -55 Z" fill="var(--accent)" style="opacity: 0.7;" />
+        <path d="M0 0 L18 10 L18 -45 L0 -55 Z" fill="var(--accent)" />
+        <path d="M0 -55 L-18 -45 L0 -35 L18 -45 Z" fill="var(--accent2)" style="opacity: 0.8;" />
+      </g>
+      <g class="iso-bar" style="transform: translate(115px, 120px);">
+        <path d="M0 0 L-18 10 L-18 -75 L0 -85 Z" fill="var(--accent2)" style="opacity: 0.7;" />
+        <path d="M0 0 L18 10 L18 -75 L0 -85 Z" fill="var(--accent2)" />
+        <path d="M0 -85 L-18 -75 L0 -65 L18 -75 Z" fill="var(--accent-glow)" style="opacity: 0.9;" />
+      </g>
+      <g class="iso-bar" style="transform: translate(155px, 130px);">
+        <path d="M0 0 L-18 10 L-18 -35 L0 -45 Z" fill="var(--accent3)" style="opacity: 0.7;" />
+        <path d="M0 0 L18 10 L18 -35 L0 -45 Z" fill="var(--accent3)" />
+        <path d="M0 -45 L-18 -35 L0 -25 L18 -35 Z" fill="var(--accent2)" style="opacity: 0.5;" />
+      </g>
+      <path d="M40 70 L95 35 L145 42 L200 15" stroke="url(#lineGrad)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="200" cy="15" r="5" fill="var(--accent2)" />
+      <defs>
+        <linearGradient id="sphereGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--accent2)" />
+          <stop offset="100%" stop-color="var(--accent)" />
+        </linearGradient>
+        <linearGradient id="sphereGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--accent3)" />
+          <stop offset="100%" stop-color="var(--accent)" />
+        </linearGradient>
+        <linearGradient id="lineGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--accent)" />
+          <stop offset="100%" stop-color="var(--accent2)" />
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+</div>
+<!-- ████ WEEK HEADER ████ -->
+<div class="week-header">
+  <div>
+    <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Semana Atual</div>
+    <div class="week-title" id="weekTitle">Carregando...</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div style="font-size:0.7rem;color:var(--text-secondary)">Progresso</div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="6"/>
+        <circle id="weekProgressRing" cx="40" cy="40" r="34" fill="none" stroke="url(#wkGrad)" stroke-width="6"
+          stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+          transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.23,1,0.32,1)"/>
+        <defs><linearGradient id="wkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--accent)"/>
+          <stop offset="100%" stop-color="var(--accent2)"/>
+        </linearGradient></defs>
+      </svg>
+      <div style="position:absolute;text-align:center">
+        <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--accent);animation:heartbeat 2s infinite" id="weekPct">0%</div>
+      </div>
+    </div>
+  </div>
+  <div class="week-nav">
+    <button class="btn btn-icon" onclick="window.changeWeek(-1)">‹</button>
+    <div class="week-badge" id="weekRange">Carregando</div>
+    <button class="btn btn-icon" onclick="window.changeWeek(1)">›</button>
+    <button class="btn" onclick="window.goToToday()" style="margin-left:4px">Hoje</button>
+  </div>
+</div>
+
+<!-- ████ STATS ROW ████ -->
+<div class="stats-row">
+  <div class="stat-card" style="position: relative; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-card); transition: var(--transition);">
+    <div style="position: absolute; top: -10px; right: -10px; width: 70px; height: 70px; border-radius: 50%; background: var(--accent-trans); filter: blur(10px);"></div>
+    <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px;">Tarefas Concluídas</div>
+    <div class="stat-value" id="statDone" style="font-size: 2.2rem; font-weight: 800; color: var(--accent); font-family: var(--font-display); line-height: 1;">0</div>
+    <div class="stat-sub" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">Esta semana</div>
+    <div class="stat-icon i1" style="position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: 0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">✅</div>
+  </div>
+  <div class="stat-card" style="position: relative; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-card); transition: var(--transition);">
+    <div style="position: absolute; top: -10px; right: -10px; width: 70px; height: 70px; border-radius: 50%; background: var(--accent4-trans); filter: blur(10px);"></div>
+    <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px;">Em Andamento</div>
+    <div class="stat-value s2" id="statPending" style="font-size: 2.2rem; font-weight: 800; color: var(--accent4); font-family: var(--font-display); line-height: 1;">0</div>
+    <div class="stat-sub" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">Pendentes</div>
+    <div class="stat-icon i2" style="position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: 0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">⚡</div>
+  </div>
+  <div class="stat-card" style="position: relative; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-card); transition: var(--transition);">
+    <div style="position: absolute; top: -10px; right: -10px; width: 70px; height: 70px; border-radius: 50%; background: var(--accent2-trans); filter: blur(10px);"></div>
+    <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px;">Sequência de Hábitos</div>
+    <div class="stat-value s3" id="statStreak" style="font-size: 2.2rem; font-weight: 800; color: var(--accent2); font-family: var(--font-display); line-height: 1;">7</div>
+    <div class="stat-sub" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">Dias ativos</div>
+    <div class="stat-icon i3" style="position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: 0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🔥</div>
+  </div>
+  <div class="stat-card" style="position: relative; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-card); transition: var(--transition);">
+    <div style="position: absolute; top: -10px; right: -10px; width: 70px; height: 70px; border-radius: 50%; background: var(--accent3-trans); filter: blur(10px);"></div>
+    <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px;">Índice de Foco</div>
+    <div class="stat-value s4" id="statScore" style="font-size: 2.2rem; font-weight: 800; color: var(--accent3); font-family: var(--font-display); line-height: 1;">82</div>
+    <div class="stat-sub" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">De 100</div>
+    <div class="stat-icon i4" style="position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: 0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🎯</div>
+  </div>
+</div>
+
+<div class="dashboard-jump-row">
+  <button class="dash-jump" onclick="document.getElementById('dash-performance').scrollIntoView({behavior:'smooth',block:'start'})">📊 Resultados Semanais</button>
+  <button class="dash-jump" onclick="document.getElementById('dash-progress').scrollIntoView({behavior:'smooth',block:'start'})">🎯 Progresso Geral</button>
+  <button class="dash-jump" onclick="document.getElementById('dash-breakdown').scrollIntoView({behavior:'smooth',block:'start'})">🧩 Detalhamento por Seção</button>
+  <button class="dash-jump" onclick="document.getElementById('dash-forecast').scrollIntoView({behavior:'smooth',block:'start'})">🚀 Projeção de Crescimento</button>
+</div>
+
+<div class="dashboard-pro-grid" id="dash-performance">
+  <div class="dash-section">
+    <div class="dash-head"><div><div class="dash-kicker">Desempenho Geral</div><div class="dash-title">Rendimento Semanal 3D Animado</div><div class="dash-sub">Visualize as métricas do seu desempenho diário: produtividade, conclusão de tarefas e qualidade do foco.</div></div><div class="dash-chip">Dados de Demonstração</div></div>
+    <div class="dash-3d-stage">
+      <div class="dash3dbar" style="--h:96px;--c:var(--accent);--d:.05s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">64%</b><span class="l">Seg</span></div>
+      <div class="dash3dbar" style="--h:138px;--c:var(--accent2);--d:.12s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">79%</b><span class="l">Ter</span></div>
+      <div class="dash3dbar" style="--h:168px;--c:var(--accent3);--d:.19s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">92%</b><span class="l">Qua</span></div>
+      <div class="dash3dbar" style="--h:150px;--c:var(--accent4);--d:.26s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">85%</b><span class="l">Qui</span></div>
+      <div class="dash3dbar" style="--h:124px;--c:var(--accent5);--d:.33s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">73%</b><span class="l">Sex</span></div>
+      <div class="dash3dbar" style="--h:132px;--c:var(--accent);--d:.40s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">77%</b><span class="l">Sáb</span></div>
+      <div class="dash3dbar" style="--h:108px;--c:var(--accent2);--d:.47s"><i class="t"></i><i class="s"></i><i class="f"></i><b class="v">68%</b><span class="l">Dom</span></div>
+    </div>
+  </div>
+  <div class="dash-section" id="dash-progress">
+    <div class="dash-head"><div><div class="dash-kicker">Progresso</div><div class="dash-title">Conclusão Total</div><div class="dash-sub">Painel circular interativo do seu desempenho.</div></div><div class="dash-chip">78% Concluído</div></div>
+    <div class="donut-dashboard"><div class="donut-shell"><div class="donut-inner"><b>78%</b><span>Concluído</span></div></div></div>
+    <div class="dash-chart-row">
+      <div class="mini-progress-card"><b>31</b><span>Planejadas</span><div class="premium-meter"><i style="--w:86%"></i></div></div>
+      <div class="mini-progress-card"><b>24</b><span>Concluídas</span><div class="premium-meter"><i style="--w:78%"></i></div></div>
+      <div class="mini-progress-card"><b>7</b><span>Dias Ativos</span><div class="premium-meter"><i style="--w:91%"></i></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-pro-grid" id="dash-breakdown">
+  <div class="dash-section">
+    <div class="dash-head"><div><div class="dash-kicker">Métricas das Seções</div><div class="dash-title">Desempenho Detalhado por Módulo</div><div class="dash-sub">As estatísticas consolidadas do aplicativo mostram seu resultado segmentado em múltiplas dimensões de produtividade.</div></div><div class="dash-chip">8 Módulos</div></div>
+    <div class="result-timeline">
+      <div class="result-row"><span class="result-day">Planejador</span><div class="result-bar"><i style="--w:88%;--c:var(--accent)"></i></div><b class="result-val">88%</b></div>
+      <div class="result-row"><span class="result-day">Calendário</span><div class="result-bar"><i style="--w:74%;--c:var(--accent2)"></i></div><b class="result-val">74%</b></div>
+      <div class="result-row"><span class="result-day">Análises</span><div class="result-bar"><i style="--w:91%;--c:var(--accent3)"></i></div><b class="result-val">91%</b></div>
+      <div class="result-row"><span class="result-day">Revisão IA</span><div class="result-bar"><i style="--w:82%;--c:var(--accent4)"></i></div><b class="result-val">82%</b></div>
+      <div class="result-row"><span class="result-day">Orçamento</span><div class="result-bar"><i style="--w:67%;--c:var(--accent5)"></i></div><b class="result-val">67%</b></div>
+      <div class="result-row"><span class="result-day">Metas</span><div class="result-bar"><i style="--w:79%;--c:var(--accent)"></i></div><b class="result-val">79%</b></div>
+    </div>
+  </div>
+  <div class="dash-section">
+    <div class="dash-head"><div><div class="dash-kicker">Distribuição</div><div class="dash-title">Divisão do Foco Semanal</div><div class="dash-sub">Veja de forma acumulada para onde suas horas focadas estão sendo alocadas.</div></div></div>
+    <div class="stacked-bars">
+      <div class="stack-row"><div class="stack-label">Trabalho</div><div class="stack-track"><i style="--w:58%;--c:var(--accent)"></i><i style="--w:22%;--c:var(--accent2)"></i><i style="--w:20%;--c:var(--accent3)"></i></div></div>
+      <div class="stack-row"><div class="stack-label">Pessoal</div><div class="stack-track"><i style="--w:42%;--c:var(--accent3)"></i><i style="--w:31%;--c:var(--accent4)"></i><i style="--w:27%;--c:var(--accent5)"></i></div></div>
+      <div class="stack-row"><div class="stack-label">Estudos</div><div class="stack-track"><i style="--w:67%;--c:var(--accent2)"></i><i style="--w:18%;--c:var(--accent)"></i><i style="--w:15%;--c:var(--accent4)"></i></div></div>
+      <div class="stack-row"><div class="stack-label">Saúde</div><div class="stack-track"><i style="--w:51%;--c:var(--accent5)"></i><i style="--w:26%;--c:var(--accent3)"></i><i style="--w:23%;--c:var(--accent)"></i></div></div>
+    </div>
+    <div class="dashboard-note" style="margin-top:14px"><b>Insight do Planner:</b> Sua produtividade atinge o pico na quarta-feira, enquanto as seções de finanças e bem-estar exigem mais dedicação no próximo ciclo.</div>
+  </div>
+</div>
+
+<div class="dash-section" id="dash-forecast">
+  <div class="dash-head"><div><div class="dash-kicker">Tendência Semanal</div><div class="dash-title">Gráfico de Histórico e Evolução</div><div class="dash-sub">Gráfico de linhas interativo que exibe um visual moderno com a tendência da sua produtividade.</div></div><div class="dash-chip">+18% de Crescimento</div></div>
+  <div class="section-result-grid">
+    <div class="line-chart-card">
+      <svg class="line-chart-svg" viewBox="0 0 620 170" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="dashLineGrad" x1="0" x2="1">
+            <stop offset="0" stop-color="var(--accent)"/>
+            <stop offset=".5" stop-color="var(--accent2)"/>
+            <stop offset="1" stop-color="var(--accent3)"/>
+          </linearGradient>
+          <linearGradient id="dashAreaGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="var(--accent)" stop-opacity=".25"/>
+            <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,150 L0,120 C70,95 95,110 145,78 C190,50 232,82 280,58 C335,30 370,66 430,42 C490,18 540,48 620,24 L620,170 L0,170 Z" fill="url(#dashAreaGrad)"/>
+        <path class="line-glow" d="M0,120 C70,95 95,110 145,78 C190,50 232,82 280,58 C335,30 370,66 430,42 C490,18 540,48 620,24" fill="none" stroke="url(#dashLineGrad)" stroke-width="6" stroke-linecap="round"/>
+        <circle class="dotPulse" cx="145" cy="78" r="7" fill="var(--accent2)"/>
+        <circle class="dotPulse" cx="280" cy="58" r="7" fill="var(--accent3)"/>
+        <circle class="dotPulse" cx="430" cy="42" r="7" fill="var(--accent)"/>
+        <circle class="dotPulse" cx="620" cy="24" r="7" fill="var(--accent4)"/>
+      </svg>
+    </div>
+    <div class="dashboard-note"><b>Resumo de Resultados:</b><br>• Conclusão do planejador aumentou em 18%.<br>• 24 tarefas concluídas com sucesso.<br>• 6 compromissos agendados no calendário.<br>• Score de foco consolidado em 82%.<br>• Recomendação sugerida: delegar ou transferir afazeres de baixa prioridade e focar nas principais metas diárias.</div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="content-card"><div class="content-title">🚀 Plano de Ação para Hoje</div><div class="mini-list"><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Finalizar design e layout premium</div><div class="mini-sub">Alta prioridade • 09:00</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent2)"></span><div><div class="mini-text">Preparar demonstração oficial do projeto</div><div class="mini-sub">Reunião agendada • 14:00</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent3)"></span><div><div class="mini-text">Revisar listagens e criativos SEO</div><div class="mini-sub">Ajustes finais • Período da Noite</div></div></div></div></div>
+  <div class="content-card"><div class="content-title">📌 Próximos Marcos Cruciais</div><div class="mini-list"><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Lançamento oficial do aplicativo V2</div><div class="mini-sub">Prazo final: sexta-feira</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent2)"></span><div><div class="mini-text">Redigir documentação e guia do usuário PDF</div><div class="mini-sub">Material complementar do projeto</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent3)"></span><div><div class="mini-text">Auditoria de palavras-chave e indexação</div><div class="mini-sub">Planejamento de marketing</div></div></div></div></div>
+  <div class="content-card"><div class="content-title">💼 Resumo Geral da Semana</div><div class="pill-row"><span class="pill"><b>24</b> tarefas</span><span class="pill"><b>7</b> hábitos</span><span class="pill"><b>4</b> metas</span><span class="pill"><b>82%</b> foco</span><span class="pill"><b>5</b> notas</span><span class="pill">Modo <b>Premium</b>ativo</span></div></div>
+</div>
+</section>
+<section class="app-view" id="view-planner">
+<div class="view-hero"><div><div class="view-kicker">Área de Trabalho</div><div class="view-title">Quadro do Planejador Semanal</div><div class="view-sub">Crie tarefas, acompanhe hábitos e tenha uma visão clara do progresso das suas metas em uma estrutura totalmente responsiva.</div></div><div class="dashboard-actions"><button class="btn btn-primary" onclick="window.openAddTask()">+ Nova Tarefa</button><button class="btn" onclick="window.openAddGoal()">+ Nova Meta</button></div></div>
+<div class="content-grid"><div class="content-card"><div class="content-title">🗓 Tema Integrado</div><p class="mini-sub">Organize, execute e refine — faça de cada dia um reflexo do seu foco.</p></div><div class="content-card"><div class="content-title">🎯 Classificação de Prioridade</div><div class="pill-row"><span class="pill">🔴 Alta</span><span class="pill">🟡 Média</span><span class="pill">🟢 Baixa</span></div></div><div class="content-card"><div class="content-title">✨ Dica Rápida</div><p class="mini-sub">Você pode alternar entre as abas e seções utilizando o menu ou os botões de ação.</p></div></div>
+<!-- ████ MAIN GRID ████ -->
+<div class="main-grid">
+  <!-- PLANNER -->
+  <div class="planner-panel">
+    <div class="panel-header">
+      <div class="panel-title">📅 Planejador Semanal</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="font-size:0.75rem;padding:6px 14px" onclick="window.openAddTask()">+ Tarefa</button>
+        <button class="btn" style="font-size:0.75rem;padding:6px 14px" onclick="window.clearCompleted()">🗑 Limpar Concluídas</button>
+      </div>
+    </div>
+    <div class="days-grid" id="daysGrid"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Progress Rings -->
+    <div class="progress-card">
+      <div class="panel-header" style="margin:-22px -22px 0;border-radius:var(--radius) var(--radius) 0 0">
+        <div class="panel-title">📊 Metas</div>
+        <button class="btn" style="font-size:0.72rem;padding:5px 12px" onclick="window.openAddGoal()">+ Meta</button>
+      </div>
+      <div style="margin-top:20px">
+        <div class="progress-rings">
+          <div class="ring-container">
+            <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+              <defs>
+                <linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent2)"/></linearGradient>
+                <linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent2)"/><stop offset="100%" stop-color="var(--accent3)"/></linearGradient>
+                <linearGradient id="rg3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent3)"/><stop offset="100%" stop-color="var(--accent4)"/></linearGradient>
+              </defs>
+              <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bg-secondary)" stroke-width="10"/>
+              <circle id="ring1" cx="80" cy="80" r="68" fill="none" stroke="url(#rg1)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="427.2" stroke-dashoffset="427.2"
+                transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1.8s cubic-bezier(0.23,1,0.32,1)"/>
+              <circle cx="80" cy="80" r="52" fill="none" stroke="var(--bg-secondary)" stroke-width="10"/>
+              <circle id="ring2" cx="80" cy="80" r="52" fill="none" stroke="url(#rg2)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"
+                transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 2s cubic-bezier(0.23,1,0.32,1)"/>
+              <circle cx="80" cy="80" r="36" fill="none" stroke="var(--bg-secondary)" stroke-width="10"/>
+              <circle id="ring3" cx="80" cy="80" r="36" fill="none" stroke="url(#rg3)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2"
+                transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 2.2s cubic-bezier(0.23,1,0.32,1)"/>
+            </svg>
+            <div class="ring-center-text">
+              <span id="ringMainPct">82%</span>
+              <span class="ring-center-label">Geral</span>
+            </div>
+          </div>
         </div>
+        <div class="ring-legend" id="goalLegend"></div>
+      </div>
     </div>
-    <div class="placeholder">
-        <div style="font-size: 4rem;">📅</div>
-        <h2>Planner</h2>
-        <p>O arquivo do planner não foi encontrado. Me envie o arquivo INdex.html que está na sua área de trabalho para eu colocar aqui.</p>
+
+    <!-- Habits -->
+    <div class="habits-card">
+      <div class="panel-header" style="margin:-20px -20px 0;border-radius:var(--radius) var(--radius) 0 0">
+        <div class="panel-title">💎 Hábitos e Rotina</div>
+      </div>
+      <div style="margin-top:16px" id="habitsList"></div>
+      <button class="add-habit-btn" onclick="window.addHabit()">+ Adicionar Hábito</button>
     </div>
-    <script src="/admin/auth.js"></script>
-    <script>requireAuth();</script>
+  </div>
+</div>
+
+</section>
+
+<section class="app-view" id="view-calendar">
+  <div class="view-hero"><div><div class="view-kicker">Planejador de Longo Prazo</div><div class="view-title">Calendário Mensal Completo</div><div class="view-sub">Planeje o mês inteiro incluindo reuniões, prazos cruciais, datas de lançamento de conteúdo, finanças e metas pessoais.</div></div><button class="btn btn-primary" onclick="window.addCalendarEventFromForm()">+ Criar Evento</button></div>
+  <div class="content-grid">
+    <div class="content-card"><div class="content-title">🌟 Foco Mensal</div><p class="mini-sub">Mantenha a visibilidade sobre prazos extensos para manter o planejamento semanal alinhado.</p></div>
+    <div class="content-card"><div class="content-title">🏷 Categorias</div><div class="pill-row"><span class="pill"><b>Trabalho</b></span><span class="pill"><b>Pessoal</b></span><span class="pill"><b>Finanças</b></span><span class="pill"><b>Conteúdo</b></span></div></div>
+    <div class="content-card"><div class="content-title">⚡ Navegação Rápida</div><p class="mini-sub">Alterne entre meses utilizando as setas laterais ou clique no botão hoje.</p></div>
+  </div>
+  <div class="calendar-shell">
+    <div class="month-card">
+      <div class="month-toolbar">
+        <div><div class="month-title" id="calendarMonthTitle">Calendário Mensal</div><div class="mini-sub">Quadro interativo para acompanhamento geral do mês</div></div>
+        <div class="month-nav"><button class="btn btn-icon" onclick="window.changeCalendarMonth(-1)">‹</button><button class="btn" onclick="window.goCalendarToday()">Este Mês</button><button class="btn btn-icon" onclick="window.changeCalendarMonth(1)">›</button></div>
+      </div>
+      <div class="month-grid" id="calendarGrid"></div>
+    </div>
+    <aside class="month-side-card">
+      <div class="panel-title">📌 Visão Geral do Mês</div>
+      <div class="calendar-stat-grid">
+        <div class="calendar-stat"><b id="calTotalEvents">0</b><span>Eventos</span></div>
+        <div class="calendar-stat"><b id="calDeadlines">0</b><span>Prazos</span></div>
+        <div class="calendar-stat"><b id="calMeetings">0</b><span>Reuniões</span></div>
+        <div class="calendar-stat"><b id="calContent">0</b><span>Conteúdos</span></div>
+      </div>
+      <div class="panel-title" style="margin-top:18px">➕ Agendar no Calendário</div>
+      <div class="calendar-form">
+        <input id="calEventTitle" placeholder="Título ex: Lançamento de Produto" />
+        <input id="calEventDate" type="date" />
+        <select id="calEventType"><option value="work">Trabalho / Reunião</option><option value="deadline">Prazo Máximo</option><option value="content">Marketing / Conteúdo</option><option value="money">Finanças / Contas</option><option value="personal">Pessoal / Lazer</option></select>
+        <button class="btn btn-primary" onclick="window.addCalendarEventFromForm()">Salvar Plano ✓</button>
+      </div>
+      <div class="panel-title" style="margin-top:20px">🧾 Próximos Compromissos</div>
+      <div class="agenda-list" id="calendarAgenda"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="app-view" id="view-analytics">
+<div class="view-hero"><div><div class="view-kicker">Métricas de Foco</div><div class="view-title">Análise & Progresso Semanal</div><div class="view-sub">Visualize Gráficos de barras interativos, preenchimento de metas e o medidor de índice pessoal.</div></div><button class="btn btn-primary" onclick="window.exportData()">📤 Exportar Relatório</button></div>
+<div class="content-grid"><div class="content-card"><div class="content-title">📊 Análise de Desempenho</div><div class="mini-list"><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Pico de Produtividade: Quarta-feira</div><div class="mini-sub">Maior volume de tarefas concluídas</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent3)"></span><div><div class="mini-text">Qualidade de Foco: +14%</div><div class="mini-sub">Aumento em relação ao ciclo anterior</div></div></div></div></div><div class="content-card"><div class="content-title">🔥 Tendências de Hábitos</div><div class="pill-row"><span class="pill"><b>21</b> dias: hidratação</span><span class="pill"><b>14</b> dias: treinos</span><span class="pill"><b>7</b> dias: leitura</span></div></div><div class="content-card"><div class="content-title">💡 Dica de Foco</div><p class="mini-sub">Selecione sessões de Pomodoro mais curtas no período da tarde para manter a consistência.</p></div></div>
+<!-- ████ TICKER ████ -->
+<div class="ticker">
+  <div class="ticker-label">✦ AO VIVO</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="tickerInner"></div>
+  </div>
+</div>
+
+<!-- ████ ANALYTICS ████ -->
+<div class="analytics-row">
+  <!-- Bar Chart -->
+  <div class="bar-chart-card">
+    <div class="panel-title" style="margin-bottom:4px">📈 Tarefas Diárias</div>
+    <div style="font-size:0.73rem;color:var(--text-secondary)">Porcentagem diária concluída</div>
+    <div class="bar-chart-inner" id="barChart"></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted)" id="barLabels"></div>
+  </div>
+
+  <!-- Waffle Chart -->
+  <div class="waffle-card">
+    <div class="flex flex-between items-center" style="margin-bottom:4px">
+      <div class="panel-title">⬛ Auditoria de Metas</div>
+      <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--accent)" id="wafflePercent">0%</div>
+    </div>
+    <div style="font-size:0.73rem;color:var(--text-secondary);margin-bottom:8px">Cada bloco representa 1% do objetivo semanal</div>
+    <div class="waffle-grid" id="waffleGrid"></div>
+    <div style="display:flex;gap:16px;margin-top:8px;font-size:0.72rem">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div><span style="color:var(--text-secondary)">Concluído</span></div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--bg-secondary)"></div><span style="color:var(--text-secondary)">Restante</span></div>
+    </div>
+  </div>
+
+  <!-- Gauge -->
+  <div class="gauge-card">
+    <div class="panel-title" style="margin-bottom:4px">🎯 Medidor de Foco</div>
+    <div style="font-size:0.73rem;color:var(--text-secondary);margin-bottom:8px">Consistência e produtividade</div>
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" width="180" height="110" viewBox="0 0 180 110">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="var(--accent5)"/>
+            <stop offset="50%" stop-color="var(--accent4)"/>
+            <stop offset="100%" stop-color="var(--accent3)"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="var(--bg-secondary)" stroke-width="14" stroke-linecap="round"/>
+        <path id="gaugeFill" d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+          stroke-dasharray="219.9" stroke-dashoffset="219.9" style="transition:stroke-dashoffset 2s cubic-bezier(0.23,1,0.32,1)"/>
+        <line id="gaugeNeedle" x1="90" y1="90" x2="90" y2="26" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90,90,90)" style="transition:transform 2s cubic-bezier(0.23,1,0.32,1)"/>
+        <circle cx="90" cy="90" r="5" fill="var(--accent)"/>
+        <text x="18" y="108" fill="var(--text-muted)" font-size="9" font-family="DM Sans">0</text>
+        <text x="160" y="108" fill="var(--text-muted)" font-size="9" font-family="DM Sans" text-anchor="end">100</text>
+      </svg>
+    </div>
+    <div class="gauge-value" id="gaugeVal">82</div>
+    <div class="gauge-label-text">Índice de Foco</div>
+  </div>
+</div>
+
+</section>
+
+<section class="app-view" id="view-review">
+  <div class="view-hero"><div><div class="view-kicker">Mapeamento Avançado</div><div class="view-title">Revisão Semanal por IA</div><div class="view-sub">Recurso Inteligente de auditoria de hábitos, índice de foco consolidado e projeção interativa em 3D de resultados diários.</div></div><button class="btn btn-primary" onclick="window.showToast('Métricas de IA recalculadas ✓')">✨ Atualizar Revisão</button></div>
+  <div class="premium-kpi-row">
+    <div class="premium-kpi"><b>87%</b><span>Aproveitamento Semanal</span></div>
+    <div class="premium-kpi"><b>14</b><span>Metas Atingidas</span></div>
+    <div class="premium-kpi"><b>5h</b><span>Tempo de Foco</span></div>
+    <div class="premium-kpi"><b>3</b><span>Prioridades Concluídas</span></div>
+  </div>
+  <div class="ai-review-grid">
+    <div class="ai-card">
+      <div class="content-title">🤖 Resumo Consolidado de IA</div>
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:12px 0 4px"><div class="ai-score">A+</div><div><div class="mini-text" style="font-size:1rem;font-weight:900">Seu desempenho está excelente!</div><div class="mini-sub">Simulação de diagnóstico de IA: Seu foco permaneceu contínuo entre terça e quinta-feira. Recomenda-se reservar o período matinal para tarefas de desenvolvimento criativo.</div></div></div>
+      <div class="ai-insight"><div class="ai-icon">⚡</div><div><b>Dica de Ação:</b> Aloque um bloco de foco de 45 minutos para revisar a proposta do cliente e transfira afazeres operacionais secundários para sexta-feira à tarde.</div></div>
+      <div class="ai-insight"><div class="ai-icon">🎯</div><div><b>Meta Destacada:</b> Concluir os 3 principais compromissos da rotina elevará seu aproveitamento global para 94%.</div></div>
+      <div class="ai-insight"><div class="ai-icon">🧠</div><div><b>Padrão Detectado:</b> A manutenção do planejamento diário no início da manhã está gerando alta consistência operacional.</div></div>
+    </div>
+    <div class="three-d-panel">
+      <div class="content-title">🪐 Órbita de Desempenho</div>
+      <div class="orbit-chart">
+        <div class="orbit-center">87%</div>
+        <div class="orbit-dot">📅</div><div class="orbit-dot">🎯</div><div class="orbit-dot">💎</div><div class="orbit-dot">⚡</div>
+      </div>
+      <div class="pill-row"><span class="pill"><b>Organização</b> 92%</span><span class="pill"><b>Foco Real</b> 78%</span><span class="pill"><b>Hábitos</b> 84%</span></div>
+    </div>
+  </div>
+  <div class="three-d-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:4px">
+      <div class="content-title" style="margin-bottom:0">📊 Rendimento Semanal Consolidado</div>
+      <div class="saas-graph-legend" style="display:flex; gap:12px; font-size:0.75rem;">
+        <span style="display:flex; align-items:center; gap:5px; color:var(--text-secondary);"><span style="width:10px; height:10px; border-radius:3px; background:var(--accent)"></span>Rendimento</span>
+        <span style="display:flex; align-items:center; gap:5px; color:var(--text-secondary);"><span style="border-top:1.5px dashed var(--accent4); width:14px; height:0"></span>Meta Diária (80%)</span>
+      </div>
+    </div>
+    <div class="mini-sub" style="margin-bottom:20px">Mapeamento profissional que destaca o aproveitamento das metas de produtividade ao longo dos dias semanais.</div>
+    <div class="saas-graph-container">
+      <div class="saas-grid-lines">
+        <div class="saas-grid-line" style="top:0%"><span class="saas-grid-label">100%</span></div>
+        <div class="saas-grid-line" style="top:20%; border-top: 1.5px dashed var(--accent4);"><span class="saas-grid-label" style="color:var(--accent4); font-weight:700">Meta (80%)</span></div>
+        <div class="saas-grid-line" style="top:25%"><span class="saas-grid-label">75%</span></div>
+        <div class="saas-grid-line" style="top:50%"><span class="saas-grid-label">50%</span></div>
+        <div class="saas-grid-line" style="top:75%"><span class="saas-grid-label">25%</span></div>
+        <div class="saas-grid-line" style="top:100%"><span class="saas-grid-label">0%</span></div>
+      </div>
+      <div class="saas-bars-container">
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Segunda-feira</b><br>62% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c1" style="height: 62%;">
+              <span class="saas-bar-value">62%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Seg</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Terça-feira</b><br>81% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c2" style="height: 81%;">
+              <span class="saas-bar-value">81%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Ter</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Quarta-feira</b><br>94% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c3" style="height: 94%;">
+              <span class="saas-bar-value">94%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Qua</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Quinta-feira</b><br>88% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c4" style="height: 88%;">
+              <span class="saas-bar-value">88%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Qui</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Sexta-feira</b><br>70% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c5" style="height: 70%;">
+              <span class="saas-bar-value">70%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Sex</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Sábado</b><br>76% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c1" style="height: 76%;">
+              <span class="saas-bar-value">76%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Sáb</div>
+        </div>
+        <div class="saas-bar-col">
+          <div class="saas-bar-tooltip"><b>Domingo</b><br>66% Rendimento</div>
+          <div class="saas-bar-fill-wrapper">
+            <div class="saas-bar-fill c2" style="height: 66%;">
+              <span class="saas-bar-value">66%</span>
+            </div>
+          </div>
+          <div class="saas-bar-label">Dom</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="app-view" id="view-focus">
+<div class="view-hero"><div><div class="view-kicker">Trabalho Focado</div><div class="view-title">Timer de Foco & Anotações de Ideias</div><div class="view-sub">Utilize blocos Pomodoro estruturados e uma área flexível de anotações rápidas para manter a consistência diária.</div></div><button class="btn btn-primary" onclick="window.startTimer()">▶ Iniciar Foco</button></div>
+<div class="content-grid"><div class="content-card"><div class="content-title">🎧 Trilhas Recomendadas</div><div class="mini-list"><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Ambiente de Concentração Profunda</div><div class="mini-sub">Sessão sugerida: 25 min</div></div></div><div class="mini-item"><span class="mini-dot" style="background:var(--accent2)"></span><div><div class="mini-text">Planejamento Calmo</div><div class="mini-sub">Início de ciclo tranquilo</div></div></div></div></div><div class="content-card"><div class="content-title">🧘 Pausas Ativas</div><div class="pill-row"><span class="pill">Alongamento</span><span class="pill">Água</span><span class="pill">Caminhar</span><span class="pill">Respirar</span></div></div><div class="content-card"><div class="content-title">📝 Pergunta do Dia</div><p class="mini-sub">Qual é o principal compromisso que fará seu dia de hoje valer a pena?</p></div></div>
+<!-- ████ PREMIUM FEATURE UPGRADE: FOCUS TIMER + BRAIN DUMP NOTES ████ -->
+<div class="features-row">
+  <div class="feature-card">
+    <div class="feature-head">
+      <div><div class="feature-title">⏱ Cronômetro de Foco</div><div class="feature-sub">Foco contínuo e sprints no estilo Pomodoro</div></div>
+      <div class="pulse-wrapper"><button class="btn btn-icon" onclick="window.resetTimer()">↻</button><span class="pulse-ring"></span></div>
+    </div>
+    <div class="timer-ring">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="62" fill="none" stroke="var(--bg-secondary)" stroke-width="10"/>
+        <circle id="timerCircle" cx="75" cy="75" r="62" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="389.5" stroke-dashoffset="0" transform="rotate(-90 75 75)" style="transition:stroke-dashoffset .8s cubic-bezier(.23,1,.32,1)"/>
+      </svg>
+      <div class="timer-display" id="timerDisplay">25:00</div>
+    </div>
+    <div class="timer-actions">
+      <button class="btn btn-primary" onclick="window.startTimer()">▶ Iniciar</button>
+      <button class="btn" onclick="window.pauseTimer()">⏸ Pausar</button>
+      <button class="btn" onclick="window.setTimerMode(5)">Pausa de 5m</button>
+      <button class="btn" onclick="window.setTimerMode(25)">Foco de 25m</button>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-head">
+      <div><div class="feature-title">🧠 Espaço de Ideias / Anotações</div><div class="feature-sub">Ideias rápidas, lembretes de metas e registros gerais</div></div>
+      <button class="btn btn-primary" onclick="window.addNote()">+ Salvar</button>
+    </div>
+    <div class="notes-wrap">
+      <textarea id="quickNote" class="note-input" placeholder="Escreva uma anotação, ideia rápida ou meta semanal..."></textarea>
+      <div class="note-list" id="noteList"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+</section>
+
+<section class="app-view" id="view-goals">
+  <div class="view-hero"><div><div class="view-kicker">Estruturação de Resultados</div><div class="view-title">Roteiro e Histórico de Metas</div><div class="view-sub">Decomponha seus objetivos de longo prazo em etapas diárias, prazos consolidados e monitoramento de desempenho.</div></div><button class="btn btn-primary" onclick="window.openAddGoal()">+ Nova Meta</button></div>
+  <div class="goal-roadmap">
+    <div class="roadmap-card"><div class="content-title">🚀 Planejamento de Lançamento</div><p class="mini-sub">Estruturar imagens finais do produto, redigir guias de uso, testar links e indexação SEO.</p><div class="progress-line"><span style="width:78%"></span></div><div class="pill-row"><span class="pill"><b>78%</b> Concluído</span><span class="pill">Prazo: Sexta-feira</span></div></div>
+    <div class="roadmap-card"><div class="content-title">📚 Desenvolvimento Profissional</div><p class="mini-sub">Finalizar módulos de cursos, revisar conceitos práticos e organizar documentação.</p><div class="progress-line"><span style="width:55%"></span></div><div class="pill-row"><span class="pill"><b>55%</b> Planejado</span><span class="pill">3 Tarefas Restantes</span></div></div>
+    <div class="roadmap-card"><div class="content-title">💪 Saúde, Hábito & Rotina</div><p class="mini-sub">Foco integral em treinos consistentes, alimentação balanceada, sono reparador e hidratação diária.</p><div class="progress-line"><span style="width:64%"></span></div><div class="pill-row"><span class="pill"><b>64%</b> Consistência</span><span class="pill">Metas Ativas</span></div></div>
+  </div>
+</section>
+
+<section class="app-view" id="view-budget">
+  <div class="view-hero"><div><div class="view-kicker">Gestão Financeira</div><div class="view-title">Acompanhamento e Orçamento Semanal</div><div class="view-sub">Monitore receitas, custos recorrentes e aportes de investimento diretamente no painel do planejador.</div></div><button class="btn btn-primary" onclick="window.showToast('Funcionalidade de orçamento ativa')">+ Adicionar Registro</button></div>
+  <div class="budget-board">
+    <div class="budget-card"><div class="content-title">💵 Receitas do Ciclo</div><div class="money-row"><span>Projetos Corporativos / Contratos</span><b>R$ 850</b></div><div class="money-row"><span>Vendas de Infoprodutos e Ativos</span><b>R$ 420</b></div><div class="money-row"><span>Serviços Adicionais / Consultoria</span><b>R$ 120</b></div></div>
+    <div class="budget-card"><div class="content-title">🧾 Investimentos e Despesas</div><div class="money-row"><span>Infraestrutura e Softwares SaaS</span><b>R$ 90</b></div><div class="money-row"><span>Campanhas de Anúncios e Leads</span><b>R$ 150</b></div><div class="money-row"><span>Despesas Operacionais Diversas</span><b>R$ 310</b></div></div>
+    <div class="budget-card"><div class="content-title">🏦 Fundos de Reserva / Investimento</div><p class="mini-sub">Progresso de aporte planejado para o ciclo atual.</p><div class="progress-line"><span style="width:70%"></span></div><div class="money-row"><span>Reserva Salva</span><b>R$ 490 / R$ 700</b></div></div>
+  </div>
+</section>
+
+<section class="app-view" id="view-resources">
+  <div class="view-hero"><div><div class="view-kicker">Central Unificada</div><div class="view-title">Central de Recursos e Links de Apoio</div><div class="view-sub">Mantenha links cruciais, referências conceituais e atalhos de ferramentas centralizados no mesmo ecossistema de produção.</div></div><button class="btn btn-primary" onclick="window.showToast('Recurso adicionado para testes')">+ Criar Atalho</button></div>
+  <div class="resource-board">
+    <div class="resource-card"><div class="content-title">📌 Links de Alta Utilidade</div><div class="link-row"><span>Painel do Projeto Principal</span><span class="resource-tag">Ativo</span></div><div class="link-row"><span>Pasta Compartilhada no Drive</span><span class="resource-tag">Nuvem</span></div><div class="link-row"><span>Diretório de Notas Gerais</span><span class="resource-tag">Notas</span></div></div>
+    <div class="resource-card"><div class="content-title">🧰 Caixa de Ferramentas</div><div class="link-row"><span>Repositório de Ativos de IA</span><span class="resource-tag">Design</span></div><div class="link-row"><span>Consolas de Indexação de Busca</span><span class="resource-tag">SEO</span></div><div class="link-row"><span>Cronograma das Redes Sociais</span><span class="resource-tag">Social</span></div></div>
+    <div class="resource-card"><div class="content-title">📝 Modelos Úteis Reutilizáveis</div><div class="mini-list"><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Modelo de Alinhamento Semanal</div><div class="mini-sub">Copie e instancie quando desejar.</div></div></div><div class="mini-item"><span class="mini-dot"></span><div><div class="mini-text">Briefing Estrutural de Clientes</div><div class="mini-sub">Formulário reutilizável de entrada.</div></div></div></div></div>
+  </div>
+</section>
+
+<section class="app-view" id="view-sections">
+  <div class="view-hero"><div><div class="view-kicker">Organização Customizável</div><div class="view-title">Suas Seções Personalizadas</div><div class="view-sub">Crie módulos customizados ilimitados para monitorar alimentação, treinos, controle de clientes ou cronograma escolar.</div></div><button class="btn btn-primary" onclick="window.openSectionModal()">+ Criar Seção</button></div>
+  <div id="customSectionList" class="custom-section-list"></div>
+</section>
+</main>
+</div><!-- end app-shell -->
+
+<!-- ████ FAB ████ -->
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-option" style="animation-delay:0.1s" onclick="window.openAddTask();window.closeFab()">
+    <div class="fab-option-label">Nova Tarefa</div>
+    <div class="fab-option-btn">📝</div>
+  </div>
+  <div class="fab-option" style="animation-delay:0.15s" onclick="window.addHabit();window.closeFab()">
+    <div class="fab-option-label">Novo Hábito</div>
+    <div class="fab-option-btn">💎</div>
+  </div>
+  <div class="fab-option" style="animation-delay:0.2s" onclick="window.openAddGoal();window.closeFab()">
+    <div class="fab-option-label">Nova Meta</div>
+    <div class="fab-option-btn">🎯</div>
+  </div>
+  <div class="fab-option" style="animation-delay:0.25s" onclick="window.openSectionModal();window.closeFab()">
+    <div class="fab-option-label">Nova Seção</div>
+    <div class="fab-option-btn">➕</div>
+  </div>
+</div>
+<button class="fab" id="fabBtn" onclick="window.toggleFab()">+</button>
+
+<!-- ████ SETTINGS ████ -->
+<div class="settings-overlay" id="settingsOverlay" onclick="window.closeSettings(event)">
+  <div class="settings-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div class="settings-title">⚙️ Configurações</div>
+      <button class="btn btn-icon" onclick="window.closeSettingsBtn()">✕</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">🎨 Esquema de Tema</div>
+      <div class="theme-grid">
+        <button class="theme-btn active" data-theme="default" onclick="window.setTheme('default',this)" style="background:linear-gradient(135deg,#0a0a0f,#7c3aed)"><span>Escuro</span></button>
+        <button class="theme-btn" data-theme="midnight" onclick="window.setTheme('midnight',this)" style="background:linear-gradient(135deg,#010b1f,#3b82f6)"><span>Noite</span></button>
+        <button class="theme-btn" data-theme="rose" onclick="window.setTheme('rose',this)" style="background:linear-gradient(135deg,#18060a,#ff6b8b)"><span>Rosa</span></button>
+        <button class="theme-btn" data-theme="emerald" onclick="window.setTheme('emerald',this)" style="background:linear-gradient(135deg,#022c22,#10b981)"><span>Floresta</span></button>
+        <button class="theme-btn" data-theme="pearl" onclick="window.setTheme('pearl',this)" style="background:linear-gradient(135deg,#f4f4f8,#7c3aed)"><span>Pérola</span></button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">🔔 Preferências e Recursos</div>
+      <div class="settings-row">
+        <div class="settings-row-label">Animações de Interface</div>
+        <div class="toggle on" id="toggleAnim" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Notificações Inteligentes</div>
+        <div class="toggle on" id="toggleNotif" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Efeitos Sonoros do Foco</div>
+        <div class="toggle" id="toggleSound" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Layout de Exibição Compacto</div>
+        <div class="toggle" id="toggleCompact" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">📅 Opções do Planejador</div>
+      <div class="settings-row">
+        <div class="settings-row-label">Início da Semana</div>
+        <select class="form-select" style="width:auto;padding:5px 10px">
+          <option>Segunda-feira</option><option>Domingo</option><option>Sábado</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Formato de Data</div>
+        <select class="form-select" style="width:auto;padding:5px 10px">
+          <option>DD/MM/AA</option><option>MM/DD/AA</option><option>AA/MM/DD</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">💾 Backup e Armazenamento</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="window.exportData()">📤 Exportar Backup</button>
+        <button class="btn" onclick="window.clearAllData()">🗑 Limpar Todo Histórico</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ ADD TASK MODAL ████ -->
+<div class="modal-overlay" id="taskModal" onclick="window.closeModal('taskModal',event)">
+  <div class="modal">
+    <div class="modal-title">📝 <span id="modalTitle">Criar Nova Tarefa</span></div>
+    <div class="form-group">
+      <label class="form-label">Nome do Compromisso / Tarefa</label>
+      <input class="form-input" id="taskName" placeholder="O que você precisa realizar?"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">Dia da Semana</label>
+        <select class="form-select" id="taskDay">
+          <option value="0">Segunda-feira</option><option value="1">Terça-feira</option>
+          <option value="2">Quarta-feira</option><option value="3">Quinta-feira</option>
+          <option value="4">Sexta-feira</option><option value="5">Sábado</option>
+          <option value="6">Domingo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Horário Sugerido</label>
+        <input type="time" class="form-input" id="taskTime" value="09:00"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nível de Prioridade</label>
+      <select class="form-select" id="taskPriority">
+        <option value="high">🔴 Alta Prioridade</option>
+        <option value="mid" selected>🟡 Média Prioridade</option>
+        <option value="low">🟢 Baixa Prioridade</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tag de Identificação Visual (Cor)</label>
+      <div class="color-picker" id="colorPicker">
+        <div class="color-dot selected" data-color="#f0b429" style="background:#f0b429" onclick="window.selectColor(this)"></div>
+        <div class="color-dot" data-color="#e86bdf" style="background:#e86bdf" onclick="window.selectColor(this)"></div>
+        <div class="color-dot" data-color="#4af4b2" style="background:#4af4b2" onclick="window.selectColor(this)"></div>
+        <div class="color-dot" data-color="#5b9cf6" style="background:#5b9cf6" onclick="window.selectColor(this)"></div>
+        <div class="color-dot" data-color="#ff6b6b" style="background:#ff6b6b" onclick="window.selectColor(this)"></div>
+        <div class="color-dot" data-color="#a78bfa" style="background:#a78bfa" onclick="window.selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anotações Relevantes (opcional)</label>
+      <textarea class="form-textarea" id="taskNotes" placeholder="Anotações adicionais sobre o compromisso..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="window.closeModal('taskModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="window.saveTask()">Salvar Tarefa ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ ADD GOAL MODAL ████ -->
+<div class="modal-overlay" id="goalModal" onclick="window.closeModal('goalModal',event)">
+  <div class="modal">
+    <div class="modal-title">🎯 Adicionar Meta de Aproveitamento</div>
+    <div class="form-group">
+      <label class="form-label">Título da Meta</label>
+      <input class="form-input" id="goalName" placeholder="ex: Concluir Projeto X"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Progresso Atual (0-100)</label>
+      <input type="range" id="goalProgress" min="0" max="100" value="50"
+        style="width:100%;accent-color:var(--accent)" oninput="document.getElementById('goalProgressVal').textContent=this.value+'%'"/>
+      <div style="text-align:center;font-family:var(--font-mono);font-size:1.2rem;color:var(--accent);margin-top:4px" id="goalProgressVal">50%</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Gradiente de Cor Recomendado</label>
+      <select class="form-select" id="goalColor">
+         <option value="rg1">Ouro → Vermelho</option>
+         <option value="rg2">Roxo → Azul</option>
+         <option value="rg3">Verde → Azul</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="window.closeModal('goalModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="window.saveGoal()">Salvar Meta ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ ADD CUSTOM SECTION MODAL ████ -->
+<div class="modal-overlay" id="sectionModal" onclick="window.closeModal('sectionModal',event)">
+  <div class="modal">
+    <div class="modal-title">➕ Criar Nova Seção Personalizada</div>
+    <div class="section-form">
+      <label><span class="form-label">Nome da Nova Seção</span><input id="sectionName" placeholder="ex: Plano de Refeições, Lista de Compras, Clientes"/></label>
+      <label><span class="form-label">Ícone de Apoio</span><select id="sectionIcon"><option>📌</option><option>💼</option><option>🎬</option><option>🍽️</option><option>🏋️</option><option>📚</option><option>💰</option><option>🛒</option><option>✨</option></select></label>
+      <label><span class="form-label">Conteúdo Inicial Demonstrativo</span><textarea id="sectionContent" placeholder="Adicione seu checklist, atalhos, anotações de progresso ou fluxo semanal..."></textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="window.closeModal('sectionModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="window.saveSection()">Salvar Seção ✓</button>
+    </div>
+  </div>
+</div>
+
+  <script>
+var Planner = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/plannerLogic.ts
+  var plannerLogic_exports = {};
+  __export(plannerLogic_exports, {
+    initWeeklyHero: () => initWeeklyHero
+  });
+  function initWeeklyHero() {
+    const DAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "S\xE1b", "Dom"];
+    const DAYS_FULL = ["Segunda-feira", "Ter\xE7a-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "S\xE1bado", "Domingo"];
+    let currentWeekOffset = 0;
+    let calendarMonthOffset = 0;
+    let editingTaskId = null;
+    let selectedColor = "#f0b429";
+    let fabOpen = false;
+    const defaultHabits = [
+      { id: 1, name: "Treino Matinal \u{1F3CB}\uFE0F", done: true, streak: 14 },
+      { id: 2, name: "Ler 30 Minutos \u{1F4DA}", done: false, streak: 7 },
+      { id: 3, name: "Beber 8 Copos de \xC1gua \u{1F4A7}", done: true, streak: 21 },
+      { id: 4, name: "Meditar 10 Minutos \u{1F9D8}", done: false, streak: 3 }
+    ];
+    const defaultGoals = [
+      { id: 1, name: "Lan\xE7amento do Projeto", progress: 82, color: "rg1" },
+      { id: 2, name: "Condicionamento F\xEDsico", progress: 65, color: "rg2" },
+      { id: 3, name: "Foco de Aprendizado", progress: 45, color: "rg3" }
+    ];
+    const defaultCalendarEvents = [
+      { id: 101, title: "Planejamento de Longo Prazo", date: "__Y__-__M__-03", type: "work" },
+      { id: 102, title: "Alinhamento com Cliente", date: "__Y__-__M__-06", type: "work" },
+      { id: 103, title: "Lan\xE7amento na Etsy", date: "__Y__-__M__-09", type: "deadline" },
+      { id: 104, title: "Lote de Conte\xFAdos para Redes", date: "__Y__-__M__-12", type: "content" },
+      { id: 105, title: "Revis\xE3o de Custos & Contas", date: "__Y__-__M__-15", type: "money" },
+      { id: 106, title: "Alinhamento Semanal + Refei\xE7\xF5es", date: "__Y__-__M__-18", type: "personal" },
+      { id: 107, title: "Rascunho de E-mail de Marketing", date: "__Y__-__M__-22", type: "content" },
+      { id: 108, title: "Revis\xE3o Consolidada do M\xEAs", date: "__Y__-__M__-28", type: "deadline" }
+    ];
+    function buildDefaultCalendarEvents() {
+      const d = /* @__PURE__ */ new Date(), y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0");
+      return defaultCalendarEvents.map((e) => ({ ...e, date: e.date.replace("__Y__", String(y)).replace("__M__", m) }));
+    }
+    function safeLoad(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        console.warn("Falha ao carregar do Storage:", key, e);
+        return fallback;
+      }
+    }
+    function safeStore(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn("Falha ao salvar no Storage:", key, e);
+      }
+    }
+    let tasks = safeLoad("wh_tasks", []);
+    let habits = safeLoad("wh_habits", defaultHabits);
+    let goals = safeLoad("wh_goals", defaultGoals);
+    let notes = safeLoad("wh_notes", []);
+    let customSections = safeLoad("wh_sections", []);
+    let calendarEvents = safeLoad("wh_calendar_events", buildDefaultCalendarEvents());
+    function save() {
+      safeStore("wh_tasks", tasks);
+      safeStore("wh_habits", habits);
+      safeStore("wh_goals", goals);
+      safeStore("wh_notes", notes);
+      safeStore("wh_sections", customSections);
+      safeStore("wh_calendar_events", calendarEvents);
+    }
+    function getWeekDates(offset) {
+      const today = /* @__PURE__ */ new Date();
+      const day = today.getDay();
+      const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(today.setDate(diff + offset * 7));
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        dates.push(d);
+      }
+      return dates;
+    }
+    function formatDate(d) {
+      return d.getDate() + "/" + (d.getMonth() + 1);
+    }
+    function isToday(d) {
+      const t = /* @__PURE__ */ new Date();
+      return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+    }
+    function getDateKey(d) {
+      return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    }
+    function render() {
+      const dates = getWeekDates(currentWeekOffset);
+      const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      const monthsFull = ["Janeiro", "Fevereiro", "Mar\xE7o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+      const weekTitleEl = document.getElementById("weekTitle");
+      if (weekTitleEl) {
+        weekTitleEl.textContent = "Semana de " + dates[0].getDate() + " de " + monthsFull[dates[0].getMonth()];
+      }
+      const weekRangeEl = document.getElementById("weekRange");
+      if (weekRangeEl) {
+        weekRangeEl.textContent = formatDate(dates[0]) + " \u2014 " + formatDate(dates[6]);
+      }
+      renderDays(dates);
+      renderStats();
+      renderHabits();
+      renderGoals();
+      renderBarChart(dates);
+      renderWaffle();
+      updateGauge();
+      renderCalendar();
+    }
+    function renderDays(dates) {
+      const grid = document.getElementById("daysGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      dates.forEach((date, i) => {
+        const key = getDateKey(date);
+        const dayTasks = tasks.filter((t) => t.dateKey === key);
+        const col = document.createElement("div");
+        col.className = "day-col" + (isToday(date) ? " today" : "");
+        col.innerHTML = `
+        <div class="day-header">
+          <div class="day-name">${DAYS[i]}</div>
+          <div class="day-date">${date.getDate()}</div>
+        </div>
+        <div class="tasks-container" id="tasks_${key}">
+          ${dayTasks.map((t) => taskHTML(t)).join("")}
+        </div>
+        <button class="add-task-btn" onclick="window.openAddTask(${i},'${key}')">\uFF0B Adicionar</button>
+      `;
+        grid.appendChild(col);
+      });
+    }
+    function taskHTML(t) {
+      return `<div class="task-item${t.done ? " completed" : ""}" id="task_${t.id}" onclick="window.toggleTask(${t.id})">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${t.color || "var(--accent)"};border-radius:2px 0 0 2px"></div>
+      <div class="task-text">${t.name}</div>
+      ${t.time ? `<div class="task-time">\u23F0 ${t.time}</div>` : ""}
+      <div class="task-actions">
+        <button class="task-btn check" onclick="event.stopPropagation();window.toggleTask(${t.id})">\u2713</button>
+        <button class="task-btn del" onclick="event.stopPropagation();window.deleteTask(${t.id})">\u2715</button>
+      </div>
+    </div>`;
+    }
+    function renderStats() {
+      const dates = getWeekDates(currentWeekOffset);
+      const keys = dates.map((d) => getDateKey(d));
+      const weekTasks = tasks.filter((t) => keys.includes(t.dateKey));
+      const done = weekTasks.filter((t) => t.done).length;
+      const total = weekTasks.length;
+      const statDoneEl = document.getElementById("statDone");
+      if (statDoneEl) statDoneEl.textContent = String(done);
+      const statPendingEl = document.getElementById("statPending");
+      if (statPendingEl) statPendingEl.textContent = String(total - done);
+      const pct = total > 0 ? Math.round(done / total * 100) : 0;
+      const weekPctEl = document.getElementById("weekPct");
+      if (weekPctEl) weekPctEl.textContent = pct + "%";
+      const r = 34, circumference = 2 * Math.PI * r;
+      const ringEl = document.getElementById("weekProgressRing");
+      if (ringEl) {
+        ringEl.style.strokeDashoffset = String(circumference * (1 - pct / 100));
+      }
+    }
+    function renderHabits() {
+      const el = document.getElementById("habitsList");
+      if (!el) return;
+      el.innerHTML = habits.map((h) => `
+      <div class="habit-item${h.done ? " done" : ""}" onclick="window.toggleHabit(${h.id})">
+        <div class="habit-check">${h.done ? "\u2713" : ""}</div>
+        <div class="habit-name">${h.name}</div>
+        <div class="habit-streak">\u{1F525}${h.streak}</div>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:0.75rem" 
+          onclick="event.stopPropagation();window.deleteHabit(${h.id})">\u2715</button>
+      </div>`).join("");
+    }
+    function renderGoals() {
+      const el = document.getElementById("goalLegend");
+      if (!el) return;
+      el.innerHTML = "";
+      const colors = ["var(--accent)", "var(--accent2)", "var(--accent3)"];
+      goals.forEach((g, i) => {
+        el.innerHTML += `<div class="legend-item">
+        <div class="legend-dot" style="background:${colors[i % 3]}"></div>
+        <span>${g.name}: <b style="color:${colors[i % 3]}">${g.progress}%</b></span>
+      </div>`;
+      });
+      const mainPctEl = document.getElementById("ringMainPct");
+      if (mainPctEl) {
+        mainPctEl.textContent = Math.round(goals.reduce((a, g) => a + g.progress, 0) / Math.max(goals.length, 1)) + "%";
+      }
+      setTimeout(() => {
+        const rings = ["ring1", "ring2", "ring3"];
+        const circs = [427.2, 326.7, 226.2];
+        goals.forEach((g, i) => {
+          const el2 = document.getElementById(rings[i]);
+          if (el2) el2.style.strokeDashoffset = String(circs[i] * (1 - g.progress / 100));
+        });
+      }, 300);
+    }
+    function renderBarChart(dates) {
+      const bar = document.getElementById("barChart");
+      const lbl = document.getElementById("barLabels");
+      if (!bar || !lbl) return;
+      bar.innerHTML = "";
+      lbl.innerHTML = "";
+      const colors = ["", "c2", "c3", "c4", "", "c2", "c3"];
+      dates.forEach((d, i) => {
+        const key = getDateKey(d);
+        const total = tasks.filter((t) => t.dateKey === key).length || 0;
+        const done = tasks.filter((t) => t.dateKey === key && t.done).length || 0;
+        const pct = total > 0 ? Math.round(done / total * 100) : 0;
+        const wrap = document.createElement("div");
+        wrap.className = "bar-wrap";
+        const h = Math.max(pct, 4);
+        wrap.innerHTML = `
+        <div class="bar-pct">${pct || done}${total ? "%" : ""}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${colors[i]}" style="height:${h}%;animation-delay:${i * 0.1}s"></div>
+        </div>`;
+        bar.appendChild(wrap);
+        const l = document.createElement("span");
+        l.className = "bar-label";
+        l.textContent = DAYS[i];
+        lbl.appendChild(l);
+      });
+    }
+    function renderWaffle() {
+      const dates = getWeekDates(currentWeekOffset);
+      const keys = dates.map((d) => getDateKey(d));
+      const weekTasks = tasks.filter((t) => keys.includes(t.dateKey));
+      const done = weekTasks.filter((t) => t.done).length;
+      const total = Math.max(weekTasks.length, 1);
+      const pct = Math.round(done / total * 100);
+      const grid = document.getElementById("waffleGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      for (let i = 0; i < 100; i++) {
+        const cell = document.createElement("div");
+        cell.className = "waffle-cell" + (i < pct ? " filled" : "");
+        cell.style.animationDelay = i * 0.01 + "s";
+        grid.appendChild(cell);
+      }
+      const wafflePctEl = document.getElementById("wafflePercent");
+      if (wafflePctEl) wafflePctEl.textContent = pct + "%";
+    }
+    function updateGauge() {
+      const scoreEl = document.getElementById("statScore");
+      const score = scoreEl ? parseInt(scoreEl.textContent || "82") || 82 : 82;
+      const fill = document.getElementById("gaugeFill");
+      const needle = document.getElementById("gaugeNeedle");
+      const gaugeLength = 219.9;
+      if (fill) fill.style.strokeDashoffset = String(gaugeLength * (1 - score / 100));
+      if (needle) {
+        const angle = -90 + score / 100 * 180;
+        needle.setAttribute("transform", `rotate(${angle},90,90)`);
+      }
+      const valEl = document.getElementById("gaugeVal");
+      if (valEl) valEl.textContent = String(score);
+    }
+    let pendingDayIdx = 0;
+    let pendingDateKey = "";
+    function openAddTask(dayIdx, dateKey) {
+      editingTaskId = null;
+      pendingDayIdx = dayIdx ?? 0;
+      pendingDateKey = dateKey ?? getDateKey(getWeekDates(currentWeekOffset)[0]);
+      const mTitle = document.getElementById("modalTitle");
+      if (mTitle) mTitle.textContent = "Criar Nova Tarefa";
+      const tName = document.getElementById("taskName");
+      if (tName) tName.value = "";
+      const tDay = document.getElementById("taskDay");
+      if (tDay) tDay.value = String(pendingDayIdx);
+      const tTime = document.getElementById("taskTime");
+      if (tTime) tTime.value = "09:00";
+      const tNotes = document.getElementById("taskNotes");
+      if (tNotes) tNotes.value = "";
+      const tPriority = document.getElementById("taskPriority");
+      if (tPriority) tPriority.value = "mid";
+      const mOverlay = document.getElementById("taskModal");
+      if (mOverlay) mOverlay.classList.add("open");
+      setTimeout(() => {
+        if (tName) tName.focus();
+      }, 200);
+    }
+    function saveTask() {
+      const tName = document.getElementById("taskName");
+      const name = tName ? tName.value.trim() : "";
+      if (!name) return;
+      const tDay = document.getElementById("taskDay");
+      const dayIdx = tDay ? parseInt(tDay.value) : 0;
+      const date = getWeekDates(currentWeekOffset)[dayIdx];
+      const dateKey = getDateKey(date);
+      const tTime = document.getElementById("taskTime");
+      const time = tTime ? tTime.value : "09:00";
+      const tPriority = document.getElementById("taskPriority");
+      const priority = tPriority ? tPriority.value : "mid";
+      const tNotes = document.getElementById("taskNotes");
+      const notesStr = tNotes ? tNotes.value : "";
+      if (editingTaskId) {
+        const t = tasks.find((t2) => t2.id === editingTaskId);
+        if (t) {
+          t.name = name;
+          t.time = time;
+          t.color = selectedColor;
+        }
+      } else {
+        tasks.push({
+          id: Date.now(),
+          name,
+          time,
+          priority,
+          color: selectedColor,
+          notes: notesStr,
+          dateKey,
+          done: false
+        });
+      }
+      save();
+      closeModal("taskModal");
+      render();
+    }
+    function toggleTask(id) {
+      const t = tasks.find((t2) => t2.id === id);
+      if (t) {
+        t.done = !t.done;
+        const el = document.getElementById("task_" + id);
+        if (el) {
+          el.style.animation = "heartbeat 0.5s ease";
+          setTimeout(() => {
+            el.style.animation = "";
+          }, 600);
+        }
+        save();
+        render();
+      }
+    }
+    function deleteTask(id) {
+      tasks = tasks.filter((t) => t.id !== id);
+      save();
+      render();
+    }
+    function clearCompleted() {
+      tasks = tasks.filter((t) => !t.done);
+      save();
+      render();
+    }
+    function toggleHabit(id) {
+      const h = habits.find((h2) => h2.id === id);
+      if (h) {
+        h.done = !h.done;
+        if (h.done) h.streak++;
+        save();
+        renderHabits();
+      }
+    }
+    function deleteHabit(id) {
+      habits = habits.filter((h) => h.id !== id);
+      save();
+      renderHabits();
+    }
+    function addHabit() {
+      const name = prompt("Nome do h\xE1bito:");
+      if (!name) return;
+      habits.push({ id: Date.now(), name, done: false, streak: 0 });
+      save();
+      renderHabits();
+    }
+    function openAddGoal() {
+      const gModal = document.getElementById("goalModal");
+      if (gModal) gModal.classList.add("open");
+    }
+    function saveGoal() {
+      const gName = document.getElementById("goalName");
+      const name = gName ? gName.value.trim() : "";
+      if (!name) return;
+      const gProg = document.getElementById("goalProgress");
+      const progress = gProg ? parseInt(gProg.value) : 50;
+      const gColor = document.getElementById("goalColor");
+      const color = gColor ? gColor.value : "rg1";
+      goals.push({
+        id: Date.now(),
+        name,
+        progress,
+        color
+      });
+      save();
+      renderGoals();
+      closeModal("goalModal");
+    }
+    function navigateView(view, btn) {
+      document.querySelectorAll(".app-view").forEach((v) => v.classList.remove("active"));
+      const target = document.getElementById("view-" + view) || document.getElementById("view_" + view);
+      if (target) {
+        target.classList.add("active");
+      }
+      document.querySelectorAll(".pro-nav-item[data-view]").forEach((b) => {
+        const el = b;
+        el.classList.toggle("active", el.dataset.view === view);
+      });
+      if (!btn) {
+        const b = document.querySelector(`.pro-nav-item[data-view="${view}"]`);
+        if (b) b.classList.add("active");
+      }
+      closeMobileSidebar();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        updateGauge();
+        updateTimerUI();
+      }, 80);
+    }
+    function openMobileSidebar() {
+      const sidebar = document.getElementById("proSidebar");
+      if (sidebar) sidebar.classList.add("open");
+      const overlay = document.getElementById("sidebarOverlay");
+      if (overlay) overlay.classList.add("open");
+      document.body.classList.add("menu-open");
+    }
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById("proSidebar");
+      if (sidebar) sidebar.classList.remove("open");
+      const overlay = document.getElementById("sidebarOverlay");
+      if (overlay) overlay.classList.remove("open");
+      document.body.classList.remove("menu-open");
+    }
+    function toggleLightMode() {
+      const isLight = document.documentElement.getAttribute("data-theme") === "pearl";
+      setTheme(isLight ? "default" : "pearl");
+    }
+    function closeModal(id, e) {
+      if (e && e.target !== document.getElementById(id)) return;
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove("open");
+    }
+    function openSettings() {
+      const el = document.getElementById("settingsOverlay");
+      if (el) el.classList.add("open");
+    }
+    function closeSettingsBtn() {
+      const el = document.getElementById("settingsOverlay");
+      if (el) el.classList.remove("open");
+    }
+    function closeSettings(e) {
+      if (e.target === document.getElementById("settingsOverlay")) {
+        closeSettingsBtn();
+      }
+    }
+    function setTheme(t, btn) {
+      document.documentElement.removeAttribute("data-theme");
+      if (t !== "default") document.documentElement.setAttribute("data-theme", t);
+      try {
+        localStorage.setItem("wh_theme", t);
+      } catch (e) {
+      }
+      document.querySelectorAll(".theme-grid .theme-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.theme === t);
+      });
+      if (btn) btn.classList.add("active");
+      showToast((t === "pearl" ? "P\xE9rola (Claro)" : "Escuro") + " aplicado com sucesso");
+    }
+    function toggleFab() {
+      fabOpen = !fabOpen;
+      const fabMenu = document.getElementById("fabMenu");
+      if (fabMenu) fabMenu.classList.toggle("open", fabOpen);
+      const fabBtn = document.getElementById("fabBtn");
+      if (fabBtn) {
+        fabBtn.textContent = fabOpen ? "\u2715" : "+";
+        fabBtn.style.transform = fabOpen ? "rotate(0deg)" : "";
+      }
+    }
+    function closeFab() {
+      fabOpen = false;
+      const fabMenu = document.getElementById("fabMenu");
+      if (fabMenu) fabMenu.classList.remove("open");
+      const fabBtn = document.getElementById("fabBtn");
+      if (fabBtn) fabBtn.textContent = "+";
+    }
+    function selectColor(el) {
+      document.querySelectorAll(".color-picker .color-dot").forEach((d) => d.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedColor = el.dataset.color || "#f0b429";
+    }
+    function changeWeek(d) {
+      currentWeekOffset += d;
+      render();
+    }
+    function goToToday() {
+      currentWeekOffset = 0;
+      render();
+    }
+    function buildWaveform() {
+      const w = document.getElementById("waveform");
+      if (!w) return;
+      w.innerHTML = "";
+      for (let i = 0; i < 16; i++) {
+        const b = document.createElement("div");
+        b.className = "wave-bar";
+        b.style.height = Math.random() * 20 + 6 + "px";
+        b.style.animationDuration = 0.5 + Math.random() * 0.7 + "s";
+        b.style.animationDelay = Math.random() * 0.5 + "s";
+        w.appendChild(b);
+      }
+    }
+    function buildTicker() {
+      const items = [
+        ["Tarefas de Hoje", "24 Conclu\xEDdas"],
+        ["Rotina Saud\xE1vel", "7 Conclu\xEDdo"],
+        ["Temporizador de Foco", "Score de 82%"],
+        ["Se\xE7\xF5es Ativas", "3 \xC1reas"],
+        ["Metas Gerais", "3 Definidas"],
+        ["Ciclo de Planejamento", "7 Dias Semana"]
+      ];
+      const el = document.getElementById("tickerInner");
+      if (el) {
+        el.innerHTML = items.map(([l, v]) => `<div class="ticker-item">\u2726 ${l} <span>${v}</span></div>`).join("");
+      }
+    }
+    function exportData() {
+      const data = { tasks, habits, goals, notes, customSections, calendarEvents };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "weeklyhero-backup.json";
+      a.click();
+    }
+    function clearAllData() {
+      if (confirm("Deseja limpar todos os dados? Esta a\xE7\xE3o n\xE3o pode ser desfeita.")) {
+        tasks = [];
+        habits = [];
+        goals = [];
+        notes = [];
+        customSections = [];
+        calendarEvents = buildDefaultCalendarEvents();
+        save();
+        render();
+        renderNotes();
+        renderCustomSections();
+        renderCalendar();
+      }
+    }
+    function animateCounter(el, target, duration = 1e3) {
+      if (!el) return;
+      const start = 0;
+      const step = (target - start) / (duration / 16);
+      let current = start;
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        el.textContent = String(Math.floor(current));
+      }, 16);
+    }
+    function seedData() {
+      if (notes.length === 0) {
+        notes.push(
+          { id: Date.now() + 900, text: "Ideias r\xE1pidas: preparar checklist de lan\xE7amento, atualizar imagens do produto e redigir guia do usu\xE1rio." },
+          { id: Date.now() + 901, text: "Ideia: adicionar se\xE7\xE3o de reflex\xE3o semanal para os usu\xE1rios." },
+          { id: Date.now() + 902, text: "Lembrete: exportar backup ap\xF3s a personaliza\xE7\xE3o das se\xE7\xF5es." }
+        );
+      }
+      if (customSections.length === 0) {
+        customSections.push(
+          {
+            id: Date.now() + 700,
+            title: "Calend\xE1rio de Conte\xFAdo",
+            icon: "\u{1F3AC}",
+            content: "Segunda: carrossel no Instagram\nTer\xE7a: v\xEDdeo promocional da Etsy\nQuarta: pins no Pinterest\nQuinta: campanha de e-mail\nSexta: postagem de lan\xE7amento de produto"
+          },
+          {
+            id: Date.now() + 701,
+            title: "Plano de Refei\xE7\xF5es",
+            icon: "\u{1F37D}\uFE0F",
+            content: "Caf\xE9 da manh\xE3: aveia + frutas\nAlmo\xE7o: prato de arroz\nJantar: frango grelhado + salada\nLanches: nozes, iogurte, meta de \xE1gua"
+          },
+          {
+            id: Date.now() + 702,
+            title: "Projetos de Clientes",
+            icon: "\u{1F4BC}",
+            content: "Cliente A: refinamento de layout\nCliente B: sistema de miniaturas\nCliente C: entrega final + faturamento\nAcompanhamento: sexta-feira \xE0s 16:00"
+          }
+        );
+      }
+      if (tasks.length > 0) {
+        save();
+        return;
+      }
+      const dates = getWeekDates(0);
+      const sampleTasks = [
+        [0, "Revis\xE3o do Design System", "09:00", "#f0b429"],
+        [0, "Reuni\xE3o Di\xE1ria de Alinhamento", "11:00", "#e86bdf"],
+        [1, "Abertura para Clientes", "14:00", "#5b9cf6"],
+        [1, "Revis\xE3o do C\xF3digo", "10:00", "#4af4b2"],
+        [2, "Redigir Documenta\xE7\xE3o", "09:30", "#f0b429"],
+        [2, "Reuni\xE3o 1:1", "15:00", "#ff6b6b"],
+        [3, "Planejamento do Ciclo / Sprint", "10:00", "#e86bdf"],
+        [3, "Implanta\xE7\xE3o de Atualiza\xE7\xF5es", "16:00", "#4af4b2"],
+        [4, "Fechamento da Semana", "11:00", "#f0b429"],
+        [4, "Almo\xE7o em Equipe \u{1F371}", "13:00", "#ff6b6b"],
+        [5, "Reorganiza\xE7\xE3o Pessoal + Planejamento", "10:30", "#a78bfa"],
+        [5, "Cria\xE7\xE3o de Lote de Conte\xFAdo", "15:30", "#5b9cf6"],
+        [6, "Reflex\xE3o Semanal", "18:00", "#4af4b2"],
+        [6, "Preparar Metas da Pr\xF3xima Semana", "19:00", "#f0b429"]
+      ];
+      sampleTasks.forEach(([day, name, time, color], i) => {
+        tasks.push({
+          id: Date.now() + i,
+          name,
+          time,
+          color,
+          dateKey: getDateKey(dates[day]),
+          done: i < 3,
+          priority: "mid",
+          notes: ""
+        });
+      });
+      save();
+    }
+    let timerSeconds = 25 * 60;
+    let timerTotal = 25 * 60;
+    let timerRunning = false;
+    let timerId = null;
+    function updateTimerUI() {
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
+      const s = String(timerSeconds % 60).padStart(2, "0");
+      const display = document.getElementById("timerDisplay");
+      const circle = document.getElementById("timerCircle");
+      if (display) display.textContent = `${m}:${s}`;
+      if (circle) {
+        const c = 389.5;
+        circle.style.strokeDashoffset = String(c * (1 - timerSeconds / timerTotal));
+      }
+    }
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      showToast("Cron\xF4metro de foco iniciado");
+      timerId = setInterval(() => {
+        timerSeconds--;
+        updateTimerUI();
+        if (timerSeconds <= 0) {
+          pauseTimer();
+          showToast("Sess\xE3o de foco conclu\xEDda! \u2713");
+          timerSeconds = timerTotal;
+          updateTimerUI();
+        }
+      }, 1e3);
+    }
+    function pauseTimer() {
+      timerRunning = false;
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+      showToast("Cron\xF4metro de foco pausado");
+    }
+    function resetTimer() {
+      pauseTimer();
+      timerSeconds = timerTotal;
+      updateTimerUI();
+      showToast("Foco reiniciado");
+    }
+    function setTimerMode(min) {
+      pauseTimer();
+      timerTotal = min * 60;
+      timerSeconds = timerTotal;
+      updateTimerUI();
+      showToast("Modo de " + min + " minutos selecionado");
+    }
+    function renderNotes() {
+      const list = document.getElementById("noteList");
+      if (!list) return;
+      if (!notes.length) {
+        list.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;text-align:center;padding:18px;border:1px dashed var(--border);border-radius:12px">Nenhuma nota salvada \u2014 comece a registrar suas ideias!</div>';
+        return;
+      }
+      list.innerHTML = notes.slice().reverse().map((n) => `
+      <div class="note-item">
+        <span>${escapeHTML(n.text)}</span>
+        <button class="note-del" onclick="window.deleteNote(${n.id})">\xD7</button>
+      </div>`).join("");
+    }
+    function addNote() {
+      const input = document.getElementById("quickNote");
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) {
+        showToast("Escreva sua anota\xE7\xE3o primeiro");
+        return;
+      }
+      notes.push({ id: Date.now(), text });
+      input.value = "";
+      save();
+      renderNotes();
+      showToast("Ideia registrada \u2713");
+    }
+    function deleteNote(id) {
+      notes = notes.filter((n) => n.id !== id);
+      save();
+      renderNotes();
+      showToast("Nota exclu\xEDda");
+    }
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, (ch) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      })[ch] || ch);
+    }
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add("show");
+      const prevText = showToast._t;
+      if (prevText) clearTimeout(prevText);
+      showToast._t = setTimeout(() => t.classList.remove("show"), 1800);
+    }
+    function openSectionModal() {
+      const m = document.getElementById("sectionModal");
+      if (!m) return;
+      const sName = document.getElementById("sectionName");
+      const sContent = document.getElementById("sectionContent");
+      if (sName) sName.value = "";
+      if (sContent) sContent.value = "";
+      m.classList.add("open");
+      setTimeout(() => {
+        if (sName) sName.focus();
+      }, 150);
+    }
+    function saveSection() {
+      const sName = document.getElementById("sectionName");
+      const title = sName ? sName.value.trim() : "";
+      const sIcon = document.getElementById("sectionIcon");
+      const icon = sIcon ? sIcon.value : "\u{1F4CC}";
+      const sContent = document.getElementById("sectionContent");
+      const content = sContent && sContent.value.trim() ? sContent.value.trim() : "Adicione seu plano personalizado, notas, checklist, links, lembretes ou fluxo semanal de forma otimizada aqui.";
+      if (!title) {
+        showToast("O t\xEDtulo da se\xE7\xE3o \xE9 obrigat\xF3rio");
+        return;
+      }
+      customSections.push({ id: Date.now(), title, icon, content });
+      save();
+      closeModal("sectionModal");
+      renderCustomSections();
+      navigateView("sections");
+      showToast("Se\xE7\xE3o personalizada criada de forma otimizada \u2713");
+    }
+    function deleteSection(id) {
+      customSections = customSections.filter((s) => s.id !== id);
+      save();
+      renderCustomSections();
+      showToast("Se\xE7\xE3o exclu\xEDda com sucesso");
+    }
+    function editSection(id) {
+      const sec = customSections.find((s) => s.id === id);
+      if (!sec) return;
+      const updated = prompt("Atualizar conte\xFAdo da se\xE7\xE3o:", sec.content);
+      if (updated === null) return;
+      sec.content = updated;
+      save();
+      renderCustomSections();
+      showToast("Anota\xE7\xE3o atualizada \u2713");
+    }
+    function renderCustomSections() {
+      const nav = document.getElementById("customNavItems");
+      if (nav) {
+        nav.innerHTML = `<button class="pro-nav-item" data-view="sections" onclick="window.navigateView('sections',this)"><span>\u{1F9E9}</span><b>Se\xE7\xF5es Criadas</b></button>`;
+      }
+      const list = document.getElementById("customSectionList");
+      if (!list) return;
+      if (!customSections.length) {
+        list.innerHTML = '<div class="empty-premium">Nenhuma se\xE7\xE3o personalizada ainda. Selecione "Adicionar Se\xE7\xE3o" no painel principal para criar seu espa\xE7o sob medida.<br><br><button class="btn btn-primary" onclick="window.openSectionModal()">+ Adicionar Se\xE7\xE3o Personalizada</button></div>';
+        return;
+      }
+      list.innerHTML = customSections.map((sec) => `
+      <div class="custom-block">
+        <h3>${sec.icon || "\u{1F4CC}"} ${escapeHTML(sec.title)}</h3>
+        <p>${escapeHTML(sec.content)}</p>
+        <div class="custom-actions">
+          <button class="btn" onclick="window.editSection(${sec.id})">\u270E Editar</button>
+          <button class="btn" onclick="window.deleteSection(${sec.id})">\u{1F5D1} Excluir</button>
+        </div>
+      </div>`).join("") + `
+      <div class="custom-block" style="display:grid;place-items:center;text-align:center;border-style:dashed">
+        <h3>\u2795 Novo Quadro de Trabalho</h3>
+        <p>Crie categorias para Refei\xE7\xF5es, Controle Escolar, Lista de Compras ou Projetos Paralelos.</p>
+        <button class="btn btn-primary" onclick="window.openSectionModal()">+ Adicionar Se\xE7\xE3o Personalizada</button>
+      </div>`;
+    }
+    function getCalendarBaseDate() {
+      const d = /* @__PURE__ */ new Date();
+      d.setDate(1);
+      d.setMonth(d.getMonth() + calendarMonthOffset);
+      return d;
+    }
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+    function dateKeyISO(d) {
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+    }
+    function eventClass(type) {
+      return type === "content" ? "pink" : type === "personal" ? "green" : type === "money" ? "blue" : "";
+    }
+    function eventIcon(type) {
+      return { work: "\u{1F4BC}", deadline: "\u{1F6A8}", content: "\u{1F3AC}", money: "\u{1F4B0}", personal: "\u{1F33F}" }[type] || "\u{1F4CC}";
+    }
+    function renderCalendar() {
+      const grid = document.getElementById("calendarGrid");
+      if (!grid) return;
+      const title = document.getElementById("calendarMonthTitle");
+      const base = getCalendarBaseDate();
+      const months = ["Janeiro", "Fevereiro", "Mar\xE7o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+      if (title) title.textContent = months[base.getMonth()] + " " + base.getFullYear();
+      const y = base.getFullYear(), m = base.getMonth();
+      const first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
+      const startIndex = (first.getDay() + 6) % 7;
+      const start = new Date(first);
+      start.setDate(first.getDate() - startIndex);
+      const todayKey = dateKeyISO(/* @__PURE__ */ new Date());
+      const dows = ["Seg", "Ter", "Qua", "Qui", "Sex", "S\xE1b", "Dom"];
+      grid.innerHTML = dows.map((d) => `<div class="month-dow">${d}</div>`).join("");
+      let monthEvents = calendarEvents.filter((e) => {
+        const dt = /* @__PURE__ */ new Date(e.date + "T00:00:00");
+        return dt.getMonth() === m && dt.getFullYear() === y;
+      });
+      for (let i = 0; i < 42; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const key = dateKeyISO(d);
+        const ev = calendarEvents.filter((e) => e.date === key);
+        const cell = document.createElement("div");
+        cell.className = "month-day " + (d.getMonth() !== m ? "other " : "") + (key === todayKey ? "today " : "") + (ev.length ? "has-event" : "");
+        cell.style.animationDelay = i * 0.018 + "s";
+        cell.onclick = () => prefillCalendarEvent(key);
+        cell.innerHTML = `
+        <div class="month-num">
+          <span>${d.getDate()}</span>
+          <span>${key === todayKey ? "HOJE" : ""}</span>
+        </div>
+        <div class="month-events">
+          ${ev.slice(0, 3).map((e) => `<div class="month-event ${eventClass(e.type)}" title="${escapeHTML(e.title)}">${eventIcon(e.type)} ${escapeHTML(e.title)}</div>`).join("")}
+          ${ev.length > 3 ? `<div class="month-event blue">+${ev.length - 3} mais</div>` : ""}
+        </div>`;
+        grid.appendChild(cell);
+      }
+      const byType = (t) => monthEvents.filter((e) => e.type === t).length;
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      set("calTotalEvents", monthEvents.length);
+      set("calDeadlines", byType("deadline"));
+      set("calMeetings", byType("work"));
+      set("calContent", byType("content"));
+      const agenda = document.getElementById("calendarAgenda");
+      if (agenda) {
+        agenda.innerHTML = monthEvents.sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8).map((e, i) => {
+          const dt = /* @__PURE__ */ new Date(e.date + "T00:00:00");
+          return `
+          <div class="agenda-item" style="animation-delay:${i * 0.05}s">
+            <div class="agenda-date">
+              ${dt.getDate()}
+              <br>
+              <span style="font-size:.58rem">${months[dt.getMonth()].slice(0, 3)}</span>
+            </div>
+            <div>
+              <div class="agenda-title">${eventIcon(e.type)} ${escapeHTML(e.title)}</div>
+              <div class="agenda-sub">${e.type.charAt(0).toUpperCase() + e.type.slice(1)} \u2022 Toque para gerenciar</div>
+            </div>
+          </div>`;
+        }).join("") || '<div class="empty-premium">Nenhum plano neste per\xEDodo.</div>';
+      }
+      const input = document.getElementById("calEventDate");
+      if (input && !input.value) input.value = todayKey;
+    }
+    function changeCalendarMonth(delta) {
+      calendarMonthOffset += delta;
+      renderCalendar();
+      showToast("Calend\xE1rio atualizado");
+    }
+    function goCalendarToday() {
+      calendarMonthOffset = 0;
+      renderCalendar();
+      showToast("De volta ao ciclo atual");
+    }
+    function prefillCalendarEvent(date) {
+      const input = document.getElementById("calEventDate");
+      if (input) {
+        input.value = date;
+        showToast("Data selecionada: " + date);
+      }
+    }
+    function addCalendarEventFromForm() {
+      const titleEl = document.getElementById("calEventTitle");
+      const dateEl = document.getElementById("calEventDate");
+      const typeEl = document.getElementById("calEventType");
+      if (!titleEl || !dateEl || !typeEl) return;
+      const title = titleEl.value.trim();
+      const date = dateEl.value;
+      const type = typeEl.value;
+      if (!title) {
+        showToast("Adicione o t\xEDtulo do compromisso primeiro");
+        titleEl.focus();
+        return;
+      }
+      if (!date) {
+        showToast("Selecione uma data para o calend\xE1rio");
+        return;
+      }
+      calendarEvents.push({ id: Date.now(), title, date, type });
+      titleEl.value = "";
+      save();
+      renderCalendar();
+      showToast("Metas do m\xEAs atualizadas \u2713");
+    }
+    const targetWindow = window;
+    targetWindow.closeMobileSidebar = closeMobileSidebar;
+    targetWindow.navigateView = navigateView;
+    targetWindow.openSectionModal = openSectionModal;
+    targetWindow.openSettings = openSettings;
+    targetWindow.toggleLightMode = toggleLightMode;
+    targetWindow.openMobileSidebar = openMobileSidebar;
+    targetWindow.openAddTask = openAddTask;
+    targetWindow.changeWeek = changeWeek;
+    targetWindow.goToToday = goToToday;
+    targetWindow.toggleTask = toggleTask;
+    targetWindow.deleteTask = deleteTask;
+    targetWindow.clearCompleted = clearCompleted;
+    targetWindow.toggleHabit = toggleHabit;
+    targetWindow.deleteHabit = deleteHabit;
+    targetWindow.addHabit = addHabit;
+    targetWindow.openAddGoal = openAddGoal;
+    targetWindow.saveGoal = saveGoal;
+    targetWindow.closeModal = closeModal;
+    targetWindow.saveTask = saveTask;
+    targetWindow.saveSection = saveSection;
+    targetWindow.editSection = editSection;
+    targetWindow.deleteSection = deleteSection;
+    targetWindow.setTheme = setTheme;
+    targetWindow.toggleFab = toggleFab;
+    targetWindow.closeFab = closeFab;
+    targetWindow.selectColor = selectColor;
+    targetWindow.exportData = exportData;
+    targetWindow.clearAllData = clearAllData;
+    targetWindow.startTimer = startTimer;
+    targetWindow.pauseTimer = pauseTimer;
+    targetWindow.resetTimer = resetTimer;
+    targetWindow.setTimerMode = setTimerMode;
+    targetWindow.addNote = addNote;
+    targetWindow.deleteNote = deleteNote;
+    targetWindow.changeCalendarMonth = changeCalendarMonth;
+    targetWindow.goCalendarToday = goCalendarToday;
+    targetWindow.addCalendarEventFromForm = addCalendarEventFromForm;
+    targetWindow.closeSettingsBtn = closeSettingsBtn;
+    targetWindow.closeSettings = closeSettings;
+    targetWindow.showToast = showToast;
+    const savedTheme = localStorage.getItem("wh_theme") || "default";
+    setTheme(savedTheme);
+    buildWaveform();
+    buildTicker();
+    seedData();
+    render();
+    renderNotes();
+    renderCustomSections();
+    updateTimerUI();
+    setTimeout(() => {
+      animateCounter(document.getElementById("statStreak"), 7);
+      animateCounter(document.getElementById("statScore"), 82);
+    }, 600);
+    setTimeout(updateGauge, 800);
+  }
+  return __toCommonJS(plannerLogic_exports);
+})();
+
+
+    // Inicialização segura do Planner 360 independente do estado do DOM
+    function initPlanner() {
+      if (typeof Planner !== 'undefined' && typeof Planner.initWeeklyHero === 'function') {
+        Planner.initWeeklyHero();
+      } else {
+        console.error('Erro: Módulo Planner ou initWeeklyHero não encontrado!');
+      }
+    }
+
+    if (document.readyState !== 'loading') {
+      initPlanner();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPlanner);
+    }
+  </script>
+  <script src="/admin/auth.js"></script>
+  <script>requireAuth();</script>
 </body>
 </html>
