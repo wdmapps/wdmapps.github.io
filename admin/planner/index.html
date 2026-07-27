@@ -1741,28 +1741,32 @@ var Planner = (() => {
       fsSaveDebounced();
     }
     let fsPending = false;
+    async function fsSaveNow() {
+      try {
+        const data = {
+          tasks: safeLoad("wh_tasks", []),
+          habits: safeLoad("wh_habits", []),
+          goals: safeLoad("wh_goals", []),
+          notes: safeLoad("wh_notes", []),
+          customSections: safeLoad("wh_sections", []),
+          calendarEvents: safeLoad("wh_calendar_events", [])
+        };
+        if (window.__db) {
+          await window.__db.collection("planner_data").doc("main").set(data, { merge: true });
+        }
+      } catch (e) {
+        console.warn("Firestore save failed:", e);
+      }
+    }
     function fsSaveDebounced() {
       if (fsPending) return;
       fsPending = true;
       setTimeout(async () => {
         fsPending = false;
-        try {
-          const data = {
-            tasks: safeLoad("wh_tasks", []),
-            habits: safeLoad("wh_habits", []),
-            goals: safeLoad("wh_goals", []),
-            notes: safeLoad("wh_notes", []),
-            customSections: safeLoad("wh_sections", []),
-            calendarEvents: safeLoad("wh_calendar_events", [])
-          };
-          if (window.__db) {
-            await window.__db.collection("planner_data").doc("main").set(data, { merge: true });
-          }
-        } catch (e) {
-          console.warn("Firestore save failed (normal se banco não criado ainda):", e);
-        }
-      }, 800);
+        await fsSaveNow();
+      }, 200);
     }
+    window.addEventListener("beforeunload", fsSaveNow);
     async function fsLoad() {
       try {
         if (!window.__db) return;
@@ -2257,6 +2261,7 @@ var Planner = (() => {
         notes = [];
         customSections = [];
         calendarEvents = buildDefaultCalendarEvents();
+        localStorage.removeItem("wh_seeded");
         save();
         render();
         renderNotes();
@@ -2279,6 +2284,9 @@ var Planner = (() => {
       }, 16);
     }
     function seedData() {
+      const seeded = localStorage.getItem("wh_seeded");
+      if (seeded) return;
+      localStorage.setItem("wh_seeded", "true");
       if (notes.length === 0) {
         notes.push(
           { id: Date.now() + 900, text: "Ideias r\xE1pidas: preparar checklist de lan\xE7amento, atualizar imagens do produto e redigir guia do usu\xE1rio." },
