@@ -905,11 +905,12 @@ body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;poi
     <div id="customNavItems"></div>
     <button class="pro-nav-item" onclick="window.openSectionModal();window.closeMobileSidebar()"><span>➕</span><b>Adicionar Seção</b></button>
     <button class="pro-nav-item" onclick="window.openSettings();window.closeMobileSidebar()"><span>⚙️</span><b>Configurações</b></button>
+    <button class="pro-nav-item" onclick="window.location.href='/admin/dashboard.html'" style="border-color:var(--accent);background:var(--accent-trans)"><span>←</span><b>Painel Admin</b></button>
   </div>
   <div class="sidebar-card"><div class="sidebar-card-title">Modo Claro / Escuro</div><div class="sidebar-card-sub">Alterne entre o sofisticado modo escuro e o elegante modo claro pérola.</div><button class="btn light-quick" onclick="window.toggleLightMode()">🌗 Alternar Tema</button></div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.closeMobileSidebar()"></div>
-<header class="mobile-header"><div class="mobile-header-inner"><button class="mobile-hamburger" onclick="window.openMobileSidebar()" aria-label="Abrir menu"><span></span><span></span><span></span></button><div class="mobile-title">Planner 360</div><div style="display:flex;gap:8px"><button class="btn btn-icon" onclick="window.openSettings()">⚙️</button><button class="btn btn-icon" onclick="window.toggleLightMode()">🌗</button></div></div></header>
+<header class="mobile-header"><div class="mobile-header-inner"><button class="mobile-hamburger" onclick="window.openMobileSidebar()" aria-label="Abrir menu"><span></span><span></span><span></span></button><div class="mobile-title">Planner 360</div><div style="display:flex;gap:6px"><button class="btn btn-icon" onclick="window.location.href='/admin/dashboard.html'" title="Voltar ao Admin" style="font-size:0.85rem">←</button><button class="btn btn-icon" onclick="window.openSettings()">⚙️</button><button class="btn btn-icon" onclick="window.toggleLightMode()">🌗</button></div></div></header>
 <main class="app-wrapper app-main">
 <section class="app-view active" id="view-dashboard">
 <nav class="nav">
@@ -921,6 +922,7 @@ body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;poi
     <div class="waveform" id="waveform"></div>
   </div>
   <div class="nav-controls">
+    <button class="btn btn-icon" onclick="window.location.href='/admin/dashboard.html'" title="Voltar ao Admin">←</button>
     <button class="btn btn-icon" id="notifBtn" title="Notificações">🔔</button>
     <button class="btn btn-icon" id="settingsBtn" title="Configurações" onclick="window.openSettings()">⚙️</button>
     <button class="btn btn-primary" onclick="window.openAddTask()">+ Nova Tarefa</button>
