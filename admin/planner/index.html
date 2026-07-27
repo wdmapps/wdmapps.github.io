@@ -2046,6 +2046,12 @@ var Planner = (() => {
           dateKey,
           done: false
         });
+        const parts = dateKey.split("-");
+        const isoDate = parts[0] + "-" + String(parts[1]).padStart(2, "0") + "-" + String(parts[2]).padStart(2, "0");
+        const existing = calendarEvents.find(e => e.date === isoDate && e.title === name);
+        if (!existing) {
+          calendarEvents.push({ id: Date.now(), title: name, date: isoDate, type: "work" });
+        }
       }
       save();
       closeModal("taskModal");
@@ -2067,7 +2073,13 @@ var Planner = (() => {
       }
     }
     function deleteTask(id) {
+      const del = tasks.find((t) => t.id === id);
       tasks = tasks.filter((t) => t.id !== id);
+      if (del) {
+        const parts = del.dateKey.split("-");
+        const isoDate = parts[0] + "-" + String(parts[1]).padStart(2, "0") + "-" + String(parts[2]).padStart(2, "0");
+        calendarEvents = calendarEvents.filter((e) => !(e.date === isoDate && e.title === del.name));
+      }
       save();
       render();
     }
