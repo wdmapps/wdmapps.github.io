@@ -2068,6 +2068,10 @@ var Planner = (() => {
             el.style.animation = "";
           }, 600);
         }
+        const parts = t.dateKey.split("-");
+        const isoDate = parts[0] + "-" + String(parts[1]).padStart(2, "0") + "-" + String(parts[2]).padStart(2, "0");
+        const calEv = calendarEvents.find(e => e.date === isoDate && e.title === t.name);
+        if (calEv) calEv.done = t.done;
         save();
         render();
       }
@@ -2590,7 +2594,7 @@ var Planner = (() => {
           <span>${key === todayKey ? "HOJE" : ""}</span>
         </div>
         <div class="month-events">
-          ${ev.slice(0, 3).map((e) => `<div class="month-event ${eventClass(e.type)}" title="${escapeHTML(e.title)}">${eventIcon(e.type)} ${escapeHTML(e.title)}</div>`).join("")}
+          ${ev.slice(0, 3).map((e) => `<div class="month-event ${eventClass(e.type)} ${e.done ? "completed" : ""}" onclick="event.stopPropagation();window.toggleCalendarEvent(${e.id})" title="Clique para concluir/desfazer. Clique com botão direito para excluir." oncontextmenu="event.preventDefault();event.stopPropagation();if(confirm('Excluir este evento?'))window.deleteCalendarEvent(${e.id})" style="${e.done ? "opacity:0.5;text-decoration:line-through" : ""}">${e.done ? "✓ " : ""}${eventIcon(e.type)} ${escapeHTML(e.title)}</div>`).join("")}
           ${ev.length > 3 ? `<div class="month-event blue">+${ev.length - 3} mais</div>` : ""}
         </div>`;
         grid.appendChild(cell);
@@ -2641,6 +2645,20 @@ var Planner = (() => {
         input.value = date;
         showToast("Data selecionada: " + date);
       }
+    }
+    function toggleCalendarEvent(id) {
+      const ev = calendarEvents.find((e) => e.id === id);
+      if (ev) {
+        ev.done = !ev.done;
+        save();
+        renderCalendar();
+      }
+    }
+    function deleteCalendarEvent(id) {
+      calendarEvents = calendarEvents.filter((e) => e.id !== id);
+      save();
+      renderCalendar();
+      render();
     }
     function addCalendarEventFromForm() {
       const titleEl = document.getElementById("calEventTitle");
@@ -2702,6 +2720,8 @@ var Planner = (() => {
     targetWindow.deleteNote = deleteNote;
     targetWindow.changeCalendarMonth = changeCalendarMonth;
     targetWindow.goCalendarToday = goCalendarToday;
+    targetWindow.toggleCalendarEvent = toggleCalendarEvent;
+    targetWindow.deleteCalendarEvent = deleteCalendarEvent;
     targetWindow.addCalendarEventFromForm = addCalendarEventFromForm;
     targetWindow.closeSettingsBtn = closeSettingsBtn;
     targetWindow.closeSettings = closeSettings;
