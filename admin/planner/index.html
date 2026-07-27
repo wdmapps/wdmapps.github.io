@@ -1738,7 +1738,47 @@ var Planner = (() => {
       } catch (e) {
         console.warn("Falha ao salvar no Storage:", key, e);
       }
+      fsSaveDebounced();
     }
+    let fsPending = false;
+    function fsSaveDebounced() {
+      if (fsPending) return;
+      fsPending = true;
+      setTimeout(async () => {
+        fsPending = false;
+        try {
+          const data = {
+            tasks: safeLoad("wh_tasks", []),
+            habits: safeLoad("wh_habits", []),
+            goals: safeLoad("wh_goals", []),
+            notes: safeLoad("wh_notes", []),
+            customSections: safeLoad("wh_sections", []),
+            calendarEvents: safeLoad("wh_calendar_events", [])
+          };
+          if (window.__db) {
+            await window.__db.collection("planner_data").doc("main").set(data, { merge: true });
+          }
+        } catch (e) {
+          console.warn("Firestore save failed (normal se banco não criado ainda):", e);
+        }
+      }, 800);
+    }
+    async function fsLoad() {
+      try {
+        if (!window.__db) return;
+        const snap = await window.__db.collection("planner_data").doc("main").get();
+        if (!snap.exists) return;
+        const data = snap.data();
+        Object.entries(data).forEach(([k, v]) => {
+          if (v && Array.isArray(v)) {
+            localStorage.setItem("wh_" + k, JSON.stringify(v));
+          }
+        });
+      } catch (e) {
+        console.warn("Firestore load failed (normal se banco não criado ainda):", e);
+      }
+    }
+    setTimeout(fsLoad, 500);
     let tasks = safeLoad("wh_tasks", []);
     let habits = safeLoad("wh_habits", defaultHabits);
     let goals = safeLoad("wh_goals", defaultGoals);
@@ -2678,6 +2718,22 @@ var Planner = (() => {
     } else {
       document.addEventListener('DOMContentLoaded', initPlanner);
     }
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzZhOil1oIjkvV79HpVmPLYl3RURtrALw",
+      authDomain: "planer-334f5.firebaseapp.com",
+      projectId: "planer-334f5",
+      storageBucket: "planer-334f5.firebasestorage.app",
+      messagingSenderId: "1055600693510",
+      appId: "1:1055600693510:web:5de9c920a0b1b3d72ace87",
+      measurementId: "G-Q7ZT9LX2C7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.__db = firebase.firestore();
+    window.__db.settings({ merge: true });
   </script>
   <script src="/admin/auth.js"></script>
   <script>requireAuth();</script>
