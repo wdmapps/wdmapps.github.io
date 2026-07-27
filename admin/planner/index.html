@@ -1769,20 +1769,21 @@ var Planner = (() => {
     window.addEventListener("beforeunload", fsSaveNow);
     async function fsLoad() {
       try {
-        if (!window.__db) return;
+        if (!window.__db) return false;
         const snap = await window.__db.collection("planner_data").doc("main").get();
-        if (!snap.exists) return;
+        if (!snap.exists) return false;
         const data = snap.data();
         Object.entries(data).forEach(([k, v]) => {
           if (v && Array.isArray(v)) {
             localStorage.setItem("wh_" + k, JSON.stringify(v));
           }
         });
+        return true;
       } catch (e) {
-        console.warn("Firestore load failed (normal se banco não criado ainda):", e);
+        console.warn("Firestore load failed:", e);
+        return false;
       }
     }
-    setTimeout(fsLoad, 500);
     let tasks = safeLoad("wh_tasks", []);
     let habits = safeLoad("wh_habits", defaultHabits);
     let goals = safeLoad("wh_goals", defaultGoals);
@@ -2697,16 +2698,27 @@ var Planner = (() => {
     setTheme(savedTheme);
     buildWaveform();
     buildTicker();
-    seedData();
-    render();
-    renderNotes();
-    renderCustomSections();
-    updateTimerUI();
-    setTimeout(() => {
-      animateCounter(document.getElementById("statStreak"), 7);
-      animateCounter(document.getElementById("statScore"), 82);
-    }, 600);
-    setTimeout(updateGauge, 800);
+    (async () => {
+      const loaded = await fsLoad();
+      if (loaded) {
+        tasks = safeLoad("wh_tasks", []);
+        habits = safeLoad("wh_habits", defaultHabits);
+        goals = safeLoad("wh_goals", defaultGoals);
+        notes = safeLoad("wh_notes", []);
+        customSections = safeLoad("wh_sections", []);
+        calendarEvents = safeLoad("wh_calendar_events", buildDefaultCalendarEvents());
+      }
+      seedData();
+      render();
+      renderNotes();
+      renderCustomSections();
+      updateTimerUI();
+      setTimeout(() => {
+        animateCounter(document.getElementById("statStreak"), 7);
+        animateCounter(document.getElementById("statScore"), 82);
+      }, 600);
+      setTimeout(updateGauge, 800);
+    })();
   }
   return __toCommonJS(plannerLogic_exports);
 })();
