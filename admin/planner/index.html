@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planner 360 - Sistema de Produtividade</title>
+  <title>Planner WDM - Sistema de Produtividade</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -891,7 +891,7 @@ body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;poi
 <!-- ████ NAV ████ -->
 <div class="app-shell">
 <aside class="pro-sidebar" id="proSidebar">
-  <div class="pro-brand"><div class="pro-brand-icon">✦</div><div class="pro-brand-text"><div class="pro-brand-title" style="font-weight: 800;">Planner 360</div><div class="pro-brand-sub" style="font-size: 0.65rem;">Sistema de Produtividade</div></div><button class="mobile-menu-close" onclick="window.closeMobileSidebar()" aria-label="Fechar menu">✕</button></div>
+  <div class="pro-brand"><div class="pro-brand-icon">✦</div><div class="pro-brand-text"><div class="pro-brand-title" style="font-weight: 800;">Planner WDM</div><div class="pro-brand-sub" style="font-size: 0.65rem;">Sistema de Produtividade</div></div><button class="mobile-menu-close" onclick="window.closeMobileSidebar()" aria-label="Fechar menu">✕</button></div>
   <div class="pro-menu">
     <button class="pro-nav-item active" data-view="dashboard" onclick="window.navigateView('dashboard',this)"><span>🏠</span><b>Dashboard</b></button>
     <button class="pro-nav-item" data-view="planner" onclick="window.navigateView('planner',this)"><span>📅</span><b>Planejador Semanal</b></button>
@@ -910,13 +910,13 @@ body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;poi
   <div class="sidebar-card"><div class="sidebar-card-title">Modo Claro / Escuro</div><div class="sidebar-card-sub">Alterne entre o sofisticado modo escuro e o elegante modo claro pérola.</div><button class="btn light-quick" onclick="window.toggleLightMode()">🌗 Alternar Tema</button></div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.closeMobileSidebar()"></div>
-<header class="mobile-header"><div class="mobile-header-inner"><button class="mobile-hamburger" onclick="window.openMobileSidebar()" aria-label="Abrir menu"><span></span><span></span><span></span></button><div class="mobile-title">Planner 360</div><div style="display:flex;gap:6px"><button class="btn btn-icon" onclick="window.location.href='/admin/dashboard.html'" title="Voltar ao Admin" style="font-size:0.85rem">←</button><button class="btn btn-icon" onclick="window.openSettings()">⚙️</button><button class="btn btn-icon" onclick="window.toggleLightMode()">🌗</button></div></div></header>
+<header class="mobile-header"><div class="mobile-header-inner"><button class="mobile-hamburger" onclick="window.openMobileSidebar()" aria-label="Abrir menu"><span></span><span></span><span></span></button><div class="mobile-title">Planner WDM</div><div style="display:flex;gap:6px"><button class="btn btn-icon" onclick="window.location.href='/admin/dashboard.html'" title="Voltar ao Admin" style="font-size:0.85rem">←</button><button class="btn btn-icon" onclick="window.openSettings()">⚙️</button><button class="btn btn-icon" onclick="window.toggleLightMode()">🌗</button></div></div></header>
 <main class="app-wrapper app-main">
 <section class="app-view active" id="view-dashboard">
 <nav class="nav">
   <div class="nav-logo">
     <div class="logo-icon">★</div>
-    <span>Planner 360</span>
+    <span>Planner WDM</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="waveform" id="waveform"></div>
@@ -932,7 +932,7 @@ body::after{content:'';position:fixed;inset:auto -10% -20% -10%;height:320px;poi
 <div class="view-hero" style="display: flex; align-items: center; justify-content: space-between; gap: 24px;">
   <div style="flex: 1;">
     <div class="view-kicker" style="color: var(--accent); font-weight: 700;">Sua Central de Produtividade</div>
-    <div class="view-title" style="font-family: var(--font-display); font-size: 2.15rem; font-weight: 800; margin-bottom: 12px; line-height: 1.25;">Planner 360</div>
+    <div class="view-title" style="font-family: var(--font-display); font-size: 2.15rem; font-weight: 800; margin-bottom: 12px; line-height: 1.25;">Planner WDM</div>
     <div class="view-sub" style="font-size: 0.95rem; line-height: 1.6; max-width: 580px; margin-bottom: 20px; color: var(--text-secondary);">Um sistema completo para organizar tarefas, gerenciar hábitos, acompanhar metas e analisar seu desempenho com inteligência.</div>
     <div class="dashboard-actions" style="display: flex; gap: 12px;">
       <button class="btn btn-primary" onclick="window.navigateView('planner')" style="padding: 11px 24px; font-weight: 600; border-radius: 12px; background: var(--grad1); border: none; color: white; cursor: pointer; transition: var(--transition);">Abrir Planejador</button>
@@ -2769,7 +2769,7 @@ var Planner = (() => {
 })();
 
 
-    // Inicialização segura do Planner 360 independente do estado do DOM
+    // Inicialização segura do Planner WDM independente do estado do DOM
     function initPlanner() {
       if (typeof Planner !== 'undefined' && typeof Planner.initWeeklyHero === 'function') {
         Planner.initWeeklyHero();
