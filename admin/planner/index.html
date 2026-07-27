@@ -2733,7 +2733,6 @@ var Planner = (() => {
     };
     firebase.initializeApp(firebaseConfig);
     window.__db = firebase.firestore();
-    window.__db.settings({ merge: true });
   </script>
   <script src="/admin/auth.js"></script>
   <script>requireAuth();</script>
