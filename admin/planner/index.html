@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner - WDM Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066ff;
+            --bg: #0a1628;
+            --bg-light: #0f1f3d;
+            --bg-card: #132244;
+            --border: #1e3a5f;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --radius: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .header {
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 1.25rem; font-weight: 700; }
+        .header h1 span { color: var(--primary); }
+        .btn {
+            padding: 8px 20px;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        iframe {
+            width: 100%;
+            border: none;
+        }
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+        .placeholder h2 { font-size: 1.5rem; }
+        .placeholder p { color: var(--text-light); max-width: 400px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span>WDM</span> Planner</h1>
+        <div>
+            <a href="/admin/dashboard.html" class="btn btn-outline">← Dashboard</a>
+        </div>
+    </div>
+    <div class="placeholder">
+        <div style="font-size: 4rem;">📅</div>
+        <h2>Planner</h2>
+        <p>O arquivo do planner não foi encontrado. Me envie o arquivo INdex.html que está na sua área de trabalho para eu colocar aqui.</p>
+    </div>
+    <script src="/admin/auth.js"></script>
+    <script>requireAuth();</script>
+</body>
+</html>
