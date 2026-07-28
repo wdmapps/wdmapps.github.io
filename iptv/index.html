@@ -49,7 +49,8 @@
             border-bottom: 1px solid var(--border); transition: var(--transition);
         }
         .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; }
-        .logo { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text-dark); text-decoration: none; }
+        .logo { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .logo-img { width: 46px; height: 46px; object-fit: cover; border-radius: 12px; box-shadow: 0 0 18px rgba(0,170,255,0.25); }
         .logo span { color: var(--primary); }
         .nav-menu { display: flex; list-style: none; gap: 32px; }
         .nav-menu a { text-decoration: none; color: var(--text); font-weight: 500; font-size: 0.95rem; transition: var(--transition); }
@@ -72,7 +73,11 @@
         }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 
-        .hero-content { position: relative; z-index: 1; text-align: center; max-width: 800px; }
+        .hero-content { position: relative; z-index: 1; text-align: center; max-width: 900px; }
+        .hero-logo {
+            display: block; width: min(520px, 92vw); margin: 0 auto 28px;
+            border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.55), 0 0 40px rgba(0,170,255,0.18);
+        }
         .hero-badge {
             display: inline-block; padding: 8px 20px; border-radius: 50px;
             background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.3);
@@ -179,6 +184,7 @@
 
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
+            .hero-logo { width: min(360px, 94vw); border-radius: 18px; }
             .hero-stats { gap: 24px; flex-wrap: wrap; }
             .nav-menu { display: none; }
             .contact-grid { grid-template-columns: 1fr; }
@@ -189,7 +195,7 @@
 <body>
     <header class="header">
         <nav class="nav container">
-            <a href="/" class="logo">WDM <span>Apps</span></a>
+            <a href="/" class="logo"><img src="img/logo-wdm-iptv.png" alt="WDM IPTV" class="logo-img">WDM <span>IPTV</span></a>
             <ul class="nav-menu">
                 <li><a href="#planos">Planos</a></li>
                 <li><a href="#recursos">Recursos</a></li>
@@ -201,6 +207,7 @@
 
     <section class="hero">
         <div class="hero-content">
+            <img src="img/logo-wdm-iptv.png" alt="WDM IPTV" class="hero-logo">
             <div class="hero-badge">📺 Nova Plataforma</div>
             <h1><span>WDM IPTV</span><br>A melhor TV por internet</h1>
             <p>Canais ao vivo, filmes, séries, esportes e muito mais. Assista onde quiser, quando quiser, no dispositivo que preferir.</p>
