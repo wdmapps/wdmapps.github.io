@@ -147,6 +147,43 @@
         .feature-card p { color: var(--text-light); font-size: 0.9rem; }
 
         .catalog-section { padding: 100px 0; background: #000; }
+        .media-showcase {
+            display: grid; grid-template-columns: 1.25fr 0.75fr; grid-template-rows: repeat(2, 250px);
+            gap: 16px;
+        }
+        .media-tile {
+            position: relative; overflow: hidden; border-radius: 22px; border: 1px solid var(--border);
+            isolation: isolate; min-height: 230px;
+        }
+        .media-tile:first-child { grid-row: 1 / 3; }
+        .media-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+        .media-tile::before {
+            content: ''; position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(180deg, transparent 25%, rgba(0,0,0,0.94) 100%);
+        }
+        .media-tile::after {
+            content: ''; position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(135deg, rgba(0,174,255,0.18), transparent 45%);
+            pointer-events: none;
+        }
+        .media-tile:hover img { transform: scale(1.06); }
+        .media-copy { position: absolute; left: 26px; right: 26px; bottom: 24px; z-index: 2; }
+        .media-copy span {
+            display: inline-flex; padding: 5px 10px; border-radius: 999px; margin-bottom: 9px;
+            color: var(--primary-light); background: rgba(0,0,0,0.7); border: 1px solid rgba(0,174,255,0.35);
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .media-copy h3 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; line-height: 1.2; }
+        .media-tile:first-child .media-copy h3 { font-size: clamp(1.7rem, 3vw, 2.5rem); max-width: 520px; }
+        .device-banner {
+            display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 36px;
+            background: linear-gradient(135deg, rgba(0,174,255,0.10), rgba(0,0,0,0.94));
+            border: 1px solid var(--border); border-radius: 24px; overflow: hidden;
+        }
+        .device-banner img { width: 100%; height: 360px; object-fit: cover; }
+        .device-copy { padding: 40px 0 40px 42px; }
+        .device-copy h2 { font-family: 'Poppins', sans-serif; font-size: 2rem; margin: 12px 0; }
+        .device-copy p { color: var(--text-light); margin-bottom: 22px; }
         .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
         .category-card {
             background: linear-gradient(180deg, rgba(0,174,255,0.08), rgba(5,11,22,0.92));
@@ -239,6 +276,12 @@
             .nav-menu { display: none; }
             .contact-grid { grid-template-columns: 1fr; }
             .split-section { grid-template-columns: 1fr; }
+            .media-showcase { grid-template-columns: 1fr; grid-template-rows: none; }
+            .media-tile:first-child { grid-row: auto; }
+            .media-tile { height: 280px; }
+            .device-banner { grid-template-columns: 1fr; }
+            .device-copy { padding: 30px 24px 0; }
+            .device-banner img { height: 260px; }
             .section-header h2 { font-size: 1.8rem; }
         }
     </style>
@@ -271,6 +314,30 @@
                 <div class="stat"><span class="stat-number">+18mil</span><span class="stat-label">Canais e transmissões</span></div>
                 <div class="stat"><span class="stat-number">+65mil</span><span class="stat-label">Filmes e séries</span></div>
                 <div class="stat"><span class="stat-number">4h</span><span class="stat-label">Teste grátis</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Sua programação</span>
+                <h2>Entretenimento para cada momento</h2>
+                <p>Da sessão de cinema ao jogo decisivo, escolha o que assistir com uma navegação simples e organizada.</p>
+            </div>
+            <div class="media-showcase">
+                <article class="media-tile">
+                    <img src="img/cinema.jpg" alt="Sala de cinema representando o catálogo de filmes da WDM IPTV" loading="lazy">
+                    <div class="media-copy"><span>Cinema em casa</span><h3>Filmes e séries para curtir do seu jeito</h3></div>
+                </article>
+                <article class="media-tile">
+                    <img src="img/esportes.jpg" alt="Atleta representando a programação esportiva da WDM IPTV" loading="lazy">
+                    <div class="media-copy"><span>Ao vivo</span><h3>Esportes e grandes eventos</h3></div>
+                </article>
+                <article class="media-tile">
+                    <img src="img/entretenimento.jpg" alt="Pessoa assistindo televisão em casa" loading="lazy">
+                    <div class="media-copy"><span>Conforto</span><h3>Assista sem sair do sofá</h3></div>
+                </article>
             </div>
         </div>
     </section>
@@ -360,6 +427,20 @@
                 <div class="update-item"><h4>Grade atualizada</h4><p>Canais e transmissões ajustados conforme disponibilidade técnica.</p></div>
                 <div class="update-item"><h4>Ativação rápida</h4><p>Receba suas credenciais e orientação de instalação pelo atendimento.</p></div>
                 <div class="update-item"><h4>Suporte premium</h4><p>Ajuda para configurar no celular, Smart TV, TV Box, PC ou tablet.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="device-banner">
+                <div class="device-copy">
+                    <span class="section-tag">Onde você estiver</span>
+                    <h2>Uma experiência que acompanha você</h2>
+                    <p>Use em Smart TV, TV Box, celular, tablet ou computador. Nossa equipe orienta a configuração no dispositivo compatível.</p>
+                    <a href="#contato" class="btn btn-primary">Solicitar teste de 4 horas</a>
+                </div>
+                <img src="img/dispositivos.jpg" alt="Dispositivos conectados representando o acesso multiplataforma" loading="lazy">
             </div>
         </div>
     </section>
