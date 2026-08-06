@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDM TV - Assistir Filme</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { margin: 0; padding: 40px; background: radial-gradient(circle at top right, #0f1f3d, #000 70%); min-height: 100vh; color: white; }
+        .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.25; pointer-events: none; animation: float 12s ease-in-out infinite; }
+        .glow-1 { width: 400px; height: 400px; background: var(--primary); top: -120px; left: -80px; }
+        .glow-2 { width: 350px; height: 350px; background: var(--accent); bottom: -100px; right: -100px; animation-delay: -6s; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--text); text-decoration: none; font-weight: 600; position: relative; z-index: 1; }
+        .back-link:hover { color: var(--accent); }
+
+        .container { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; display: flex; gap: 30px; background: rgba(6,14,26,0.75); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); }
+        .poster-box { width: 250px; flex-shrink: 0; }
+        .poster-box img { width: 100%; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .info-box { flex: 1; }
+        h1 { margin: 0 0 15px 0; font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+        h1 span { color: var(--accent); }
+        .plot { color: var(--text-light); line-height: 1.6; margin-bottom: 20px; }
+        .btn-play {
+            background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 15px 34px;
+            border: none; cursor: pointer; font-size: 1.05rem; font-weight: 700; border-radius: 50px;
+            transition: 0.3s; box-shadow: 0 10px 30px rgba(0,102,255,0.4);
+        }
+        .btn-play:hover { transform: scale(1.05); box-shadow: 0 16px 40px rgba(0,102,255,0.55); }
+
+        #movie-player { display: none; position: relative; z-index: 1; width: 100%; max-width: 900px; margin: 20px auto; border-radius: 14px; background: #000; }
+
+        @media (max-width: 768px) { .container { flex-direction: column; } .poster-box { width: 100%; max-width: 300px; margin: 0 auto; } body { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <a href="filmes.html" class="back-link">⬅ Voltar</a>
+
+    <div class="container" id="details">
+        <div class="poster-box">
+            <img id="poster" src="" alt="Capa" onerror="this.src='https://via.placeholder.com/300x450/0f1f3d/fff?text=Sem+Capa';">
+        </div>
+        <div class="info-box">
+            <h1 id="title">Carregando...</h1>
+            <p class="plot" id="plot">Carregando sinopse...</p>
+            <button class="btn-play" onclick="iniciarPlayer()">▶ Assistir Agora</button>
+        </div>
+    </div>
+
+    <video id="movie-player" controls playsinline></video>
+
+    <script src="config.js"></script>
+    <script>
+        const dns = localStorage.getItem("active_dns");
+        const user = localStorage.getItem("username");
+        const pass = localStorage.getItem("password");
+        const movieId = localStorage.getItem("chosen_stream_id");
+        const auto = new URLSearchParams(location.search).has('auto');
+
+        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
+
+        async function carregar() {
+            if (!movieId) { window.location.href = "filmes.html"; return; }
+            try {
+                const apiUrl = `${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_info&vod_id=${movieId}`;
+                const res = await fetch(prox(apiUrl));
+                const data = await res.json();
+
+                if (data.info) {
+                    document.getElementById('title').innerHTML = `${data.info.name} <span>(${data.info.year || ''})</span>`;
+                    document.getElementById('plot').innerText = data.info.plot || "Sinopse não disponível.";
+                    document.getElementById('poster').src = data.info.movie_image || '';
+                    const ext = (data.movie_data && data.movie_data.container_extension) || 'mp4';
+                    window.movieUrl = prox(`${dns}/movie/${user}/${pass}/${movieId}.${ext}`);
+                    if (auto) iniciarPlayer();
+                }
+            } catch (e) { console.error("Erro:", e); }
+        }
+
+        function iniciarPlayer() {
+            document.getElementById('details').style.display = 'none';
+            const v = document.getElementById('movie-player');
+            v.muted = auto;
+            v.src = window.movieUrl;
+            v.style.display = 'block';
+            v.play();
+        }
+
+        carregar();
+    </script>
+</body>
+</html>

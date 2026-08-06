@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDM TV - Canais ao Vivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { margin: 0; background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.3; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
+        .glow-1 { width: 450px; height: 450px; background: var(--primary); top: -150px; left: -100px; }
+        .glow-2 { width: 380px; height: 380px; background: var(--accent); bottom: -120px; right: -120px; animation-delay: -6s; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+
+        .app { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100vh; }
+
+        .top { display: flex; align-items: center; gap: 16px; padding: 14px 3%; background: rgba(6,14,26,0.7); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(30,58,95,0.5); z-index: 10; }
+        .home-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: transform 0.3s; }
+        .home-btn:hover { transform: translateY(-2px); }
+        .top h1 { font-size: 1.3rem; font-weight: 800; }
+        .top h1 span { color: var(--accent); }
+
+        .layout { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 350px; background: rgba(6,14,26,0.75); backdrop-filter: blur(15px); display: flex; flex-direction: column; border-right: 1px solid rgba(30,58,95,0.5); }
+        .search-box { padding: 14px; background: rgba(6,14,26,0.6); }
+        #search { width: 100%; padding: 11px 15px; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,31,61,0.6); color: white; outline: none; font-size: 0.9rem; }
+        #search:focus { border-color: var(--accent); }
+        .menu-nav { display: flex; padding: 10px; gap: 6px; background: rgba(6,14,26,0.5); }
+        .menu-nav button { flex: 1; padding: 8px; background: var(--bg-light); color: var(--text-light); border: 1px solid transparent; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 0.8rem; transition: all 0.3s; }
+        .menu-nav button:hover { border-color: var(--accent); color: white; }
+        .list-area { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        .cat-head { padding: 12px 16px; background: rgba(15,31,61,0.5); cursor: pointer; font-weight: 700; border-bottom: 1px solid rgba(30,58,95,0.4); transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .cat-head:hover { background: rgba(0,102,255,0.15); }
+        .cat-head .num { color: var(--text-light); font-size: 0.75rem; font-weight: 500; }
+        .canal-item { padding: 11px 18px; cursor: pointer; border-bottom: 1px solid rgba(30,58,95,0.3); display: flex; align-items: center; gap: 12px; font-size: 0.88rem; transition: background 0.25s; }
+        .canal-item:hover { background: linear-gradient(90deg, rgba(0,102,255,0.3), rgba(0,170,255,0.1)); }
+        .canal-item .cn { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+        .canal-item .nome { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fav-star { color: #ffd700; font-size: 1.1rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
+        .fav-star:hover { opacity: 1; }
+
+        .player-area { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px 3%; }
+        #main-player { width: 100%; max-height: 82vh; background: #000; border-radius: 16px; outline: none; }
+        .info { text-align: center; margin-top: 14px; font-size: 1rem; color: var(--text-light); min-height: 24px; }
+        .info .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e50914; margin-right: 8px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        @media (max-width: 768px) { .sidebar { width: 40%; min-width: 200px; } .top h1 { font-size: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="app">
+        <div class="top">
+            <a href="painel.html" class="home-btn">← Voltar Home</a>
+            <h1>WDM <span>TV</span> · Canais ao Vivo</h1>
+        </div>
+
+        <div class="layout">
+            <div class="sidebar">
+                <div class="search-box">
+                    <input type="text" id="search" placeholder="Buscar canal..." oninput="filtrar()">
+                </div>
+                <div class="menu-nav">
+                    <button onclick="renderizarEspecial('recentes')">Recentes</button>
+                    <button onclick="renderizarEspecial('favoritos')">Favoritos</button>
+                </div>
+                <div class="list-area" id="list"></div>
+            </div>
+
+            <div class="player-area">
+                <video id="main-player" controls autoplay muted playsinline></video>
+                <div class="info" id="canal-nome">Selecione um canal</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        let todosCanais = [], categorias = [];
+        const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
+        let hls = null, fatalCount = 0, canalAtual = null, restartCount = 0, jaTocou = false;
+
+        const video = document.getElementById('main-player');
+        video.addEventListener('playing', () => { jaTocou = true; });
+
+        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
+
+        async function init() {
+            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
+            if (!dns || !user || !pass || dns === "null") {
+                alert("Sessão expirada. Faça login novamente.");
+                window.location.href = "index.html";
+                return;
+            }
+            try {
+                const resCat = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_categories`));
+                const resChan = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_streams`));
+                categorias = await resCat.json();
+                todosCanais = await resChan.json();
+                renderizarMenuPadrao();
+            } catch (e) { console.error("Erro init:", e); }
+        }
+
+        function registrarRecente(ch) {
+            let rec = JSON.parse(localStorage.getItem('recentes') || '[]');
+            rec = rec.filter(r => r.stream_id != ch.stream_id);
+            rec.unshift(ch);
+            localStorage.setItem('recentes', JSON.stringify(rec.slice(0, 6)));
+        }
+
+        function renderizarEspecial(tipo) {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = `<div class="cat-head" onclick="location.reload()">← Voltar à lista</div>`;
+            JSON.parse(localStorage.getItem(tipo) || '[]').forEach(ch => criarLinha(listDiv, ch));
+        }
+
+        function criarLinha(container, ch) {
+            const div = document.createElement('div');
+            div.className = 'canal-item';
+            div.innerHTML = `<span class="cn"></span><span class="nome">${ch.name}</span><span class="fav-star" onclick="event.stopPropagation(); toggleFavorito(${JSON.stringify(ch).replace(/"/g, "'")})">★</span>`;
+            div.onclick = () => { carregarPlayer(ch); registrarRecente(ch); };
+            container.appendChild(div);
+        }
+
+        function toggleFavorito(ch) {
+            let favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+            const idx = favs.findIndex(f => f.stream_id == ch.stream_id);
+            if (idx > -1) favs.splice(idx, 1); else favs.push(ch);
+            localStorage.setItem('favoritos', JSON.stringify(favs));
+            alert(idx > -1 ? "Removido!" : "Favoritado!");
+        }
+
+        function carregarPlayer(ch) {
+            canalAtual = ch;
+            const nomeEl = document.getElementById('canal-nome');
+            nomeEl.innerHTML = `<span class="ativo-dot"></span>Carregando: ${ch.name}`;
+            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
+            if (!dns || !user || !pass || dns === "null") { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+
+            const streamUrl = `${dns}/live/${user}/${pass}/${ch.stream_id}.m3u8`;
+            if (hls) { hls.destroy(); hls = null; }
+            fatalCount = 0; restartCount = 0; jaTocou = false;
+            video.removeAttribute('src'); video.load();
+            nomeEl.innerHTML = `<span class="active-dot"></span>Carregando: ${ch.name}`;
+
+            if (window.Hls && Hls.isSupported()) {
+                hls = new Hls({
+                    maxBufferLength: 30, maxMaxBufferLength: 60, enableWorker: false,
+                    liveDurationInfinity: true, liveSyncDurationCount: 4, liveMaxLatencyDurationCount: 12,
+                    manifestLoadingTimeOut: 25000, manifestLoadingMaxRetry: 5, levelLoadingTimeOut: 25000,
+                    xhrSetup: (xhr, url) => { xhr.open('GET', prox(url), true); }
+                });
+
+                hls.on(Hls.Events.ERROR, (e, data) => {
+                    if (!data.fatal) return;
+                    fatalCount++;
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        if (fatalCount < 3) { hls.startLoad(); }
+                        else if (restartCount < 3) {
+                            restartCount++;
+                            nomeEl.innerHTML = `<span class="active-dot"></span>Reconectando ao canal...`;
+                            setTimeout(() => { if (canalAtual) carregarPlayer(canalAtual); }, 2000);
+                        } else { nomeEl.innerHTML = "Não foi possível carregar o canal."; nomeEl.style.color = '#e50914'; }
+                    } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                        hls.recoverMediaError();
+                    } else { nomeEl.innerHTML = "Erro ao reproduzir o canal."; }
+                });
+
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.BUFFER_EOS, () => { if (hls) hls.startLoad(); video.play().catch(() => {}); });
+                video.addEventListener('ended', () => { if (hls) { hls.startLoad(); video.play().catch(() => {}); } });
+                video.play().catch(() => {});
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = prox(streamUrl);
+                video.play().catch(() => {});
+            } else {
+                nomeEl.innerHTML = 'Navegador sem suporte a HLS.';
+            }
+        }
+
+        function filtrar() {
+            const q = document.getElementById('search').value.toLowerCase();
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = `<div class="cat-head" onclick="location.reload()">← Voltar à lista</div>`;
+            todosCanais.filter(ch => ch.name.toLowerCase().includes(q)).slice(0, 200).forEach(ch => criarLinha(listDiv, ch));
+        }
+
+        function renderizarMenuPadrao() {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = '';
+            Object.values(categorias).forEach(c => {
+                const head = document.createElement('div');
+                head.className = "cat-head";
+                const qtd = todosCanais.filter(ch => ch.category_id == c.category_id).length;
+                head.innerHTML = `<span>${c.category_name}</span><span class="num">${qtd}</span>`;
+                head.onclick = () => {
+                    if (palavrasSenha.some(p => c.category_name.toLowerCase().includes(p))) {
+                        if (prompt("Senha:") !== "0000") return alert("Senha errada!");
+                    }
+                    listDiv.innerHTML = `<div class="cat-head" onclick="location.reload()">← Voltar</div>`;
+                    todosCanais.filter(ch => ch.category_id == c.category_id).forEach(ch => criarLinha(listDiv, ch));
+                };
+                listDiv.appendChild(head);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

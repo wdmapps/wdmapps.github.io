@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDM TV - Filmes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); min-height: 100vh; }
+        .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.3; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
+        .glow-1 { width: 450px; height: 450px; background: var(--primary); top: -150px; left: -100px; }
+        .glow-2 { width: 380px; height: 380px; background: var(--accent); bottom: -120px; right: -120px; animation-delay: -6s; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+
+        .content { position: relative; z-index: 1; padding: 0 3% 60px; }
+        .top { display: flex; align-items: center; gap: 16px; padding: 14px 0; position: sticky; top: 0; background: rgba(6,14,26,0.75); backdrop-filter: blur(15px); z-index: 10; }
+        .home-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: transform 0.3s; }
+        .home-btn:hover { transform: translateY(-2px); }
+        .top h1 { font-size: 1.3rem; font-weight: 800; }
+        .top h1 span { color: var(--accent); }
+        #search { flex: 1; max-width: 400px; padding: 11px 16px; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,31,61,0.6); color: white; outline: none; font-size: 0.9rem; }
+        #search:focus { border-color: var(--accent); }
+
+        .cats { display: flex; gap: 8px; overflow-x: auto; padding: 16px 0; scrollbar-width: thin; }
+        .cat-chip { padding: 8px 16px; background: rgba(15,31,61,0.5); border: 1px solid var(--border); border-radius: 50px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; transition: all 0.3s; color: var(--text-light); }
+        .cat-chip:hover, .cat-chip.ativo { border-color: var(--accent); color: white; background: rgba(0,102,255,0.25); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px; padding-top: 10px; }
+        .filme { border-radius: 16px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid rgba(255,255,255,0.08); background: var(--bg-light); transition: all 0.4s cubic-bezier(0.2,0.8,0.2,1); aspect-ratio: 2/3; }
+        .filme:hover { transform: translateY(-8px) scale(1.03); border-color: var(--accent); box-shadow: 0 18px 50px rgba(0,170,255,0.3); }
+        .filme img { width: 100%; height: 100%; object-fit: cover; }
+        .filme .grad { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 12px 12px; background: linear-gradient(transparent, rgba(6,14,26,0.95)); }
+        .filme .nome { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .filme .ano { font-size: 0.7rem; color: var(--accent); margin-top: 2px; }
+
+        @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } .top h1 { font-size: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="content">
+        <div class="top">
+            <a href="painel.html" class="home-btn">← Voltar Home</a>
+            <h1>WDM <span>TV</span> · Filmes</h1>
+            <input type="text" id="search" placeholder="Buscar filme..." oninput="buscar()">
+        </div>
+
+        <div class="cats" id="cats"></div>
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
+        let filmes = [], categorias = [], catAtiva = "0";
+
+        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
+
+        async function init() {
+            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
+            if (!dns || !user || !pass) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+            try {
+                const r1 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_categories`));
+                const r2 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_streams`));
+                categorias = await r1.json();
+                filmes = await r2.json();
+                const catsDiv = document.getElementById('cats');
+                catsDiv.innerHTML = `<div class="cat ativo" data-id="0" onclick="filtrarCat('0')">Todos</div>`;
+                Object.values(categorias).forEach(c => {
+                    if (palavrasSenhas.some(p => c.category_name.toLowerCase().includes(p))) return;
+                    const chip = document.createElement('div');
+                    chip.className = 'cat';
+                    chip.dataset.id = c.category_id;
+                    chip.innerText = c.category_name;
+                    chip.onclick = () => filtrarCat(c.category_id);
+                    catsDiv.appendChild(chip);
+                });
+                renderizar(filmes);
+            } catch (e) { console.error(e); document.getElementById('grid').innerHTML = "<p style='color:#94a3b8'>Erro ao carregar catálogo.</p>"; }
+        }
+
+        function filtrarCat(id) {
+            catId = id;
+            document.querySelectorAll('.cat').forEach(c => c.classList.toggle('ativo', c.dataset.id === id));
+            renderizar(id === "0" ? filmes : filmes.filter(f => String(f.category_id) === String(id)));
+        }
+
+        function renderizar(lista) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            lista.slice(0, 300).forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'filme';
+                card.innerHTML = `
+                    <img src="${f.stream_icon}" onerror="this.remove();">
+                    <div class="grad"><div class="nome">${f.name}</div><div class="ano">${f.year || 'Filme'}</div></div>`;
+                card.onclick = () => { localStorage.setItem("chosen_stream_id", f.stream_id); window.location.href = "ver_filme.html?auto=1"; };
+                grid.appendChild(card);
+            });
+        }
+
+        function buscar() {
+            const q = document.getElementById('search').value.toLowerCase();
+            renderizar(filmes.filter(f => f.name.toLowerCase().includes(q)));
+        }
+
+        init();
+    </script>
+</body>
+</html>

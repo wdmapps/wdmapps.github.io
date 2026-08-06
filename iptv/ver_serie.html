@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDM TV - Assistir Série</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { margin: 0; padding: 40px; background: radial-gradient(circle at top right, #0f1f3d, #000 70%); min-height: 100vh; color: white; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--text); text-decoration: none; font-weight: 600; }
+        .back-link:hover { color: var(--accent); }
+        .head { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 30px; }
+        .poster-box img { width: 220px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .info h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
+        .info p { color: var(--text-light); line-height: 1.6; }
+        .temporadas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+        .temp-btn { padding: 9px 18px; background: var(--bg-light); border: 1px solid var(--border); border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s; color: var(--text-light); }
+        .temp-btn.ativo { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border-color: transparent; }
+        .eps { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .ep { padding: 14px; background: rgba(15,31,61,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; text-align: center; }
+        .ep:hover { border-color: var(--accent); background: rgba(0,102,255,0.2); }
+        #serie-player { display: none; width: 100%; max-width: 900px; margin: 20px auto; border-radius: 14px; background: #000; }
+        @media (max-width: 768px) { .head { flex-direction: column; } body { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <a href="series.html" class="back-link">⬅ Voltar</a>
+
+    <div class="head">
+        <div class="poster-box"><img id="poster" src="" onerror="this.src='https://via.placeholder.com/220x330/0f1f3d/fff?text=Sem+Capa';"></div>
+        <div class="info">
+            <h1 id="title">Carregando...</h1>
+            <p id="plot">Carregando...</p>
+        </div>
+    </div>
+
+    <div class="temporadas" id="temporadas"></div>
+    <div class="eps" id="eps"></div>
+
+    <video id="serie-player" controls playsinline></video>
+
+    <script src="config.js"></script>
+    <script>
+        const dns = localStorage.getItem("active_dns");
+        const user = localStorage.getItem("username");
+        const pass = localStorage.getItem("password");
+        const serieId = localStorage.getItem("chosen_serie_id");
+        let info = null;
+
+        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
+
+        async function init() {
+            if (!serieId) { window.location.href = "series.html"; return; }
+            try {
+                const apiUrl = `${dns}/player_api.php?username=${user}&password=${pass}&action=get_series_info&series_id=${serieId}`;
+                const res = await fetch(prox(apiUrl));
+                const data = await res.json();
+                info = data;
+                document.getElementById('title').innerText = data.info.name;
+                document.getElementById('plot').innerText = data.info.plot || "Sinopse não disponível.";
+                document.getElementById('poster').src = data.info.cover || '';
+
+                const tds = document.getElementById('temporadas');
+                tds.innerHTML = '';
+                data.seasons.forEach(s => {
+                    const b = document.createElement('div');
+                    b.className = 'temp-btn' + (s.season_number === 1 ? ' ativo' : '');
+                    b.innerText = 'Temporada ' + s.season_number;
+                    b.onclick = () => {
+                        document.querySelectorAll('.temp-btn').forEach(x => x.classList.remove('ativo'));
+                        b.classList.add('ativo');
+                        renderizarEps(s.season_number);
+                    };
+                    tds.appendChild(b);
+                });
+                renderizarEps(1);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderizarEps(season) {
+            const epsDiv = document.getElementById('eps');
+            epsDiv.innerHTML = '';
+            const eps = info.episodes.filter(e => e.season == season);
+            eps.forEach(ep => {
+                const d = document.createElement('div');
+                d.className = 'ep';
+                d.innerText = `Ep ${ep.episode_num}: ${ep.title}`;
+                d.onclick = () => {
+                    document.getElementById('eps').innerHTML = '';
+                    const v = document.getElementById('serie-player');
+                    const stream = prox(`${dns}/series/${user}/${pass}/${serieId}/${ep.id}.mp4`);
+                    v.src = stream;
+                    v.style.display = 'block';
+                    v.play();
+                    d.style.display = 'none';
+                    document.getElementById('eps').appendChild(d);
+                };
+                epsDiv.appendChild(d);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
