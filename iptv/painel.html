@@ -4,102 +4,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WDM TV - Painel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0066ff; --accent: #00aaff; --bg: #0a1628; --bg-light: #0f1f3d; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        :root {
+            --primary: #0066ff;
+            --accent: #00aaff;
+            --bg: #060e1a;
+            --bg-light: #0f1f3d;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --border: #1e3a5f;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 100%);
-            color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+            position: relative;
         }
 
+        /* Fundo com brilhos animados */
+        .glow { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.35; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
+        .glow-1 { width: 500px; height: 500px; background: var(--primary); top: -150px; left: -100px; }
+        .glow-2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; right: -100px; animation-delay: -6s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.1); } }
+
+        .app { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+
+        /* Barra de topo */
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 4%; background: rgba(6,14,26,0.7); border-bottom: 1px solid #1e3a5f;
+            padding: 16px 4%; background: rgba(6, 14, 26, 0.6); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(30, 58, 95, 0.5); position: sticky; top: 0; z-index: 10;
         }
-        .ticker { font-size: 1.4rem; font-weight: 600; color: #fff; width: 60%; }
-        .user-panel { display: flex; align-items: center; gap: 20px; font-size: 1rem; }
-        #clock { font-family: monospace; font-size: 1.2rem; color: #00aaff; }
+        .ticker { font-size: 1.3rem; font-weight: 600; width: 55%; overflow: hidden; white-space: nowrap; }
+        .ticker span { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        .ticker span b { background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        header { padding: 20px 4%; display: flex; justify-content: space-between; align-items: center; }
-        .brand-logo img { max-height: 100px; }
+        .user-panel { display: flex; align-items: center; gap: 16px; }
+        #clock { font-family: 'Inter', monospace; font-size: 1rem; color: var(--accent); letter-spacing: 1px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .logout-btn {
+            background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-light);
+            padding: 8px 18px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover { background: #e50914; border-color: #e50914; color: white; }
 
-        .menu-wrapper { max-width: 1100px; margin: 50px auto; padding: 0 4%; }
-        .grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        /* Cabeçalho */
+        header { padding: 40px 4% 10px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .brand img { max-height: 70px; border-radius: 14px; }
+        .brand h1 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+        .brand h1 span { background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand p { color: var(--text-light); font-size: 0.9rem; margin-top: 2px; }
+
+        /* Menu glass */
+        .menu-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 4%; width: 100%; }
+        .grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
         .glass-btn {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 50px 30px;
-            display: flex; flex-direction: column; align-items: center; gap: 20px; cursor: pointer; transition: 0.3s;
-            text-decoration: none; color: white; text-align: center;
+            background: rgba(15, 31, 61, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 48px 30px;
+            display: flex; flex-direction: column; align-items: center; gap: 18px; cursor: pointer;
+            text-decoration: none; color: white; text-align: center; position: relative; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .glass-btn:hover { background: rgba(0, 102, 255, 0.15); border-color: var(--primary); transform: translateY(-10px); }
-        .icon-size { font-size: 4.5rem; }
+        .glass-btn::before {
+            content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0; transition: opacity 0.4s; z-index: 0;
+        }
+        .glass-btn:hover { transform: translateY(-12px) scale(1.02); border-color: rgba(0, 170, 255, 0.5); box-shadow: 0 20px 60px rgba(0, 102, 255, 0.35); }
+        .glass-btn:hover::before { opacity: 0.15; }
+        .glass-btn > * { position: relative; z-index: 1; }
+        .icon-size { font-size: 4rem; filter: drop-shadow(0 8px 20px rgba(0, 170, 255, 0.4)); transition: transform 0.4s; }
+        .glass-btn:hover .icon-size { transform: scale(1.15) rotate(-5deg); }
+        .glass-btn h2 { font-size: 1.6rem; font-weight: 700; }
+        .glass-btn p { color: var(--text-light); font-size: 0.9rem; }
 
-        .recents-container { padding: 60px 4%; }
-        .slider-row { display: flex; overflow: hidden; padding: 10px 0; }
-        .slider-track { display: flex; gap: 20px; width: max-content; will-change: transform; animation: sliderScroll 45s linear infinite; }
+        /* Carrossel */
+        .recents-container { padding: 50px 4% 80px; width: 100%; }
+        .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .section-head h3 { font-size: 1.4rem; font-weight: 700; }
+        .section-head h3 span { color: var(--accent); }
+        .badge-live { background: #e50914; color: white; font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 50px; letter-spacing: 1px; }
+        .slider-row { display: flex; overflow: hidden; padding: 10px 0; -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); }
+        .slider-track { display: flex; gap: 20px; width: max-content; will-change: transform; animation: sliderScroll 50s linear infinite; }
         .slider-row:hover .slider-track { animation-play-state: paused; }
         @keyframes sliderScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .vod-item { min-width: 180px; height: 260px; background: #0f1f3d; border: 1px solid #1e3a5f; border-radius: 10px; cursor: pointer; transition: 0.3s; position: relative; }
-        .vod-item:hover { transform: scale(1.05); border-color: var(--accent); }
-        .vod-item-title { position: absolute; bottom: 0; width: 100%; padding: 12px; background: rgba(6,14,26,0.9); font-size: 0.85rem; text-align: center; border-radius: 0 0 10px 10px; }
+        .vod-item {
+            min-width: 190px; height: 270px; border-radius: 16px; cursor: pointer; position: relative; overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .vod-item:hover { transform: scale(1.06) translateY(-6px); border-color: var(--accent); box-shadow: 0 16px 40px rgba(0, 170, 255, 0.3); }
+        .vod-item .poster { width: 100%; height: 100%; object-fit: cover; }
+        .vod-item .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 14px 14px; background: linear-gradient(transparent, rgba(6, 14, 26, 0.95)); }
+        .vod-item .overlay .titulo { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vod-item .overlay .categoria { font-size: 0.7rem; color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+        /* Rodapé */
+        footer { text-align: center; padding: 24px; color: var(--text-light); font-size: 0.8rem; border-top: 1px solid rgba(30, 58, 95, 0.4); }
 
         @media (max-width: 768px) {
             .grid-menu { grid-template-columns: 1fr; }
-            .ticker { font-size: 1rem; width: 45%; }
+            .ticker { font-size: 0.9rem; width: 40%; }
+            .brand h1 { font-size: 1.4rem; }
+            .glass-btn { padding: 32px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="ticker"><marquee scrollamount="6">WDM TV — A melhor experiência em entretenimento</marquee></div>
-        <div class="user-panel">
-            <div id="clock">00:00:00</div>
-            <span>Olá, <b><span id="lblUser">...</span></b></span>
-            <button onclick="efetuarLogout()" style="background:var(--primary); border:none; color:white; padding:8px 20px; cursor:pointer; border-radius:6px; font-weight:bold;">Sair</button>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="app">
+        <div class="top-bar">
+            <div class="ticker"><span><b>WDM TV</b> &nbsp;·&nbsp; A melhor experiência em entretenimento &nbsp;·&nbsp; Filmes, séries e canais em alta qualidade &nbsp;·&nbsp;</span></div>
+            <div class="user-panel">
+                <div id="clock">00:00:00</div>
+                <div class="avatar" id="avatar">?</div>
+                <button class="logout-btn" onclick="efetuarLogout()">Sair</button>
+            </div>
         </div>
+
+        <header>
+            <div class="brand">
+                <img src="../img/logo-wdm-iptv.png" alt="WDM TV" onerror="this.style.display='none'">
+                <div>
+                    <h1>WDM <span>TV</span></h1>
+                    <p>Seu entretenimento, do seu jeito</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="menu-wrapper">
+            <div class="grid-menu">
+                <a href="#" class="glass-btn"><div class="icon-size">📺</div><h2>Canais</h2><p>TV ao vivo com dezenas de canais</p></a>
+                <a href="#" class="glass-btn"><div class="icon-size">🎬</div><h2>Filmes</h2><p>Catálogo completo de filmes</p></a>
+                <a href="#" class="glass-btn"><div class="icon-size">🍿</div><h2>Séries</h2><p>Suas séries favoritas em um só lugar</p></a>
+            </div>
+        </main>
+
+        <section class="recents-container">
+            <div class="section-head">
+                <h3>Adicionados <span>Recentemente</span></h3>
+                <span class="badge-live">AO VIVO</span>
+            </div>
+            <div class="slider-row" id="carouselRow">
+                <div class="slider-track" id="carouselTrack"></div>
+            </div>
+        </section>
+
+        <footer>© 2026 WDM Apps. Todos os direitos reservados.</footer>
     </div>
 
-    <header>
-        <div class="brand-logo"><img src="../img/logo-wdm-iptv.png" alt="WDM TV" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<h1 style=color:#fff>WDM TV</h1>')"></div>
-    </header>
-
-    <main class="menu-wrapper">
-        <div class="grid-menu">
-            <a href="#" class="glass-btn"><div class="icon-size">📺</div><h2>Canais</h2></a>
-            <a href="#" class="glass-btn"><div class="icon-size">🎬</div><h2>Filmes</h2></a>
-            <a href="#" class="glass-btn"><div class="icon-size">🍿</div><h2>Séries</h2></a>
-        </div>
-    </main>
-
-    <section class="recents-container">
-        <h3 style="margin-bottom:20px;">Adicionados Recentemente</h3>
-        <div class="slider-row" id="carouselRow"><div class="slider-track" id="carouselTrack"></div></div>
-    </section>
-
+    <script src="config.js"></script>
     <script>
-        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
-        document.getElementById("lblUser").innerText = localStorage.getItem("username") || "Visitante";
+        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR'), 1000);
+
+        const nome = localStorage.getItem("username") || "Visitante";
+        document.getElementById("lblUser")?.remove();
+        document.getElementById("avatar").innerText = nome.charAt(0).toUpperCase();
 
         function efetuarLogout() { localStorage.clear(); window.location.href = "index.html"; }
 
         const demo = [
-            { name: "Demo 01", color: "#1e3a5f" }, { name: "Demo 02", color: "#0052cc" },
-            { name: "Demo 03", color: "#00aaff" }, { name: "Demo 04", color: "#0f1f3d" },
-            { name: "Demo 05", color: "#3385ff" }
+            { name: "Demo 01", categoria: "Ação", color: "#1e3a5f" },
+            { name: "Demo 02", categoria: "Comédia", color: "#0052cc" },
+            { name: "Demo 03", categoria: "Drama", color: "#00aaff" },
+            { name: "Demo 04", categoria: "Ficção", color: "#0f1f3d" },
+            { name: "Demo 05", categoria: "Aventura", color: "#3385ff" },
+            { name: "Demo 06", categoria: "Documentário", color: "#0d2847" }
         ];
 
         function criarCard(item) {
             const card = document.createElement("div");
             card.className = "vod-item";
-            card.innerHTML = `<div style="width:100%;height:85%;background:linear-gradient(135deg,${item.color},#060e1a);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border-radius:10px 10px 0 0;">🎬</div><div class="vod-item-title">${item.name}</div>`;
+            const poster = item.stream_icon
+                ? `<img class="poster" src="${item.stream_icon}" onerror="this.remove()">`
+                : `<div class="poster" style="background:${item.color||'#0d2847'};display:flex;align-items:center;justify-content:center;font-size:3rem;">🎬</div>`;
+            const titulo = item.name || item.title;
+            card.innerHTML = `
+                ${poster}
+                <div class="overlay">
+                    <div class="titulo">${titulo}</div>
+                    <div class="categoria">${item.categoria || "Filme"}</div>
+                </div>`;
+            card.onclick = () => { localStorage.setItem("chosen_stream_id", item.stream_id); window.location.href = "ver_filme.html?auto=1"; };
             return card;
         }
 
         const track = document.getElementById("carouselTrack");
-        demo.forEach(i => track.appendChild(criarCard(i)));
-        demo.forEach(i => track.appendChild(criarCard(i)));
+
+        // Carrega catálogo real via API (com proxy) se estiver logado
+        async function carregarCatalogo() {
+            try {
+                const dns = localStorage.getItem("active_dns");
+                const user = localStorage.getItem("username");
+                const pass = localStorage.getItem("password");
+                if (!dns || !user || !pass) throw new Error("sem sessão");
+
+                const apiUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=get_vod_streams`;
+                const proxyUrl = (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(apiUrl);
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) throw new Error("vazio");
+
+                const itens = [...data].sort((a, b) => b.stream_id - a.stream_id).slice(0, 15);
+                track.innerHTML = "";
+                itens.forEach(i => track.appendChild(criarCard({ ...i, categoria: i.category_name })));
+                itens.forEach(i => track.appendChild(criarCard({ ...i, categoria: i.category_name })));
+            } catch (e) {
+                // Se falhar (ex.: deploy antigo), mostra demo
+                demo.forEach(i => track.appendChild(criarCard(i)));
+                demo.forEach(i => track.appendChild(criarCard(i)));
+            }
+        }
+        carregarCatalogo();
     </script>
 </body>
 </html>
