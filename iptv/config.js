@@ -4,5 +4,5 @@ const CONFIG = {
         "http://pnow.space",
         "http://dns1.prontonline.com"
     ],
-    proxyUrl: "https://ptv-proxy.williamwdm.workers.dev/"
+    proxyUrl: "https://ptv-proxy.williamwdm.workers.dev/?url="
 };
