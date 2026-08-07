@@ -45,20 +45,17 @@
     <video id="serie-player" controls playsinline></video>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
-        const dns = localStorage.getItem("active_dns");
-        const user = localStorage.getItem("username");
-        const pass = localStorage.getItem("password");
+        const { user, pass } = getCred();
         const serieId = localStorage.getItem("chosen_serie_id");
         let info = null;
 
-        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
-
         async function init() {
             if (!serieId) { window.location.href = "series.html"; return; }
+            if (precisaLogin()) { window.location.href = "index.html"; return; }
             try {
-                const apiUrl = `${dns}/player_api.php?username=${user}&password=${pass}&action=get_series_info&series_id=${serieId}`;
-                const res = await fetch(prox(apiUrl));
+                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_series_info", series_id: serieId }));
                 const data = await res.json();
                 info = data;
                 document.getElementById('title').innerText = data.info.name;
@@ -93,7 +90,7 @@
                 d.onclick = () => {
                     document.getElementById('eps').innerHTML = '';
                     const v = document.getElementById('serie-player');
-                    const stream = prox(`${dns}/series/${user}/${pass}/${serieId}/${ep.id}.mp4`);
+                    const stream = serieUrl(serieId, ep.id);
                     v.src = stream;
                     v.style.display = 'block';
                     v.play();

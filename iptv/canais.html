@@ -84,6 +84,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         let todosCanais = [], categorias = [];
@@ -93,18 +94,16 @@
         const video = document.getElementById('main-player');
         video.addEventListener('playing', () => { jaTocou = true; });
 
-        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
-
         async function init() {
-            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
-            if (!dns || !user || !pass || dns === "null") {
+            const { user, pass } = getCred();
+            if (precisaLogin()) {
                 alert("Sessão expirada. Faça login novamente.");
                 window.location.href = "index.html";
                 return;
             }
             try {
-                const resCat = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_categories`));
-                const resChan = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_streams`) + "&limit=2000");
+                const resCat = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_live_categories" }));
+                const resChan = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_live_streams", limit: 2000 }));
                 categorias = await resCat.json();
                 todosCanais = await resChan.json();
                 renderizarMenuPadrao();
@@ -144,10 +143,10 @@
             canalAtual = ch;
             const nomeEl = document.getElementById('canal-nome');
             nomeEl.innerHTML = `<span class="ativo-dot"></span>Carregando: ${ch.name}`;
-            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
-            if (!dns || !user || !pass || dns === "null") { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+            const { user, pass } = getCred();
+            if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
 
-            const streamUrl = `${dns}/live/${user}/${pass}/${ch.stream_id}.m3u8`;
+            const streamUrl = liveUrl(ch.stream_id);
             if (hls) { hls.destroy(); hls = null; }
             fatalCount = 0; restartCount = 0; jaTocou = false;
             video.removeAttribute('src'); video.load();
@@ -157,8 +156,7 @@
                 hls = new Hls({
                     maxBufferLength: 30, maxMaxBufferLength: 60, enableWorker: false,
                     liveDurationInfinity: true, liveSyncDurationCount: 4, liveMaxLatencyDurationCount: 12,
-                    manifestLoadingTimeOut: 25000, manifestLoadingMaxRetry: 5, levelLoadingTimeOut: 25000,
-                    xhrSetup: (xhr, url) => { xhr.open('GET', prox(url), true); }
+                    manifestLoadingTimeOut: 25000, manifestLoadingMaxRetry: 5, levelLoadingTimeOut: 25000
                 });
 
                 hls.on(Hls.Events.ERROR, (e, data) => {
@@ -182,7 +180,7 @@
                 video.addEventListener('ended', () => { if (hls) { hls.startLoad(); video.play().catch(() => {}); } });
                 video.play().catch(() => {});
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = prox(streamUrl);
+                video.src = streamUrl;
                 video.play().catch(() => {});
             } else {
                 nomeEl.innerHTML = 'Navegador sem suporte a HLS.';

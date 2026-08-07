@@ -58,24 +58,23 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
         let filmes = [], categorias = [], catAtiva = "0";
 
-        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
-
         async function init() {
-            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
-            if (!dns || !user || !pass) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+            const { user, pass } = getCred();
+            if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
             try {
-                const r1 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_categories`));
-                const r2 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_streams`) + "&limit=500");
+                const r1 = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_categories" }));
+                const r2 = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_streams", limit: 500 }));
                 categorias = await r1.json();
                 filmes = await r2.json();
                 const catsDiv = document.getElementById('cats');
                 catsDiv.innerHTML = `<div class="cat ativo" data-id="0" onclick="filtrarCat('0')">Todos</div>`;
                 Object.values(categorias).forEach(c => {
-                    if (palavrasSenhas.some(p => c.category_name.toLowerCase().includes(p))) return;
+                    if (palavrasSenha.some(p => c.category_name.toLowerCase().includes(p))) return;
                     const chip = document.createElement('div');
                     chip.className = 'cat';
                     chip.dataset.id = c.category_id;

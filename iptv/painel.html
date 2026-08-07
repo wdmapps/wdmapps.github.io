@@ -162,6 +162,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR'), 1000);
 
@@ -202,14 +203,10 @@
         // Carrega catálogo real via API (com proxy) se estiver logado
         async function carregarCatalogo() {
             try {
-                const dns = localStorage.getItem("active_dns");
-                const user = localStorage.getItem("username");
-                const pass = localStorage.getItem("password");
-                if (!dns || !user || !pass) throw new Error("sem sessão");
+                const { user, pass } = getCred();
+                if (precisaLogin()) throw new Error("sem sessão");
 
-                const apiUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=get_vod_streams`;
-                const proxyUrl = (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(apiUrl) + "&limit=60";
-                const res = await fetch(proxyUrl);
+                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_streams", limit: 60 }));
                 const data = await res.json();
 
                 if (!Array.isArray(data) || data.length === 0) throw new Error("vazio");

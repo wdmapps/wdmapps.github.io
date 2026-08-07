@@ -97,13 +97,6 @@
 
         <form id="formLogin" autocomplete="off">
             <div class="campo">
-                <label for="dns">DNS</label>
-                <div class="input-wrap">
-                    <span class="icon">🌐</span>
-                    <input type="text" id="dns" placeholder="http://seu-servidor.com" required>
-                </div>
-            </div>
-            <div class="campo">
                 <label for="username">Usuário</label>
                 <div class="input-wrap">
                     <span class="icon">👤</span>
@@ -125,10 +118,10 @@
     </div>
 
     <script src="config.js"></script>
-    <script src="auth.js"></script>
+    <script src="api.js"></script>
     <script>
         // Se já estiver logado, vai direto pro painel
-        if (localStorage.getItem("username") && localStorage.getItem("active_dns")) window.location.href = "painel.html";
+        if (localStorage.getItem("username") && localStorage.getItem("password")) window.location.href = "painel.html";
 
         const form = document.getElementById("formLogin");
         const erro = document.getElementById("erro");
@@ -136,16 +129,11 @@
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const dns = document.getElementById("dns").value.trim().replace(/\/+$/, "");
             const user = document.getElementById("username").value.trim();
             const pass = document.getElementById("password").value.trim();
 
             erro.classList.remove("mostrar");
 
-            if (!/^https?:\/\/.+/i.test(dns)) {
-                showErro("DNS inválido. Use o formato http://servidor.com");
-                return;
-            }
             if (user.length < 3) {
                 showErro("Usuário inválido. Digite pelo menos 3 caracteres.");
                 return;
@@ -158,20 +146,19 @@
             btn.disabled = true;
             btn.textContent = "Entrando...";
 
-            // Usa o DNS digitado no formulário para validar a conta
-            CONFIG.dnsList = [dns];
-            localStorage.setItem("active_dns", dns);
-            const teste = await tentarLogin(user, pass);
+            const teste = await api("auth", { username: user, password: pass });
 
             erro.classList.remove("mostrar");
 
-            if (teste.success) {
+            if (teste && teste.ok) {
+                localStorage.setItem("username", user);
+                localStorage.setItem("password", pass);
                 localStorage.setItem("logging_in", "1");
                 window.location.href = "painel.html";
             } else {
                 localStorage.removeItem("username");
                 localStorage.removeItem("password");
-                showErro(teste.message || "Login falhou.");
+                showErro((teste && teste.message) || "Login falhou.");
                 btn.disabled = false;
                 btn.textContent = "Entrar";
             }

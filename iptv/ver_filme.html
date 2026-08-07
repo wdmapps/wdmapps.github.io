@@ -60,20 +60,17 @@
     <video id="movie-player" controls playsinline></video>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
-        const dns = localStorage.getItem("active_dns");
-        const user = localStorage.getItem("username");
-        const pass = localStorage.getItem("password");
+        const { user, pass } = getCred();
         const movieId = localStorage.getItem("chosen_stream_id");
         const auto = new URLSearchParams(location.search).has('auto');
 
-        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
-
         async function carregar() {
             if (!movieId) { window.location.href = "filmes.html"; return; }
+            if (precisaLogin()) { window.location.href = "index.html"; return; }
             try {
-                const apiUrl = `${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_info&vod_id=${movieId}`;
-                const res = await fetch(prox(apiUrl));
+                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_info", vod_id: movieId }));
                 const data = await res.json();
 
                 if (data.info) {
@@ -81,7 +78,7 @@
                     document.getElementById('plot').innerText = data.info.plot || "Sinopse não disponível.";
                     document.getElementById('poster').src = data.info.movie_image || '';
                     const ext = (data.movie_data && data.movie_data.container_extension) || 'mp4';
-                    window.movieUrl = prox(`${dns}/movie/${user}/${pass}/${movieId}.${ext}`);
+                    window.movieUrl = vodUrl(movieId, ext);
                     if (auto) iniciarPlayer();
                 }
             } catch (e) { console.error("Erro:", e); }

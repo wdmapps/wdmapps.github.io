@@ -8,3 +8,8 @@ Desktop.ini
 
 # OS
 .DS_Store
+
+# wrangler (Cloudflare)
+.wrangler/
+wrangler.toml
+

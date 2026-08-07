@@ -48,16 +48,15 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         let series = [];
 
-        function prox(url) { return (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(url); }
-
         async function init() {
-            const dns = localStorage.getItem("active_dns"), user = localStorage.getItem("username"), pass = localStorage.getItem("password");
-            if (!dns || !user || !pass) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+            const { user, pass } = getCred();
+            if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
             try {
-                const r = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_series`) + "&limit=500");
+                const r = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_series", limit: 500 }));
                 series = await r.json();
                 renderizar(series);
             } catch (e) { console.error(e); document.getElementById('grid').innerHTML = "<p style='color:#94a3b8'>Erro ao carregar séries.</p>"; }
