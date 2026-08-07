@@ -10,27 +10,42 @@
     <style>
         :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); min-height: 100vh; }
-        .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.3; pointer-events: none; animation: float 12s ease-in-out infinite; }
+
+        body { margin: 0; background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.3; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
         .glow-1 { width: 450px; height: 450px; background: var(--primary); top: -150px; left: -100px; }
         .glow-2 { width: 380px; height: 380px; background: var(--accent); bottom: -120px; right: -120px; animation-delay: -6s; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
-        .content { position: relative; z-index: 1; padding: 0 3% 60px; }
-        .top { display: flex; align-items: center; gap: 16px; padding: 14px 0; position: sticky; top: 0; background: rgba(6,14,26,0.75); backdrop-filter: blur(15px); z-index: 10; }
+
+        .app { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100vh; }
+
+        .top { display: flex; align-items: center; gap: 16px; padding: 14px 3%; background: rgba(6,14,26,0.7); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(30,58,95,0.5); z-index: 10; }
         .home-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: transform 0.3s; }
         .home-btn:hover { transform: translateY(-2px); }
         .top h1 { font-size: 1.3rem; font-weight: 800; }
         .top h1 span { color: var(--accent); }
-        #search { flex: 1; max-width: 400px; padding: 11px 16px; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,31,61,0.6); color: white; outline: none; font-size: 0.9rem; }
+
+        .layout { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 350px; background: rgba(6,14,26,0.75); backdrop-filter: blur(15px); display: flex; flex-direction: column; border-right: 1px solid rgba(30,58,95,0.5); }
+        .search-box { padding: 14px; background: rgba(6,14,26,0.6); }
+        #search { width: 100%; padding: 11px 15px; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,31,61,0.6); color: white; outline: none; font-size: 0.9rem; }
         #search:focus { border-color: var(--accent); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px; padding-top: 20px; }
+        .list-area { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        .cat-head { padding: 12px 16px; background: rgba(15,31,61,0.5); cursor: pointer; font-weight: 700; border-bottom: 1px solid rgba(30,58,95,0.4); transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .cat-head:hover { background: rgba(0,102,255,0.15); }
+        .cat-head.ativo { background: linear-gradient(90deg, rgba(0,102,255,0.35), rgba(0,170,255,0.15)); border-left: 3px solid var(--accent); }
+        .cat-head .num { color: var(--text-light); font-size: 0.75rem; font-weight: 500; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 20px 3%; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px; }
         .serie { border-radius: 16px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid rgba(255,255,255,0.08); background: var(--bg-light); transition: all 0.4s cubic-bezier(0.2,0.8,0.2,1); aspect-ratio: 2/3; }
         .serie:hover { transform: translateY(-8px) scale(1.03); border-color: var(--accent); box-shadow: 0 18px 50px rgba(0,170,255,0.3); }
         .serie img { width: 100%; height: 100%; object-fit: cover; }
         .serie .grad { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 12px 12px; background: linear-gradient(transparent, rgba(6,14,26,0.95)); }
         .serie .nome { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .serie .info { font-size: 0.7rem; color: var(--accent); margin-top: 2px; }
-        @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+
+        @media (max-width: 768px) { .sidebar { width: 40%; min-width: 200px; } .top h1 { font-size: 1rem; } .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
     </style>
 </head>
 <body>
@@ -38,28 +53,69 @@
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
 
-    <div class="content">
+    <div class="app">
         <div class="top">
             <a href="painel.html" class="home-btn">← Voltar Home</a>
             <h1>WDM <span>TV</span> · Séries</h1>
-            <input type="text" id="search" placeholder="Buscar série..." oninput="buscar()">
         </div>
-        <div class="grid" id="grid"></div>
+
+        <div class="layout">
+            <div class="sidebar">
+                <div class="search-box">
+                    <input type="text" id="search" placeholder="Buscar série..." oninput="buscar()">
+                </div>
+                <div class="list-area" id="cats"></div>
+            </div>
+
+            <div class="content-area">
+                <div class="grid" id="grid"></div>
+            </div>
+        </div>
     </div>
 
     <script src="config.js?v=3"></script>
     <script src="api.js?v=3"></script>
     <script>
-        let series = [];
+        const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
+        let series = [], categorias = [];
 
         async function init() {
             const { user, pass } = getCred();
             if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
             try {
-                const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", limit: 500 });
-                series = await r.json();
-                renderizar(series);
+                const r1 = await apiFetch("mcp", { username: user, password: pass, action: "get_series_categories", limit: 2000 });
+                const r2 = await apiFetch("mcp", { username: user, password: pass, action: "get_series", limit: 2000 });
+                categorias = Object.values(await r1.json());
+                series = await r2.json();
+                renderizarMenuPadrao();
             } catch (e) { console.error(e); document.getElementById('grid').innerHTML = "<p style='color:#94a3b8'>Erro ao carregar séries.</p>"; }
+        }
+
+        function renderizarMenuPadrao() {
+            const catsDiv = document.getElementById('cats');
+            catsDiv.innerHTML = '';
+            categorias.forEach(c => {
+                if (palavrasSenha.some(p => c.category_name.toLowerCase().includes(p))) return;
+                const head = document.createElement('div');
+                head.className = "cat-head";
+                const qtd = series.filter(f => String(f.category_id) === String(c.category_id)).length;
+                head.innerHTML = `<span>${c.category_name}</span><span class="num">${qtd}</span>`;
+                head.onclick = () => {
+                    document.querySelectorAll('.cat-head').forEach(h => h.classList.remove('ativo'));
+                    head.classList.add('ativo');
+                    renderizar(series.filter(f => String(f.category_id) === String(c.category_id)));
+                };
+                catsDiv.appendChild(head);
+            });
+            const head = document.createElement('div');
+            head.className = "cat-head ativo";
+            head.innerHTML = `<span>Todos</span><span class="num">${series.length}</span>`;
+            head.onclick = () => {
+                document.querySelectorAll('.cat-head').forEach(h => h.classList.remove('ativo'));
+                head.classList.add('ativo');
+                renderizar(series);
+            };
+            catsDiv.insertBefore(head, catsDiv.firstChild);
         }
 
         function renderizar(lista) {
