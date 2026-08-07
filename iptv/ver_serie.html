@@ -55,7 +55,7 @@
             if (!serieId) { window.location.href = "series.html"; return; }
             if (precisaLogin()) { window.location.href = "index.html"; return; }
             try {
-                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_series_info", series_id: serieId }));
+                const res = await apiFetch("mcp", { username: user, password: pass, action: "get_series_info", series_id: serieId });
                 const data = await res.json();
                 info = data;
                 document.getElementById('title').innerText = data.info.name;

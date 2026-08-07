@@ -70,7 +70,7 @@
             if (!movieId) { window.location.href = "filmes.html"; return; }
             if (precisaLogin()) { window.location.href = "index.html"; return; }
             try {
-                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_info", vod_id: movieId }));
+                const res = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_info", vod_id: movieId });
                 const data = await res.json();
 
                 if (data.info) {

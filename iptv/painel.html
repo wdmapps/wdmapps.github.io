@@ -206,7 +206,7 @@
                 const { user, pass } = getCred();
                 if (precisaLogin()) throw new Error("sem sessão");
 
-                const res = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_vod_streams", limit: 60 }));
+                const res = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_streams", limit: 30 });
                 const data = await res.json();
 
                 if (!Array.isArray(data) || data.length === 0) throw new Error("vazio");

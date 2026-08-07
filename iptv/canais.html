@@ -102,8 +102,8 @@
                 return;
             }
             try {
-                const resCat = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_live_categories" }));
-                const resChan = await fetch(apiUrl("mcp", { username: user, password: pass, action: "get_live_streams", limit: 2000 }));
+                const resCat = await apiFetch("mcp", { username: user, password: pass, action: "get_live_categories", limit: 2000 });
+                const resChan = await apiFetch("mcp", { username: user, password: pass, action: "get_live_streams", limit: 2000 });
                 categorias = await resCat.json();
                 todosCanais = await resChan.json();
                 renderizarMenuPadrao();

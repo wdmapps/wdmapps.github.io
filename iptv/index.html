@@ -146,19 +146,24 @@
             btn.disabled = true;
             btn.textContent = "Entrando...";
 
-            const teste = await api("auth", { username: user, password: pass });
+            try {
+                const teste = await api("auth", { username: user, password: pass });
 
-            erro.classList.remove("mostrar");
+                erro.classList.remove("mostrar");
 
-            if (teste && teste.ok) {
-                localStorage.setItem("username", user);
-                localStorage.setItem("password", pass);
-                localStorage.setItem("logging_in", "1");
-                window.location.href = "painel.html";
-            } else {
-                localStorage.removeItem("username");
-                localStorage.removeItem("password");
-                showErro((teste && teste.message) || "Login falhou.");
+                if (teste && teste.ok) {
+                    localStorage.setItem("username", user);
+                    localStorage.setItem("password", pass);
+                    localStorage.setItem("logging_in", "1");
+                    window.location.href = "painel.html";
+                } else {
+                    localStorage.removeItem("username");
+                    localStorage.removeItem("password");
+                    showErro((teste && teste.message) || "Login falhou.");
+                }
+            } catch (e) {
+                showErro("Falha de conexão. Tente novamente.");
+            } finally {
                 btn.disabled = false;
                 btn.textContent = "Entrar";
             }

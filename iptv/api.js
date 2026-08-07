@@ -6,10 +6,32 @@ function apiUrl(endpoint, params) {
     return `${API}/${endpoint}?${qs.toString()}`;
 }
 
-// wrapper de fetch JSON
+// wrapper de fetch JSON (nunca trava: timeout de 25s e erro tratado)
 async function api(endpoint, params) {
-    const r = await fetch(apiUrl(endpoint, params));
-    return r.json();
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 25000);
+        const r = await fetch(apiUrl(endpoint, params), { signal: ctrl.signal });
+        clearTimeout(timer);
+        return await r.json();
+    } catch (e) {
+        console.error("Falha de rede no API:", e);
+        return { ok: false, message: "Falha de conexão. Tente novamente." };
+    }
+}
+
+// fetch genérico com timeout (para catálogo/streams, sem parsing de JSON)
+async function apiFetch(endpoint, params) {
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 30000);
+        const r = await fetch(apiUrl(endpoint, params), { signal: ctrl.signal });
+        clearTimeout(timer);
+        return r;
+    } catch (e) {
+        console.error("Falha de rede no apiFetch:", e);
+        throw e;
+    }
 }
 
 // credenciais da sessão
