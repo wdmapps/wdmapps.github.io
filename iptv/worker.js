@@ -104,6 +104,30 @@ export default {
                         parsed = parsed.slice(0, limit);
                     }
                     rewriteImages(parsed, dnsList, origin);
+
+                    // Contagens reais por categoria (sem expor a lista completa)
+                    if (action === "get_vod_categories" || action === "get_series_categories") {
+                        const countAction = action === "get_vod_categories" ? "get_vod_streams" : "get_series";
+                        const countUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${countAction}`;
+                        try {
+                            const cr = await fetch(countUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+                            if (cr.ok) {
+                                const list = await cr.json();
+                                if (Array.isArray(list)) {
+                                    const counts = {};
+                                    for (const it of list) {
+                                        const cid = String(it.category_id);
+                                        counts[cid] = (counts[cid] || 0) + 1;
+                                    }
+                                    if (Array.isArray(parsed)) {
+                                        for (const c of parsed) {
+                                            if (c && c.category_id) c.count = counts[String(c.category_id)] || 0;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) { /* sem contagens */ }
+                    }
                 }
 
                 return new Response(typeof parsed === "string" ? body : JSON.stringify(parsed), {

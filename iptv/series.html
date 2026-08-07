@@ -66,7 +66,7 @@
             <div class="sidebar">
                 <div class="search-box">
                     <input type="text" id="search" placeholder="Buscar série..." oninput="buscar()">
-                    <button class="refresh-btn" title="Recarregar" onclick="location.reload()">⟳</button>
+                    <button class="refresh-btn" title="Recarregar" onclick="recarregar()">⟳</button>
                 </div>
                 <div class="list-area" id="cats"></div>
             </div>
@@ -81,50 +81,83 @@
     <script src="api.js?v=3"></script>
     <script>
         const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
-        let series = [], categorias = [];
+        let series = [], categorias = [], catAtiva = "0";
 
         async function init() {
             const { user, pass } = getCred();
             if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
+            setCarregando(true);
             try {
-                const r1 = await apiFetch("mcp", { username: user, password: pass, action: "get_series_categories", limit: 2000 });
-                const r2 = await apiFetch("mcp", { username: user, password: pass, action: "get_series", limit: 2000 });
-                categorias = Object.values(await r1.json());
-                series = await r2.json();
-                renderizarMenuPadrao();
+                await carregarCategorias(user, pass);
+                await mostrarSeries(user, pass, false);
             } catch (e) { console.error(e); document.getElementById('grid').innerHTML = "<p style='color:#94a3b8'>Erro ao carregar séries.</p>"; }
+            setCarregando(false);
         }
 
-        function renderizarMenuPadrao() {
+        function setCarregando(on) {
+            document.getElementById('grid').innerHTML = on ? "<p style='color:#94a3b8'>Carregando séries...</p>" : "";
+        }
+
+        async function carregarCategorias(user, pass) {
+            const r1 = await apiFetch("mcp", { username: user, password: pass, action: "get_series_categories", limit: 2000 });
+            categorias = Object.values(await r1.json());
             const catsDiv = document.getElementById('cats');
             catsDiv.innerHTML = '';
+            const head = document.createElement('div');
+            head.className = "cat-head" + (catAtiva === "0" ? " ativo" : "");
+            head.innerHTML = `<span>Todos</span><span class="num">—</span>`;
+            head.onclick = () => selectCat("0", null);
+            catsDiv.appendChild(head);
             categorias.forEach(c => {
                 if (palavrasSenha.some(p => c.category_name.toLowerCase().includes(p))) return;
-                const head = document.createElement('div');
-                head.className = "cat-head";
-                const qtd = series.filter(f => String(f.category_id) === String(c.category_id)).length;
-                head.innerHTML = `<span>${c.category_name}</span><span class="num">${qtd}</span>`;
-                head.onclick = () => {
-                    document.querySelectorAll('.cat-head').forEach(h => h.classList.remove('ativo'));
-                    head.classList.add('ativo');
-                    renderizar(series.filter(f => String(f.category_id) === String(c.category_id)));
-                };
-                catsDiv.appendChild(head);
+                const el = document.createElement('div');
+                el.className = "cat-head" + (catAtiva === String(c.category_id) ? " ativo" : "");
+                el.dataset.id = c.category_id;
+                const qtd = c.count != null && c.count > 0 ? c.count : '';
+                el.innerHTML = `<span>${c.category_name}</span>${qtd ? `<span class="num">${qtd}</span>` : ''}`;
+                el.onclick = () => selectCat(String(c.category_id), el);
+                catsDiv.appendChild(el);
             });
-            const head = document.createElement('div');
-            head.className = "cat-head ativo";
-            head.innerHTML = `<span>Todos</span><span class="num">${series.length}</span>`;
-            head.onclick = () => {
-                document.querySelectorAll('.cat-head').forEach(h => h.classList.remove('ativo'));
-                head.classList.add('ativo');
+        }
+
+        let debounce = null;
+        function selectCat(id, el) {
+            catAtiva = id;
+            document.querySelectorAll('.cat-head').forEach(h => h.classList.remove('ativo'));
+            (el || document.querySelector('.cat-head[data-id="' + id + '"]'))?.classList.add('ativo');
+            const { user, pass } = getCred();
+            if (precisaLogin()) return;
+            clearTimeout(debounce);
+            debounce = setTimeout(() => mostrarSeries(user, pass, true), 30);
+        }
+
+        async function mostrarSeries(user, pass, soLista) {
+            setCarregando(soLista !== false);
+            try {
+                let lista;
+                if (catAtiva && catAtiva !== "0") {
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", category_id: catAtiva, limit: 5000 });
+                    lista = await r.json();
+                } else {
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", limit: 5000 });
+                    lista = await r.json();
+                }
+                series = lista;
                 renderizar(series);
-            };
-            catsDiv.insertBefore(head, catsDiv.firstChild);
+            } catch (e) { console.error(e); }
+            setCarregando(false);
+        }
+
+        function recarregar() {
+            const { user, pass } = getCred();
+            if (precisaLogin()) return;
+            init();
         }
 
         function renderizar(lista) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+            if (!lista.length) { grid.innerHTML = "<p style='color:#94a3b8'>Nenhuma série encontrada.</p>"; return; }
             lista.slice(0, 200).forEach(s => {
                 const card = document.createElement('div');
                 card.className = 'serie';
