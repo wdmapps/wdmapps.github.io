@@ -152,7 +152,7 @@
                     : `<div class="art" style="display:flex;align-items:center;justify-content:center;font-size:3rem;">📺</div>`;
                 card.innerHTML = `
                     <span class="fav-star" onclick="event.stopPropagation(); toggleFavorito('${String(ch.stream_id)}')">★</span>
-                    ${art}
+                    ${arte}
                     <div class="grad"><div class="nome">${ch.name}</div><div class="info"><span class="live-dot"></span>AO VIVO</div></div>`;
                 card.onclick = () => { abrirCanal(ch); };
                 grid.appendChild(card);
