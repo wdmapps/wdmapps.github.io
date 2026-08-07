@@ -52,13 +52,12 @@
         .campo label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
         .campo .input-wrap { position: relative; }
         .campo input {
-            width: 100%; padding: 14px 16px 14px 46px; font-size: 1rem; color: var(--text);
+            width: 100%; padding: 14px 16px; font-size: 1rem; color: var(--text);
             background: rgba(6, 14, 26, 0.6); border: 1px solid var(--border); border-radius: 14px; outline: none;
             transition: all 0.3s;
         }
         .campo input::placeholder { color: var(--text-light); }
         .campo input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 170, 255, 0.15); }
-        .campo .icone { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.7; }
 
         .btn {
             width: 100%; padding: 15px; font-size: 1rem; font-weight: 700; color: white;
@@ -89,7 +88,6 @@
 
     <div class="card">
         <div class="brand">
-            <img src="../img/logo-wdm-iptv.png" alt="WDM TV" onerror="this.style.display='none'">
             <h1>WDM <span>TV</span></h1>
         </div>
         <p class="sub">Acesse sua conta para começar</p>
@@ -100,14 +98,12 @@
             <div class="campo">
                 <label for="username">Usuário</label>
                 <div class="input-wrap">
-                    <span class="icon">👤</span>
                     <input type="text" id="username" placeholder="Digite seu usuário" required>
                 </div>
             </div>
             <div class="campo">
                 <label for="password">Senha</label>
                 <div class="input-wrap">
-                    <span class="icon">🔒</span>
                     <input type="password" id="password" placeholder="Digite sua senha" required>
                 </div>
             </div>
