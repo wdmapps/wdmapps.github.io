@@ -97,7 +97,9 @@ const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
         }
 
         function setCarregando(on) {
-            document.getElementById('grid').innerHTML = on ? "<p style='color:#94a3b8'>Carregando catálogo...</p>" : "";
+            if (!on) return;
+            const g = document.getElementById('grid');
+            if (!g.querySelector('.filme')) g.innerHTML = "<p style='color:#94a3b8'>Carregando catálogo...</p>";
         }
 
         async function carregarCategorias(user, pass) {

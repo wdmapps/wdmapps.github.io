@@ -95,7 +95,9 @@
         }
 
         function setCarregando(on) {
-            document.getElementById('grid').innerHTML = on ? "<p style='color:#94a3b8'>Carregando séries...</p>" : "";
+            if (!on) return;
+            const g = document.getElementById('grid');
+            if (!g.querySelector('.serie')) g.innerHTML = "<p style='color:#94a3b8'>Carregando séries...</p>";
         }
 
         async function carregarCategorias(user, pass) {
