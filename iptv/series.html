@@ -11,7 +11,8 @@
         :root { --primary: #0066ff; --accent: #00aaff; --bg: #060e1a; --bg-light: #0f1f3d; --text: #e2e8f0; --text-light: #94a3b8; --border: #1e3a5f; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-        body { margin: 0; background: radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { margin: 0; background: url('../img/fundo.jpg') center/cover fixed no-repeat, radial-gradient(circle at center, #0f1f3d 0%, #060e1a 70%, #000 100%); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(6,14,26,0.55); z-index: 0; pointer-events: none; }
         .glow { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.3; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
         .glow-1 { width: 450px; height: 450px; background: var(--primary); top: -150px; left: -100px; }
         .glow-2 { width: 380px; height: 380px; background: var(--accent); bottom: -120px; right: -120px; animation-delay: -6s; }

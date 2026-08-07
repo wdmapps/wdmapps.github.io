@@ -21,10 +21,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background: var(--bg); color: var(--text);
+            background: url('../img/fundo.jpg') center/cover fixed no-repeat, var(--bg); color: var(--text);
             min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
             position: relative;
         }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(6,14,26,0.7); z-index: 0; pointer-events: none; }
 
         .glow { position: fixed; border-radius: 50%; filter: blur(140px); opacity: 0.35; pointer-events: none; animation: float 14s ease-in-out infinite; }
         .glow-1 { width: 560px; height: 560px; background: var(--primary); top: -180px; left: -120px; }

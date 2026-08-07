@@ -20,10 +20,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background: var(--bg); color: var(--text);
+            background: url('../img/fundo.jpg') center/cover fixed no-repeat, var(--bg); color: var(--text);
             min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
             position: relative;
         }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(6,14,26,0.62); z-index: 0; pointer-events: none; }
 
         /* Fundo com brilhos animados */
         .glow { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.35; pointer-events: none; z-index: 0; animation: float 12s ease-in-out infinite; }
