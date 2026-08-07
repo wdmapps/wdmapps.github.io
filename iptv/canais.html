@@ -102,7 +102,7 @@
                 categorias = Object.values(await resCat.json());
                 todosCanais = await resChan.json();
                 renderizarMenuPadrao();
-                mostrarTodos();
+                renderizar(todosCanais);
             } catch (e) { console.error("Erro init:", e); }
         }
 
