@@ -69,7 +69,7 @@
             if (!dns || !user || !pass) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
             try {
                 const r1 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_categories`));
-                const r2 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_streams`));
+                const r2 = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_vod_streams`) + "&limit=500");
                 categorias = await r1.json();
                 filmes = await r2.json();
                 const catsDiv = document.getElementById('cats');

@@ -208,7 +208,7 @@
                 if (!dns || !user || !pass) throw new Error("sem sessão");
 
                 const apiUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=get_vod_streams`;
-                const proxyUrl = (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(apiUrl);
+                const proxyUrl = (CONFIG.proxyUrl || "/ptv?url=") + encodeURIComponent(apiUrl) + "&limit=60";
                 const res = await fetch(proxyUrl);
                 const data = await res.json();
 

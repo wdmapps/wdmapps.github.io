@@ -104,7 +104,7 @@
             }
             try {
                 const resCat = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_categories`));
-                const resChan = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_streams`));
+                const resChan = await fetch(prox(`${dns}/player_api.php?username=${user}&password=${pass}&action=get_live_streams`) + "&limit=2000");
                 categorias = await resCat.json();
                 todosCanais = await resChan.json();
                 renderizarMenuPadrao();
