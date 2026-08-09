@@ -66,7 +66,9 @@ function vodUrl(streamId, ext) {
 }
 
 // URL de episódio de série
+// ATENÇÃO: este painel (dbonline) serve episódios pelo caminho /movie/<user>/<pass>/<ep_id>.<ext>,
+// não pelo /series/... padrão (que retorna 404)
 function serieUrl(serieId, epId, ext) {
     const { user, pass } = getCred();
-    return mUrl(`series/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${serieId}/${epId}.${ext || "mp4"}`);
+    return mUrl(`movie/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${epId}.${ext || "mp4"}`);
 }

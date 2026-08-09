@@ -54,6 +54,17 @@
             document.getElementById('plot').innerHTML = `<span style="color:${cor}">${msg}</span>`;
         }
 
+        function achatarEpisodios(raw) {
+            if (Array.isArray(raw)) return raw;
+            const out = [];
+            if (raw && typeof raw === "object") {
+                for (const k of Object.keys(raw)) {
+                    if (Array.isArray(raw[k])) out.push(...raw[k]);
+                }
+            }
+            return out;
+        }
+
         async function init() {
             if (!serieId) { window.location.href = "series.html"; return; }
             if (precisaLogin()) { window.location.href = "index.html"; return; }
@@ -74,8 +85,9 @@
                 document.getElementById('plot').innerText = data.info.plot || "Sinopse não disponível.";
                 document.getElementById('poster').src = data.info.cover || '';
 
-                const episodios = Array.isArray(data.episodes) ? data.episodes
-                    : (data.info && Array.isArray(data.info.episodes) ? data.info.episodes : []);
+                // algumas operadoras retornam episodes como objeto por temporada {"1":[...]}
+                let episodios = achatarEpisodios(data.episodes);
+                if (!episodios.length) episodios = achatarEpisodios(data.info && data.info.episodes);
 
                 const tds = document.getElementById('temporadas');
                 tds.innerHTML = '';
