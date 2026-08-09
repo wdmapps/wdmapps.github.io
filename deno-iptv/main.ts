@@ -29,21 +29,60 @@ const CORS = {
 // na URL NUNCA usam esta variável.
 let defaultServer = 0;
 
+// A provedora serve o /live/ apenas para User-Agents de media player
+// (UA de navegador -> 404; VLC -> 302 para a CDN tokenizada).
+const UA_PLAYER = "VLC/3.0.20 LibVLC/3.0.20";
+const UA_WEB = "Mozilla/5.0";
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: CORS });
 }
 
-// Reescrita de uma linha de playlist (m3u8)
-function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: number): string {
-  const pin = `${origin}/m/${usedIdx}`;
+function b64urlEncode(s: string) {
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
 
-  // 1) hosts conhecidos (com ou sem port) -> origin/m/<índice>/<caminho>
-  //    TODOS os recursos internos da playlist (playlists filhas, segmentos
-  //    .ts, keys, etc.) usam SEMPRE o MESMO índice — o do servidor que
-  //    gerou esta playlist (os tokens só valem nesse servidor).
+function b64urlDecode(s: string) {
+  let b = s.replace(/-/g, "+").replace(/_/g, "/");
+  while (b.length % 4) b += "=";
+  try {
+    return atob(b);
+  } catch {
+    return "";
+  }
+}
+
+function hostOf(u: string): string {
+  try {
+    return new URL(u).host;
+  } catch {
+    return "";
+  }
+}
+
+function idxOfHost(dnsList: string[], host: string): number {
+  for (let i = 0; i < dnsList.length; i++) {
+    try {
+      if (new URL(dnsList[i]).host === host) return i;
+    } catch {
+      /* segue */
+    }
+  }
+  return -1;
+}
+
+// Reescrita de uma linha de playlist (m3u8)
+// Regras:
+//  - URL absoluta em DNS_LIST[i]  -> /m/<i>/<caminho>   (preserva o índice do host)
+//  - URL relativa                 -> resolve contra baseUrl (URL efetiva após
+//    redirects: a CDN tokenizada) e aplica a regra acima; se o host não
+//    pertence ao DNS_LIST, vira /m/<idx>/x/<url> (proxy que preserva o host,
+//    sem jamais descartar o hostname -> 404 incorreto)
+function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: number, baseUrl?: string): string {
+  // 1) hosts conhecidos (com ou sem port) -> origin/m/<índice-DO-HOST>/<caminho>
   for (let i = 0; i < dnsList.length; i++) {
     const base = dnsList[i].replace(/\/+$/, "");
-    if (line.includes(base)) line = line.split(base).join(`${origin}/m/${usedIdx}`);
+    if (line.includes(base)) line = line.split(base).join(`${origin}/m/${i}`);
     let host: string;
     try {
       host = new URL(dnsList[i]).host;
@@ -51,21 +90,36 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
       continue;
     }
     const esc = host.replace(/\./g, "\\.");
-    line = line.replace(new RegExp(`//${esc}(:[0-9]+)?`, "g"), `${origin}/m/${usedIdx}`);
+    line = line.replace(new RegExp(`(https?:)?//${esc}(:[0-9]+)?`, "g"), `${origin}/m/${i}`);
   }
+
+  const fix = (u: string): string => {
+    if (!u) return "";
+    if (u.startsWith(origin + "/m/")) return u;
+    let abs = u;
+    if (!/^(https?:)?\/\//.test(u)) {
+      if (!baseUrl) return u;
+      try {
+        abs = new URL(u, baseUrl).href;
+      } catch {
+        return u;
+      }
+    }
+    const i = idxOfHost(dnsList, hostOf(abs));
+    if (i >= 0) return `${origin}/m/${i}` + abs.replace(/^https?:\/\/[^/]+/, "");
+    return `${origin}/m/${usedIdx}/x/${b64urlEncode(abs)}`;
+  };
 
   const t = line.trim();
   if (!t) return line;
-  if (t.startsWith("/")) return line.replace(t, `${pin}${t}`);
-  if (/^https?:\/\//.test(t)) return line.replace(t, `${pin}/` + t.replace(/^https?:\/\/[^/]+/, ""));
+  if (/^https?:\/\//.test(t) || t.startsWith("//") || t.startsWith("/")) {
+    return line.replace(t, fix(t));
+  }
   if (/URI="[^"]+"/.test(line)) {
-    return line.replace(/URI="([^"]+)"/g, (m, u) => {
-      if (!u || u.indexOf(origin) === 0) return m; // já reescrito
-      let nu = u;
-      if (/^(https?:)?\/\//.test(nu)) nu = nu.replace(/^(https?:)?\/\/[^/]+/, "");
-      if (nu.startsWith("/")) nu = `${pin}${nu}`;
-      return `URI="${nu}"`;
-    });
+    return line.replace(/URI="([^"]+)"/g, (m, u) => `URI="${fix(u)}"`);
+  }
+  if (/^[^\s#,]+$/.test(t) && /\.(ts|m3u8|key)(\?.*)?$/i.test(t)) {
+    return line.replace(t, fix(t));
   }
   return line;
 }
@@ -243,17 +297,39 @@ if (rr.ok) {
       const sel = (pinIdx >= 0 && pinIdx < dnsList.length) ? pinIdx : defaultServer % dnsList.length;
       let usedIdx = sel;
 
+      // Passthrough com host preservado (CDN tokenizada fora do DNS_LIST):
+      // /m/<idx>/x/<base64url da URL exata que o upstream gerou>
+      if (resto.startsWith("x/")) {
+        const target = b64urlDecode(resto.slice(2).split("?")[0]);
+        if (!target || !/^https?:\/\//.test(target)) return json({ error: "URL inválida." }, 400);
+        const headers: Record<string, string> = { "User-Agent": UA_PLAYER };
+        for (const h of ["Range", "If-Range"]) {
+          const v = request.headers.get(h);
+          if (v) headers[h] = v;
+        }
+        try {
+          const rr = await fetch(target, { headers });
+          if (!rr) return json({ error: "Falha no upstream." }, 502);
+          const respHeaders = new Headers(rr.headers);
+          respHeaders.set("Access-Control-Allow-Origin", "*");
+          respHeaders.set("Cache-Control", "no-store");
+          return new Response(rr.body, { status: rr.status, headers: respHeaders });
+        } catch {
+          return json({ error: "Falha no upstream." }, 502);
+        }
+      }
+
+      const isLive = /^live\//.test(rel);
       const headers: Record<string, string> = {};
       for (const h of ["Range", "If-Range"]) {
         const v = request.headers.get(h);
         if (v) headers[h] = v;
       }
+      headers["User-Agent"] = isLive ? UA_PLAYER : UA_WEB;
 
       let response: Response | null = null;
       try {
-        response = await fetch(`${dnsList[sel]}/${rel}`, {
-          headers: { "User-Agent": "Mozilla/5.0", ...headers },
-        });
+        response = await fetch(`${dnsList[sel]}/${rel}`, { headers });
       } catch {
         response = null;
       }
@@ -266,7 +342,7 @@ if (rr.ok) {
           if (i === sel) continue;
           try {
             const rr = await fetch(`${dnsList[i]}/${rel}`, {
-              headers: { "User-Agent": "Mozilla/5.0", ...headers },
+              headers: { "User-Agent": isLive ? UA_PLAYER : UA_WEB, ...headers },
             });
             if (rr.ok) {
               response = rr;
@@ -301,17 +377,18 @@ if (rr.ok) {
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
         let resto2 = "";
+        const baseUrl = response.url || "";
         const ts = new TransformStream<Uint8Array, Uint8Array>({
           transform(chunk, controller) {
             resto2 += decoder.decode(chunk, { stream: true });
             let i;
             while ((i = resto2.indexOf("\n")) !== -1) {
-              controller.enqueue(encoder.encode(rewriteLine(resto2.slice(0, i), dnsList, origin, usedIdx) + "\n"));
+              controller.enqueue(encoder.encode(rewriteLine(resto2.slice(0, i), dnsList, origin, usedIdx, baseUrl) + "\n"));
               resto2 = resto2.slice(i + 1);
             }
           },
           flush(controller) {
-            if (resto2.length) controller.enqueue(encoder.encode(rewriteLine(resto2, dnsList, origin, usedIdx)));
+            if (resto2.length) controller.enqueue(encoder.encode(rewriteLine(resto2, dnsList, origin, usedIdx, baseUrl)));
           },
         });
 

@@ -47,12 +47,13 @@
 
     <script src="config.js?v=3"></script>
     <script src="api.js?v=3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
     <script>
         const canal = JSON.parse(localStorage.getItem("canal_atual") || "null");
         const auto = new URLSearchParams(location.search).has('auto');
 
         let hls = null, canalAtual = null, timerReconexao = null, falhas = 0, ultimoErro = '';
+        let softRecoveryCount = 0, lastSoftRecovery = 0, timerSoft = null, lastReconnect = 0;
         const video = document.getElementById('main-player');
         const nomeEl = document.getElementById('canal-nome');
 
@@ -70,6 +71,13 @@
 
         function reconectar() {
             clearTimeout(timerReconexao);
+            const agora = Date.now();
+            if (agora - lastReconnect < 15000) {
+                timerReconexao = setTimeout(reconectar, 15000 - (agora - lastReconnect));
+                status(`<span class="dot"></span>Aguardando estabilizar...`);
+                return;
+            }
+            lastReconnect = agora;
             if (hls) { hls.destroy(); hls = null; }
             falhas++;
             if (falhas > 12) {
@@ -78,6 +86,25 @@
             }
             status(`<span class="dot"></span>Reconectando: ${canalAtual ? canalAtual.name : ''}...`);
             timerReconexao = setTimeout(iniciar, 1500);
+        }
+
+        function recuperarSuave(data, urlFalha, code) {
+            const agora = Date.now();
+            if (agora - lastSoftRecovery < 3000) return;
+            lastSoftRecovery = agora;
+            softRecoveryCount++;
+            ultimoErro = `soft:${data.details || data.type}${code ? ' HTTP ' + code : ''}`;
+            console.debug('%c[HLS-SOFT]', 'color:#ffa500', ultimoErro, urlFalha || '');
+            if (softRecoveryCount > 6) {
+                reconectar();
+                return;
+            }
+            status(`<span class="dot"></span>Recuperando: ${canalAtual ? canalAtual.name : ''}...`);
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+            clearTimeout(timerSoft);
+            timerSoft = setTimeout(() => {
+                if (hls) { try { hls.startLoad(-1); } catch (e) { console.debug('startLoad falhou', e); } }
+            }, 1200);
         }
 
         function iniciar() {
@@ -104,18 +131,31 @@
                 hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
 
                 hls.on(Hls.Events.ERROR, (e, data) => {
-                    if (!data.fatal) return;
-                    const info = data.details || data.type;
-                    const code = data.response && data.response.code ? ' (HTTP ' + data.response.code + ')' : '';
-                    const urlFalha = data.url || data.frag && data.frag.url || '';
-                    ultimoErro = `${info}${code}${urlFalha ? ' · ' + urlFalha : ''}`;
-                    console.error('HLS fatal:', ultimoErro, data);
+                    const frag = data.frag;
+                    const code = data.response && data.response.code || 0;
+                    const urlFalha = (frag && frag.url) || data.url || '';
+                    const sn = (frag && frag.sn !== undefined) ? frag.sn : (data.stats && data.stats.fragSN !== undefined ? data.stats.fragSN : '-');
+                    if (data.fatal || data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        console.debug('%c[HLS-ERR]', 'color:#e50914', {
+                            type: data.type, details: data.details, fatal: data.fatal,
+                            status: code, url: urlFalha.slice(0, 160), sn
+                        });
+                    }
                     if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                         hls.recoverMediaError();
                         return;
                     }
-                    clearTimeout(timerReconexao);
-                    timerReconexao = setTimeout(reconectar, 800);
+                    if (!data.fatal) return;
+                    const detalhe = data.details || '';
+                    const isManifest = detalhe.indexOf('manifestLoad') !== -1 || detalhe.indexOf('levelLoad') !== -1;
+                    if (isManifest) {
+                        ultimoErro = `${detalhe}${code ? ' (HTTP ' + code + ')' : ''}${urlFalha ? ' · ' + urlFalha.slice(0, 120) : ''}`;
+                        console.error('HLS fatal (manifesto):', ultimoErro);
+                        clearTimeout(timerReconexao);
+                        timerReconexao = setTimeout(reconectar, 800);
+                        return;
+                    }
+                    recuperarSuave(data, urlFalha, code);
                 });
 
                 hls.loadSource(streamUrl);
@@ -128,7 +168,7 @@
             }
         }
 
-        video.addEventListener('playing', () => { falhas = 0; });
+        video.addEventListener('playing', () => { falhas = 0; softRecoveryCount = 0; });
 
         iniciar();
     </script>
