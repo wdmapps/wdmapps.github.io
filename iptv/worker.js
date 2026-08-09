@@ -199,10 +199,30 @@ export default {
                         }
                         return line;
                     });
+                    // 3) URIs dentro de linhas de comentário (#EXT-X-KEY, #EXT-X-MAP, etc.)
+                    //    que apontem para host absoluto ou raiz -> proxy (evita CORS/404 no reload)
+                    rewritten = rewritten.replace(/URI="([^"]+)"/g, function (m, u) {
+                        if (!u || u.indexOf(origin) === 0) return m; // já reescrito
+                        let nu = u;
+                        if (/^(https?:)?\/\//.test(nu)) nu = nu.replace(/^(https?:)?\/\/[^/]+/, "");
+                        if (nu.startsWith("/")) nu = `${origin}/m${nu}`;
+                        return `URI="${nu}"`;
+                    });
+                    // headers do corpo ORIGINAL não valem mais para o texto reescrito;
+                    // Content-Length/Encoding divergentes quebram o reload da playlist no navegador
+                    const finalHeaders = Object.fromEntries(respHeaders);
+                    delete finalHeaders["content-length"];
+                    delete finalHeaders["content-encoding"];
+                    delete finalHeaders["transfer-encoding"];
+                    delete finalHeaders["content-range"];
+                    delete finalHeaders["etag"];
+                    delete finalHeaders["last-modified"];
+                    delete finalHeaders["date"];
+
                     return new Response(rewritten, {
                         status: 200,
                         headers: {
-                            ...Object.fromEntries(respHeaders),
+                            ...finalHeaders,
                             "Content-Type": "application/vnd.apple.mpegurl",
                         },
                     });

@@ -52,7 +52,7 @@
         const canal = JSON.parse(localStorage.getItem("canal_atual") || "null");
         const auto = new URLSearchParams(location.search).has('auto');
 
-        let hls = null, fatalCount = 0, restartCount = 0, canalAtual = null;
+        let hls = null, canalAtual = null, timerReconexao = null, falhas = 0, ultimoErro = '';
         const video = document.getElementById('main-player');
         const nomeEl = document.getElementById('canal-nome');
 
@@ -63,52 +63,72 @@
             localStorage.setItem('recentes', JSON.stringify(rec.slice(0, 6)));
         }
 
+        function status(texto, cor = '#e2e8f0') {
+            nomeEl.innerHTML = texto;
+            nomeEl.style.color = cor;
+        }
+
+        function reconectar() {
+            clearTimeout(timerReconexao);
+            if (hls) { hls.destroy(); hls = null; }
+            falhas++;
+            if (falhas > 12) {
+                status(`<span class="dot"></span>Não foi possível carregar o canal.<br><small>Último erro: ${ultimoErro || 'desconhecido'}</small><br><button onclick="location.reload()" style="margin-top:8px;padding:6px 16px;border:none;border-radius:8px;background:#0066ff;color:white;cursor:pointer">Tentar de novo</button>`, '#e50914');
+                return;
+            }
+            status(`<span class="dot"></span>Reconectando: ${canalAtual ? canalAtual.name : ''}...`);
+            timerReconexao = setTimeout(iniciar, 1500);
+        }
+
         function iniciar() {
             if (!canal) { window.location.href = "canais.html"; return; }
             if (precisaLogin()) { window.location.href = "index.html"; return; }
             canalAtual = canal;
-            nomeEl.innerHTML = `<span class="dot"></span>Assistindo: ${canal.name}`;
+            status(`<span class="dot"></span>Assistindo: ${canal.name}`);
             registrarRecente(canal);
 
             const streamUrl = liveUrl(canal.stream_id);
             if (hls) { hls.destroy(); hls = null; }
-            fatalCount = 0; restartCount = 0;
             video.removeAttribute('src'); video.load();
 
             if (window.Hls && Hls.isSupported()) {
                 hls = new Hls({
+                    lowLatencyMode: false,
                     maxBufferLength: 30, maxMaxBufferLength: 60, enableWorker: false,
                     liveDurationInfinity: true, liveSyncDurationCount: 4, liveMaxLatencyDurationCount: 12,
-                    manifestLoadingTimeOut: 25000, manifestLoadingMaxRetry: 5, levelLoadingTimeOut: 25000
+                    manifestLoadingTimeOut: 15000, manifestLoadingMaxRetry: 2, manifestLoadingRetryDelay: 1000,
+                    levelLoadingTimeOut: 15000, levelLoadingMaxRetry: 2, levelLoadingRetryDelay: 1000,
+                    fragLoadingTimeOut: 15000, fragLoadingMaxRetry: 3, fragLoadingRetryDelay: 1000
                 });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
 
                 hls.on(Hls.Events.ERROR, (e, data) => {
                     if (!data.fatal) return;
-                    fatalCount++;
-                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        if (fatalCount < 3) { hls.startLoad(); }
-                        else if (restartCount < 3) {
-                            restartCount++;
-                            nomeEl.innerHTML = `<span class="dot"></span>Reconectando: ${canalAtual.name}...`;
-                            setTimeout(() => { if (canalAtual) iniciar(); }, 2000);
-                        } else { nomeEl.innerHTML = "Não foi possível carregar o canal."; nomeEl.style.color = '#e50914'; }
-                    } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                    const info = data.details || data.type;
+                    const code = data.response && data.response.code ? ' (HTTP ' + data.response.code + ')' : '';
+                    const urlFalha = data.url || data.frag && data.frag.url || '';
+                    ultimoErro = `${info}${code}${urlFalha ? ' · ' + urlFalha : ''}`;
+                    console.error('HLS fatal:', ultimoErro, data);
+                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                         hls.recoverMediaError();
-                    } else { nomeEl.innerHTML = "Erro ao reproduzir o canal."; }
+                        return;
+                    }
+                    clearTimeout(timerReconexao);
+                    timerReconexao = setTimeout(reconectar, 800);
                 });
 
                 hls.loadSource(streamUrl);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.BUFFER_EOS, () => { if (hls) hls.startLoad(); video.play().catch(() => {}); });
-                video.addEventListener('ended', () => { if (hls) { hls.startLoad(); video.play().catch(() => {}); } });
-                video.play().catch(() => {});
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = streamUrl;
                 video.play().catch(() => {});
             } else {
-                nomeEl.innerHTML = 'Navegador sem suporte a HLS.';
+                status('Navegador sem suporte a HLS.', '#e50914');
             }
         }
+
+        video.addEventListener('playing', () => { falhas = 0; });
 
         iniciar();
     </script>
