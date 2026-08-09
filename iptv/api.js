@@ -66,7 +66,7 @@ function vodUrl(streamId, ext) {
 }
 
 // URL de episódio de série
-function serieUrl(serieId, epId) {
+function serieUrl(serieId, epId, ext) {
     const { user, pass } = getCred();
-    return mUrl(`series/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${serieId}/${epId}.mp4`);
+    return mUrl(`series/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${serieId}/${epId}.${ext || "mp4"}`);
 }

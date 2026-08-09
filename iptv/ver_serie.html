@@ -49,40 +49,68 @@
     <script>
         const { user, pass } = getCred();
         const serieId = localStorage.getItem("chosen_serie_id");
-        let info = null;
+
+        function statusHtml(msg, cor = '#e2e8f0') {
+            document.getElementById('plot').innerHTML = `<span style="color:${cor}">${msg}</span>`;
+        }
 
         async function init() {
             if (!serieId) { window.location.href = "series.html"; return; }
             if (precisaLogin()) { window.location.href = "index.html"; return; }
+            statusHtml("Carregando episódios...");
             try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 60000);
                 const res = await apiFetch("mcp", { username: user, password: pass, action: "get_series_info", series_id: serieId });
+                clearTimeout(timer);
+                if (!res || !res.ok) throw new Error("Falha na API (HTTP " + (res && res.status || '?') + ")");
                 const data = await res.json();
-                info = data;
-                document.getElementById('title').innerText = data.info.name;
+
+                if (!data || typeof data !== "object" || data.error || !data.info) {
+                    throw new Error("Resposta inválida da API: " + JSON.stringify(data || null).slice(0, 200));
+                }
+
+                document.getElementById('title').innerText = data.info.name || 'Série';
                 document.getElementById('plot').innerText = data.info.plot || "Sinopse não disponível.";
                 document.getElementById('poster').src = data.info.cover || '';
 
+                const episodios = Array.isArray(data.episodes) ? data.episodes
+                    : (data.info && Array.isArray(data.info.episodes) ? data.info.episodes : []);
+
                 const tds = document.getElementById('temporadas');
                 tds.innerHTML = '';
-                data.seasons.forEach(s => {
+                let temporadas = (Array.isArray(data.seasons) && data.seasons.length) ? data.seasons
+                    : [...new Set(episodios.map(e => e.season != null ? String(e.season) : "1"))].map(s => ({ season_number: s }));
+                if (!temporadas.length) temporadas = [{ season_number: 1 }];
+
+                temporadas.forEach(s => {
                     const b = document.createElement('div');
-                    b.className = 'temp-btn' + (s.season_number === 1 ? ' ativo' : '');
+                    b.className = 'temp-btn' + (String(s.season_number) === String(temporadas[0].season_number) ? ' ativo' : '');
                     b.innerText = 'Temporada ' + s.season_number;
                     b.onclick = () => {
                         document.querySelectorAll('.temp-btn').forEach(x => x.classList.remove('ativo'));
                         b.classList.add('ativo');
-                        renderizarEps(s.season_number);
+                        renderizarEps(String(s.season_number), episodios);
                     };
                     tds.appendChild(b);
                 });
-                renderizarEps(1);
-            } catch (e) { console.error(e); }
+
+                if (!episodios.length) {
+                    statusHtml("A operadora não retornou episódios para esta série.", '#e50914');
+                    return;
+                }
+                renderizarEps(String(temporadas[0].season_number), episodios);
+            } catch (e) {
+                console.error(e);
+                statusHtml("Erro ao carregar a série: " + e.message + '<br><button onclick="location.reload()" style="margin-top:10px;padding:6px 16px;border:none;border-radius:8px;background:#0066ff;color:white;cursor:pointer">Tentar de novo</button>', '#e50914');
+            }
         }
 
-        function renderizarEps(season) {
+        function renderizarEps(season, episodios) {
             const epsDiv = document.getElementById('eps');
             epsDiv.innerHTML = '';
-            const eps = info.episodes.filter(e => e.season == season);
+            const eps = episodios.filter(e => String(e.season) === String(season));
+            if (!eps.length) { epsDiv.innerHTML = "<p style='color:#94a3b8'>Sem episódios nesta temporada.</p>"; return; }
             eps.forEach(ep => {
                 const d = document.createElement('div');
                 d.className = 'ep';
@@ -90,12 +118,10 @@
                 d.onclick = () => {
                     document.getElementById('eps').innerHTML = '';
                     const v = document.getElementById('serie-player');
-                    const stream = serieUrl(serieId, ep.id);
+                    const stream = serieUrl(serieId, ep.id, ep.container_extension);
                     v.src = stream;
                     v.style.display = 'block';
                     v.play();
-                    d.style.display = 'none';
-                    document.getElementById('eps').appendChild(d);
                 };
                 epsDiv.appendChild(d);
             });
