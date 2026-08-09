@@ -218,6 +218,7 @@ export default {
                     delete finalHeaders["etag"];
                     delete finalHeaders["last-modified"];
                     delete finalHeaders["date"];
+                    delete finalHeaders["content-type"]; // substituído pelo mpegurl abaixo
 
                     return new Response(rewritten, {
                         status: 200,
