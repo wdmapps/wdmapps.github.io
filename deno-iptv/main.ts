@@ -24,7 +24,10 @@ const CORS = {
   "Cache-Control": "no-store",
 };
 
-let workingServer = 0;
+// Servidor padrão para rotas NÃO pinadas (/mcp e /m/ sem índice) —
+// atualizado pela última autenticação. Requisições de mídia com índice
+// na URL NUNCA usam esta variável.
+let defaultServer = 0;
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: CORS });
@@ -35,9 +38,12 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
   const pin = `${origin}/m/${usedIdx}`;
 
   // 1) hosts conhecidos (com ou sem port) -> origin/m/<índice>/<caminho>
+  //    TODOS os recursos internos da playlist (playlists filhas, segmentos
+  //    .ts, keys, etc.) usam SEMPRE o MESMO índice — o do servidor que
+  //    gerou esta playlist (os tokens só valem nesse servidor).
   for (let i = 0; i < dnsList.length; i++) {
     const base = dnsList[i].replace(/\/+$/, "");
-    if (line.includes(base)) line = line.split(base).join(`${origin}/m/${i}`);
+    if (line.includes(base)) line = line.split(base).join(`${origin}/m/${usedIdx}`);
     let host: string;
     try {
       host = new URL(dnsList[i]).host;
@@ -45,7 +51,7 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
       continue;
     }
     const esc = host.replace(/\./g, "\\.");
-    line = line.replace(new RegExp(`//${esc}(:[0-9]+)?`, "g"), `${origin}/m/${i}`);
+    line = line.replace(new RegExp(`//${esc}(:[0-9]+)?`, "g"), `${origin}/m/${usedIdx}`);
   }
 
   const t = line.trim();
@@ -106,7 +112,7 @@ async function handleRequest(request: Request): Promise<Response> {
 
   const path = url.pathname;
   const q = url.searchParams;
-  const dns = dnsList[workingServer % dnsList.length];
+  const dnsDefault = dnsList[defaultServer % dnsList.length];
 
   try {
     // ===== AUTENTICAÇÃO =====
@@ -124,11 +130,12 @@ async function handleRequest(request: Request): Promise<Response> {
           const data = await r.json();
           if (data && data.user_info && data.user_info.auth === 1) {
             if (data.user_info.status === "Active") {
-              workingServer = i;
+              defaultServer = i;
               return json({
                 ok: true,
                 user: data.user_info.username,
                 exp: data.user_info.exp_ts || null,
+                server: i,
               });
             }
             return json({ ok: false, message: "Esta conta encontra-se vencida ou inativa." });
@@ -153,7 +160,7 @@ async function handleRequest(request: Request): Promise<Response> {
         const v = q.get(k);
         if (v) extras.push(`${k}=${encodeURIComponent(v)}`);
       }
-      let apiUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}`;
+      let apiUrl = `${dnsDefault}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}`;
       if (extras.length) apiUrl += "&" + extras.join("&");
 
       let r = await fetch(apiUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
@@ -162,11 +169,11 @@ async function handleRequest(request: Request): Promise<Response> {
         for (const sA of dnsList) {
           const alt = `${sA}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}`;
           const rr = await fetch(alt, { headers: { "User-Agent": "Mozilla/5.0" } });
-          if (rr.ok) {
-            r = rr;
-            workingServer = dnsList.indexOf(sA);
-            break;
-          }
+if (rr.ok) {
+              r = rr;
+              defaultServer = dnsList.indexOf(sA);
+              break;
+            }
         }
       }
       const body = await r.text();
@@ -189,7 +196,7 @@ async function handleRequest(request: Request): Promise<Response> {
         // Contagens reais por categoria (sem expor a lista completa)
         if (action === "get_vod_categories" || action === "get_series_categories") {
           const countAction = action === "get_vod_categories" ? "get_vod_streams" : "get_series";
-          const countUrl = `${dns}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${countAction}`;
+          const countUrl = `${dnsDefault}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${countAction}`;
           try {
             const cr = await fetch(countUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
             if (cr.ok) {
@@ -224,15 +231,17 @@ async function handleRequest(request: Request): Promise<Response> {
     // /m/<índice>/<caminho>           -> servidor dnsList[índice] (fixado)
     if (path.startsWith("/m/")) {
       let resto = path.slice(3);
-      let idx = -1;
+      let pinIdx = -1;
       const mIdx = resto.match(/^(\d+)\//);
       if (mIdx) {
-        idx = parseInt(mIdx[1], 10);
+        pinIdx = parseInt(mIdx[1], 10);
         resto = resto.slice(mIdx[0].length);
       }
       const rel = resto + (url.search ? url.search : "");
-      let dnsSel = (idx >= 0 && idx < dnsList.length) ? dnsList[idx] : dnsList[workingServer % dnsList.length];
-      let usedIdx = dnsList.indexOf(dnsSel);
+      // Tráfego com índice na URL usa EXATAMENTE o servidor indicado;
+      // sem índice, usa o servidor padrão da última autenticação.
+      const sel = (pinIdx >= 0 && pinIdx < dnsList.length) ? pinIdx : defaultServer % dnsList.length;
+      let usedIdx = sel;
 
       const headers: Record<string, string> = {};
       for (const h of ["Range", "If-Range"]) {
@@ -240,26 +249,38 @@ async function handleRequest(request: Request): Promise<Response> {
         if (v) headers[h] = v;
       }
 
-      let response = await fetch(`${dnsSel}/${rel}`, {
-        headers: { "User-Agent": "Mozilla/5.0", ...headers },
-      });
-      if (!response.ok) {
+      let response: Response | null = null;
+      try {
+        response = await fetch(`${dnsList[sel]}/${rel}`, {
+          headers: { "User-Agent": "Mozilla/5.0", ...headers },
+        });
+      } catch {
+        response = null;
+      }
+
+      // Fallback SOMENTE quando o servidor pinado está realmente fora
+      // (timeout/erro de conexão) ou falha 5xx relevante. 404 de segmento
+      // HLS NÃO troca de servidor — pode ser apenas token expirado.
+      if (!response || response.status >= 500) {
         for (let i = 0; i < dnsList.length; i++) {
-          const srv = dnsList[i];
+          if (i === sel) continue;
           try {
-            const rr = await fetch(`${srv}/${rel}`, {
+            const rr = await fetch(`${dnsList[i]}/${rel}`, {
               headers: { "User-Agent": "Mozilla/5.0", ...headers },
             });
             if (rr.ok) {
               response = rr;
               usedIdx = i;
-              workingServer = i;
               break;
             }
           } catch {
             /* próximo */
           }
         }
+      }
+
+      if (!response) {
+        return json({ error: "Servidores indisponíveis." }, 502);
       }
 
       const ct = response.headers.get("content-type") || "";

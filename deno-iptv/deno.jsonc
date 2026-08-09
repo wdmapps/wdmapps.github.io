@@ -1,0 +1,10 @@
+{
+  "deploy": {
+    "org": "wdmapps",
+    "app": "wdmappsgithubio",
+    "runtime": {
+      "type": "dynamic",
+      "entrypoint": "./main.ts"
+    }
+  }
+}

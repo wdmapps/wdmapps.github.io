@@ -53,16 +53,22 @@ function mUrl(rel) {
     return `${API}/m/${clean}`;
 }
 
-// URL de stream ao vivo
+// índice do servidor pinado na última autenticação (/auth devolve `server`)
+function getServer() {
+    const s = parseInt(localStorage.getItem("server") || "0", 10);
+    return isNaN(s) ? 0 : s;
+}
+
+// URL de stream ao vivo (playlist + segmentos fixados no mesmo servidor)
 function liveUrl(streamId) {
     const { user, pass } = getCred();
-    return mUrl(`live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.m3u8`);
+    return mUrl(`${getServer()}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.m3u8`);
 }
 
 // URL de filme (vê qual extensão)
 function vodUrl(streamId, ext) {
     const { user, pass } = getCred();
-    return mUrl(`movie/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.${ext || "mp4"}`);
+    return mUrl(`${getServer()}/movie/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.${ext || "mp4"}`);
 }
 
 // URL de episódio de série
@@ -70,5 +76,5 @@ function vodUrl(streamId, ext) {
 // não pelo /series/... padrão (que retorna 404)
 function serieUrl(serieId, epId, ext) {
     const { user, pass } = getCred();
-    return mUrl(`movie/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${epId}.${ext || "mp4"}`);
+    return mUrl(`${getServer()}/movie/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${epId}.${ext || "mp4"}`);
 }

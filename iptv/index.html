@@ -151,6 +151,7 @@
                 if (teste && teste.ok) {
                     localStorage.setItem("username", user);
                     localStorage.setItem("password", pass);
+                    localStorage.setItem("server", String(teste.server ?? 0));
                     localStorage.setItem("logging_in", "1");
                     window.location.href = "painel.html";
                 } else {
