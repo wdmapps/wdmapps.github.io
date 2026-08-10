@@ -33,6 +33,7 @@ let defaultServer = 0;
 // (UA de navegador -> 404; VLC -> 302 para a CDN tokenizada).
 const UA_PLAYER = "VLC/3.0.20 LibVLC/3.0.20";
 const UA_WEB = "Mozilla/5.0";
+const liveAuthCache = new Map<string, number>();
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: CORS });
@@ -116,7 +117,7 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
     return line.replace(t, fix(t));
   }
   if (/URI="[^"]+"/.test(line)) {
-    return line.replace(/URI="([^"]+)"/g, (m, u) => `URI="${fix(u)}"`);
+    return line.replace(/URI="([^"]+)"/g, (_m, u) => `URI="${fix(u)}"`);
   }
   if (/^[^\s#,]+$/.test(t) && /\.(ts|m3u8|key)(\?.*)?$/i.test(t)) {
     return line.replace(t, fix(t));
@@ -124,7 +125,39 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
   return line;
 }
 
-function rewriteImages(obj: any, dnsList: string[], origin: string): void {
+function liveCredentials(rel: string): { user: string; pass: string } | null {
+  const parts = rel.split("?", 1)[0].replace(/^\/+/, "").split("/");
+  const start = parts[0] === "live" ? 1 : 0;
+  if (parts.length < start + 3) return null;
+  try {
+    return {
+      user: decodeURIComponent(parts[start]),
+      pass: decodeURIComponent(parts[start + 1]),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function ensureLiveSession(server: string, serverIdx: number, rel: string): Promise<void> {
+  const cred = liveCredentials(rel);
+  if (!cred) return;
+
+  const key = `${serverIdx}:${cred.user}`;
+  const now = Date.now();
+  if (now - (liveAuthCache.get(key) || 0) < 20_000) return;
+
+  const authUrl = `${server.replace(/\/+$/, "")}/player_api.php?username=${encodeURIComponent(cred.user)}&password=${encodeURIComponent(cred.pass)}`;
+  try {
+    const response = await fetch(authUrl, { headers: { "User-Agent": UA_WEB } });
+    await response.text();
+    if (response.ok) liveAuthCache.set(key, now);
+  } catch {
+    /* o próprio manifesto ainda pode autenticar a conta */
+  }
+}
+
+function rewriteImages(obj: unknown, dnsList: string[], origin: string): void {
   const bases = dnsList.map((d) => d.replace(/\/+$/, ""));
   const KEYS = ["stream_icon", "movie_image", "cover", "icon", "backdrop", "thumbnail"];
   if (Array.isArray(obj)) {
@@ -132,23 +165,24 @@ function rewriteImages(obj: any, dnsList: string[], origin: string): void {
     return;
   }
   if (obj && typeof obj === "object") {
-    for (const k of Object.keys(obj)) {
-      if (KEYS.includes(k) && typeof obj[k] === "string" && obj[k]) {
-        const val = obj[k] as string;
+    const record = obj as Record<string, unknown>;
+    for (const k of Object.keys(record)) {
+      if (KEYS.includes(k) && typeof record[k] === "string" && record[k]) {
+        const val = record[k] as string;
         for (const b of bases) {
           const host = b.split("//")[1];
           if (val.startsWith(b)) {
-            obj[k] = origin + "/m/" + val.slice(b.length).replace(/^\/+/, "");
+            record[k] = origin + "/m/" + val.slice(b.length).replace(/^\/+/, "");
             break;
           }
           if (val.startsWith("//" + host) || val.startsWith("http://" + host) || val.startsWith("https://" + host)) {
             const cut = val.replace(/^(https?:)?(\/\/)+[^/]+/, "");
-            obj[k] = origin + "/m/" + cut.replace(/^\/+/, "");
+            record[k] = origin + "/m/" + cut.replace(/^\/+/, "");
             break;
           }
         }
-      } else if (obj[k] && typeof obj[k] === "object") {
-        rewriteImages(obj[k], dnsList, origin);
+      } else if (record[k] && typeof record[k] === "object") {
+        rewriteImages(record[k], dnsList, origin);
       }
     }
   }
@@ -327,6 +361,8 @@ if (rr.ok) {
       }
       headers["User-Agent"] = isLive ? UA_PLAYER : UA_WEB;
 
+      if (isLive) await ensureLiveSession(dnsList[sel], sel, rel);
+
       let response: Response | null = null;
       try {
         response = await fetch(`${dnsList[sel]}/${rel}`, { headers });
@@ -334,13 +370,13 @@ if (rr.ok) {
         response = null;
       }
 
-      // Fallback SOMENTE quando o servidor pinado está realmente fora
-      // (timeout/erro de conexão) ou falha 5xx relevante. 404 de segmento
-      // HLS NÃO troca de servidor — pode ser apenas token expirado.
-      if (!response || response.status >= 500) {
+      // Segmentos tokenizados permanecem no servidor fixado. Para o
+      // manifesto inicial, porém, um 404 também tenta os demais servidores.
+      if (!response || response.status >= 500 || (isLive && response.status === 404 && /\.m3u8(\?.*)?$/i.test(rel))) {
         for (let i = 0; i < dnsList.length; i++) {
           if (i === sel) continue;
           try {
+            if (isLive) await ensureLiveSession(dnsList[i], i, rel);
             const rr = await fetch(`${dnsList[i]}/${rel}`, {
               headers: { "User-Agent": isLive ? UA_PLAYER : UA_WEB, ...headers },
             });

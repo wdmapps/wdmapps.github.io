@@ -65,6 +65,13 @@ function liveUrl(streamId) {
     return mUrl(`${getServer()}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.m3u8`);
 }
 
+// Fluxo MPEG-TS contínuo: mantém o mesmo request/IP no proxy e evita que
+// os tokens HLS sejam invalidados entre um segmento e outro.
+function liveTsUrl(streamId) {
+    const { user, pass } = getCred();
+    return mUrl(`${getServer()}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${streamId}.ts`);
+}
+
 // URL de filme (vê qual extensão)
 function vodUrl(streamId, ext) {
     const { user, pass } = getCred();
