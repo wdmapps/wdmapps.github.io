@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Museu a Meia-Noite</title>
+  <desc id="desc">Uma camera de seguranca observa uma galeria escura com uma figura misteriosa.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#30362f"/>
+      <stop offset="1" stop-color="#171b18"/>
+    </linearGradient>
+    <radialGradient id="light">
+      <stop offset="0" stop-color="#ded8c7" stop-opacity=".26"/>
+      <stop offset="1" stop-color="#ded8c7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="800" height="500" fill="#080908"/>
+  <rect x="18" y="18" width="764" height="464" fill="url(#wall)" stroke="#7e877c" stroke-width="2"/>
+  <ellipse cx="400" cy="210" rx="330" ry="220" fill="url(#light)"/>
+  <path d="M18 330h764v152H18z" fill="#121512"/>
+  <g stroke="#4f574f" opacity=".7">
+    <path d="M400 330L70 482M400 330l-160 152M400 330v152M400 330l160 152M400 330l330 152"/>
+    <path d="M18 380h764M18 430h764"/>
+  </g>
+  <g>
+    <rect x="80" y="86" width="160" height="205" fill="#111411" stroke="#b4ad94" stroke-width="9"/>
+    <rect x="96" y="102" width="128" height="173" fill="#29302b"/>
+    <ellipse cx="160" cy="164" rx="29" ry="36" fill="#9b9b8b"/>
+    <path d="M112 258q48-91 96 0z" fill="#666d64"/>
+    <circle cx="148" cy="159" r="5" fill="#e05242"/>
+    <circle cx="173" cy="159" r="5" fill="#e05242"/>
+  </g>
+  <g>
+    <rect x="319" y="76" width="175" height="220" fill="#111411" opacity=".35"/>
+    <circle cx="350" cy="69" r="4" fill="#b3b09d"/>
+    <circle cx="462" cy="69" r="4" fill="#b3b09d"/>
+  </g>
+  <g fill="#a5a698">
+    <rect x="560" y="303" width="108" height="118"/>
+    <path d="M544 320q70-55 140 0l-17 35H559z"/>
+    <ellipse cx="614" cy="250" rx="34" ry="49"/>
+  </g>
+  <g fill="#050605" transform="translate(420 325)">
+    <circle cy="-82" r="25"/>
+    <path d="M-35-55q-18 86-30 157H66Q53 31 34-55z"/>
+  </g>
+  <ellipse cx="420" cy="330" rx="95" ry="48" fill="#000" opacity=".38" filter="url(#blur)"/>
+  <g fill="none" stroke="#ded8c7" stroke-width="3">
+    <path d="M45 86V45h42M713 45h42v41M45 414v41h42M713 455h42v-41"/>
+  </g>
+  <circle cx="66" cy="67" r="8" fill="#e05242"/>
+  <text x="88" y="74" fill="#ded8c7" font-family="monospace" font-size="20" letter-spacing="4">REC / CAM 01</text>
+  <text x="49" y="450" fill="#a7aea5" font-family="monospace" font-size="17" letter-spacing="3">00:13:13</text>
+  <path d="M18 113h764M18 119h764M18 238h764M18 243h764M18 367h764M18 373h764" stroke="#000" stroke-width="2" opacity=".3"/>
+</svg>

@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0b">
+<meta name="description" content="Museu a Meia-Noite: vigie as cameras, encontre anomalias e sobreviva ao turno noturno.">
+<title>Museu &agrave; Meia-Noite | WDM Jogos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080908;
+    --ink: #101311;
+    --panel: #181c19;
+    --panel-2: #212622;
+    --paper: #ddd8c7;
+    --muted: #8f998e;
+    --dim: #596159;
+    --line: rgba(205, 211, 194, 0.2);
+    --red: #e05242;
+    --red-dark: #7e2f28;
+    --green: #a9baa7;
+    --amber: #d4b66d;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: var(--black);
+    color: var(--paper);
+    font-family: "IBM Plex Mono", Consolas, monospace;
+  }
+
+  button,
+  a { font: inherit; }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 3px;
+  }
+
+  #game-shell {
+    position: fixed;
+    inset: 0;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(79, 89, 79, 0.12), transparent 42%),
+      linear-gradient(135deg, #111410, #070807 70%);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #game-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 79px, rgba(222, 216, 199, 0.035) 80px),
+      repeating-linear-gradient(0deg, transparent 0 79px, rgba(222, 216, 199, 0.025) 80px);
+  }
+
+  .topbar {
+    position: absolute;
+    z-index: 7;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    height: 52px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    border: 1px solid var(--line);
+    background: rgba(10, 12, 10, 0.9);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(7px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 100%;
+    padding: 0 15px;
+    border-right: 1px solid var(--line);
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .brand i {
+    width: 8px;
+    height: 8px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 12px rgba(224, 82, 66, 0.8);
+    animation: record-blink 1.2s steps(1) infinite;
+  }
+
+  @keyframes record-blink { 50% { opacity: 0.25; } }
+
+  .shift-clock {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 0 22px;
+  }
+
+  .shift-clock span {
+    color: var(--muted);
+    font-size: 0.56rem;
+    letter-spacing: 0.14em;
+  }
+
+  .shift-clock strong {
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: 1.45rem;
+    letter-spacing: 0.1em;
+  }
+
+  .top-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    height: 100%;
+    padding: 0 8px 0 14px;
+    border-left: 1px solid var(--line);
+  }
+
+  .score-mini {
+    margin-right: 6px;
+    color: var(--amber);
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .utility-btn {
+    min-width: 54px;
+    height: 32px;
+    padding: 0 9px;
+    border: 1px solid rgba(221, 216, 199, 0.24);
+    border-radius: 0;
+    background: #121512;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .utility-btn:hover { color: var(--paper); border-color: var(--paper); }
+
+  .mobile-presence { display: none; }
+
+  .play-layout {
+    position: absolute;
+    z-index: 3;
+    top: max(76px, calc(env(safe-area-inset-top) + 66px));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(13px, env(safe-area-inset-bottom));
+    left: max(12px, env(safe-area-inset-left));
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr) 220px;
+    gap: 12px;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .camera-rail,
+  .side-panel {
+    min-height: 0;
+    border: 1px solid var(--line);
+    background: rgba(15, 18, 15, 0.84);
+    backdrop-filter: blur(5px);
+  }
+
+  .rail-title,
+  .panel-title {
+    margin: 0;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .camera-list {
+    display: grid;
+    gap: 7px;
+    padding: 9px;
+  }
+
+  .camera-btn {
+    position: relative;
+    min-width: 0;
+    height: 62px;
+    padding: 8px 8px 8px 13px;
+    overflow: hidden;
+    border: 1px solid rgba(221, 216, 199, 0.14);
+    border-radius: 0;
+    background: #121512;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    transition: color 130ms ease, border-color 130ms ease, background 130ms ease;
+  }
+
+  .camera-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: #354038;
+  }
+
+  .camera-btn b {
+    display: block;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: 0.93rem;
+    letter-spacing: 0.12em;
+  }
+
+  .camera-btn small {
+    display: block;
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 0.5rem;
+    letter-spacing: 0.06em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .camera-btn:hover { color: var(--paper); border-color: rgba(221, 216, 199, 0.38); }
+  .camera-btn.active { color: var(--paper); border-color: rgba(224, 82, 66, 0.58); background: #241815; }
+  .camera-btn.active::before { background: var(--red); box-shadow: 0 0 10px rgba(224, 82, 66, 0.65); }
+
+  .camera-btn.warning:not(.active) {
+    color: #d3a39c;
+    animation: camera-warning 0.7s steps(2) infinite;
+  }
+
+  @keyframes camera-warning { 50% { border-color: rgba(224, 82, 66, 0.45); } }
+
+  .camera-btn.locked {
+    color: #4d554e;
+    cursor: not-allowed;
+    background: repeating-linear-gradient(135deg, #111310 0 8px, #151815 8px 16px);
+  }
+
+  .camera-btn.locked b::after {
+    content: " / OFF";
+    color: var(--red-dark);
+    font-size: 0.7rem;
+  }
+
+  .feed-column {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .feed-frame {
+    position: relative;
+    width: min(100%, calc((100vh - 154px) * 1.7778));
+    margin: auto;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border: 1px solid rgba(221, 216, 199, 0.34);
+    background: #050605;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.44);
+  }
+
+  .feed-frame.danger { border-color: rgba(224, 82, 66, 0.55); }
+
+  #feed-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .scanlines,
+  .feed-vignette,
+  .glass-noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .scanlines {
+    opacity: 0.34;
+    mix-blend-mode: multiply;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.32) 3px, transparent 4px);
+  }
+
+  .glass-noise {
+    opacity: 0.07;
+    background-image:
+      repeating-linear-gradient(77deg, transparent 0 17px, rgba(255, 255, 255, 0.13) 18px, transparent 19px 36px);
+  }
+
+  .feed-vignette {
+    box-shadow: inset 0 0 90px 20px rgba(0, 0, 0, 0.62);
+  }
+
+  .feed-corner {
+    position: absolute;
+    z-index: 3;
+    color: rgba(231, 228, 213, 0.9);
+    font-size: clamp(0.5rem, 1vw, 0.68rem);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-shadow: 0 1px 4px #000;
+    pointer-events: none;
+  }
+
+  .feed-top-left { top: 13px; left: 14px; }
+  .feed-top-right { top: 13px; right: 14px; }
+  .feed-bottom-left { bottom: 13px; left: 14px; }
+  .feed-bottom-right { right: 14px; bottom: 13px; }
+
+  .rec-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 9px rgba(224, 82, 66, 0.8);
+  }
+
+  .feed-message {
+    position: absolute;
+    z-index: 4;
+    top: 50%;
+    left: 50%;
+    width: min(620px, calc(100% - 40px));
+    padding: 11px 16px;
+    transform: translate(-50%, -50%);
+    border-top: 1px solid rgba(221, 216, 199, 0.35);
+    border-bottom: 1px solid rgba(221, 216, 199, 0.35);
+    background: rgba(7, 9, 7, 0.82);
+    color: var(--paper);
+    opacity: 0;
+    text-align: center;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: clamp(0.72rem, 1.5vw, 1rem);
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+  }
+
+  .feed-message.show { opacity: 1; }
+  .feed-message.alert { color: #ffb1a8; border-color: rgba(224, 82, 66, 0.65); }
+  .feed-message.good { color: #d9d3a8; border-color: rgba(212, 182, 109, 0.65); }
+
+  .feed-help {
+    width: min(100%, calc((100vh - 154px) * 1.7778));
+    margin: 0 auto;
+    color: #727d73;
+    font-size: 0.55rem;
+    line-height: 1.45;
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+
+  .feed-help strong { color: var(--paper); }
+
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .presence-box { padding: 13px 12px 16px; border-bottom: 1px solid var(--line); }
+
+  .presence-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .presence-head span { color: var(--muted); font-size: 0.58rem; letter-spacing: 0.12em; }
+  .presence-head strong { font-family: "Archivo Narrow", Arial Narrow, sans-serif; font-size: 1.25rem; }
+
+  .presence-track {
+    height: 9px;
+    overflow: hidden;
+    border: 1px solid rgba(221, 216, 199, 0.22);
+    background: #090a09;
+  }
+
+  .presence-fill {
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: linear-gradient(90deg, #677a67, var(--amber), var(--red));
+    transition: transform 100ms linear;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stat-item { padding: 12px; border-right: 1px solid var(--line); }
+  .stat-item:last-child { border-right: 0; }
+  .stat-item span { display: block; color: var(--dim); font-size: 0.5rem; letter-spacing: 0.1em; }
+  .stat-item strong { display: block; margin-top: 4px; color: var(--paper); font-family: "Archivo Narrow", Arial Narrow, sans-serif; font-size: 1.35rem; }
+
+  .log-box { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+  .event-log { min-height: 0; margin: 0; padding: 7px 12px 12px; overflow: hidden; list-style: none; }
+
+  .event-log li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(221, 216, 199, 0.08);
+    color: #748077;
+    font-size: 0.53rem;
+    line-height: 1.45;
+  }
+
+  .event-log time { display: block; margin-bottom: 2px; color: #4e574f; }
+  .event-log li.good { color: #b9b68f; }
+  .event-log li.bad { color: #bd756c; }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    display: grid;
+    place-items: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding:
+      max(28px, env(safe-area-inset-top))
+      max(22px, env(safe-area-inset-right))
+      max(28px, env(safe-area-inset-bottom))
+      max(22px, env(safe-area-inset-left));
+    background:
+      linear-gradient(90deg, rgba(7, 8, 7, 0.97), rgba(7, 8, 7, 0.88) 58%, rgba(7, 8, 7, 0.42)),
+      repeating-linear-gradient(90deg, transparent 0 119px, rgba(221, 216, 199, 0.035) 120px);
+    touch-action: pan-y;
+  }
+
+  .screen-inner {
+    position: relative;
+    width: min(1020px, calc(100vw - 44px));
+    max-width: 100%;
+    animation: screen-enter 420ms ease both;
+  }
+
+  @keyframes screen-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .start-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.75fr);
+    gap: clamp(38px, 7vw, 96px);
+    align-items: end;
+  }
+
+  .case-number {
+    margin: 0 0 18px;
+    color: var(--red);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .case-number::before { content: "[ "; }
+  .case-number::after { content: " ]"; }
+
+  .game-title {
+    margin: 0;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: clamp(4.8rem, 11.5vw, 9.5rem);
+    font-weight: 700;
+    line-height: 0.73;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
+  }
+
+  .game-title span {
+    display: block;
+    margin-top: 0.18em;
+    color: transparent;
+    font-size: 0.52em;
+    letter-spacing: 0.04em;
+    -webkit-text-stroke: 1px var(--paper);
+  }
+
+  .lead {
+    max-width: 620px;
+    margin: 28px 0 0;
+    color: #adb4aa;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: clamp(1rem, 2vw, 1.28rem);
+    line-height: 1.45;
+  }
+
+  .dossier {
+    border-top: 2px solid var(--red);
+    border-bottom: 1px solid var(--line);
+    background: rgba(20, 24, 20, 0.72);
+  }
+
+  .dossier-row {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 13px;
+    border-bottom: 1px solid rgba(221, 216, 199, 0.1);
+  }
+
+  .dossier-row:last-child { border-bottom: 0; }
+  .dossier-row b { color: var(--red); font-family: "Archivo Narrow", Arial Narrow, sans-serif; font-size: 0.75rem; letter-spacing: 0.13em; }
+  .dossier-row span { color: #949e94; font-size: 0.62rem; line-height: 1.5; }
+
+  .primary-btn,
+  .secondary-btn {
+    min-height: 56px;
+    margin-top: 15px;
+    border-radius: 0;
+    cursor: pointer;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .primary-btn {
+    width: 100%;
+    border: 1px solid var(--red);
+    background: var(--red);
+    color: #160b09;
+    font-size: 0.95rem;
+  }
+
+  .primary-btn:hover { color: var(--red); background: transparent; }
+
+  .secondary-btn {
+    padding: 0 20px;
+    border: 1px solid rgba(221, 216, 199, 0.3);
+    background: #121512;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .secondary-btn:hover { color: var(--paper); border-color: var(--paper); }
+
+  .menu-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    color: #5d665e;
+    font-size: 0.56rem;
+    letter-spacing: 0.06em;
+  }
+
+  .menu-meta a { color: #8f998f; text-underline-offset: 3px; }
+
+  .end-panel,
+  .pause-panel {
+    width: min(720px, 100%);
+    margin: 0 auto;
+    padding: 2px 0 2px 24px;
+    border-left: 4px solid var(--red);
+  }
+
+  .end-panel.safe { border-color: var(--amber); }
+
+  .screen-kicker {
+    margin: 0 0 12px;
+    color: var(--red);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .screen-title {
+    margin: 0;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: clamp(3.7rem, 9vw, 7rem);
+    font-weight: 700;
+    line-height: 0.83;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+  }
+
+  .screen-copy {
+    max-width: 620px;
+    margin: 19px 0;
+    color: #a9b1a7;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 20px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .result-item { padding: 12px 8px 12px 0; }
+  .result-item span { display: block; color: var(--dim); font-size: 0.54rem; letter-spacing: 0.11em; }
+  .result-item strong { display: block; margin-top: 4px; color: var(--amber); font-family: "Archivo Narrow", Arial Narrow, sans-serif; font-size: 1.65rem; }
+
+  .evidence-list { display: grid; gap: 5px; margin: 16px 0; }
+  .evidence {
+    padding: 8px 10px;
+    border-left: 2px solid #394139;
+    background: rgba(20, 24, 20, 0.72);
+    color: #5f685f;
+    font-size: 0.6rem;
+  }
+  .evidence.found { border-color: var(--red); color: #c9a19a; }
+
+  .button-row { display: flex; gap: 8px; }
+  .button-row .primary-btn { max-width: 340px; }
+
+  @media (max-width: 940px) {
+    .play-layout { grid-template-columns: 145px minmax(0, 1fr); }
+    .side-panel { display: none; }
+    .mobile-presence { display: block; width: 76px; }
+    .mobile-presence .presence-track { height: 5px; }
+  }
+
+  @media (max-width: 700px) {
+    .topbar { height: 46px; grid-template-columns: 1fr auto auto; }
+    .brand { padding: 0 9px; font-size: 0.83rem; }
+    .brand i { margin-right: 7px; }
+    .shift-clock { gap: 0; padding: 0 9px; }
+    .shift-clock span { display: none; }
+    .shift-clock strong { font-size: 1.05rem; }
+    .top-right { gap: 5px; padding-left: 7px; }
+    .score-mini { display: none; }
+    .utility-btn { min-width: 40px; height: 29px; padding: 0 6px; font-size: 0.52rem; }
+    #sound-btn { font-size: 0; }
+    #sound-btn::after { content: "SOM"; font-size: 0.52rem; }
+    .mobile-presence { width: 54px; }
+    .play-layout {
+      top: max(66px, calc(env(safe-area-inset-top) + 56px));
+      right: 8px;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      left: 8px;
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+    .feed-column { grid-row: 1; }
+    .feed-frame,
+    .feed-help { width: 100%; }
+    .feed-help { font-size: 0.5rem; }
+    .camera-rail { grid-row: 2; }
+    .rail-title { display: none; }
+    .camera-list { grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 6px; }
+    .camera-btn { height: 46px; padding: 5px 5px 5px 9px; }
+    .camera-btn b { font-size: 0.75rem; }
+    .camera-btn small { margin-top: 2px; font-size: 0.43rem; }
+    .feed-corner { font-size: 0.46rem; }
+    .feed-top-left,
+    .feed-top-right { top: 8px; }
+    .feed-bottom-left,
+    .feed-bottom-right { bottom: 8px; }
+    .feed-top-left,
+    .feed-bottom-left { left: 9px; }
+    .feed-top-right,
+    .feed-bottom-right { right: 9px; }
+    .start-grid { grid-template-columns: 1fr; gap: 32px; }
+    .game-title { font-size: clamp(4.5rem, 23vw, 7.2rem); }
+    .lead { margin-top: 23px; }
+    .screen { place-items: start center; }
+    .screen-inner { margin: auto 0; }
+    .menu-meta { flex-wrap: wrap; }
+  }
+
+  @media (max-height: 590px) and (orientation: landscape) {
+    .topbar { height: 42px; }
+    .play-layout { top: 60px; }
+    .camera-btn { height: 46px; }
+    .camera-list { gap: 4px; }
+    .start-grid { grid-template-columns: 1.1fr 0.9fr; gap: 34px; }
+    .game-title { font-size: clamp(4.3rem, 19vh, 6rem); }
+    .lead { margin-top: 15px; font-size: 0.95rem; }
+    .dossier-row { padding: 7px 10px; }
+    .primary-btn,
+    .secondary-btn { min-height: 43px; margin-top: 9px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen-inner,
+    .camera-btn.warning,
+    .brand i { animation: none; }
+    .feed-message,
+    .presence-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main id="game-shell">
+  <header class="topbar" id="topbar" hidden>
+    <div class="brand"><i></i>Museu / Vigil&acirc;ncia</div>
+    <div class="shift-clock"><span>HOR&Aacute;RIO</span><strong id="shift-time">00:00</strong></div>
+    <div class="top-right">
+      <div class="mobile-presence" aria-label="N&iacute;vel de presen&ccedil;a"><div class="presence-track"><div class="presence-fill" id="mobile-presence-fill"></div></div></div>
+      <span class="score-mini" id="score-mini">000000</span>
+      <button class="utility-btn" id="sound-btn" type="button" aria-pressed="false">SOM ON</button>
+      <button class="utility-btn" id="pause-btn" type="button">PAUSA</button>
+    </div>
+  </header>
+
+  <section class="play-layout" id="play-layout" hidden>
+    <nav class="camera-rail" aria-label="C&acirc;meras do museu">
+      <h2 class="rail-title">Circuito interno</h2>
+      <div class="camera-list">
+        <button class="camera-btn active" data-room="0" type="button"><b>CAM 01</b><small>GALERIA NORTE</small></button>
+        <button class="camera-btn" data-room="1" type="button"><b>CAM 02</b><small>ESCULTURAS</small></button>
+        <button class="camera-btn" data-room="2" type="button"><b>CAM 03</b><small>COLE&Ccedil;&Atilde;O EG&Iacute;PCIA</small></button>
+        <button class="camera-btn" data-room="3" type="button"><b>CAM 04</b><small>ARQUIVO</small></button>
+        <button class="camera-btn" data-room="4" type="button"><b>CAM 05</b><small>SAL&Atilde;O CENTRAL</small></button>
+        <button class="camera-btn locked" data-room="5" type="button"><b>CAM 06</b><small>SEM REGISTRO</small></button>
+      </div>
+    </nav>
+
+    <div class="feed-column">
+      <div class="feed-frame" id="feed-frame">
+        <canvas id="feed-canvas" width="960" height="540" aria-label="Imagem da c&acirc;mera selecionada">
+          Seu navegador precisa oferecer suporte ao elemento canvas.
+        </canvas>
+        <div class="scanlines"></div>
+        <div class="glass-noise"></div>
+        <div class="feed-vignette"></div>
+        <div class="feed-corner feed-top-left"><span class="rec-dot"></span>REC</div>
+        <div class="feed-corner feed-top-right" id="feed-code">CAM 01</div>
+        <div class="feed-corner feed-bottom-left" id="feed-room">GALERIA NORTE</div>
+        <div class="feed-corner feed-bottom-right" id="feed-time">00:00:00</div>
+        <div class="feed-message" id="feed-message" role="status" aria-live="polite"></div>
+      </div>
+      <div class="feed-help"><strong>CLIQUE NA MUDAN&Ccedil;A</strong> para registrar uma anomalia. Use as setas ou as teclas <strong>1-6</strong> para trocar de c&acirc;mera.</div>
+    </div>
+
+    <aside class="side-panel">
+      <h2 class="panel-title">Sala de seguran&ccedil;a</h2>
+      <div class="presence-box">
+        <div class="presence-head"><span>PRESEN&Ccedil;A</span><strong id="presence-value">0%</strong></div>
+        <div class="presence-track"><div class="presence-fill" id="presence-fill"></div></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item"><span>ENCONTRADAS</span><strong id="found-value">0</strong></div>
+        <div class="stat-item"><span>ERROS</span><strong id="errors-value">0</strong></div>
+      </div>
+      <div class="log-box">
+        <h2 class="panel-title">Registro do turno</h2>
+        <ol class="event-log" id="event-log"></ol>
+      </div>
+    </aside>
+  </section>
+
+  <section class="screen" id="start-screen">
+    <div class="screen-inner start-grid">
+      <div>
+        <p class="case-number">Arquivo de incidente 00-13</p>
+        <h1 class="game-title">Museu <span>&agrave; meia-noite</span></h1>
+        <p class="lead">O museu fechou &agrave;s 23:47. &Agrave; meia-noite, objetos come&ccedil;aram a aparecer em lugares onde nunca estiveram. Voc&ecirc; &eacute; a &uacute;nica pessoa ainda no pr&eacute;dio.</p>
+      </div>
+      <div>
+        <div class="dossier" aria-label="Como jogar">
+          <div class="dossier-row"><b>MEMORIZE</b><span>Observe cada sala durante a inspe&ccedil;&atilde;o inicial.</span></div>
+          <div class="dossier-row"><b>COMPARE</b><span>Troque de c&acirc;mera e procure objetos, sombras ou pessoas diferentes.</span></div>
+          <div class="dossier-row"><b>REGISTRE</b><span>Clique diretamente na mudan&ccedil;a. Um clique errado aumenta a presen&ccedil;a.</span></div>
+          <div class="dossier-row"><b>SOBREVIVA</b><span>Mantenha a sala de seguran&ccedil;a isolada at&eacute; as 06:00.</span></div>
+        </div>
+        <button class="primary-btn" id="start-btn" type="button">Iniciar inspe&ccedil;&atilde;o</button>
+        <div class="menu-meta">
+          <span>RECORDE: <strong id="menu-best">000000</strong></span>
+          <a href="index.html">VOLTAR AO ARCADE</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="pause-screen" hidden>
+    <div class="screen-inner pause-panel">
+      <p class="screen-kicker">Grava&ccedil;&atilde;o suspensa</p>
+      <h2 class="screen-title">N&atilde;o tire os olhos</h2>
+      <p class="screen-copy">As c&acirc;meras foram pausadas, mas o museu n&atilde;o foi.</p>
+      <div class="button-row">
+        <button class="primary-btn" id="resume-btn" type="button">Voltar &agrave;s c&acirc;meras</button>
+        <button class="secondary-btn" id="quit-btn" type="button">Abandonar turno</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="end-screen" hidden>
+    <div class="screen-inner end-panel" id="end-panel">
+      <p class="screen-kicker" id="end-kicker">Relat&oacute;rio 06:00</p>
+      <h2 class="screen-title" id="end-title">Turno encerrado</h2>
+      <p class="screen-copy" id="end-copy"></p>
+      <div class="result-grid">
+        <div class="result-item"><span>PONTOS</span><strong id="end-score">0</strong></div>
+        <div class="result-item"><span>ANOMALIAS</span><strong id="end-found">0</strong></div>
+        <div class="result-item"><span>ERROS</span><strong id="end-errors">0</strong></div>
+      </div>
+      <div class="evidence-list" id="evidence-list"></div>
+      <div class="button-row">
+        <button class="primary-btn" id="retry-btn" type="button">Novo turno</button>
+        <button class="secondary-btn" id="menu-btn" type="button">Menu</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const WIDTH = 960;
+  const HEIGHT = 540;
+  const SHIFT_LENGTH = 108;
+  const MEMORY_LENGTH = 11;
+  const BEST_KEY = "museu_meia_noite_best_v1";
+  const MUTE_KEY = "museu_meia_noite_muted_v1";
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const canvas = document.getElementById("feed-canvas");
+  const ctx = canvas.getContext("2d");
+  const topbar = document.getElementById("topbar");
+  const playLayout = document.getElementById("play-layout");
+  const startScreen = document.getElementById("start-screen");
+  const pauseScreen = document.getElementById("pause-screen");
+  const endScreen = document.getElementById("end-screen");
+  const endPanel = document.getElementById("end-panel");
+  const feedFrame = document.getElementById("feed-frame");
+  const feedMessage = document.getElementById("feed-message");
+  const shiftTime = document.getElementById("shift-time");
+  const feedTime = document.getElementById("feed-time");
+  const feedCode = document.getElementById("feed-code");
+  const feedRoom = document.getElementById("feed-room");
+  const scoreMini = document.getElementById("score-mini");
+  const presenceValue = document.getElementById("presence-value");
+  const presenceFill = document.getElementById("presence-fill");
+  const mobilePresenceFill = document.getElementById("mobile-presence-fill");
+  const foundValue = document.getElementById("found-value");
+  const errorsValue = document.getElementById("errors-value");
+  const eventLog = document.getElementById("event-log");
+  const soundButton = document.getElementById("sound-btn");
+  const cameraButtons = Array.from(document.querySelectorAll(".camera-btn"));
+  const menuBest = document.getElementById("menu-best");
+
+  const rooms = [
+    {
+      code: "CAM 01",
+      name: "GALERIA NORTE",
+      anomalies: [
+        { key: "portrait-eyes", label: "OLHOS NO RETRATO", region: [78, 92, 205, 245] },
+        { key: "painting-gone", label: "QUADRO AUSENTE", region: [365, 72, 218, 245] },
+        { key: "bust-turned", label: "BUSTO DESLOCADO", region: [680, 215, 140, 220] },
+        { key: "gallery-visitor", label: "VISITANTE APOS O FECHAMENTO", region: [810, 170, 135, 310] },
+        { key: "extra-frame", label: "MOLDURA NAO CATALOGADA", region: [612, 72, 112, 155] }
+      ]
+    },
+    {
+      code: "CAM 02",
+      name: "ESCULTURAS",
+      anomalies: [
+        { key: "headless-statue", label: "CABECA DA ESTATUA AUSENTE", region: [365, 70, 225, 380] },
+        { key: "moved-statue", label: "ESCULTURA DESLOCADA", region: [75, 160, 220, 295] },
+        { key: "sculpture-visitor", label: "FIGURA ENTRE AS OBRAS", region: [730, 145, 150, 335] },
+        { key: "broken-rope", label: "BARREIRA ROMPIDA", region: [205, 355, 540, 125] },
+        { key: "ceiling-shadow", label: "SOMBRA NO TETO", region: [170, 38, 560, 125] }
+      ]
+    },
+    {
+      code: "CAM 03",
+      name: "COLECAO EGIPCIA",
+      anomalies: [
+        { key: "sarc-open", label: "SARCOFAGO ABERTO", region: [330, 55, 300, 420], group: "sarc" },
+        { key: "sarc-eyes", label: "REFLEXO NO SARCOFAGO", region: [390, 90, 185, 130], group: "sarc" },
+        { key: "jar-gone", label: "VASIJA AUSENTE", region: [105, 315, 155, 155] },
+        { key: "footprints", label: "PEGADAS NA AREIA", region: [580, 380, 280, 125] },
+        { key: "egypt-priest", label: "FIGURA JUNTO A PAREDE", region: [775, 120, 160, 350] }
+      ]
+    },
+    {
+      code: "CAM 04",
+      name: "ARQUIVO",
+      anomalies: [
+        { key: "clock-wrong", label: "RELOGIO MARCANDO 13:13", region: [405, 42, 145, 135] },
+        { key: "drawer-open", label: "GAVETA ABERTA", region: [545, 285, 270, 170] },
+        { key: "book-gap", label: "DOCUMENTOS AUSENTES", region: [58, 78, 265, 300] },
+        { key: "under-desk", label: "PRESENCA SOB A MESA", region: [390, 350, 230, 160] },
+        { key: "file-floor", label: "PASTA FORA DO ARQUIVO", region: [195, 395, 210, 105] }
+      ]
+    },
+    {
+      code: "CAM 05",
+      name: "SALAO CENTRAL",
+      anomalies: [
+        { key: "door-open", label: "PORTA DE SERVICO ABERTA", region: [680, 160, 220, 325] },
+        { key: "stair-figure", label: "FIGURA NA ESCADARIA", region: [370, 165, 220, 300] },
+        { key: "banner-change", label: "TEXTO ALTERADO NO ESTANDARTE", region: [65, 60, 205, 330] },
+        { key: "chandelier-gone", label: "LUSTRE AUSENTE", region: [325, 20, 310, 210] },
+        { key: "extra-portrait", label: "RETRATO NAO CATALOGADO", region: [730, 55, 150, 150] }
+      ]
+    },
+    {
+      code: "CAM 06",
+      name: "RESERVA 13",
+      anomalies: [
+        { key: "covered-moved", label: "PECA COBERTA DESLOCADA", region: [70, 165, 260, 315] },
+        { key: "wall-symbol", label: "MARCA NA PAREDE", region: [45, 40, 190, 145] },
+        { key: "mirror-face", label: "EVIDENCIA 01 / REFLEXO", region: [340, 65, 225, 345], special: 0 },
+        { key: "crate-open", label: "EVIDENCIA 02 / CAIXA 1913", region: [585, 275, 260, 205], special: 1 },
+        { key: "cage-figure", label: "EVIDENCIA 03 / OCUPANTE", region: [745, 75, 185, 350], special: 2 }
+      ]
+    }
+  ];
+
+  const evidenceText = [
+    "O reflexo usa o uniforme do primeiro vigia.",
+    "A caixa 1913 chegou ao museu sem remetente.",
+    "A grade foi construida ao redor de algo que ja estava aqui."
+  ];
+
+  const anomalyMap = new Map();
+  rooms.forEach(function (room, roomIndex) {
+    room.anomalies.forEach(function (anomaly) {
+      anomalyMap.set(anomaly.key, Object.assign({ room: roomIndex }, anomaly));
+    });
+  });
+
+  let state = "menu";
+  let game = createGame();
+  let lastFrame = performance.now();
+  let renderTime = 0;
+  let messageTimer = 0;
+  let hudTimer = 0;
+  let audioContext = null;
+  let humOscillator = null;
+  let humGain = null;
+  let noiseSource = null;
+  let muted = readStored(MUTE_KEY, "0") === "1";
+
+  function createGame() {
+    return {
+      elapsed: 0,
+      memoryLeft: MEMORY_LENGTH,
+      score: 0,
+      threat: 0,
+      found: 0,
+      errors: 0,
+      combo: 0,
+      comboTimer: 0,
+      currentRoom: 0,
+      active: [],
+      seen: new Set(),
+      roomUnlocked: false,
+      specialFound: new Set(),
+      specialSpawned: new Set(),
+      nextSpawn: 2.4,
+      transition: 1,
+      wrongFlash: 0,
+      reticle: null,
+      result: null,
+      logs: []
+    };
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function random(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function pad(value, size) {
+    return String(Math.max(0, Math.floor(value))).padStart(size, "0");
+  }
+
+  function readStored(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return value === null ? fallback : value;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function writeStored(key, value) {
+    try {
+      localStorage.setItem(key, String(value));
+    } catch (error) {
+      // Storage is optional for gameplay.
+    }
+  }
+
+  function getBest() {
+    const value = Number.parseInt(readStored(BEST_KEY, "0"), 10);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function showGameUi(visible) {
+    topbar.hidden = !visible;
+    playLayout.hidden = !visible;
+  }
+
+  function startGame() {
+    ensureAudio();
+    startAmbient();
+    game = createGame();
+    state = "memorize";
+    startScreen.hidden = true;
+    pauseScreen.hidden = true;
+    endScreen.hidden = true;
+    showGameUi(true);
+    eventLog.replaceChildren();
+    resetCameraButtons();
+    selectRoom(0, true);
+    addLog("INSPECAO INICIAL", "Memorize cada sala antes da meia-noite.", "");
+    showMessage("INSPECAO INICIAL / MEMORIZE AS SALAS", "", 2600);
+    updateHud(true);
+    playTone(220, 0.16, "sine", 0.04, 330);
+  }
+
+  function returnToMenu() {
+    state = "menu";
+    game = createGame();
+    startScreen.hidden = false;
+    pauseScreen.hidden = true;
+    endScreen.hidden = true;
+    showGameUi(false);
+    menuBest.textContent = pad(getBest(), 6);
+    setAmbientLevel(0.004);
+  }
+
+  function togglePause(forceResume) {
+    if ((state === "running" || state === "memorize") && !forceResume) {
+      game.pausedState = state;
+      state = "paused";
+      pauseScreen.hidden = false;
+      setAmbientLevel(0.004);
+      return;
+    }
+    if (state === "paused") {
+      state = game.pausedState || "running";
+      pauseScreen.hidden = true;
+      setAmbientLevel(0.014);
+      lastFrame = performance.now();
+    }
+  }
+
+  function finishGame(survived) {
+    if (state !== "running") return;
+    state = "ended";
+    game.result = survived ? "survived" : "caught";
+    showGameUi(false);
+
+    const isRecord = game.score > getBest();
+    if (isRecord) writeStored(BEST_KEY, game.score);
+
+    const secret = survived && game.specialFound.size === 3;
+    const endTitle = document.getElementById("end-title");
+    const endKicker = document.getElementById("end-kicker");
+    const endCopy = document.getElementById("end-copy");
+    endPanel.classList.toggle("safe", survived);
+
+    if (!survived) {
+      endKicker.textContent = "SINAL PERDIDO / " + formatClock(game.elapsed);
+      endTitle.textContent = "A porta abriu";
+      endCopy.textContent = "A ultima camera registrou a sala de seguranca vazia. O museu abriu normalmente as 09:00, mas seu nome nao aparece mais na escala.";
+      playNoise(0.9, 0.14, 260);
+      playTone(95, 0.9, "sawtooth", 0.07, 38);
+    } else if (secret) {
+      endKicker.textContent = "ARQUIVO 00-13 / COMPLETO";
+      endTitle.textContent = "Ele se lembrou";
+      endCopy.textContent = "As 06:00, a Reserva 13 estava vazia. No livro de ponto de 1913, uma nova assinatura apareceu com o seu nome e a data de hoje.";
+      playChord([174, 220, 261, 349], 1.25, 0.035);
+    } else {
+      endKicker.textContent = "RELATORIO DO TURNO / 06:00";
+      endTitle.textContent = "Museu fechado";
+      endCopy.textContent = "O primeiro funcionario chegou enquanto as cameras voltavam ao normal. Ninguem acreditou no relatorio, mas nenhuma obra deixou o predio.";
+      playChord([196, 247, 294, 392], 1.1, 0.032);
+    }
+
+    if (isRecord) endCopy.textContent += " Novo recorde de vigilancia.";
+    document.getElementById("end-score").textContent = pad(game.score, 6);
+    document.getElementById("end-found").textContent = String(game.found);
+    document.getElementById("end-errors").textContent = String(game.errors);
+    renderEvidence();
+    endScreen.hidden = false;
+    setAmbientLevel(survived ? 0.003 : 0.009);
+  }
+
+  function renderEvidence() {
+    const list = document.getElementById("evidence-list");
+    list.replaceChildren();
+    evidenceText.forEach(function (text, index) {
+      const item = document.createElement("div");
+      const found = game.specialFound.has(index);
+      item.className = "evidence" + (found ? " found" : "");
+      item.textContent = "EVIDENCIA 0" + (index + 1) + " / " + (found ? text : "NAO RECUPERADA");
+      list.appendChild(item);
+    });
+  }
+
+  function resetCameraButtons() {
+    cameraButtons.forEach(function (button, index) {
+      button.classList.toggle("active", index === 0);
+      button.classList.remove("warning");
+      button.classList.toggle("locked", index === 5);
+      if (index === 5) button.querySelector("small").textContent = "SEM REGISTRO";
+    });
+  }
+
+  function update(dt) {
+    game.transition = Math.max(0, game.transition - dt * 2.8);
+    game.wrongFlash = Math.max(0, game.wrongFlash - dt * 2.4);
+    if (game.reticle) {
+      game.reticle.life -= dt;
+      if (game.reticle.life <= 0) game.reticle = null;
+    }
+
+    if (state === "memorize") {
+      game.memoryLeft -= dt;
+      if (game.memoryLeft <= 0) {
+        state = "running";
+        game.memoryLeft = 0;
+        game.nextSpawn = 1.4;
+        addLog("00:00", "Turno iniciado. Movimento detectado no circuito.", "bad");
+        showMessage("MEIA-NOITE / REGISTRE TODA MUDANCA", "alert", 2800);
+        playTone(110, 0.55, "sine", 0.05, 82);
+      }
+      updateHudThrottled(dt);
+      return;
+    }
+
+    if (state !== "running") return;
+
+    game.elapsed += dt;
+    const progress = clamp(game.elapsed / SHIFT_LENGTH, 0, 1);
+
+    if (game.elapsed >= SHIFT_LENGTH) {
+      finishGame(true);
+      return;
+    }
+
+    if (!game.roomUnlocked && progress >= 0.52) unlockReserve();
+
+    const specialKeys = ["mirror-face", "crate-open", "cage-figure"];
+    const specialTimes = [0.59, 0.74, 0.89];
+    specialTimes.forEach(function (threshold, index) {
+      if (progress >= threshold && !game.specialSpawned.has(index)) {
+        game.specialSpawned.add(index);
+        spawnSpecific(specialKeys[index]);
+      }
+    });
+
+    game.nextSpawn -= dt;
+    const maxActive = 2 + (progress > 0.38 ? 1 : 0) + (progress > 0.76 ? 1 : 0);
+    if (game.nextSpawn <= 0 && game.active.length < maxActive) {
+      spawnRandomAnomaly(progress);
+      game.nextSpawn = random(7.2, 10.8) - progress * 1.8;
+    }
+
+    let pressure = 0;
+    game.active.forEach(function (active) {
+      active.age += dt;
+      pressure += 0.21 + progress * 0.16;
+      if (active.age > 18) pressure += 0.32;
+    });
+    game.threat = clamp(game.threat + pressure * dt, 0, 100);
+
+    if (game.threat >= 100) {
+      finishGame(false);
+      return;
+    }
+
+    game.comboTimer -= dt;
+    if (game.comboTimer <= 0) game.combo = 0;
+    updateHudThrottled(dt);
+  }
+
+  function updateHudThrottled(dt) {
+    hudTimer -= dt;
+    if (hudTimer <= 0) {
+      hudTimer = 0.08;
+      updateHud(false);
+    }
+  }
+
+  function unlockReserve() {
+    game.roomUnlocked = true;
+    cameraButtons[5].classList.remove("locked");
+    cameraButtons[5].querySelector("small").textContent = "RESERVA 13";
+    addLog(formatClock(game.elapsed), "Uma sexta camera apareceu no circuito.", "bad");
+    showMessage("CAM 06 CONECTADA / LOCAL NAO CONSTA NA PLANTA", "alert", 3600);
+    playAlert();
+  }
+
+  function spawnSpecific(key) {
+    const definition = anomalyMap.get(key);
+    if (!definition || game.active.some(function (item) { return item.key === key; })) return;
+    game.active.push({ key: key, room: definition.room, age: 0 });
+    game.seen.add(key);
+    addLog(formatClock(game.elapsed), "Interferencia forte no canal 06.", "bad");
+    showMessage("SINAL FORA DO CATALOGO", "alert", 1700);
+    playAlert();
+  }
+
+  function spawnRandomAnomaly(progress) {
+    const unlockedRooms = game.roomUnlocked ? rooms : rooms.slice(0, 5);
+    let candidates = [];
+
+    unlockedRooms.forEach(function (room, roomIndex) {
+      const roomActive = game.active.filter(function (item) { return item.room === roomIndex; });
+      if (roomActive.length >= 2) return;
+      room.anomalies.forEach(function (definition) {
+        if (definition.special !== undefined || game.seen.has(definition.key)) return;
+        const conflict = game.active.some(function (active) {
+          const other = anomalyMap.get(active.key);
+          return active.key === definition.key || (definition.group && other.group === definition.group);
+        });
+        if (!conflict) candidates.push(Object.assign({ room: roomIndex }, definition));
+      });
+    });
+
+    if (!candidates.length) {
+      game.seen.clear();
+      candidates = [];
+      unlockedRooms.forEach(function (room, roomIndex) {
+        room.anomalies.forEach(function (definition) {
+          if (definition.special === undefined && !game.active.some(function (item) { return item.key === definition.key; })) {
+            candidates.push(Object.assign({ room: roomIndex }, definition));
+          }
+        });
+      });
+    }
+
+    if (!candidates.length) return;
+    const choice = candidates[Math.floor(Math.random() * candidates.length)];
+    game.active.push({ key: choice.key, room: choice.room, age: 0 });
+    game.seen.add(choice.key);
+    addLog(formatClock(game.elapsed), progress > 0.66 ? "Oscilacao severa detectada." : "Oscilacao detectada no circuito.", "bad");
+    playAnomaly();
+  }
+
+  function selectRoom(index, silent) {
+    if (index === 5 && !game.roomUnlocked) {
+      showMessage("CAM 06 / CANAL INEXISTENTE", "alert", 1500);
+      playTone(85, 0.13, "square", 0.035, 65);
+      return;
+    }
+    game.currentRoom = index;
+    game.transition = silent ? 0.45 : 1;
+    cameraButtons.forEach(function (button, buttonIndex) {
+      button.classList.toggle("active", buttonIndex === index);
+    });
+    feedCode.textContent = rooms[index].code;
+    feedRoom.textContent = rooms[index].name;
+    if (!silent) playCameraSwitch();
+  }
+
+  function cycleRoom(direction) {
+    if (state !== "running" && state !== "memorize") return;
+    const count = game.roomUnlocked ? 6 : 5;
+    selectRoom((game.currentRoom + direction + count) % count, false);
+  }
+
+  function reportAt(x, y) {
+    if (state === "memorize") {
+      game.reticle = { x: x, y: y, life: 0.45, hit: null };
+      showMessage("INSPECAO INICIAL / APENAS OBSERVE", "", 1100);
+      return;
+    }
+    if (state !== "running") return;
+
+    let matchIndex = -1;
+    for (let index = game.active.length - 1; index >= 0; index -= 1) {
+      const active = game.active[index];
+      if (active.room !== game.currentRoom) continue;
+      const definition = anomalyMap.get(active.key);
+      const region = definition.region;
+      if (x >= region[0] && x <= region[0] + region[2] && y >= region[1] && y <= region[1] + region[3]) {
+        matchIndex = index;
+        break;
+      }
+    }
+
+    if (matchIndex >= 0) resolveAnomaly(matchIndex, x, y);
+    else registerError(x, y);
+  }
+
+  function resolveAnomaly(index, x, y) {
+    const active = game.active[index];
+    const definition = anomalyMap.get(active.key);
+    game.active.splice(index, 1);
+    game.found += 1;
+    game.combo = game.comboTimer > 0 ? Math.min(4, game.combo + 1) : 1;
+    game.comboTimer = 5;
+    const speedBonus = Math.max(0, Math.round(220 - active.age * 8));
+    const points = (220 + speedBonus) * game.combo;
+    game.score += points;
+    game.threat = Math.max(0, game.threat - 7);
+    game.transition = 0.55;
+    game.reticle = { x: x, y: y, life: 0.75, hit: true };
+
+    if (definition.special !== undefined) {
+      game.specialFound.add(definition.special);
+      showMessage(definition.label + " / ARQUIVADA", "good", 3000);
+      addLog(formatClock(game.elapsed), definition.label + " recuperada.", "good");
+      playEvidence();
+    } else {
+      showMessage("ANOMALIA REGISTRADA  +" + points + (game.combo > 1 ? "  SEQUENCIA x" + game.combo : ""), "good", 1500);
+      addLog(formatClock(game.elapsed), rooms[active.room].code + " / " + definition.label + ".", "good");
+      playCorrect(game.combo);
+    }
+    updateHud(true);
+  }
+
+  function registerError(x, y) {
+    game.errors += 1;
+    game.combo = 0;
+    game.comboTimer = 0;
+    game.score = Math.max(0, game.score - 80);
+    game.threat = clamp(game.threat + 12, 0, 100);
+    game.wrongFlash = 1;
+    game.transition = 0.7;
+    game.reticle = { x: x, y: y, life: 0.65, hit: false };
+    addLog(formatClock(game.elapsed), rooms[game.currentRoom].code + " / Falso registro.", "bad");
+    showMessage("FALSO REGISTRO / A PRESENCA SE APROXIMA", "alert", 1900);
+    playWrong();
+    if (game.threat >= 100) finishGame(false);
+    updateHud(true);
+  }
+
+  function showMessage(text, tone, duration) {
+    clearTimeout(messageTimer);
+    feedMessage.textContent = text;
+    feedMessage.className = "feed-message" + (tone ? " " + tone : "");
+    requestAnimationFrame(function () { feedMessage.classList.add("show"); });
+    messageTimer = window.setTimeout(function () { feedMessage.classList.remove("show"); }, duration || 1800);
+  }
+
+  function addLog(time, text, tone) {
+    const item = document.createElement("li");
+    item.className = tone || "";
+    const stamp = document.createElement("time");
+    stamp.textContent = time;
+    item.appendChild(stamp);
+    item.appendChild(document.createTextNode(text));
+    eventLog.prepend(item);
+    while (eventLog.children.length > 6) eventLog.lastElementChild.remove();
+  }
+
+  function formatClock(elapsed) {
+    const totalMinutes = Math.min(360, Math.floor((elapsed / SHIFT_LENGTH) * 360));
+    return pad(Math.floor(totalMinutes / 60), 2) + ":" + pad(totalMinutes % 60, 2);
+  }
+
+  function updateHud(force) {
+    const clock = state === "memorize" ? "--:" + pad(Math.ceil(game.memoryLeft), 2) : formatClock(game.elapsed);
+    shiftTime.textContent = clock;
+    feedTime.textContent = state === "memorize" ? "INSPECAO -" + pad(Math.ceil(game.memoryLeft), 2) : clock + ":" + pad(Math.floor((game.elapsed * 7) % 60), 2);
+    scoreMini.textContent = pad(game.score, 6);
+    presenceValue.textContent = Math.round(game.threat) + "%";
+    const scale = "scaleX(" + (game.threat / 100) + ")";
+    presenceFill.style.transform = scale;
+    mobilePresenceFill.style.transform = scale;
+    foundValue.textContent = String(game.found);
+    errorsValue.textContent = String(game.errors);
+    feedFrame.classList.toggle("danger", game.threat >= 68);
+    soundButton.textContent = muted ? "SOM OFF" : "SOM ON";
+    soundButton.setAttribute("aria-pressed", muted ? "true" : "false");
+
+    cameraButtons.forEach(function (button, index) {
+      const oldAnomaly = game.active.some(function (active) { return active.room === index && active.age > 17; });
+      button.classList.toggle("warning", oldAnomaly);
+    });
+    if (force) hudTimer = 0.08;
+  }
+
+  function activeSet() {
+    return new Set(game.active.filter(function (active) {
+      return active.room === game.currentRoom;
+    }).map(function (active) { return active.key; }));
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    const anomalies = activeSet();
+    const shake = game.threat > 82 && Math.random() < 0.12 ? random(-2.5, 2.5) : 0;
+    ctx.save();
+    if (shake) ctx.translate(shake, 0);
+
+    switch (game.currentRoom) {
+      case 0: drawGallery(anomalies, time); break;
+      case 1: drawSculptures(anomalies, time); break;
+      case 2: drawEgypt(anomalies, time); break;
+      case 3: drawArchive(anomalies, time); break;
+      case 4: drawHall(anomalies, time); break;
+      case 5: drawReserve(anomalies, time); break;
+      default: drawGallery(anomalies, time);
+    }
+
+    drawCameraArtifacts(time);
+    drawReticle();
+    ctx.restore();
+  }
+
+  function drawRoomBase(options) {
+    const wallTop = options.wallTop || "#343a34";
+    const wallBottom = options.wallBottom || "#242a25";
+    const floor = options.floor || "#171b18";
+    const horizon = options.horizon || 330;
+    const gradient = ctx.createLinearGradient(0, 0, 0, horizon);
+    gradient.addColorStop(0, wallTop);
+    gradient.addColorStop(1, wallBottom);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, WIDTH, horizon);
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, horizon, WIDTH, HEIGHT - horizon);
+
+    ctx.strokeStyle = "rgba(207, 211, 195, 0.12)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, horizon);
+    ctx.lineTo(WIDTH, horizon);
+    ctx.stroke();
+
+    ctx.lineWidth = 1;
+    for (let x = -200; x <= 1160; x += 120) {
+      ctx.beginPath();
+      ctx.moveTo(480, horizon);
+      ctx.lineTo(x, HEIGHT);
+      ctx.stroke();
+    }
+    for (let y = horizon + 42; y < HEIGHT; y += 42) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(WIDTH, y);
+      ctx.stroke();
+    }
+
+    const shade = ctx.createRadialGradient(480, 230, 60, 480, 250, 620);
+    shade.addColorStop(0, "rgba(230, 228, 210, 0.08)");
+    shade.addColorStop(1, "rgba(0, 0, 0, 0.45)");
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+
+  function drawFrame(x, y, width, height, kind) {
+    ctx.fillStyle = "#171916";
+    ctx.fillRect(x - 8, y - 8, width + 16, height + 16);
+    ctx.strokeStyle = "#aaa58f";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x - 4, y - 4, width + 8, height + 8);
+    ctx.fillStyle = "#5d6259";
+    ctx.fillRect(x, y, width, height);
+
+    if (kind === "portrait") {
+      ctx.fillStyle = "#252a26";
+      ctx.fillRect(x + 18, y + 18, width - 36, height - 36);
+      ctx.fillStyle = "#a5a28f";
+      ctx.beginPath();
+      ctx.ellipse(x + width / 2, y + height * 0.38, width * 0.16, height * 0.17, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#727568";
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.22, y + height * 0.9);
+      ctx.quadraticCurveTo(x + width * 0.5, y + height * 0.52, x + width * 0.78, y + height * 0.9);
+      ctx.fill();
+    } else if (kind === "landscape") {
+      ctx.fillStyle = "#6f766b";
+      ctx.fillRect(x + 10, y + 10, width - 20, height * 0.47);
+      ctx.fillStyle = "#303b34";
+      ctx.beginPath();
+      ctx.moveTo(x + 5, y + height * 0.72);
+      ctx.lineTo(x + width * 0.35, y + height * 0.36);
+      ctx.lineTo(x + width * 0.58, y + height * 0.65);
+      ctx.lineTo(x + width * 0.82, y + height * 0.32);
+      ctx.lineTo(x + width, y + height * 0.72);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#4a5148";
+      ctx.fillRect(x + 8, y + height * 0.72, width - 16, height * 0.2);
+    } else {
+      ctx.fillStyle = "#343936";
+      ctx.fillRect(x + 12, y + 12, width - 24, height - 24);
+      ctx.strokeStyle = "#818477";
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(x + 25, y + height - 28);
+      ctx.lineTo(x + width * 0.45, y + 30);
+      ctx.lineTo(x + width - 25, y + height - 35);
+      ctx.stroke();
+    }
+  }
+
+  function drawPerson(x, y, scale, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = color || "#090a09";
+    ctx.beginPath();
+    ctx.arc(0, -70, 21, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-29, -48);
+    ctx.quadraticCurveTo(-43, 28, -32, 92);
+    ctx.lineTo(31, 92);
+    ctx.quadraticCurveTo(43, 28, 28, -48);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawBust(x, y, turned) {
+    ctx.fillStyle = "#8d9184";
+    ctx.fillRect(x - 42, y + 48, 84, 88);
+    ctx.fillStyle = "#a8a998";
+    ctx.beginPath();
+    ctx.moveTo(x - 60, y + 58);
+    ctx.quadraticCurveTo(x, y + 15, x + 60, y + 58);
+    ctx.lineTo(x + 47, y + 88);
+    ctx.lineTo(x - 47, y + 88);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    if (turned) ctx.ellipse(x + 15, y - 4, 24, 39, -0.3, 0, Math.PI * 2);
+    else ctx.ellipse(x, y - 4, 29, 39, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#525a52";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    if (turned) {
+      ctx.moveTo(x + 26, y - 5);
+      ctx.lineTo(x + 40, y + 1);
+      ctx.lineTo(x + 27, y + 7);
+    } else {
+      ctx.moveTo(x - 12, y - 8);
+      ctx.lineTo(x - 4, y - 8);
+      ctx.moveTo(x + 5, y - 8);
+      ctx.lineTo(x + 13, y - 8);
+    }
+    ctx.stroke();
+  }
+
+  function drawGallery(set) {
+    drawRoomBase({ wallTop: "#3b4039", wallBottom: "#292e29", floor: "#171a18", horizon: 342 });
+    ctx.strokeStyle = "rgba(215, 210, 190, 0.22)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 56);
+    ctx.lineTo(WIDTH, 56);
+    ctx.moveTo(0, 310);
+    ctx.lineTo(WIDTH, 310);
+    ctx.stroke();
+
+    drawFrame(92, 108, 170, 210, "portrait");
+    if (set.has("portrait-eyes")) {
+      ctx.fillStyle = "#d64c40";
+      ctx.shadowColor = "#d64c40";
+      ctx.shadowBlur = 10;
+      ctx.fillRect(159, 181, 8, 5);
+      ctx.fillRect(186, 181, 8, 5);
+      ctx.shadowBlur = 0;
+    }
+
+    if (!set.has("painting-gone")) drawFrame(385, 92, 180, 205, "landscape");
+    else {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
+      ctx.fillRect(381, 88, 188, 213);
+      ctx.fillStyle = "#9a9d8f";
+      ctx.beginPath(); ctx.arc(425, 84, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(525, 84, 3, 0, Math.PI * 2); ctx.fill();
+    }
+
+    drawFrame(760, 98, 125, 150, "abstract");
+    if (set.has("extra-frame")) drawFrame(620, 86, 88, 118, "portrait");
+
+    drawBust(745, 285, set.has("bust-turned"));
+    ctx.fillStyle = "#3a403b";
+    ctx.fillRect(310, 403, 310, 30);
+    ctx.fillRect(335, 433, 18, 55);
+    ctx.fillRect(575, 433, 18, 55);
+    if (set.has("gallery-visitor")) drawPerson(870, 367, 1.18, "#0a0c0a");
+  }
+
+  function drawStatue(x, y, scale, head) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = "#a7aa9d";
+    if (head) {
+      ctx.beginPath(); ctx.arc(0, -126, 27, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.moveTo(-37, -96);
+    ctx.quadraticCurveTo(-55, -10, -34, 68);
+    ctx.lineTo(-22, 130);
+    ctx.lineTo(22, 130);
+    ctx.lineTo(34, 68);
+    ctx.quadraticCurveTo(55, -10, 37, -96);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#555d56";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(-35, -78); ctx.lineTo(-76, 8);
+    ctx.moveTo(35, -78); ctx.lineTo(66, -2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSculptures(set) {
+    drawRoomBase({ wallTop: "#363a36", wallBottom: "#232824", floor: "#151816", horizon: 350 });
+    for (let x = 75; x < WIDTH; x += 178) {
+      ctx.fillStyle = "#444a44";
+      ctx.fillRect(x, 0, 24, 350);
+      ctx.fillStyle = "#595e56";
+      ctx.fillRect(x - 9, 0, 42, 18);
+      ctx.fillRect(x - 7, 323, 38, 27);
+    }
+    if (set.has("ceiling-shadow")) {
+      ctx.fillStyle = "rgba(4, 5, 4, 0.72)";
+      ctx.beginPath();
+      ctx.ellipse(455, 62, 240, 42, -0.08, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = "#73786f";
+    ctx.fillRect(390, 396, 180, 52);
+    drawStatue(480, 288, 1.08, !set.has("headless-statue"));
+
+    const leftX = set.has("moved-statue") ? 248 : 175;
+    ctx.fillStyle = "#686e67";
+    ctx.fillRect(leftX - 62, 395, 124, 45);
+    drawStatue(leftX, 320, 0.6, true);
+
+    ctx.fillStyle = "#686e67";
+    ctx.fillRect(730, 402, 120, 42);
+    drawBust(790, 313, false);
+
+    ctx.strokeStyle = "#85877b";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(210, 426);
+    if (set.has("broken-rope")) {
+      ctx.quadraticCurveTo(330, 505, 420, 450);
+      ctx.moveTo(540, 450);
+      ctx.quadraticCurveTo(660, 455, 750, 426);
+    } else {
+      ctx.quadraticCurveTo(480, 480, 750, 426);
+    }
+    ctx.stroke();
+    [210, 750].forEach(function (x) {
+      ctx.fillStyle = "#96988c";
+      ctx.fillRect(x - 5, 402, 10, 82);
+    });
+    if (set.has("sculpture-visitor")) drawPerson(805, 355, 1.25, "#090a09");
+  }
+
+  function drawGlyphs() {
+    ctx.strokeStyle = "rgba(188, 167, 115, 0.35)";
+    ctx.lineWidth = 3;
+    for (let row = 0; row < 3; row += 1) {
+      for (let col = 0; col < 8; col += 1) {
+        const x = 42 + col * 116;
+        const y = 70 + row * 80;
+        ctx.beginPath();
+        ctx.arc(x, y, 10 + (col % 3) * 2, 0, Math.PI * 1.5);
+        ctx.moveTo(x + 22, y - 13);
+        ctx.lineTo(x + 22, y + 16);
+        ctx.moveTo(x + 12, y + 3);
+        ctx.lineTo(x + 34, y + 3);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function drawEgypt(set) {
+    drawRoomBase({ wallTop: "#413b2d", wallBottom: "#2c2a22", floor: "#1b1915", horizon: 360 });
+    drawGlyphs();
+    ctx.fillStyle = "rgba(77, 66, 42, 0.72)";
+    ctx.fillRect(310, 42, 340, 322);
+    ctx.strokeStyle = "#8f7d51";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(310, 42, 340, 322);
+
+    ctx.save();
+    if (set.has("sarc-open")) {
+      ctx.translate(100, -18);
+      ctx.rotate(0.08);
+    }
+    ctx.fillStyle = "#827044";
+    ctx.strokeStyle = "#b29a5e";
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(430, 330);
+    ctx.lineTo(397, 145);
+    ctx.quadraticCurveTo(407, 72, 480, 66);
+    ctx.quadraticCurveTo(553, 72, 563, 145);
+    ctx.lineTo(530, 330);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#a28b53";
+    ctx.beginPath(); ctx.ellipse(480, 130, 39, 48, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#51452e";
+    ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(434, 230); ctx.lineTo(526, 230); ctx.stroke();
+    ctx.restore();
+
+    if (set.has("sarc-eyes")) {
+      ctx.fillStyle = "#e05242";
+      ctx.shadowColor = "#e05242";
+      ctx.shadowBlur = 14;
+      ctx.fillRect(459, 122, 10, 5);
+      ctx.fillRect(491, 122, 10, 5);
+      ctx.shadowBlur = 0;
+    }
+
+    if (!set.has("jar-gone")) {
+      ctx.fillStyle = "#776a4b";
+      ctx.beginPath();
+      ctx.moveTo(128, 438); ctx.quadraticCurveTo(105, 385, 130, 346); ctx.lineTo(186, 346); ctx.quadraticCurveTo(211, 385, 188, 438); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#9d8959"; ctx.fillRect(133, 337, 50, 15);
+    } else {
+      ctx.strokeStyle = "rgba(177, 155, 102, 0.25)";
+      ctx.beginPath(); ctx.ellipse(158, 440, 48, 12, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    if (set.has("footprints")) {
+      ctx.fillStyle = "rgba(8, 9, 7, 0.58)";
+      for (let index = 0; index < 6; index += 1) {
+        ctx.save();
+        ctx.translate(620 + index * 39, 458 - (index % 2) * 24);
+        ctx.rotate(-0.35);
+        ctx.beginPath(); ctx.ellipse(0, 0, 10, 21, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+    if (set.has("egypt-priest")) drawPerson(850, 350, 1.4, "#0d0e0b");
+  }
+
+  function drawArchive(set) {
+    drawRoomBase({ wallTop: "#313832", wallBottom: "#222722", floor: "#141715", horizon: 372 });
+    [45, 675].forEach(function (shelfX) {
+      ctx.fillStyle = "#222822";
+      ctx.fillRect(shelfX, 58, 245, 310);
+      ctx.strokeStyle = "#6a7168";
+      ctx.lineWidth = 5;
+      ctx.strokeRect(shelfX, 58, 245, 310);
+      for (let row = 0; row < 4; row += 1) {
+        ctx.fillStyle = "#4c554c";
+        ctx.fillRect(shelfX + 8, 125 + row * 68, 229, 5);
+        for (let book = 0; book < 8; book += 1) {
+          const bx = shelfX + 14 + book * 27;
+          const gap = set.has("book-gap") && shelfX === 45 && row === 1 && book > 2 && book < 6;
+          if (!gap) {
+            ctx.fillStyle = book % 2 ? "#777567" : "#575f56";
+            ctx.fillRect(bx, 82 + row * 68, 19, 42);
+          }
+        }
+      }
+    });
+
+    ctx.fillStyle = "#c1beaa";
+    ctx.beginPath(); ctx.arc(480, 105, 53, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#323731";
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.strokeStyle = set.has("clock-wrong") ? "#a83930" : "#343934";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(480, 105);
+    if (set.has("clock-wrong")) {
+      ctx.lineTo(455, 80); ctx.moveTo(480, 105); ctx.lineTo(504, 84);
+      ctx.fillStyle = "#8f3029"; ctx.font = "600 14px 'IBM Plex Mono'"; ctx.textAlign = "center"; ctx.fillText("13:13", 480, 145);
+    } else {
+      ctx.lineTo(480, 72); ctx.moveTo(480, 105); ctx.lineTo(509, 116);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = "#4b514a";
+    ctx.fillRect(350, 305, 300, 35);
+    ctx.fillRect(385, 340, 32, 130);
+    ctx.fillRect(585, 340, 32, 130);
+    ctx.fillStyle = "#62685f";
+    ctx.fillRect(650, 305, 150, 138);
+    for (let row = 0; row < 3; row += 1) {
+      const open = set.has("drawer-open") && row === 1;
+      ctx.fillStyle = "#73786e";
+      ctx.fillRect(658 + (open ? 38 : 0), 315 + row * 40, 132, 31);
+      ctx.fillStyle = "#292e2a";
+      ctx.fillRect(716 + (open ? 38 : 0), 327 + row * 40, 18, 5);
+    }
+
+    if (set.has("under-desk")) {
+      ctx.fillStyle = "#090a09";
+      ctx.beginPath(); ctx.arc(505, 398, 32, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(466, 420, 78, 65);
+      ctx.fillStyle = "#c74339";
+      ctx.fillRect(490, 392, 7, 4); ctx.fillRect(515, 392, 7, 4);
+    }
+    if (set.has("file-floor")) {
+      ctx.save(); ctx.translate(295, 458); ctx.rotate(-0.12);
+      ctx.fillStyle = "#9b8652"; ctx.fillRect(-65, -20, 130, 40);
+      ctx.fillStyle = "#c6b170"; ctx.fillRect(-53, -14, 45, 8);
+      ctx.restore();
+    }
+  }
+
+  function drawHall(set, time) {
+    drawRoomBase({ wallTop: "#3b3d37", wallBottom: "#282c28", floor: "#171917", horizon: 355 });
+    ctx.fillStyle = "#262b27";
+    ctx.fillRect(305, 135, 350, 220);
+    ctx.strokeStyle = "#74786d";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(305, 135, 350, 220);
+
+    for (let step = 0; step < 7; step += 1) {
+      ctx.fillStyle = step % 2 ? "#4c514b" : "#565b53";
+      ctx.fillRect(315 - step * 22, 305 + step * 28, 330 + step * 44, 24);
+    }
+
+    ctx.fillStyle = "#792f2a";
+    ctx.fillRect(72, 62, 170, 300);
+    ctx.fillStyle = "#d1c9ad";
+    ctx.font = "700 30px 'Archivo Narrow'";
+    ctx.textAlign = "center";
+    if (set.has("banner-change")) {
+      ctx.fillText("NAO", 157, 178);
+      ctx.fillText("OLHE", 157, 218);
+    } else {
+      ctx.fillText("ACERVO", 157, 180);
+      ctx.font = "500 17px 'IBM Plex Mono'";
+      ctx.fillText("1913-2026", 157, 218);
+    }
+
+    if (!set.has("chandelier-gone")) {
+      ctx.strokeStyle = "#a7a38e";
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(480, 0); ctx.lineTo(480, 95); ctx.stroke();
+      ctx.beginPath(); ctx.arc(480, 115, 73, 0, Math.PI, false); ctx.stroke();
+      for (let arm = -2; arm <= 2; arm += 1) {
+        const x = 480 + arm * 31;
+        ctx.fillStyle = "#d5c892";
+        ctx.beginPath(); ctx.arc(x, 120 + Math.abs(arm) * 6, 7 + Math.sin(time * 2 + arm) * 0.5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    ctx.fillStyle = set.has("door-open") ? "#050605" : "#424943";
+    ctx.fillRect(730, 175, 145, 245);
+    ctx.strokeStyle = "#7c8276";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(730, 175, 145, 245);
+    if (!set.has("door-open")) {
+      ctx.fillStyle = "#9f9d8d";
+      ctx.beginPath(); ctx.arc(845, 300, 6, 0, Math.PI * 2); ctx.fill();
+    }
+
+    if (set.has("extra-portrait")) drawFrame(752, 58, 112, 112, "portrait");
+    if (set.has("stair-figure")) drawPerson(490, 285, 0.9, "#070807");
+  }
+
+  function drawReserve(set, time) {
+    drawRoomBase({ wallTop: "#252b27", wallBottom: "#171b18", floor: "#0f1210", horizon: 370 });
+    ctx.fillStyle = "rgba(0, 0, 0, 0.33)";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    if (set.has("wall-symbol")) {
+      ctx.strokeStyle = "#87382f";
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.arc(135, 105, 50, 0, Math.PI * 2);
+      ctx.moveTo(135, 48); ctx.lineTo(135, 162);
+      ctx.moveTo(82, 105); ctx.lineTo(188, 105);
+      ctx.stroke();
+    }
+
+    const coveredX = set.has("covered-moved") ? 250 : 155;
+    ctx.fillStyle = "#4d534d";
+    ctx.beginPath();
+    ctx.moveTo(coveredX - 78, 420);
+    ctx.lineTo(coveredX - 58, 220);
+    ctx.quadraticCurveTo(coveredX, 165, coveredX + 58, 220);
+    ctx.lineTo(coveredX + 82, 420);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#686f66";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#151815";
+    ctx.fillRect(360, 85, 185, 300);
+    ctx.strokeStyle = "#777a6f";
+    ctx.lineWidth = 11;
+    ctx.strokeRect(360, 85, 185, 300);
+    const mirrorGradient = ctx.createLinearGradient(370, 90, 535, 380);
+    mirrorGradient.addColorStop(0, "#59635d");
+    mirrorGradient.addColorStop(0.5, "#202723");
+    mirrorGradient.addColorStop(1, "#3c4540");
+    ctx.fillStyle = mirrorGradient;
+    ctx.fillRect(371, 96, 163, 278);
+    if (set.has("mirror-face")) {
+      ctx.fillStyle = "rgba(201, 200, 182, 0.66)";
+      ctx.beginPath(); ctx.ellipse(455, 215, 45, 62, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#20231f";
+      ctx.fillRect(427, 202, 15, 7); ctx.fillRect(470, 202, 15, 7);
+      ctx.beginPath(); ctx.arc(456, 242, 18, 0, Math.PI); ctx.strokeStyle = "#20231f"; ctx.lineWidth = 5; ctx.stroke();
+    }
+
+    ctx.fillStyle = "#5a5140";
+    ctx.fillRect(610, 345, 205, 115);
+    ctx.strokeStyle = "#918267";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(610, 345, 205, 115);
+    ctx.beginPath(); ctx.moveTo(610, 390); ctx.lineTo(815, 390); ctx.stroke();
+    if (set.has("crate-open")) {
+      ctx.save();
+      ctx.translate(610, 345);
+      ctx.rotate(-0.18);
+      ctx.fillStyle = "#655b47";
+      ctx.fillRect(0, -48, 205, 48);
+      ctx.strokeRect(0, -48, 205, 48);
+      ctx.restore();
+      ctx.fillStyle = "#0a0b09";
+      ctx.fillRect(625, 350, 175, 38);
+      ctx.fillStyle = "#9b3d34";
+      ctx.font = "600 23px 'IBM Plex Mono'";
+      ctx.textAlign = "center";
+      ctx.fillText("1913", 712, 380);
+    }
+
+    ctx.strokeStyle = "#626b62";
+    ctx.lineWidth = 8;
+    ctx.strokeRect(760, 105, 145, 265);
+    ctx.lineWidth = 4;
+    for (let x = 780; x < 905; x += 25) {
+      ctx.beginPath(); ctx.moveTo(x, 105); ctx.lineTo(x, 370); ctx.stroke();
+    }
+    if (set.has("cage-figure")) {
+      drawPerson(833, 294, 1.05 + Math.sin(time * 2.5) * 0.01, "#070807");
+      ctx.fillStyle = "#c5463b";
+      ctx.fillRect(813, 216, 7, 4); ctx.fillRect(843, 216, 7, 4);
+    }
+  }
+
+  function drawCameraArtifacts(time) {
+    const noiseCount = reducedMotion ? 32 : 90;
+    ctx.save();
+    ctx.globalAlpha = 0.13;
+    for (let index = 0; index < noiseCount; index += 1) {
+      const shade = Math.random() > 0.5 ? 225 : 20;
+      ctx.fillStyle = "rgb(" + shade + "," + shade + "," + shade + ")";
+      const x = Math.random() * WIDTH;
+      const y = Math.random() * HEIGHT;
+      ctx.fillRect(x, y, random(1, 5), 1);
+    }
+    ctx.restore();
+
+    if (game.transition > 0) {
+      const amount = Math.ceil(game.transition * 24);
+      ctx.save();
+      for (let index = 0; index < amount; index += 1) {
+        const y = Math.random() * HEIGHT;
+        const height = random(2, 16);
+        ctx.fillStyle = Math.random() > 0.5 ? "rgba(210,216,199,0.2)" : "rgba(0,0,0,0.5)";
+        ctx.fillRect(0, y, WIDTH, height);
+      }
+      ctx.restore();
+    }
+
+    if (game.wrongFlash > 0) {
+      ctx.fillStyle = "rgba(180, 42, 33, " + (game.wrongFlash * 0.2) + ")";
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    }
+
+    if (game.threat > 72) {
+      const alpha = (game.threat - 72) / 28 * (0.04 + Math.sin(time * 7) * 0.02);
+      ctx.fillStyle = "rgba(125, 24, 19, " + alpha + ")";
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    }
+  }
+
+  function drawReticle() {
+    if (!game.reticle) return;
+    const reticle = game.reticle;
+    const alpha = clamp(reticle.life / 0.75, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = reticle.hit === true ? "#d4b66d" : (reticle.hit === false ? "#e05242" : "#d9d6c6");
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(reticle.x, reticle.y, 22 + (1 - alpha) * 12, 0, Math.PI * 2);
+    ctx.moveTo(reticle.x - 34, reticle.y); ctx.lineTo(reticle.x - 12, reticle.y);
+    ctx.moveTo(reticle.x + 12, reticle.y); ctx.lineTo(reticle.x + 34, reticle.y);
+    ctx.moveTo(reticle.x, reticle.y - 34); ctx.lineTo(reticle.x, reticle.y - 12);
+    ctx.moveTo(reticle.x, reticle.y + 12); ctx.lineTo(reticle.x, reticle.y + 34);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function ensureAudio() {
+    if (!audioContext) {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (error) {
+        audioContext = null;
+      }
+    }
+    if (audioContext && audioContext.state === "suspended") audioContext.resume();
+  }
+
+  function startAmbient() {
+    if (!audioContext) return;
+    if (!humOscillator) {
+      humOscillator = audioContext.createOscillator();
+      humOscillator.type = "sine";
+      humOscillator.frequency.value = 58;
+      humGain = audioContext.createGain();
+      humGain.gain.value = muted ? 0 : 0.014;
+      humOscillator.connect(humGain).connect(audioContext.destination);
+      humOscillator.start();
+    }
+    if (!noiseSource) {
+      const length = audioContext.sampleRate * 2;
+      const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * 0.2;
+      noiseSource = audioContext.createBufferSource();
+      const filter = audioContext.createBiquadFilter();
+      const gain = audioContext.createGain();
+      noiseSource.buffer = buffer;
+      noiseSource.loop = true;
+      filter.type = "lowpass";
+      filter.frequency.value = 230;
+      gain.gain.value = 0.006;
+      noiseSource.connect(filter).connect(gain).connect(humGain);
+      noiseSource.start();
+    }
+    setAmbientLevel(0.014);
+  }
+
+  function setAmbientLevel(level) {
+    if (!audioContext || !humGain) return;
+    humGain.gain.setTargetAtTime(muted ? 0 : level, audioContext.currentTime, 0.15);
+  }
+
+  function playTone(frequency, duration, type, volume, endFrequency, delay) {
+    if (muted || !audioContext) return;
+    const start = audioContext.currentTime + (delay || 0);
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = type || "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.04, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain).connect(audioContext.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.03);
+  }
+
+  function playNoise(duration, volume, cutoff) {
+    if (muted || !audioContext) return;
+    const length = Math.floor(audioContext.sampleRate * duration);
+    const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * (1 - index / length);
+    const source = audioContext.createBufferSource();
+    const filter = audioContext.createBiquadFilter();
+    const gain = audioContext.createGain();
+    source.buffer = buffer;
+    filter.type = "lowpass";
+    filter.frequency.value = cutoff || 900;
+    gain.gain.setValueAtTime(volume || 0.06, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+    source.connect(filter).connect(gain).connect(audioContext.destination);
+    source.start();
+  }
+
+  function playChord(frequencies, duration, volume) {
+    frequencies.forEach(function (frequency, index) {
+      playTone(frequency, duration, "sine", volume, frequency * 1.01, index * 0.08);
+    });
+  }
+
+  function playCameraSwitch() {
+    playNoise(0.07, 0.025, 1800);
+    playTone(1200, 0.035, "square", 0.018, 750);
+  }
+
+  function playAnomaly() {
+    playTone(92, 0.45, "sine", 0.025, 73);
+  }
+
+  function playAlert() {
+    playTone(620, 0.09, "square", 0.03, 520);
+    playTone(620, 0.09, "square", 0.03, 520, 0.16);
+    playTone(470, 0.18, "square", 0.025, 350, 0.32);
+  }
+
+  function playCorrect(combo) {
+    const base = 380 + combo * 45;
+    playTone(base, 0.09, "triangle", 0.035, base * 1.2);
+    playTone(base * 1.45, 0.16, "sine", 0.026, base * 1.6, 0.08);
+  }
+
+  function playWrong() {
+    playNoise(0.18, 0.07, 750);
+    playTone(140, 0.32, "sawtooth", 0.045, 65);
+  }
+
+  function playEvidence() {
+    [262, 311, 392, 523].forEach(function (frequency, index) {
+      playTone(frequency, 0.32, "sine", 0.028, frequency * 1.01, index * 0.08);
+    });
+  }
+
+  function toggleSound() {
+    muted = !muted;
+    writeStored(MUTE_KEY, muted ? "1" : "0");
+    ensureAudio();
+    if (!muted) {
+      startAmbient();
+      playTone(440, 0.12, "sine", 0.035, 550);
+    }
+    setAmbientLevel(state === "running" || state === "memorize" ? 0.014 : 0.004);
+    updateHud(true);
+  }
+
+  cameraButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      if (state !== "running" && state !== "memorize") return;
+      selectRoom(Number.parseInt(button.dataset.room, 10), false);
+    });
+  });
+
+  canvas.addEventListener("pointerdown", function (event) {
+    if (state !== "running" && state !== "memorize") return;
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) * WIDTH / rect.width;
+    const y = (event.clientY - rect.top) * HEIGHT / rect.height;
+    reportAt(x, y);
+  });
+
+  window.addEventListener("keydown", function (event) {
+    if (["ArrowLeft", "ArrowRight", " "].includes(event.key)) event.preventDefault();
+    if (event.key === "ArrowLeft" && !event.repeat) cycleRoom(-1);
+    if (event.key === "ArrowRight" && !event.repeat) cycleRoom(1);
+    if (/^[1-6]$/.test(event.key) && !event.repeat) selectRoom(Number(event.key) - 1, false);
+    if ((event.key.toLowerCase() === "p" || event.key === "Escape") && !event.repeat) togglePause(false);
+    if (event.key === "Enter" && !event.repeat && (state === "menu" || state === "ended")) startGame();
+  });
+
+  document.getElementById("start-btn").addEventListener("click", startGame);
+  document.getElementById("retry-btn").addEventListener("click", startGame);
+  document.getElementById("pause-btn").addEventListener("click", function () { togglePause(false); });
+  document.getElementById("resume-btn").addEventListener("click", function () { togglePause(true); });
+  document.getElementById("quit-btn").addEventListener("click", returnToMenu);
+  document.getElementById("menu-btn").addEventListener("click", returnToMenu);
+  soundButton.addEventListener("click", toggleSound);
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && (state === "running" || state === "memorize")) togglePause(false);
+  });
+
+  function loop(now) {
+    const dt = Math.min(0.035, Math.max(0, (now - lastFrame) / 1000));
+    lastFrame = now;
+    renderTime += dt;
+    update(dt);
+    draw(renderTime);
+    requestAnimationFrame(loop);
+  }
+
+  menuBest.textContent = pad(getBest(), 6);
+  soundButton.textContent = muted ? "SOM OFF" : "SOM ON";
+  selectRoom(0, true);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
