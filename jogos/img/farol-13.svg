@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Farol 13</title>
+  <desc id="desc">Um farol ilumina o mar durante uma tempestade.</desc>
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#06151c"/>
+      <stop offset="1" stop-color="#0b3942"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop offset="0" stop-color="#fff4c2" stop-opacity=".95"/>
+      <stop offset=".35" stop-color="#ffd36a" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#ffd36a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1=".5" x2="1" y2=".5">
+      <stop offset="0" stop-color="#fff2b4" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#ffd36a" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+  <rect width="800" height="500" fill="url(#sea)"/>
+  <g fill="none" stroke="#91b6b3" stroke-linecap="round" opacity=".22">
+    <path d="M30 95q32-12 64 0m62 49q40-14 79 0m362-65q43-13 86 0M37 337q46-13 91 0m450 89q52-15 104 0M279 48q32-10 64 0M329 390q43-13 86 0"/>
+    <path d="M-20 224q80-27 160 0t160 0t160 0t160 0t160 0t160 0" opacity=".45"/>
+    <path d="M-20 268q75-24 150 0t150 0t150 0t150 0t150 0t150 0" opacity=".3"/>
+  </g>
+  <g stroke="#b8d0cc" opacity=".18">
+    <path d="M75 0l-80 160M155 0L45 220M275 0L155 240M690 0L570 240M770 0L650 240"/>
+  </g>
+  <path d="M400 279L800 117 800 245z" fill="url(#beam)" filter="url(#glow)" opacity=".45"/>
+  <path d="M400 279L800 145 800 218z" fill="url(#beam)" opacity=".86"/>
+  <ellipse cx="397" cy="367" rx="126" ry="66" fill="#101d1d" stroke="#78918b" stroke-width="3"/>
+  <path d="M312 354q31-58 84-55t93 59q-27 65-91 65t-86-69z" fill="#172423"/>
+  <path d="M365 337l16-139h40l17 139z" fill="#d4ccb3" stroke="#586963" stroke-width="4"/>
+  <path d="M379 245h45l5 33h-55z" fill="#b55642" opacity=".9"/>
+  <path d="M382 199l4-28h30l5 28z" fill="#172626" stroke="#859b94" stroke-width="4"/>
+  <path d="M373 171h56l-11-16h-34z" fill="#b55642"/>
+  <circle cx="401" cy="183" r="72" fill="url(#lamp)"/>
+  <circle cx="401" cy="183" r="9" fill="#fff4c2"/>
+  <g transform="translate(646 312) rotate(-12)">
+    <path d="M-47 0l23-18h65l20 18-20 18h-65z" fill="#293f41" stroke="#88a8a4" stroke-width="3"/>
+    <rect x="-12" y="-12" width="27" height="24" fill="#14282d"/>
+    <circle cx="-24" cy="-19" r="4" fill="#e95b67"/>
+    <circle cx="-24" cy="19" r="4" fill="#70d7aa"/>
+  </g>
+  <g fill="none" stroke="#e55577" transform="translate(151 174) rotate(18)">
+    <rect x="-11" y="-11" width="22" height="22"/>
+    <rect x="-24" y="-24" width="48" height="48" opacity=".6"/>
+    <rect x="-39" y="-39" width="78" height="78" opacity=".3"/>
+  </g>
+  <path d="M0 454h800" stroke="#ffd36a" stroke-width="2" opacity=".45"/>
+  <text x="34" y="475" fill="#ffd36a" font-family="monospace" font-size="19" letter-spacing="7">TRANSMISSAO 013</text>
+</svg>

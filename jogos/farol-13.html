@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#06161c">
+<meta name="description" content="Farol 13: sobreviva a uma noite de tempestade, guie embarcacoes e decifre sinais vindos do mar.">
+<title>Farol 13 | WDM Jogos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #031015;
+    --deep: #061c23;
+    --sea: #0b3540;
+    --foam: #a8c9c7;
+    --paper: #e8e0c7;
+    --muted: #88a4a2;
+    --lamp: #ffd36a;
+    --lamp-hot: #fff1b5;
+    --rust: #dd6848;
+    --signal: #e55577;
+    --safe: #7ed6ad;
+    --line: rgba(195, 218, 211, 0.2);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "IBM Plex Mono", Consolas, monospace;
+  }
+
+  button,
+  a { font: inherit; }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--lamp);
+    outline-offset: 4px;
+  }
+
+  #game-shell {
+    position: fixed;
+    inset: 0;
+    isolation: isolate;
+    background: #06161c;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #sea-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .weather-film,
+  .vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .weather-film {
+    opacity: 0.16;
+    mix-blend-mode: soft-light;
+    background-image:
+      repeating-linear-gradient(108deg, transparent 0 7px, rgba(224, 239, 232, 0.12) 8px, transparent 9px 18px),
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.15) 4px);
+  }
+
+  .vignette {
+    background:
+      radial-gradient(ellipse at center, transparent 42%, rgba(0, 5, 8, 0.38) 78%, rgba(0, 3, 5, 0.78) 100%),
+      linear-gradient(180deg, rgba(1, 8, 11, 0.22), transparent 25%, transparent 70%, rgba(1, 8, 11, 0.38));
+  }
+
+  .game-ui {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .topbar {
+    top: max(12px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+    right: max(14px, env(safe-area-inset-right));
+    height: 48px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(3, 16, 21, 0.8), rgba(3, 16, 21, 0.34), rgba(3, 16, 21, 0.8));
+    backdrop-filter: blur(5px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-left: 12px;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .brand strong { color: var(--lamp); font-size: 1.15rem; }
+  .brand small { color: var(--muted); font-size: 0.68rem; letter-spacing: 0.12em; }
+
+  .clock {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+  }
+
+  .clock strong {
+    color: var(--paper);
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+  }
+
+  .top-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    padding-right: 7px;
+    pointer-events: auto;
+  }
+
+  .utility-btn {
+    min-width: 60px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid rgba(195, 218, 211, 0.28);
+    border-radius: 2px;
+    background: rgba(3, 16, 21, 0.76);
+    color: var(--foam);
+    cursor: pointer;
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+
+  .utility-btn:hover {
+    color: var(--lamp);
+    border-color: rgba(255, 211, 106, 0.6);
+    background: rgba(15, 42, 47, 0.9);
+  }
+
+  .hud-left,
+  .hud-right {
+    top: max(78px, calc(env(safe-area-inset-top) + 66px));
+    display: grid;
+    gap: 8px;
+  }
+
+  .hud-left { left: max(14px, env(safe-area-inset-left)); }
+  .hud-right { right: max(14px, env(safe-area-inset-right)); text-align: right; }
+
+  .hud-block {
+    min-width: 150px;
+    padding: 9px 11px 10px;
+    border-left: 2px solid rgba(168, 201, 199, 0.35);
+    background: linear-gradient(90deg, rgba(3, 16, 21, 0.7), rgba(3, 16, 21, 0.06));
+  }
+
+  .hud-right .hud-block {
+    border-left: 0;
+    border-right: 2px solid rgba(168, 201, 199, 0.35);
+    background: linear-gradient(270deg, rgba(3, 16, 21, 0.7), rgba(3, 16, 21, 0.06));
+  }
+
+  .hud-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .hud-value {
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.08em;
+  }
+
+  .score-value { color: var(--lamp); }
+
+  .integrity-pips {
+    display: flex;
+    gap: 5px;
+    margin-top: 3px;
+  }
+
+  .integrity-pips span {
+    width: 30px;
+    height: 7px;
+    border: 1px solid rgba(126, 214, 173, 0.7);
+    background: var(--safe);
+    box-shadow: 0 0 9px rgba(126, 214, 173, 0.35);
+    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .integrity-pips span.lost {
+    border-color: rgba(221, 104, 72, 0.35);
+    background: rgba(221, 104, 72, 0.12);
+    box-shadow: none;
+  }
+
+  .energy-track {
+    position: relative;
+    width: 150px;
+    height: 8px;
+    margin: 5px 0 0 auto;
+    overflow: hidden;
+    border: 1px solid rgba(168, 201, 199, 0.3);
+    background: rgba(0, 0, 0, 0.42);
+  }
+
+  .energy-fill {
+    width: 100%;
+    height: 100%;
+    transform-origin: left;
+    background: linear-gradient(90deg, var(--rust), var(--lamp));
+    box-shadow: 0 0 12px rgba(255, 211, 106, 0.45);
+    transition: background 180ms ease;
+  }
+
+  .energy-fill.low { background: var(--signal); }
+
+  .radio-call {
+    top: max(82px, calc(env(safe-area-inset-top) + 70px));
+    left: 50%;
+    width: min(520px, calc(100% - 250px));
+    padding: 9px 16px;
+    transform: translate(-50%, -14px);
+    border-top: 1px solid rgba(255, 211, 106, 0.3);
+    border-bottom: 1px solid rgba(255, 211, 106, 0.3);
+    background: rgba(3, 16, 21, 0.84);
+    color: var(--lamp-hot);
+    opacity: 0;
+    text-align: center;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .radio-call::before { content: "RADIO / "; color: var(--rust); }
+  .radio-call.show { opacity: 1; transform: translate(-50%, 0); }
+  .radio-call.danger { color: #ff9b83; border-color: rgba(221, 104, 72, 0.5); }
+  .radio-call.signal { color: #ff9cb4; border-color: rgba(229, 85, 119, 0.5); }
+
+  .signal-log {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(104px, calc(env(safe-area-inset-bottom) + 92px));
+    width: 230px;
+    padding: 12px;
+    border: 1px solid rgba(229, 85, 119, 0.24);
+    background: rgba(3, 16, 21, 0.64);
+    backdrop-filter: blur(4px);
+  }
+
+  .signal-log h2 {
+    margin: 0 0 9px;
+    color: var(--signal);
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .signal-row {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid rgba(168, 201, 199, 0.1);
+    color: #607b7b;
+    font-size: 0.58rem;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+  }
+
+  .signal-row b {
+    color: #607b7b;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 1rem;
+  }
+
+  .signal-row.found { color: #dfb4be; }
+  .signal-row.found b { color: var(--signal); text-shadow: 0 0 10px rgba(229, 85, 119, 0.5); }
+
+  .controls {
+    left: 50%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 9px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+
+  .control-btn {
+    width: 68px;
+    height: 58px;
+    border: 1px solid rgba(168, 201, 199, 0.38);
+    border-radius: 3px;
+    background: rgba(3, 16, 21, 0.82);
+    color: var(--foam);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    touch-action: none;
+    transition: transform 80ms ease, border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+
+  .control-btn strong {
+    display: block;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .control-btn small {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .control-btn:active,
+  .control-btn.pressed { transform: translateY(2px); background: rgba(20, 52, 56, 0.95); }
+
+  .beam-btn {
+    width: 98px;
+    color: #2d240d;
+    border-color: var(--lamp);
+    background: var(--lamp);
+    box-shadow: 0 0 24px rgba(255, 211, 106, 0.24), 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .beam-btn.off {
+    color: #a8b6b0;
+    border-color: rgba(168, 201, 199, 0.4);
+    background: rgba(3, 16, 21, 0.88);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .beam-btn.locked {
+    color: #f3acbb;
+    border-color: rgba(229, 85, 119, 0.5);
+    background: rgba(60, 18, 30, 0.88);
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding:
+      max(26px, env(safe-area-inset-top))
+      max(22px, env(safe-area-inset-right))
+      max(26px, env(safe-area-inset-bottom))
+      max(22px, env(safe-area-inset-left));
+    background:
+      linear-gradient(90deg, rgba(2, 12, 16, 0.96) 0%, rgba(2, 12, 16, 0.86) 42%, rgba(2, 12, 16, 0.36) 76%, rgba(2, 12, 16, 0.6) 100%),
+      repeating-linear-gradient(90deg, transparent 0 59px, rgba(168, 201, 199, 0.04) 60px);
+    touch-action: pan-y;
+  }
+
+  .screen-inner {
+    position: relative;
+    width: min(980px, calc(100vw - 44px));
+    max-width: 100%;
+    animation: screen-in 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes screen-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .start-layout {
+    display: grid;
+    grid-template-columns: minmax(300px, 1.25fr) minmax(280px, 0.75fr);
+    gap: clamp(34px, 7vw, 92px);
+    align-items: end;
+  }
+
+  .start-layout > * { min-width: 0; }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    color: var(--lamp);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 34px;
+    height: 1px;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .title {
+    margin: 0;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: clamp(5.1rem, 13vw, 10.5rem);
+    font-weight: 900;
+    line-height: 0.72;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    text-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+  }
+
+  .title span {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--lamp);
+    text-shadow: 0 0 34px rgba(255, 211, 106, 0.15);
+  }
+
+  .lead {
+    max-width: 590px;
+    margin: 30px 0 0;
+    color: #b8c9c2;
+    font-family: "Barlow Condensed", Arial Narrow, sans-serif;
+    font-size: clamp(1.08rem, 2vw, 1.35rem);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .briefing {
+    border-top: 1px solid rgba(255, 211, 106, 0.48);
+    border-bottom: 1px solid rgba(255, 211, 106, 0.2);
+    background: rgba(4, 22, 27, 0.56);
+    backdrop-filter: blur(5px);
+  }
+
+  .briefing-row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 13px;
+    padding: 13px 14px;
+    border-bottom: 1px solid rgba(168, 201, 199, 0.11);
+  }
+
+  .briefing-row:last-child { border-bottom: 0; }
+
+  .briefing-row strong {
+    color: var(--lamp);
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+  }
+
+  .briefing-row span {
+    color: #9bb0ac;
+    font-size: 0.66rem;
+    line-height: 1.5;
+  }
+
+  .primary-btn {
+    position: relative;
+    width: 100%;
+    min-height: 58px;
+    margin-top: 16px;
+    padding: 0 24px;
+    overflow: hidden;
+    border: 1px solid var(--lamp);
+    border-radius: 2px;
+    background: var(--lamp);
+    color: #241d0b;
+    cursor: pointer;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: color 180ms ease, background 180ms ease, transform 100ms ease;
+  }
+
+  .primary-btn::after {
+    content: ">";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-52%);
+    font-size: 1.25rem;
+  }
+
+  .primary-btn:hover { color: var(--lamp); background: rgba(255, 211, 106, 0.06); }
+  .primary-btn:active { transform: translateY(2px); }
+
+  .menu-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 13px;
+    color: #66817e;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+
+  .menu-meta a {
+    color: #91aaa5;
+    text-underline-offset: 3px;
+  }
+
+  .end-panel,
+  .pause-panel {
+    max-width: 710px;
+    margin: 0 auto;
+    padding-left: 22px;
+    border-left: 3px solid var(--lamp);
+  }
+
+  .end-panel.failure { border-color: var(--rust); }
+
+  .end-title,
+  .pause-title {
+    margin: 0;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: clamp(3.8rem, 10vw, 7rem);
+    font-weight: 900;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+
+  .end-copy,
+  .pause-copy {
+    max-width: 620px;
+    margin: 20px 0;
+    color: #afc2bc;
+    font-family: "Barlow Condensed", Arial Narrow, sans-serif;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 24px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .result-item { padding: 13px 8px 13px 0; }
+  .result-item span { display: block; color: var(--muted); font-size: 0.58rem; letter-spacing: 0.12em; }
+  .result-item strong { display: block; margin-top: 3px; color: var(--lamp); font-family: "Barlow Condensed", Impact, sans-serif; font-size: 1.7rem; }
+
+  .fragments {
+    display: grid;
+    gap: 5px;
+    margin: 18px 0;
+  }
+
+  .fragment {
+    padding: 8px 10px;
+    border-left: 2px solid #425d5a;
+    background: rgba(8, 30, 35, 0.56);
+    color: #607a77;
+    font-size: 0.64rem;
+  }
+
+  .fragment.found { color: #e2bdc6; border-color: var(--signal); }
+
+  .button-row { display: flex; gap: 9px; }
+  .button-row .primary-btn { max-width: 360px; }
+
+  .secondary-btn {
+    min-height: 58px;
+    margin-top: 16px;
+    padding: 0 20px;
+    border: 1px solid rgba(168, 201, 199, 0.35);
+    border-radius: 2px;
+    background: rgba(3, 16, 21, 0.7);
+    color: #a6bab5;
+    cursor: pointer;
+    font-family: "Barlow Condensed", Impact, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .secondary-btn:hover { color: var(--paper); border-color: var(--foam); }
+
+  @media (min-width: 980px) {
+    .controls { left: auto; right: max(22px, env(safe-area-inset-right)); transform: none; }
+  }
+
+  @media (max-width: 760px) {
+    .topbar { grid-template-columns: 1fr auto auto; height: 44px; }
+    .brand { padding-left: 8px; }
+    .brand small { display: none; }
+    .clock span { display: none; }
+    .clock strong { font-size: 1rem; }
+    .utility-btn { min-width: 42px; padding: 0 7px; }
+    #sound-btn { font-size: 0; }
+    #sound-btn::after { content: "SOM"; font-size: 0.6rem; }
+    .hud-left,
+    .hud-right { top: max(69px, calc(env(safe-area-inset-top) + 57px)); }
+    .hud-left { left: 9px; }
+    .hud-right { right: 9px; }
+    .hud-block { min-width: 112px; padding: 7px 8px; }
+    .hud-block.secondary { display: none; }
+    .hud-value { font-size: 1.18rem; }
+    .integrity-pips span { width: 23px; }
+    .energy-track { width: 112px; }
+    .radio-call { top: auto; bottom: max(91px, calc(env(safe-area-inset-bottom) + 79px)); width: calc(100% - 24px); }
+    .signal-log { display: none; }
+    .controls { gap: 6px; bottom: max(12px, env(safe-area-inset-bottom)); }
+    .control-btn { width: 60px; height: 54px; }
+    .beam-btn { width: 92px; }
+    .start-layout { grid-template-columns: 1fr; gap: 34px; align-items: center; }
+    .title { font-size: clamp(4rem, 21vw, 6.3rem); white-space: nowrap; }
+    .lead { margin-top: 24px; }
+    .screen { place-items: start center; }
+    .screen-inner { margin: auto 0; }
+    .menu-meta { flex-wrap: wrap; }
+  }
+
+  @media (max-height: 620px) and (orientation: landscape) {
+    .screen { place-items: start center; }
+    .screen-inner { margin: auto 0; }
+    .start-layout { grid-template-columns: 1.15fr 0.85fr; gap: 34px; }
+    .title { font-size: clamp(4.7rem, 18vh, 7rem); }
+    .lead { margin-top: 18px; font-size: 1rem; }
+    .briefing-row { padding: 8px 10px; }
+    .primary-btn,
+    .secondary-btn { min-height: 46px; margin-top: 10px; }
+    .menu-meta { margin-top: 8px; }
+    .signal-log { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen-inner { animation: none; }
+    .radio-call,
+    .control-btn,
+    .energy-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main id="game-shell">
+  <canvas id="sea-canvas" aria-label="Area de jogo do Farol 13">
+    Seu navegador precisa oferecer suporte ao elemento canvas.
+  </canvas>
+  <div class="weather-film"></div>
+  <div class="vignette"></div>
+
+  <header class="game-ui topbar" id="topbar" hidden>
+    <div class="brand"><strong>Farol 13</strong><small>WDM / turno noturno</small></div>
+    <div class="clock"><span>VIGILIA</span><strong id="hour-value">01 / 13</strong></div>
+    <div class="top-actions">
+      <button class="utility-btn" id="sound-btn" type="button" aria-pressed="false">SOM ON</button>
+      <button class="utility-btn" id="pause-btn" type="button">PAUSA</button>
+    </div>
+  </header>
+
+  <aside class="game-ui hud-left" id="hud-left" hidden>
+    <div class="hud-block">
+      <span class="hud-label">Pontuacao</span>
+      <strong class="hud-value score-value" id="score-value">000000</strong>
+    </div>
+    <div class="hud-block secondary">
+      <span class="hud-label">Estrutura</span>
+      <div class="integrity-pips" id="integrity-pips"><span></span><span></span><span></span></div>
+    </div>
+  </aside>
+
+  <aside class="game-ui hud-right" id="hud-right" hidden>
+    <div class="hud-block">
+      <span class="hud-label" id="energy-label">Gerador</span>
+      <strong class="hud-value" id="energy-value">100%</strong>
+      <div class="energy-track"><div class="energy-fill" id="energy-fill"></div></div>
+    </div>
+    <div class="hud-block secondary">
+      <span class="hud-label">Resgates / sinais</span>
+      <strong class="hud-value"><span id="rescued-value">0</span> / <span id="signals-value">0</span></strong>
+    </div>
+  </aside>
+
+  <div class="game-ui radio-call" id="radio-call" role="status" aria-live="polite"></div>
+
+  <aside class="game-ui signal-log" id="signal-log" hidden>
+    <h2>Frequencias anomalas</h2>
+    <div class="signal-row" data-signal-row="0"><b>01</b><span>CANAL BLOQUEADO</span></div>
+    <div class="signal-row" data-signal-row="1"><b>02</b><span>CANAL BLOQUEADO</span></div>
+    <div class="signal-row" data-signal-row="2"><b>03</b><span>CANAL BLOQUEADO</span></div>
+  </aside>
+
+  <nav class="game-ui controls" id="controls" aria-label="Controles do farol" hidden>
+    <button class="control-btn" id="turn-left" type="button" aria-label="Girar o facho para a esquerda">
+      <strong>&#9664;</strong><small>GIRAR</small>
+    </button>
+    <button class="control-btn beam-btn" id="beam-btn" type="button" aria-pressed="true">
+      <strong id="beam-btn-title">LUZ ON</strong><small>ESPACO</small>
+    </button>
+    <button class="control-btn" id="turn-right" type="button" aria-label="Girar o facho para a direita">
+      <strong>&#9654;</strong><small>GIRAR</small>
+    </button>
+  </nav>
+
+  <section class="screen" id="start-screen">
+    <div class="screen-inner start-layout">
+      <div>
+        <p class="eyebrow">WDM Games / Registro 013</p>
+        <h1 class="title">Farol <span>13</span></h1>
+        <p class="lead">A tempestade apagou toda a costa. Mantenha esta luz girando at&eacute; o amanhecer, guie quem ainda est&aacute; no mar e n&atilde;o responda ao que chamar pelo r&aacute;dio.</p>
+      </div>
+      <div>
+        <div class="briefing" aria-label="Como jogar">
+          <div class="briefing-row"><strong>MIRE</strong><span>Use o mouse, arraste na tela ou pressione as setas.</span></div>
+          <div class="briefing-row"><strong>GUIE</strong><span>Mantenha cada barco dentro do facho at&eacute; completar o resgate.</span></div>
+          <div class="briefing-row"><strong>POUPE</strong><span>Desligue a luz para recuperar o gerador antes que ele aque&ccedil;a.</span></div>
+          <div class="briefing-row"><strong>ESCUTE</strong><span>Tr&ecirc;s sinais desconhecidos surgir&atilde;o durante as 13 horas.</span></div>
+        </div>
+        <button class="primary-btn" id="start-btn" type="button">Assumir o turno</button>
+        <div class="menu-meta">
+          <span>RECORDE: <strong id="menu-best">000000</strong></span>
+          <a href="index.html">VOLTAR AO ARCADE</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="pause-screen" hidden>
+    <div class="screen-inner pause-panel">
+      <p class="eyebrow">Turno interrompido</p>
+      <h2 class="pause-title">Mar em espera</h2>
+      <p class="pause-copy">A tempestade foi pausada. Respire antes de voltar para a lanterna.</p>
+      <div class="button-row">
+        <button class="primary-btn" id="resume-btn" type="button">Retomar turno</button>
+        <button class="secondary-btn" id="quit-btn" type="button">Abandonar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="end-screen" hidden>
+    <div class="screen-inner end-panel" id="end-panel">
+      <p class="eyebrow" id="end-kicker">Relatorio da madrugada</p>
+      <h2 class="end-title" id="end-title">Amanheceu</h2>
+      <p class="end-copy" id="end-copy"></p>
+      <div class="result-grid">
+        <div class="result-item"><span>PONTOS</span><strong id="end-score">0</strong></div>
+        <div class="result-item"><span>RESGATES</span><strong id="end-rescued">0</strong></div>
+        <div class="result-item"><span>SINAIS</span><strong id="end-signals">0 / 3</strong></div>
+      </div>
+      <div class="fragments" id="end-fragments"></div>
+      <div class="button-row">
+        <button class="primary-btn" id="retry-btn" type="button">Novo turno</button>
+        <button class="secondary-btn" id="menu-btn" type="button">Menu</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const TAU = Math.PI * 2;
+  const GAME_LENGTH = 91;
+  const HOURS = 13;
+  const BEAM_HALF_WIDTH = 0.115;
+  const BEST_KEY = "farol13_best_v1";
+  const MUTE_KEY = "farol13_muted_v1";
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const canvas = document.getElementById("sea-canvas");
+  const ctx = canvas.getContext("2d");
+  const startScreen = document.getElementById("start-screen");
+  const pauseScreen = document.getElementById("pause-screen");
+  const endScreen = document.getElementById("end-screen");
+  const endPanel = document.getElementById("end-panel");
+  const topbar = document.getElementById("topbar");
+  const hudLeft = document.getElementById("hud-left");
+  const hudRight = document.getElementById("hud-right");
+  const signalLog = document.getElementById("signal-log");
+  const controls = document.getElementById("controls");
+  const radioCall = document.getElementById("radio-call");
+  const hourValue = document.getElementById("hour-value");
+  const scoreValue = document.getElementById("score-value");
+  const energyValue = document.getElementById("energy-value");
+  const energyLabel = document.getElementById("energy-label");
+  const energyFill = document.getElementById("energy-fill");
+  const rescuedValue = document.getElementById("rescued-value");
+  const signalsValue = document.getElementById("signals-value");
+  const integrityPips = Array.from(document.querySelectorAll("#integrity-pips span"));
+  const beamButton = document.getElementById("beam-btn");
+  const beamButtonTitle = document.getElementById("beam-btn-title");
+  const soundButton = document.getElementById("sound-btn");
+  const menuBest = document.getElementById("menu-best");
+
+  const signalTexts = [
+    "A luz nao guia. Ela chama.",
+    "O registro de 1913 termina nesta noite.",
+    "Ha outro farol aceso sob as ondas."
+  ];
+
+  const shipTypes = [
+    { key: "cutter", name: "BOTE", length: 19, width: 8, speed: 23, focus: 0.9, points: 100 },
+    { key: "trawler", name: "PESQUEIRO", length: 27, width: 10, speed: 18, focus: 1.25, points: 150 },
+    { key: "freighter", name: "CARGUEIRO", length: 36, width: 13, speed: 14, focus: 1.65, points: 230 }
+  ];
+
+  let viewWidth = 0;
+  let viewHeight = 0;
+  let dpr = 1;
+  let centerX = 0;
+  let centerY = 0;
+  let islandRadius = 60;
+  let beamAngle = -Math.PI / 2;
+  let targetBeamAngle = beamAngle;
+  let pointerAiming = false;
+  let state = "menu";
+  let game;
+  let waves = [];
+  let rain = [];
+  let lastFrame = performance.now();
+  let ambientTime = 0;
+  let radioTimer = 0;
+  let hudTimer = 0;
+  let audioContext = null;
+  let windSource = null;
+  let windGain = null;
+  let muted = readStored(MUTE_KEY, "0") === "1";
+  const keys = { left: false, right: false };
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function lerp(a, b, amount) {
+    return a + (b - a) * amount;
+  }
+
+  function random(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function pad(value, size) {
+    return String(Math.max(0, Math.floor(value))).padStart(size, "0");
+  }
+
+  function angleDifference(a, b) {
+    return Math.atan2(Math.sin(a - b), Math.cos(a - b));
+  }
+
+  function moveAngle(current, target, maxStep) {
+    const difference = angleDifference(target, current);
+    return current + clamp(difference, -maxStep, maxStep);
+  }
+
+  function readStored(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return value === null ? fallback : value;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function writeStored(key, value) {
+    try {
+      localStorage.setItem(key, String(value));
+    } catch (error) {
+      // The game remains playable when storage is unavailable.
+    }
+  }
+
+  function getBest() {
+    const value = Number.parseInt(readStored(BEST_KEY, "0"), 10);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function edgeDistance(angle, margin) {
+    const extra = margin || 0;
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    let xDistance = Infinity;
+    let yDistance = Infinity;
+
+    if (dx > 0.0001) xDistance = (viewWidth + extra - centerX) / dx;
+    else if (dx < -0.0001) xDistance = (-extra - centerX) / dx;
+
+    if (dy > 0.0001) yDistance = (viewHeight + extra - centerY) / dy;
+    else if (dy < -0.0001) yDistance = (-extra - centerY) / dy;
+
+    return Math.min(xDistance, yDistance);
+  }
+
+  function positionAt(angle, distance) {
+    return {
+      x: centerX + Math.cos(angle) * distance,
+      y: centerY + Math.sin(angle) * distance
+    };
+  }
+
+  function rebuildWeather() {
+    const waveCount = reducedMotion ? 34 : clamp(Math.floor((viewWidth * viewHeight) / 18000), 42, 110);
+    const rainCount = reducedMotion ? 25 : clamp(Math.floor((viewWidth * viewHeight) / 9500), 55, 170);
+
+    waves = Array.from({ length: waveCount }, function () {
+      return {
+        x: Math.random() * viewWidth,
+        y: Math.random() * viewHeight,
+        length: random(12, 42),
+        phase: random(0, TAU),
+        drift: random(3, 11),
+        alpha: random(0.07, 0.22)
+      };
+    });
+
+    rain = Array.from({ length: rainCount }, function () {
+      return {
+        x: Math.random() * (viewWidth + 180) - 90,
+        y: Math.random() * (viewHeight + 120) - 60,
+        length: random(7, 18),
+        speed: random(190, 380),
+        drift: random(-75, -35),
+        alpha: random(0.08, 0.34)
+      };
+    });
+  }
+
+  function resize() {
+    viewWidth = window.innerWidth;
+    viewHeight = window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(viewWidth * dpr);
+    canvas.height = Math.round(viewHeight * dpr);
+    canvas.style.width = viewWidth + "px";
+    canvas.style.height = viewHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    centerX = viewWidth * 0.5;
+    centerY = viewHeight * (viewWidth < 760 ? 0.5 : 0.54);
+    islandRadius = clamp(Math.min(viewWidth, viewHeight) * 0.085, 40, 72);
+    rebuildWeather();
+  }
+
+  function createGame() {
+    return {
+      elapsed: 0,
+      hour: 1,
+      score: 0,
+      integrity: 3,
+      energy: 100,
+      rescued: 0,
+      lost: 0,
+      signals: 0,
+      signalAttempts: 0,
+      fragments: [],
+      ships: [],
+      signal: null,
+      particles: [],
+      nextShip: 1.5,
+      nextLightning: random(5, 10),
+      weatherFlash: 0,
+      shake: 0,
+      beamOn: true,
+      overheated: false,
+      combo: 0,
+      comboTimer: 0,
+      result: null
+    };
+  }
+
+  function setGameUi(visible) {
+    topbar.hidden = !visible;
+    hudLeft.hidden = !visible;
+    hudRight.hidden = !visible;
+    signalLog.hidden = !visible;
+    controls.hidden = !visible;
+  }
+
+  function startGame() {
+    ensureAudio();
+    startWind();
+    game = createGame();
+    beamAngle = -Math.PI / 2;
+    targetBeamAngle = beamAngle;
+    pointerAiming = false;
+    keys.left = false;
+    keys.right = false;
+    state = "running";
+    startScreen.hidden = true;
+    pauseScreen.hidden = true;
+    endScreen.hidden = true;
+    setGameUi(true);
+    resetSignalLog();
+    updateHud(true);
+    callout("Gire a luz e mantenha os barcos no facho", "normal", 3200);
+    playTone(246, 0.16, "sine", 0.05, 369);
+  }
+
+  function returnToMenu() {
+    state = "menu";
+    game = createGame();
+    game.energy = 82;
+    startScreen.hidden = false;
+    pauseScreen.hidden = true;
+    endScreen.hidden = true;
+    setGameUi(false);
+    radioCall.className = "game-ui radio-call";
+    menuBest.textContent = pad(getBest(), 6);
+    setWindLevel(0.012);
+  }
+
+  function togglePause(forceResume) {
+    if (state === "running" && !forceResume) {
+      state = "paused";
+      pauseScreen.hidden = false;
+      controls.hidden = true;
+      setWindLevel(0.008);
+      return;
+    }
+
+    if (state === "paused") {
+      state = "running";
+      pauseScreen.hidden = true;
+      controls.hidden = false;
+      setWindLevel(0.025);
+      lastFrame = performance.now();
+    }
+  }
+
+  function endGame(success) {
+    if (state !== "running") return;
+    state = "ended";
+    game.result = success ? "dawn" : "lost";
+    game.beamOn = false;
+    setGameUi(false);
+
+    const oldBest = getBest();
+    const isRecord = game.score > oldBest;
+    if (isRecord) writeStored(BEST_KEY, game.score);
+
+    const endTitle = document.getElementById("end-title");
+    const endKicker = document.getElementById("end-kicker");
+    const endCopy = document.getElementById("end-copy");
+    endPanel.classList.toggle("failure", !success);
+
+    if (!success) {
+      endKicker.textContent = "SINAL INTERROMPIDO / HORA " + pad(game.hour, 2);
+      endTitle.textContent = "A costa apagou";
+      endCopy.textContent = "As ondas venceram a base do farol. " + game.rescued + " embarcacoes ainda encontraram o caminho por causa da sua luz.";
+      playNoise(0.8, 0.16, 180);
+      playTone(120, 0.8, "sawtooth", 0.08, 48);
+    } else if (game.signals === 3) {
+      endKicker.textContent = "FREQUENCIA 013 / DECODIFICADA";
+      endTitle.textContent = "Algo despertou";
+      endCopy.textContent = "O sol nasceu, mas sua luz continuou refletida la embaixo. Por um instante, um segundo farol respondeu sob as ondas.";
+      playChord([220, 277, 330, 440], 1.2, 0.045);
+    } else {
+      endKicker.textContent = "RELATORIO DA MADRUGADA / 06:13";
+      endTitle.textContent = "Amanheceu";
+      endCopy.textContent = "A tempestade recuou. " + game.rescued + " embarcacoes cruzaram os rochedos e a lanterna permaneceu acesa ate o primeiro raio de sol.";
+      playChord([196, 247, 294, 392], 1.1, 0.04);
+    }
+
+    if (isRecord) endCopy.textContent += " Novo recorde da vigilia.";
+    document.getElementById("end-score").textContent = pad(game.score, 6);
+    document.getElementById("end-rescued").textContent = String(game.rescued);
+    document.getElementById("end-signals").textContent = game.signals + " / 3";
+    renderEndFragments();
+    endScreen.hidden = false;
+    setWindLevel(success ? 0.006 : 0.016);
+  }
+
+  function renderEndFragments() {
+    const container = document.getElementById("end-fragments");
+    container.replaceChildren();
+    signalTexts.forEach(function (text, index) {
+      const row = document.createElement("div");
+      const found = game.fragments.includes(index);
+      row.className = "fragment" + (found ? " found" : "");
+      row.textContent = "0" + (index + 1) + " / " + (found ? text : "FREQUENCIA NAO RECUPERADA");
+      container.appendChild(row);
+    });
+  }
+
+  function resetSignalLog() {
+    document.querySelectorAll("[data-signal-row]").forEach(function (row) {
+      row.classList.remove("found");
+      row.querySelector("span").textContent = "CANAL BLOQUEADO";
+    });
+  }
+
+  function revealSignal(index) {
+    const row = document.querySelector("[data-signal-row='" + index + "']");
+    if (!row) return;
+    row.classList.add("found");
+    row.querySelector("span").textContent = signalTexts[index];
+  }
+
+  function callout(message, type, duration) {
+    clearTimeout(radioTimer);
+    radioCall.textContent = message;
+    radioCall.className = "game-ui radio-call " + (type || "normal");
+    requestAnimationFrame(function () {
+      radioCall.classList.add("show");
+    });
+    radioTimer = window.setTimeout(function () {
+      radioCall.classList.remove("show");
+    }, duration || 2200);
+  }
+
+  function spawnShip() {
+    const progress = game.elapsed / GAME_LENGTH;
+    let typeIndex = 0;
+    const roll = Math.random();
+    if (progress > 0.48 && roll > 0.78) typeIndex = 2;
+    else if (progress > 0.17 && roll > 0.46) typeIndex = 1;
+
+    const type = shipTypes[typeIndex];
+    let angle = random(-Math.PI, Math.PI);
+    if (game.ships.length) {
+      const newest = game.ships[game.ships.length - 1];
+      if (Math.abs(angleDifference(angle, newest.angle)) < 0.34) angle += 0.6;
+    }
+
+    game.ships.push({
+      type: type,
+      angle: angle,
+      distance: edgeDistance(angle, 44),
+      speed: type.speed * random(0.92, 1.1) * (1 + progress * 0.16),
+      drift: random(-0.035, 0.035),
+      guidance: 0,
+      lit: false,
+      status: "incoming",
+      turn: 0,
+      bob: random(0, TAU)
+    });
+  }
+
+  function spawnSignal(index) {
+    let angle = random(-Math.PI, Math.PI);
+    if (Math.abs(angleDifference(angle, beamAngle)) < 0.65) angle += 1.1;
+    game.signal = {
+      index: index,
+      angle: angle,
+      distance: edgeDistance(angle) * random(0.55, 0.72),
+      lock: 0,
+      expires: 12,
+      lit: false,
+      phase: random(0, TAU)
+    };
+    game.signalAttempts += 1;
+    callout("Sinal desconhecido detectado. Fixe a luz na frequencia", "signal", 3600);
+    playSignalAlert();
+  }
+
+  function update(dt) {
+    game.elapsed += dt;
+    const progress = clamp(game.elapsed / GAME_LENGTH, 0, 1);
+    const previousHour = game.hour;
+    game.hour = Math.min(HOURS, Math.floor(game.elapsed / (GAME_LENGTH / HOURS)) + 1);
+
+    if (game.hour !== previousHour && [5, 9, 13].includes(game.hour)) {
+      callout("Hora " + pad(game.hour, 2) + ". A mare continua subindo", "normal", 2200);
+    }
+
+    if (game.elapsed >= GAME_LENGTH) {
+      endGame(true);
+      return;
+    }
+
+    updateBeam(dt);
+    updateEnergy(dt);
+    updateShips(dt, progress);
+    updateSignal(dt);
+    updateParticles(dt);
+
+    game.nextShip -= dt;
+    const incomingCount = game.ships.filter(function (ship) { return ship.status === "incoming"; }).length;
+    if (game.nextShip <= 0 && incomingCount < 6 && progress < 0.94) {
+      spawnShip();
+      game.nextShip = lerp(4.5, 2.15, progress) * random(0.84, 1.16);
+    }
+
+    const signalHours = [3, 7, 11];
+    if (!game.signal && game.signalAttempts < signalHours.length && game.hour >= signalHours[game.signalAttempts]) {
+      spawnSignal(game.signalAttempts);
+    }
+
+    game.comboTimer -= dt;
+    if (game.comboTimer <= 0) game.combo = 0;
+
+    game.nextLightning -= dt;
+    if (game.nextLightning <= 0) {
+      game.weatherFlash = 1;
+      game.nextLightning = random(7, 14);
+      window.setTimeout(function () {
+        if (state === "running") playNoise(0.7, 0.045, 140);
+      }, 260);
+    }
+    game.weatherFlash = Math.max(0, game.weatherFlash - dt * 4.8);
+    game.shake = Math.max(0, game.shake - dt * 2.6);
+
+    hudTimer -= dt;
+    if (hudTimer <= 0) {
+      hudTimer = 0.08;
+      updateHud(false);
+    }
+  }
+
+  function updateBeam(dt) {
+    if (keys.left && !keys.right) {
+      beamAngle -= 2.25 * dt;
+      targetBeamAngle = beamAngle;
+      pointerAiming = false;
+    } else if (keys.right && !keys.left) {
+      beamAngle += 2.25 * dt;
+      targetBeamAngle = beamAngle;
+      pointerAiming = false;
+    } else if (pointerAiming) {
+      beamAngle = moveAngle(beamAngle, targetBeamAngle, 3.35 * dt);
+    }
+  }
+
+  function updateEnergy(dt) {
+    if (game.beamOn) {
+      game.energy = Math.max(0, game.energy - 4.45 * dt);
+      if (game.energy <= 0) {
+        game.beamOn = false;
+        game.overheated = true;
+        callout("Gerador superaquecido. Aguarde a carga minima", "danger", 3000);
+        playTone(150, 0.42, "sawtooth", 0.08, 70);
+      }
+    } else {
+      game.energy = Math.min(100, game.energy + 13.5 * dt);
+      if (game.overheated && game.energy >= 28) {
+        game.overheated = false;
+        callout("Gerador liberado", "normal", 1400);
+        playTone(330, 0.13, "sine", 0.045, 440);
+      }
+    }
+  }
+
+  function updateShips(dt, progress) {
+    for (let index = game.ships.length - 1; index >= 0; index -= 1) {
+      const ship = game.ships[index];
+
+      if (ship.status === "saved") {
+        ship.distance += ship.speed * 1.55 * dt;
+        ship.angle += ship.turn * dt;
+        ship.lit = game.beamOn && Math.abs(angleDifference(ship.angle, beamAngle)) < BEAM_HALF_WIDTH;
+        if (ship.distance > edgeDistance(ship.angle, 90)) game.ships.splice(index, 1);
+        continue;
+      }
+
+      ship.distance -= ship.speed * dt;
+      ship.angle += ship.drift * dt;
+      const angularSize = Math.atan2(ship.type.width * 0.7, Math.max(20, ship.distance));
+      ship.lit = game.beamOn && Math.abs(angleDifference(ship.angle, beamAngle)) < BEAM_HALF_WIDTH + angularSize;
+
+      if (ship.lit) {
+        const power = lerp(0.72, 1, game.energy / 100);
+        ship.guidance += dt * power / ship.type.focus;
+      } else {
+        ship.guidance = Math.max(0, ship.guidance - dt * 0.13);
+      }
+
+      if (ship.guidance >= 1) {
+        rescueShip(ship);
+        continue;
+      }
+
+      if (ship.distance <= islandRadius + ship.type.width * 0.7) {
+        crashShip(ship);
+        game.ships.splice(index, 1);
+        if (game.integrity <= 0) return;
+      }
+    }
+  }
+
+  function rescueShip(ship) {
+    ship.status = "saved";
+    ship.guidance = 1;
+    ship.turn = (Math.random() < 0.5 ? -1 : 1) * random(0.18, 0.3);
+    game.rescued += 1;
+    game.combo = game.comboTimer > 0 ? Math.min(5, game.combo + 1) : 1;
+    game.comboTimer = 4.2;
+    const points = ship.type.points * game.combo + Math.round(game.energy * 0.4);
+    game.score += points;
+    const position = positionAt(ship.angle, ship.distance);
+    burst(position.x, position.y, "#ffd36a", 15);
+    callout(ship.type.name + " GUIADO  +" + points + (game.combo > 1 ? "  COMBO x" + game.combo : ""), "normal", 1500);
+    playRescue(game.combo);
+  }
+
+  function crashShip(ship) {
+    const position = positionAt(ship.angle, ship.distance);
+    game.integrity -= 1;
+    game.lost += 1;
+    game.combo = 0;
+    game.comboTimer = 0;
+    game.shake = 1;
+    burst(position.x, position.y, "#dd6848", 28);
+    callout("IMPACTO NOS ROCHEDOS. ESTRUTURA " + game.integrity + " / 3", "danger", 2600);
+    playNoise(0.45, 0.12, 420);
+    playTone(105, 0.55, "sawtooth", 0.08, 45);
+    if (game.integrity <= 0) endGame(false);
+  }
+
+  function updateSignal(dt) {
+    const signal = game.signal;
+    if (!signal) return;
+
+    signal.expires -= dt;
+    signal.lit = game.beamOn && Math.abs(angleDifference(signal.angle, beamAngle)) < BEAM_HALF_WIDTH * 1.15;
+
+    if (signal.lit) signal.lock += dt / 1.8;
+    else signal.lock = Math.max(0, signal.lock - dt * 0.18);
+
+    if (signal.lock >= 1) {
+      const index = signal.index;
+      game.signals += 1;
+      game.fragments.push(index);
+      game.score += 500;
+      const position = positionAt(signal.angle, signal.distance);
+      burst(position.x, position.y, "#e55577", 34);
+      revealSignal(index);
+      callout("FRAGMENTO 0" + (index + 1) + " / " + signalTexts[index], "signal", 5200);
+      playSignalFound();
+      game.signal = null;
+      return;
+    }
+
+    if (signal.expires <= 0) {
+      callout("O sinal desapareceu na tempestade", "signal", 2400);
+      game.signal = null;
+    }
+  }
+
+  function burst(x, y, color, count) {
+    for (let index = 0; index < count; index += 1) {
+      const angle = random(0, TAU);
+      const speed = random(18, 95);
+      const life = random(0.35, 0.9);
+      game.particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: life,
+        maxLife: life,
+        size: random(1, 3.5),
+        color: color
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    for (let index = game.particles.length - 1; index >= 0; index -= 1) {
+      const particle = game.particles[index];
+      particle.life -= dt;
+      particle.x += particle.vx * dt;
+      particle.y += particle.vy * dt;
+      particle.vx *= 0.98;
+      particle.vy *= 0.98;
+      if (particle.life <= 0) game.particles.splice(index, 1);
+    }
+  }
+
+  function toggleBeam() {
+    if (state !== "running") return;
+    ensureAudio();
+    if (game.overheated && game.energy < 28) {
+      callout("Gerador bloqueado em " + Math.round(game.energy) + "%", "danger", 1400);
+      playTone(95, 0.12, "square", 0.04, 75);
+      return;
+    }
+    game.beamOn = !game.beamOn;
+    playTone(game.beamOn ? 420 : 210, 0.11, "square", 0.035, game.beamOn ? 560 : 160);
+    updateHud(true);
+  }
+
+  function updateHud(force) {
+    if (!game) return;
+    hourValue.textContent = pad(game.hour, 2) + " / 13";
+    scoreValue.textContent = pad(game.score, 6);
+    energyValue.textContent = Math.round(game.energy) + "%";
+    energyFill.style.transform = "scaleX(" + (game.energy / 100) + ")";
+    energyFill.classList.toggle("low", game.energy < 24);
+    energyLabel.textContent = game.overheated ? "Resfriando" : (game.beamOn ? "Gerador" : "Recarregando");
+    rescuedValue.textContent = String(game.rescued);
+    signalsValue.textContent = String(game.signals);
+    integrityPips.forEach(function (pip, index) {
+      pip.classList.toggle("lost", index >= game.integrity);
+    });
+    beamButton.classList.toggle("off", !game.beamOn && !game.overheated);
+    beamButton.classList.toggle("locked", game.overheated);
+    beamButtonTitle.textContent = game.overheated ? "BLOQUEIO" : (game.beamOn ? "LUZ ON" : "LUZ OFF");
+    beamButton.setAttribute("aria-pressed", game.beamOn ? "true" : "false");
+    soundButton.textContent = muted ? "SOM OFF" : "SOM ON";
+    soundButton.setAttribute("aria-pressed", muted ? "true" : "false");
+    if (force) hudTimer = 0.08;
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, viewWidth, viewHeight);
+    const shakeStrength = game && game.shake > 0 ? game.shake * 5 : 0;
+    ctx.save();
+    if (shakeStrength) ctx.translate(random(-shakeStrength, shakeStrength), random(-shakeStrength, shakeStrength));
+    drawSea(time);
+    drawContours(time);
+    drawWaves(time);
+
+    let displayBeamAngle = beamAngle;
+    let displayBeamOn = game && game.beamOn;
+    if (state === "menu") {
+      displayBeamAngle = -1.15 + Math.sin(time * 0.3) * 0.95;
+      displayBeamOn = true;
+    }
+
+    if (displayBeamOn) drawBeam(displayBeamAngle, time);
+    if (game && game.signal) drawSignal(game.signal, time);
+    if (state === "menu") drawDemoShips(time, displayBeamAngle);
+    else if (game) game.ships.forEach(function (ship) { drawShip(ship, time); });
+    drawIsland(time, displayBeamOn);
+    if (game) drawParticles();
+    drawRain(time);
+    drawEdgeShade();
+    if (game && game.weatherFlash > 0) {
+      ctx.fillStyle = "rgba(210, 232, 229, " + (game.weatherFlash * 0.32) + ")";
+      ctx.fillRect(0, 0, viewWidth, viewHeight);
+    }
+    ctx.restore();
+  }
+
+  function drawSea(time) {
+    const dawn = game && game.result === "dawn";
+    const gradient = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, Math.max(viewWidth, viewHeight) * 0.82);
+    if (dawn) {
+      gradient.addColorStop(0, "#295d61");
+      gradient.addColorStop(0.52, "#174a54");
+      gradient.addColorStop(1, "#8d654f");
+    } else {
+      gradient.addColorStop(0, "#123d44");
+      gradient.addColorStop(0.46, "#092a33");
+      gradient.addColorStop(1, "#031117");
+    }
+    ctx.fillStyle = gradient;
+    ctx.fillRect(-8, -8, viewWidth + 16, viewHeight + 16);
+
+    const glow = ctx.createLinearGradient(0, 0, 0, viewHeight);
+    glow.addColorStop(0, dawn ? "rgba(255, 180, 115, 0.15)" : "rgba(57, 112, 120, 0.09)");
+    glow.addColorStop(0.55, "rgba(0, 0, 0, 0)");
+    glow.addColorStop(1, "rgba(0, 4, 7, 0.2)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, viewWidth, viewHeight);
+  }
+
+  function drawContours(time) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.strokeStyle = "rgba(133, 181, 180, 0.075)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 10]);
+    ctx.lineDashOffset = -time * 4;
+    for (let ring = 2.1; ring < 5.7; ring += 0.82) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, islandRadius * ring, islandRadius * ring * 0.9, 0.1, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawWaves(time) {
+    ctx.save();
+    ctx.lineCap = "round";
+    waves.forEach(function (wave) {
+      const x = (wave.x + time * wave.drift) % (viewWidth + 70) - 35;
+      const y = wave.y + Math.sin(time * 0.7 + wave.phase) * 4;
+      ctx.strokeStyle = "rgba(168, 201, 199, " + wave.alpha + ")";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x - wave.length * 0.5, y);
+      ctx.quadraticCurveTo(x, y - 3, x + wave.length * 0.5, y);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawBeam(angle, time) {
+    const radius = Math.max(viewWidth, viewHeight) * 1.25;
+    const energyRatio = state === "menu" ? 0.8 : clamp(game.energy / 100, 0.2, 1);
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(angle);
+    ctx.globalCompositeOperation = "screen";
+
+    const broadGradient = ctx.createRadialGradient(0, 0, islandRadius * 0.1, 0, 0, radius);
+    broadGradient.addColorStop(0, "rgba(255, 239, 171, " + (0.34 * energyRatio) + ")");
+    broadGradient.addColorStop(0.35, "rgba(255, 219, 112, " + (0.19 * energyRatio) + ")");
+    broadGradient.addColorStop(1, "rgba(255, 211, 106, 0)");
+    ctx.fillStyle = broadGradient;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, -BEAM_HALF_WIDTH * 1.45, BEAM_HALF_WIDTH * 1.45);
+    ctx.closePath();
+    ctx.fill();
+
+    const coreGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+    coreGradient.addColorStop(0, "rgba(255, 249, 211, " + (0.42 * energyRatio) + ")");
+    coreGradient.addColorStop(0.55, "rgba(255, 225, 137, " + (0.11 * energyRatio) + ")");
+    coreGradient.addColorStop(1, "rgba(255, 211, 106, 0)");
+    ctx.fillStyle = coreGradient;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, -BEAM_HALF_WIDTH * 0.52, BEAM_HALF_WIDTH * 0.52);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawIsland(time, lampOn) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+
+    ctx.beginPath();
+    for (let index = 0; index <= 28; index += 1) {
+      const angle = (index / 28) * TAU;
+      const roughness = 1 + Math.sin(index * 2.31) * 0.09 + Math.cos(index * 4.17) * 0.055;
+      const radius = islandRadius * roughness;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius * 0.86;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "#111d1d";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(158, 183, 174, 0.34)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(190, 217, 205, 0.2)";
+    ctx.lineWidth = 1.5;
+    for (let index = 0; index < 9; index += 1) {
+      const angle = index * 0.81 + 0.3;
+      const radius = islandRadius * randomFixed(index);
+      ctx.beginPath();
+      ctx.arc(Math.cos(angle) * radius, Math.sin(angle) * radius * 0.82, 2 + (index % 3), 0, TAU);
+      ctx.stroke();
+    }
+
+    ctx.save();
+    ctx.rotate(-0.18);
+    ctx.fillStyle = "#283331";
+    ctx.strokeStyle = "#70817a";
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(-islandRadius * 0.48, -8, islandRadius * 0.62, 16);
+    ctx.strokeRect(-islandRadius * 0.48, -8, islandRadius * 0.62, 16);
+    ctx.restore();
+
+    const baseGradient = ctx.createRadialGradient(-5, -6, 2, 0, 0, islandRadius * 0.35);
+    baseGradient.addColorStop(0, "#d7d0b8");
+    baseGradient.addColorStop(0.58, "#8d9186");
+    baseGradient.addColorStop(1, "#3a4643");
+    ctx.fillStyle = baseGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, islandRadius * 0.29, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(232, 224, 199, 0.66)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(50, 60, 57, 0.9)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, islandRadius * 0.2, 0, TAU);
+    ctx.stroke();
+
+    if (lampOn) {
+      const glow = ctx.createRadialGradient(0, 0, 1, 0, 0, islandRadius * 0.44);
+      glow.addColorStop(0, "rgba(255, 249, 211, 0.95)");
+      glow.addColorStop(0.18, "rgba(255, 211, 106, 0.7)");
+      glow.addColorStop(1, "rgba(255, 211, 106, 0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, islandRadius * 0.44, 0, TAU);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = lampOn ? "#fff1b5" : "#222c2a";
+    ctx.beginPath();
+    ctx.arc(0, 0, islandRadius * 0.1, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = lampOn ? "#ffd36a" : "#566763";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function randomFixed(index) {
+    return 0.43 + ((index * 37) % 29) / 100;
+  }
+
+  function drawShip(ship, time) {
+    const position = positionAt(ship.angle, ship.distance);
+    const lit = ship.lit || ship.status === "saved";
+    const length = ship.type.length;
+    const width = ship.type.width;
+
+    ctx.save();
+    ctx.translate(position.x, position.y + Math.sin(time * 2.2 + ship.bob) * 1.1);
+    ctx.rotate(ship.angle + Math.PI);
+    ctx.shadowColor = lit ? "rgba(255, 211, 106, 0.55)" : "rgba(0, 0, 0, 0.72)";
+    ctx.shadowBlur = lit ? 10 : 5;
+    ctx.fillStyle = lit ? "#d9d5bd" : "#263b3d";
+    ctx.strokeStyle = lit ? "#fff0b2" : "#5d7777";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(length * 0.52, 0);
+    ctx.lineTo(length * 0.22, -width * 0.5);
+    ctx.lineTo(-length * 0.46, -width * 0.42);
+    ctx.lineTo(-length * 0.52, width * 0.42);
+    ctx.lineTo(length * 0.22, width * 0.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = lit ? "#45585a" : "#17282b";
+    if (ship.type.key === "freighter") {
+      ctx.fillRect(-length * 0.28, -width * 0.31, length * 0.2, width * 0.24);
+      ctx.fillRect(-length * 0.28, width * 0.07, length * 0.2, width * 0.24);
+      ctx.fillStyle = lit ? "#9d624c" : "#3c4140";
+      ctx.fillRect(0, -width * 0.32, length * 0.2, width * 0.64);
+    } else {
+      ctx.fillRect(-length * 0.1, -width * 0.32, length * 0.24, width * 0.64);
+    }
+
+    ctx.fillStyle = "#d85b52";
+    ctx.beginPath();
+    ctx.arc(-length * 0.2, -width * 0.5, 1.2, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = "#6bd1a2";
+    ctx.beginPath();
+    ctx.arc(-length * 0.2, width * 0.5, 1.2, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+
+    if (ship.status === "incoming" && (ship.guidance > 0.01 || ship.lit)) {
+      const barWidth = clamp(length * 1.35, 28, 48);
+      const y = position.y - width - 12;
+      ctx.fillStyle = "rgba(2, 12, 16, 0.8)";
+      ctx.fillRect(position.x - barWidth / 2, y, barWidth, 4);
+      ctx.fillStyle = ship.guidance > 0.76 ? "#7ed6ad" : "#ffd36a";
+      ctx.fillRect(position.x - barWidth / 2, y, barWidth * clamp(ship.guidance, 0, 1), 4);
+    }
+
+    if (ship.status === "saved") {
+      ctx.save();
+      ctx.strokeStyle = "rgba(126, 214, 173, 0.55)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(position.x, position.y, length * 0.72 + Math.sin(time * 4) * 2, 0, TAU);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawDemoShips(time, displayBeamAngle) {
+    const demoType = shipTypes[1];
+    const first = {
+      type: demoType,
+      angle: -0.25 + Math.sin(time * 0.09) * 0.08,
+      distance: Math.min(viewWidth, viewHeight) * 0.37,
+      guidance: 0,
+      lit: Math.abs(angleDifference(-0.25, displayBeamAngle)) < 0.22,
+      status: "incoming",
+      bob: 1.2
+    };
+    drawShip(first, time);
+  }
+
+  function drawSignal(signal, time) {
+    const position = positionAt(signal.angle, signal.distance);
+    const pulse = 0.5 + Math.sin(time * 7 + signal.phase) * 0.5;
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    ctx.rotate(time * 0.45);
+    ctx.globalCompositeOperation = "screen";
+    ctx.strokeStyle = "rgba(229, 85, 119, " + (0.48 + pulse * 0.42) + ")";
+    ctx.lineWidth = signal.lit ? 2 : 1;
+    ctx.shadowColor = "#e55577";
+    ctx.shadowBlur = signal.lit ? 18 : 8;
+    for (let ring = 0; ring < 3; ring += 1) {
+      const radius = 8 + ring * 8 + pulse * 3;
+      ctx.strokeRect(-radius, -radius, radius * 2, radius * 2);
+    }
+    ctx.restore();
+
+    const barWidth = 48;
+    ctx.fillStyle = "rgba(2, 12, 16, 0.82)";
+    ctx.fillRect(position.x - barWidth / 2, position.y + 34, barWidth, 4);
+    ctx.fillStyle = "#e55577";
+    ctx.fillRect(position.x - barWidth / 2, position.y + 34, barWidth * clamp(signal.lock, 0, 1), 4);
+
+    ctx.fillStyle = "rgba(255, 181, 198, 0.9)";
+    ctx.font = "600 9px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("SINAL 0" + (signal.index + 1), position.x, position.y - 35);
+  }
+
+  function drawParticles() {
+    game.particles.forEach(function (particle) {
+      ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
+      ctx.fillStyle = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.size, 0, TAU);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function drawRain(time) {
+    if (game && game.result === "dawn") return;
+    ctx.save();
+    ctx.lineWidth = 1;
+    rain.forEach(function (drop) {
+      const rawY = drop.y + time * drop.speed;
+      const y = ((rawY % (viewHeight + 100)) + viewHeight + 100) % (viewHeight + 100) - 50;
+      const rawX = drop.x + time * drop.drift;
+      const x = ((rawX % (viewWidth + 180)) + viewWidth + 180) % (viewWidth + 180) - 90;
+      ctx.strokeStyle = "rgba(191, 220, 218, " + drop.alpha + ")";
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + drop.drift * 0.035, y + drop.length);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawEdgeShade() {
+    const shade = ctx.createRadialGradient(centerX, centerY, Math.min(viewWidth, viewHeight) * 0.22, centerX, centerY, Math.max(viewWidth, viewHeight) * 0.72);
+    shade.addColorStop(0, "rgba(0, 0, 0, 0)");
+    shade.addColorStop(0.72, "rgba(0, 7, 10, 0.08)");
+    shade.addColorStop(1, "rgba(0, 4, 7, 0.48)");
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, 0, viewWidth, viewHeight);
+  }
+
+  function ensureAudio() {
+    if (!audioContext) {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (error) {
+        audioContext = null;
+      }
+    }
+    if (audioContext && audioContext.state === "suspended") audioContext.resume();
+  }
+
+  function startWind() {
+    if (!audioContext || windSource) {
+      setWindLevel(0.025);
+      return;
+    }
+
+    const length = audioContext.sampleRate * 2;
+    const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    let smooth = 0;
+    for (let index = 0; index < length; index += 1) {
+      smooth = smooth * 0.985 + (Math.random() * 2 - 1) * 0.015;
+      data[index] = smooth * 3.2;
+    }
+
+    windSource = audioContext.createBufferSource();
+    windSource.buffer = buffer;
+    windSource.loop = true;
+    const filter = audioContext.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 420;
+    filter.Q.value = 0.45;
+    windGain = audioContext.createGain();
+    windGain.gain.value = muted ? 0 : 0.025;
+    windSource.connect(filter).connect(windGain).connect(audioContext.destination);
+    windSource.start();
+  }
+
+  function setWindLevel(level) {
+    if (!audioContext || !windGain) return;
+    windGain.gain.setTargetAtTime(muted ? 0 : level, audioContext.currentTime, 0.18);
+  }
+
+  function playTone(frequency, duration, type, volume, endFrequency, delay) {
+    if (muted || !audioContext) return;
+    const start = audioContext.currentTime + (delay || 0);
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = type || "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.05, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain).connect(audioContext.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.03);
+  }
+
+  function playNoise(duration, volume, frequency) {
+    if (muted || !audioContext) return;
+    const length = Math.floor(audioContext.sampleRate * duration);
+    const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * (1 - index / length);
+    const source = audioContext.createBufferSource();
+    const filter = audioContext.createBiquadFilter();
+    const gain = audioContext.createGain();
+    source.buffer = buffer;
+    filter.type = "lowpass";
+    filter.frequency.value = frequency || 500;
+    gain.gain.setValueAtTime(volume || 0.08, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+    source.connect(filter).connect(gain).connect(audioContext.destination);
+    source.start();
+  }
+
+  function playChord(frequencies, duration, volume) {
+    frequencies.forEach(function (frequency, index) {
+      playTone(frequency, duration, "sine", volume, frequency * 1.01, index * 0.08);
+    });
+  }
+
+  function playRescue(combo) {
+    const base = 440 + combo * 35;
+    playTone(base, 0.12, "triangle", 0.045, base * 1.25);
+    playTone(base * 1.5, 0.18, "sine", 0.035, base * 1.7, 0.09);
+  }
+
+  function playSignalAlert() {
+    playTone(620, 0.11, "square", 0.03, 480);
+    playTone(780, 0.11, "square", 0.03, 610, 0.18);
+    playTone(620, 0.11, "square", 0.03, 480, 0.36);
+  }
+
+  function playSignalFound() {
+    [330, 415, 494, 660].forEach(function (frequency, index) {
+      playTone(frequency, 0.28, "sine", 0.035, frequency * 1.02, index * 0.08);
+    });
+  }
+
+  function toggleSound() {
+    muted = !muted;
+    writeStored(MUTE_KEY, muted ? "1" : "0");
+    ensureAudio();
+    if (!muted) {
+      startWind();
+      playTone(440, 0.12, "sine", 0.04, 550);
+    }
+    setWindLevel(state === "running" ? 0.025 : 0.01);
+    updateHud(true);
+  }
+
+  function aimFromPointer(event) {
+    const x = event.clientX;
+    const y = event.clientY;
+    targetBeamAngle = Math.atan2(y - centerY, x - centerX);
+    pointerAiming = true;
+  }
+
+  function bindHoldButton(button, key) {
+    function release(event) {
+      keys[key] = false;
+      button.classList.remove("pressed");
+      if (event && button.hasPointerCapture && button.hasPointerCapture(event.pointerId)) {
+        button.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    button.addEventListener("pointerdown", function (event) {
+      if (state !== "running") return;
+      event.preventDefault();
+      pointerAiming = false;
+      keys[key] = true;
+      button.classList.add("pressed");
+      button.setPointerCapture(event.pointerId);
+    });
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", function () {
+      keys[key] = false;
+      button.classList.remove("pressed");
+    });
+  }
+
+  canvas.addEventListener("pointerdown", function (event) {
+    if (state !== "running") return;
+    event.preventDefault();
+    aimFromPointer(event);
+    canvas.setPointerCapture(event.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", function (event) {
+    if (state !== "running") return;
+    if (event.pointerType === "mouse" || canvas.hasPointerCapture(event.pointerId)) aimFromPointer(event);
+  });
+
+  canvas.addEventListener("pointerup", function (event) {
+    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+  });
+
+  window.addEventListener("keydown", function (event) {
+    if (["ArrowLeft", "ArrowRight", " "].includes(event.key)) event.preventDefault();
+    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = true;
+    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = true;
+
+    if (event.key === " " && !event.repeat) toggleBeam();
+    if ((event.key.toLowerCase() === "p" || event.key === "Escape") && !event.repeat) togglePause(false);
+    if (event.key === "Enter" && !event.repeat && (state === "menu" || state === "ended")) startGame();
+  });
+
+  window.addEventListener("keyup", function (event) {
+    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = false;
+    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = false;
+  });
+
+  document.getElementById("start-btn").addEventListener("click", startGame);
+  document.getElementById("retry-btn").addEventListener("click", startGame);
+  document.getElementById("resume-btn").addEventListener("click", function () { togglePause(true); });
+  document.getElementById("pause-btn").addEventListener("click", function () { togglePause(false); });
+  document.getElementById("quit-btn").addEventListener("click", returnToMenu);
+  document.getElementById("menu-btn").addEventListener("click", returnToMenu);
+  beamButton.addEventListener("click", toggleBeam);
+  soundButton.addEventListener("click", toggleSound);
+  bindHoldButton(document.getElementById("turn-left"), "left");
+  bindHoldButton(document.getElementById("turn-right"), "right");
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && state === "running") togglePause(false);
+  });
+
+  window.addEventListener("resize", resize);
+
+  function loop(now) {
+    const dt = Math.min(0.035, Math.max(0, (now - lastFrame) / 1000));
+    lastFrame = now;
+    ambientTime += dt;
+    if (state === "running") update(dt);
+    draw(ambientTime);
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  game = createGame();
+  game.energy = 82;
+  menuBest.textContent = pad(getBest(), 6);
+  soundButton.textContent = muted ? "SOM OFF" : "SOM ON";
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
