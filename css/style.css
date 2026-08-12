@@ -588,8 +588,8 @@ body {
 
 .portfolio-image-telhas {
     background:
-        linear-gradient(180deg, rgba(10, 22, 40, 0.08), rgba(10, 22, 40, 0.48)),
-        url("https://telhasporto.com.br/assets/portas-janelas/04.jpeg") center 36% / cover no-repeat;
+        url("../img/telhas-porto-logo.png") center / min(84%, 540px) auto no-repeat,
+        linear-gradient(135deg, #101f49 0%, #071427 100%);
 }
 
 .portfolio-category {
