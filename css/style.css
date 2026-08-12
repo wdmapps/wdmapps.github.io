@@ -568,6 +568,12 @@ body {
     transition: var(--transition);
 }
 
+.portfolio-card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
 .portfolio-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-xl);
@@ -578,6 +584,12 @@ body {
     display: flex;
     align-items: flex-end;
     padding: 16px;
+}
+
+.portfolio-image-telhas {
+    background:
+        linear-gradient(180deg, rgba(10, 22, 40, 0.08), rgba(10, 22, 40, 0.48)),
+        url("https://telhasporto.com.br/assets/portas-janelas/04.jpeg") center 36% / cover no-repeat;
 }
 
 .portfolio-category {
@@ -619,6 +631,20 @@ body {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--text);
+}
+
+.portfolio-visit {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--primary-light);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.portfolio-card-link:hover .portfolio-visit {
+    color: white;
 }
 
 /* Tech Stack */
