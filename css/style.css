@@ -773,7 +773,7 @@ body {
     font-size: 0.95rem;
 }
 
-/* Contact Form */
+/* Contact Card */
 .contact-form-wrapper {
     background: var(--bg-light);
     padding: 40px;
@@ -781,48 +781,49 @@ body {
     border: 1px solid var(--border);
 }
 
-.contact-form {
+.contact-whatsapp-card {
+    min-height: 430px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 18px;
+    background: linear-gradient(145deg, rgba(37, 211, 102, 0.12), var(--bg-light) 60%);
+    overflow: hidden;
+    position: relative;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.contact-whatsapp-icon {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(37, 211, 102, 0.16);
+    font-size: 2rem;
 }
 
-.form-group label {
-    font-weight: 600;
-    font-size: 0.9rem;
+.contact-whatsapp-card .section-tag {
+    margin-bottom: 0;
+}
+
+.contact-whatsapp-card h3 {
+    font-size: 2rem;
+    line-height: 1.15;
     color: white;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 1rem;
-    font-family: inherit;
-    transition: var(--transition);
-    background: var(--bg);
-    color: white;
+.contact-whatsapp-card p {
+    color: var(--text-light);
+    font-size: 1.05rem;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0,102,255,0.2);
+.contact-whatsapp-card .btn {
+    margin-top: 8px;
 }
 
-.form-group textarea {
-    resize: vertical;
-    min-height: 120px;
+.contact-whatsapp-card small {
+    color: rgba(255,255,255,0.55);
 }
 
 /* Footer */

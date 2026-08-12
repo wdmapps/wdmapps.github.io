@@ -242,20 +242,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <span class="portfolio-visit">Visitar site <span aria-hidden="true">↗</span></span>
                         </div>
                     </a>
-                    <div class="portfolio-card">
-                        <div class="portfolio-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            <span class="portfolio-category">App Web</span>
+                    <a class="portfolio-card portfolio-card-link" href="https://play.google.com/store/apps/details?id=com.wdmapps.encontrapet" target="_blank" rel="noopener noreferrer" aria-label="Baixar o EncontraPet na Google Play">
+                        <div class="portfolio-image" style="background: url('img/encontrapet-portfolio.webp') center / cover no-repeat;">
+                            <span class="portfolio-category">App Mobile</span>
                         </div>
                         <div class="portfolio-info">
-                            <h3>Dashboard Analytics</h3>
-                            <p>Painel de controle para gestão de dados em tempo real com visualizações interativas.</p>
+                            <h3>EncontraPet</h3>
+                            <p>Aplicativo que conecta pessoas para divulgar e encontrar animais perdidos, reunindo famílias com segurança e agilidade.</p>
                             <div class="portfolio-tech">
-                                <span>Next.js</span>
-                                <span>TypeScript</span>
-                                <span>PostgreSQL</span>
+                                <span>Android</span>
+                                <span>Kotlin</span>
+                                <span>Jetpack Compose</span>
+                                <span>Firebase</span>
                             </div>
+                            <span class="portfolio-visit">Ver na Google Play <span aria-hidden="true">↗</span></span>
                         </div>
-                    </div>
+                    </a>
                     <a class="portfolio-card portfolio-card-link" href="https://play.google.com/store/apps/details?id=com.will.vendezap" target="_blank" rel="noopener noreferrer" aria-label="Baixar o VendeZap na Google Play">
                         <div class="portfolio-image" style="background: url('img/vendezap-portfolio.webp') center / cover no-repeat;">
                             <span class="portfolio-category">App Mobile</span>
@@ -360,42 +362,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         </div>
                     </div>
                 </div>
-                <div class="contact-form-wrapper">
-                    <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
-                        <input type="hidden" name="access_key" value="8c68bb0d-d427-4d8a-bad2-c40f89d3f893">
-                        <input type="hidden" name="subject" value="Novo contato - WDM Apps">
-                        <input type="hidden" name="from_name" value="WDM Apps Website">
-                        <input type="hidden" name="email" value="contato@wdmapps.com.br">
-                        <div class="form-group">
-                            <label for="name">Nome</label>
-                            <input type="text" id="name" name="name" required placeholder="Seu nome completo">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required placeholder="seu@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Telefone</label>
-                            <input type="tel" id="phone" name="phone" placeholder="(11) 99999-9999">
-                        </div>
-                        <div class="form-group">
-                            <label for="project">Tipo de Projeto</label>
-                            <select id="project" name="project" required>
-                                <option value="">Selecione o tipo de projeto</option>
-                                <option value="app-mobile">App Mobile (iOS/Android)</option>
-                                <option value="app-crossplatform">App Cross-Platform</option>
-                                <option value="app-web">Aplicação Web</option>
-                                <option value="api">API / Backend</option>
-                                <option value="consultoria">Consultoria</option>
-                                <option value="outro">Outro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Mensagem</label>
-                            <textarea id="message" name="message" rows="5" required placeholder="Descreva seu projeto..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-large btn-full">Enviar Mensagem</button>
-                    </form>
+                <div class="contact-form-wrapper contact-whatsapp-card">
+                    <span class="contact-whatsapp-icon" aria-hidden="true">💬</span>
+                    <span class="section-tag">Atendimento direto</span>
+                    <h3>Vamos falar sobre seu projeto?</h3>
+                    <p>Conte sua ideia pelo WhatsApp e receba um atendimento rápido e personalizado.</p>
+                    <a href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20WDM%20Apps%20e%20gostaria%20de%20falar%20sobre%20um%20projeto."
+                       class="btn btn-primary btn-large btn-full" target="_blank" rel="noopener noreferrer">
+                        Chamar no WhatsApp ↗
+                    </a>
+                    <small>Atendimento pelo número (11) 96918-8837</small>
                 </div>
             </div>
         </section>

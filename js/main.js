@@ -45,40 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Form submission
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Enviando...';
-            submitBtn.disabled = true;
-
-            fetch('https://api.web3forms.com/submit', {
-                method: 'POST',
-                body: new FormData(this)
-            })
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
-                    contactForm.reset();
-                } else {
-                    alert('Erro ao enviar. Tente novamente.');
-                }
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            })
-            .catch(function() {
-                alert('Erro de conexão. Tente novamente.');
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            });
-        });
-    }
-
     // Intersection Observer for animations
     const observerOptions = {
         threshold: 0.1,
