@@ -108,6 +108,27 @@ function isAbtecPage() {
     return window.location.pathname.startsWith("/admin/abtec");
 }
 
+function updateAbtecCloudLabels() {
+    if (!isAbtecPage()) return;
+
+    const applyLabels = () => {
+        document.querySelector(".sidebar-note")?.remove();
+
+        const saveMessage = document.querySelector(".save-bar p");
+        if (saveMessage) {
+            saveMessage.innerHTML = "<span></span> Alterações sincronizadas online.";
+        }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyLabels, { once: true });
+    } else {
+        applyLabels();
+    }
+}
+
+updateAbtecCloudLabels();
+
 function getAbtecLocalSnapshot() {
     return {
         lessons: localStorage.getItem(ABTEC_STORAGE_KEYS.lessons) || "[]",
