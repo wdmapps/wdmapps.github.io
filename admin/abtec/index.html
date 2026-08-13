@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071a3b">
+  <title>ABTEC | Diário de Classe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="../auth.js"></script>
+  <script>requireAuth();</script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="../dashboard.html" aria-label="Voltar ao painel administrativo">
+        <span class="brand-mark">A</span>
+        <span><strong>ABTEC</strong><small>Cursos Salto</small></span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        <button class="nav-item active" type="button" data-view="home">
+          <span class="nav-icon" aria-hidden="true">⌂</span> Home
+        </button>
+        <button class="nav-item" type="button" data-view="chamada">
+          <span class="nav-icon" aria-hidden="true">✓</span> Chamada
+        </button>
+        <button class="nav-item" type="button" data-view="historico">
+          <span class="nav-icon" aria-hidden="true">▤</span> Histórico
+        </button>
+        <button class="nav-item" type="button" data-view="alunos">
+          <span class="nav-icon" aria-hidden="true">◎</span> Alunos
+        </button>
+        <button class="nav-item" type="button" data-view="agenda">
+          <span class="nav-icon" aria-hidden="true">□</span> Agenda
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <span class="status-dot"></span>
+        <div><strong>Armazenamento local</strong><small>Dados salvos neste navegador</small></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="menu-button" id="menu-button" type="button" aria-label="Abrir menu">☰</button>
+        <div class="topbar-label">ADMINISTRAÇÃO <span>/</span> DIÁRIO DE CLASSE</div>
+        <div class="topbar-actions">
+          <a class="admin-link" href="../dashboard.html">Painel WDM</a>
+          <div class="teacher-chip"><span>PW</span><div><strong>Professor William</strong><small>Administrador</small></div></div>
+          <button class="logout-button" type="button" onclick="logout()">Sair</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow" id="view-eyebrow">VISÃO GERAL</p>
+            <h1 id="view-title">Painel administrativo</h1>
+            <p id="view-description">Acompanhe os principais números da escola.</p>
+          </div>
+          <div class="date-badge"><span id="weekday-label"></span><strong id="today-label"></strong></div>
+        </div>
+
+        <div id="home-view" class="view active">
+          <section class="dashboard-metrics">
+            <article class="metric-card classes-metric">
+              <div class="metric-top"><span class="metric-icon">▦</span><span class="metric-label">TURMAS ATIVAS</span></div>
+              <strong id="dashboard-classes">0</strong>
+              <p>turmas cadastradas</p>
+            </article>
+            <article class="metric-card students-metric">
+              <div class="metric-top"><span class="metric-icon">◎</span><span class="metric-label">TOTAL DE ALUNOS</span></div>
+              <strong id="dashboard-students">0</strong>
+              <p>matrículas nas turmas</p>
+            </article>
+            <article class="metric-card absences-metric">
+              <div class="metric-top"><span class="metric-icon">!</span><span class="metric-label">FALTAS REGISTRADAS</span></div>
+              <strong id="dashboard-absences">0</strong>
+              <p>faltas acumuladas</p>
+            </article>
+            <article class="metric-card attendance-metric">
+              <div class="metric-top"><span class="metric-icon">✓</span><span class="metric-label">PRESENÇA MÉDIA</span></div>
+              <strong id="dashboard-attendance">0%</strong>
+              <p>nas chamadas registradas</p>
+            </article>
+          </section>
+
+          <div class="dashboard-grid">
+            <section class="card class-overview-card">
+              <div class="section-heading">
+                <div><span class="step">▦</span><div><h2>Visão por turma</h2><p>Alunos, aulas e faltas acumuladas</p></div></div>
+              </div>
+              <div id="dashboard-class-list" class="dashboard-class-list"></div>
+            </section>
+            <section class="card attention-card">
+              <div class="section-heading">
+                <div><span class="step">!</span><div><h2>Atenção às faltas</h2><p>Alunos com maior número de ausências</p></div></div>
+              </div>
+              <div id="dashboard-attention-list" class="dashboard-attention-list"></div>
+            </section>
+          </div>
+        </div>
+
+        <div id="chamada-view" class="view">
+          <section class="class-picker card">
+            <div class="field wide-field">
+              <label for="class-select">Turma</label>
+              <div class="class-select-row">
+                <select id="class-select"></select>
+                <button class="utility-button add" id="new-class" type="button">+ Turma</button>
+                <button class="utility-button delete" id="delete-class" type="button">Excluir</button>
+              </div>
+            </div>
+            <div class="class-meta">
+              <span>HORÁRIO</span>
+              <strong id="class-time">18:00</strong>
+            </div>
+            <div class="class-meta">
+              <span>ALUNOS</span>
+              <strong id="student-count">0 matriculados</strong>
+            </div>
+            <div class="class-meta">
+              <span>PROGRESSO</span>
+              <strong id="class-progress">0 aulas</strong>
+            </div>
+          </section>
+
+          <div class="workspace-grid">
+            <section class="card attendance-card">
+              <div class="section-heading">
+                <div><span class="step">01</span><div><h2>Chamada</h2><p>Marque a situação de cada aluno</p></div></div>
+                <button class="text-button" id="all-present" type="button">Marcar todos presentes</button>
+              </div>
+              <div id="student-list" class="student-list"></div>
+              <div class="attendance-summary">
+                <div><span class="summary-icon present-icon">✓</span><span><strong id="present-total">0</strong><small>Presentes</small></span></div>
+                <div><span class="summary-icon absent-icon">×</span><span><strong id="absent-total">0</strong><small>Faltas</small></span></div>
+                <div><span class="summary-icon unmarked-icon">−</span><span><strong id="unmarked-total">0</strong><small>Não marcados</small></span></div>
+              </div>
+            </section>
+
+            <section class="card lesson-card">
+              <div class="section-heading">
+                <div><span class="step">02</span><div><h2>Conteúdo da aula</h2><p>O que foi trabalhado hoje?</p></div></div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="lesson-date">Data da aula</label>
+                  <input id="lesson-date" type="date">
+                </div>
+                <div class="field">
+                  <label for="module-select">Módulo</label>
+                  <select id="module-select">
+                    <option>Windows</option>
+                    <option>Word</option>
+                    <option>Excel</option>
+                    <option>PowerPoint</option>
+                    <option>Revisão / Prova</option>
+                  </select>
+                </div>
+                <div class="field full-field">
+                  <label for="lesson-content">Matéria dada</label>
+                  <textarea id="lesson-content" rows="4" placeholder="Ex.: Introdução ao Word e atividade da página 15"></textarea>
+                  <small class="field-hint">Descreva o conteúdo, páginas ou atividades aplicadas.</small>
+                </div>
+                <div class="field full-field">
+                  <label for="lesson-note">Observações <span>(opcional)</span></label>
+                  <input id="lesson-note" type="text" placeholder="Recados ou acontecimentos da aula">
+                </div>
+              </div>
+              <div class="last-lesson" id="last-lesson"></div>
+            </section>
+          </div>
+
+          <div class="save-bar">
+            <p><span></span> As alterações ficarão salvas neste navegador.</p>
+            <button class="primary-button" id="save-lesson" type="button">Salvar aula <span>→</span></button>
+          </div>
+        </div>
+
+        <div id="historico-view" class="view">
+          <section class="card history-card">
+            <div class="section-heading history-heading">
+              <div><span class="step">↺</span><div><h2>Histórico de aulas</h2><p>Conteúdos e chamadas já registrados</p></div></div>
+              <select id="history-class-select" aria-label="Filtrar turma"></select>
+            </div>
+            <div id="history-list" class="history-list"></div>
+          </section>
+        </div>
+
+        <div id="alunos-view" class="view">
+          <section class="card roster-card">
+            <div class="section-heading history-heading">
+              <div><span class="step">◎</span><div><h2>Resumo dos alunos</h2><p>Faltas acumuladas conforme a planilha</p></div></div>
+              <div class="roster-actions">
+                <select id="roster-class-select" aria-label="Selecionar turma"></select>
+                <button class="utility-button add" id="new-student" type="button">+ Adicionar aluno</button>
+              </div>
+            </div>
+            <div id="roster-list" class="roster-list"></div>
+          </section>
+        </div>
+
+        <div id="agenda-view" class="view">
+          <section class="card calendar-card">
+            <div class="calendar-toolbar">
+              <div><span class="step">□</span><div><h2>Agenda mensal</h2><p>Clique em um dia para adicionar uma tarefa</p></div></div>
+              <div class="month-navigation">
+                <button id="previous-month" type="button" aria-label="Mês anterior">←</button>
+                <strong id="calendar-month-label"></strong>
+                <button id="next-month" type="button" aria-label="Próximo mês">→</button>
+                <button class="today-button" id="calendar-today" type="button">Hoje</button>
+              </div>
+            </div>
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="management-dialog" id="class-dialog">
+    <form method="dialog" id="class-form">
+      <div class="dialog-heading"><span>+</span><div><h2>Nova turma</h2><p>Cadastre uma turma para iniciar as chamadas.</p></div></div>
+      <div class="field">
+        <label for="new-class-name">Nome da turma</label>
+        <input id="new-class-name" type="text" placeholder="Ex.: Terça-feira, 19h" maxlength="50" required>
+      </div>
+      <div class="field">
+        <label for="new-class-time">Horário</label>
+        <input id="new-class-time" type="time" required>
+      </div>
+      <div class="dialog-actions">
+        <button class="cancel-button" value="cancel" type="button">Cancelar</button>
+        <button class="primary-button" type="submit">Criar turma</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="management-dialog" id="student-dialog">
+    <form method="dialog" id="student-form">
+      <div class="dialog-heading"><span>+</span><div><h2>Adicionar aluno</h2><p id="student-dialog-class"></p></div></div>
+      <div class="field">
+        <label for="new-student-name">Nome completo</label>
+        <input id="new-student-name" type="text" placeholder="Nome do aluno" maxlength="70" required>
+      </div>
+      <div class="dialog-actions">
+        <button class="cancel-button" value="cancel" type="button">Cancelar</button>
+        <button class="primary-button" type="submit">Adicionar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="management-dialog appointment-dialog" id="appointment-dialog">
+    <form method="dialog" id="appointment-form">
+      <div class="dialog-heading"><span>□</span><div><h2>Novo compromisso</h2><p id="appointment-date-label"></p></div></div>
+      <input id="appointment-date" type="hidden">
+      <div class="field">
+        <label for="appointment-title">O que precisa ser feito?</label>
+        <input id="appointment-title" type="text" placeholder="Ex.: Preparar prova de Excel" maxlength="100" required>
+      </div>
+      <div class="field">
+        <label for="appointment-time">Horário <span>(opcional)</span></label>
+        <input id="appointment-time" type="time">
+      </div>
+      <div id="appointment-existing" class="appointment-existing"></div>
+      <div class="dialog-actions">
+        <button class="cancel-button" value="cancel" type="button">Cancelar</button>
+        <button class="primary-button" type="submit">Salvar tarefa</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
