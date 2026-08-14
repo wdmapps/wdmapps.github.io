@@ -893,8 +893,9 @@
     .top-right { gap: 5px; padding-left: 7px; }
     .score-mini { display: none; }
     .utility-btn { min-width: 40px; height: 29px; padding: 0 6px; font-size: 0.52rem; }
-    #sound-btn { font-size: 0; }
-    #sound-btn::after { content: "SOM"; font-size: 0.52rem; }
+    #sound-btn { min-width: 54px; font-size: 0; }
+    #sound-btn::after { content: "SOM ON"; font-size: 0.52rem; }
+    #sound-btn[aria-pressed="true"]::after { content: "SOM OFF"; }
     .mobile-presence { width: 54px; }
     .play-layout {
       top: max(66px, calc(env(safe-area-inset-top) + 56px));
@@ -1091,7 +1092,7 @@
   const SHIFT_LENGTH = 108;
   const MEMORY_LENGTH = 11;
   const BEST_KEY = "museu_meia_noite_best_v1";
-  const MUTE_KEY = "museu_meia_noite_muted_v1";
+  const MUTE_KEY = "museu_meia_noite_muted_v2";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const canvas = document.getElementById("feed-canvas");
@@ -1215,6 +1216,7 @@
   let humOscillator = null;
   let humGain = null;
   let noiseSource = null;
+  let ambientNoiseGain = null;
   let muted = readStored(MUTE_KEY, "0") === "1";
 
   function createGame() {
@@ -1304,7 +1306,8 @@
     addLog("INSPECAO INICIAL", "Memorize cada sala antes da meia-noite.", "");
     showMessage("INSPECAO INICIAL / MEMORIZE AS SALAS", "", 2600);
     updateHud(true);
-    playTone(220, 0.16, "sine", 0.04, 330);
+    playTone(440, 0.12, "sine", 0.055, 560);
+    playTone(660, 0.16, "triangle", 0.05, 740, 0.1);
   }
 
   function returnToMenu() {
@@ -1328,13 +1331,13 @@
       game.pausedState = state;
       state = "paused";
       pauseScreen.hidden = false;
-      setAmbientLevel(0.004);
+      setAmbientLevel(0.005);
       return;
     }
     if (state === "paused") {
       state = game.pausedState || "running";
       pauseScreen.hidden = true;
-      setAmbientLevel(0.014);
+      setAmbientLevel(0.024);
       lastFrame = performance.now();
     }
   }
@@ -1378,7 +1381,7 @@
     document.getElementById("end-errors").textContent = String(game.errors);
     renderEvidence();
     endScreen.hidden = false;
-    setAmbientLevel(survived ? 0.003 : 0.009);
+    setAmbientLevel(survived ? 0.004 : 0.012);
   }
 
   function renderEvidence() {
@@ -2361,17 +2364,21 @@
         audioContext = null;
       }
     }
-    if (audioContext && audioContext.state === "suspended") audioContext.resume();
+    if (audioContext && audioContext.state !== "running") {
+      audioContext.resume().catch(function () {
+        // A next pointer interaction will retry the browser audio unlock.
+      });
+    }
   }
 
   function startAmbient() {
     if (!audioContext) return;
     if (!humOscillator) {
       humOscillator = audioContext.createOscillator();
-      humOscillator.type = "sine";
-      humOscillator.frequency.value = 58;
+      humOscillator.type = "triangle";
+      humOscillator.frequency.value = 96;
       humGain = audioContext.createGain();
-      humGain.gain.value = muted ? 0 : 0.014;
+      humGain.gain.value = 0;
       humOscillator.connect(humGain).connect(audioContext.destination);
       humOscillator.start();
     }
@@ -2379,24 +2386,27 @@
       const length = audioContext.sampleRate * 2;
       const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
       const data = buffer.getChannelData(0);
-      for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * 0.2;
+      for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * 0.24;
       noiseSource = audioContext.createBufferSource();
       const filter = audioContext.createBiquadFilter();
-      const gain = audioContext.createGain();
+      ambientNoiseGain = audioContext.createGain();
       noiseSource.buffer = buffer;
       noiseSource.loop = true;
-      filter.type = "lowpass";
-      filter.frequency.value = 230;
-      gain.gain.value = 0.006;
-      noiseSource.connect(filter).connect(gain).connect(humGain);
+      filter.type = "bandpass";
+      filter.frequency.value = 620;
+      filter.Q.value = 0.38;
+      ambientNoiseGain.gain.value = 0;
+      noiseSource.connect(filter).connect(ambientNoiseGain).connect(audioContext.destination);
       noiseSource.start();
     }
-    setAmbientLevel(0.014);
+    setAmbientLevel(0.024);
   }
 
   function setAmbientLevel(level) {
     if (!audioContext || !humGain) return;
-    humGain.gain.setTargetAtTime(muted ? 0 : level, audioContext.currentTime, 0.15);
+    const target = muted ? 0 : level;
+    humGain.gain.setTargetAtTime(target, audioContext.currentTime, 0.12);
+    if (ambientNoiseGain) ambientNoiseGain.gain.setTargetAtTime(target * 0.72, audioContext.currentTime, 0.12);
   }
 
   function playTone(frequency, duration, type, volume, endFrequency, delay) {
@@ -2440,29 +2450,29 @@
   }
 
   function playCameraSwitch() {
-    playNoise(0.07, 0.025, 1800);
-    playTone(1200, 0.035, "square", 0.018, 750);
+    playNoise(0.09, 0.045, 2100);
+    playTone(1100, 0.055, "square", 0.035, 680);
   }
 
   function playAnomaly() {
-    playTone(92, 0.45, "sine", 0.025, 73);
+    playTone(155, 0.48, "sine", 0.05, 88);
   }
 
   function playAlert() {
-    playTone(620, 0.09, "square", 0.03, 520);
-    playTone(620, 0.09, "square", 0.03, 520, 0.16);
-    playTone(470, 0.18, "square", 0.025, 350, 0.32);
+    playTone(620, 0.09, "square", 0.05, 520);
+    playTone(620, 0.09, "square", 0.05, 520, 0.16);
+    playTone(470, 0.18, "square", 0.042, 350, 0.32);
   }
 
   function playCorrect(combo) {
     const base = 380 + combo * 45;
-    playTone(base, 0.09, "triangle", 0.035, base * 1.2);
-    playTone(base * 1.45, 0.16, "sine", 0.026, base * 1.6, 0.08);
+    playTone(base, 0.09, "triangle", 0.055, base * 1.2);
+    playTone(base * 1.45, 0.16, "sine", 0.042, base * 1.6, 0.08);
   }
 
   function playWrong() {
-    playNoise(0.18, 0.07, 750);
-    playTone(140, 0.32, "sawtooth", 0.045, 65);
+    playNoise(0.18, 0.1, 900);
+    playTone(165, 0.32, "sawtooth", 0.065, 72);
   }
 
   function playEvidence() {
@@ -2495,9 +2505,9 @@
     ensureAudio();
     if (!muted) {
       startAmbient();
-      playTone(440, 0.12, "sine", 0.035, 550);
+      playTone(520, 0.14, "sine", 0.06, 680);
     }
-    setAmbientLevel(state === "running" || state === "memorize" ? 0.014 : 0.004);
+    setAmbientLevel(state === "running" || state === "memorize" ? 0.024 : 0.005);
     updateHud(true);
   }
 
@@ -2533,6 +2543,7 @@
   document.getElementById("quit-btn").addEventListener("click", returnToMenu);
   document.getElementById("menu-btn").addEventListener("click", returnToMenu);
   soundButton.addEventListener("click", toggleSound);
+  document.addEventListener("pointerdown", ensureAudio, { capture: true });
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden && (state === "running" || state === "memorize")) togglePause(false);
