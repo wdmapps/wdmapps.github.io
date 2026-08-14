@@ -454,6 +454,226 @@
   .event-log li.good { color: #b9b68f; }
   .event-log li.bad { color: #bd756c; }
 
+  .jumpscare {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #030403;
+    cursor: none;
+    pointer-events: auto;
+  }
+
+  .jumpscare::before,
+  .jumpscare::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .jumpscare::before {
+    z-index: 3;
+    opacity: 0.5;
+    mix-blend-mode: screen;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, 0.2) 4px, transparent 5px 8px),
+      repeating-linear-gradient(90deg, rgba(224, 82, 66, 0.12) 0 2px, transparent 3px 19px);
+    animation: scare-static 65ms steps(2) infinite;
+  }
+
+  .jumpscare::after {
+    z-index: 4;
+    background: radial-gradient(circle, transparent 12%, rgba(0, 0, 0, 0.2) 48%, #000 100%);
+  }
+
+  .scare-face {
+    position: relative;
+    z-index: 2;
+    width: min(72vw, 560px);
+    aspect-ratio: 0.78;
+    overflow: hidden;
+    border-radius: 48% 52% 44% 46% / 35% 38% 62% 65%;
+    background: radial-gradient(circle at 50% 36%, #eee8d6, #999b8f 43%, #4e554f 75%, #171a18 100%);
+    box-shadow: 0 0 80px rgba(216, 216, 194, 0.35), inset 0 -45px 80px rgba(0, 0, 0, 0.58);
+    filter: contrast(1.4) grayscale(0.35);
+  }
+
+  .scare-face::before {
+    content: "";
+    position: absolute;
+    top: -5%;
+    left: 9%;
+    width: 82%;
+    height: 38%;
+    border-radius: 50%;
+    background: #111411;
+    box-shadow: 0 24px 30px rgba(0, 0, 0, 0.72);
+    transform: rotate(-4deg);
+  }
+
+  .scare-eye {
+    position: absolute;
+    z-index: 2;
+    top: 35%;
+    width: 23%;
+    height: 16%;
+    border-radius: 50%;
+    background: #020302;
+    box-shadow: inset 0 0 18px #000, 0 0 22px rgba(0, 0, 0, 0.68);
+  }
+
+  .scare-eye::after {
+    content: "";
+    position: absolute;
+    top: 38%;
+    left: 42%;
+    width: 16%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #e05242;
+    box-shadow: 0 0 15px #e05242, 0 0 28px rgba(224, 82, 66, 0.75);
+  }
+
+  .scare-eye.left { left: 16%; transform: rotate(7deg); }
+  .scare-eye.right { right: 14%; transform: rotate(-9deg); }
+
+  .scare-nose {
+    position: absolute;
+    z-index: 2;
+    top: 47%;
+    left: 44%;
+    width: 13%;
+    height: 19%;
+    border-right: 8px solid rgba(47, 51, 47, 0.8);
+    border-bottom: 8px solid rgba(47, 51, 47, 0.8);
+    transform: skew(-8deg) rotate(7deg);
+  }
+
+  .scare-mouth {
+    position: absolute;
+    z-index: 2;
+    bottom: 11%;
+    left: 29%;
+    width: 43%;
+    height: 25%;
+    overflow: hidden;
+    border: 7px solid #242824;
+    border-radius: 40% 44% 55% 52%;
+    background: #020302;
+    box-shadow: inset 0 12px 25px #000, 0 0 20px rgba(0, 0, 0, 0.6);
+    transform: rotate(2deg);
+  }
+
+  .scare-mouth::after {
+    content: "";
+    position: absolute;
+    right: -8%;
+    bottom: -18%;
+    left: -8%;
+    height: 48%;
+    border-radius: 50% 50% 0 0;
+    background: #5d201d;
+  }
+
+  .scare-caption {
+    position: absolute;
+    z-index: 5;
+    right: 20px;
+    bottom: max(22px, env(safe-area-inset-bottom));
+    left: 20px;
+    color: #e7ddd0;
+    text-align: center;
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: clamp(0.8rem, 2.4vw, 1.3rem);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-shadow: 0 2px 8px #000;
+  }
+
+  .jumpscare.glimpse { background: rgba(3, 4, 3, 0.72); }
+  .jumpscare.glimpse .scare-face {
+    position: absolute;
+    right: 4%;
+    bottom: -18%;
+    width: min(37vw, 300px);
+    animation: scare-glimpse 400ms steps(3) both;
+  }
+  .jumpscare.glimpse .scare-caption,
+  .jumpscare.rush .scare-caption { display: none; }
+
+  .jumpscare.rush {
+    background: rgba(2, 3, 2, 0.42);
+    animation: rush-darken 900ms linear both;
+  }
+  .jumpscare.rush .scare-face {
+    width: min(48vw, 390px);
+    animation: scare-rush 900ms cubic-bezier(0.12, 0.72, 0.16, 1) both;
+  }
+
+  .jumpscare.close .scare-face {
+    width: min(86vw, 680px);
+    animation: scare-close 560ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  }
+
+  .jumpscare.final .scare-face {
+    width: min(118vw, 940px);
+    animation: scare-final 1000ms steps(5) both;
+  }
+
+  @keyframes scare-static {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(8px, -5px); opacity: 0.72; }
+    100% { transform: translate(-5px, 4px); }
+  }
+
+  @keyframes scare-glimpse {
+    0% { opacity: 0; transform: translateX(80%) scale(0.72) rotate(8deg); }
+    20% { opacity: 1; }
+    72% { opacity: 1; transform: translateX(0) scale(1) rotate(-2deg); }
+    100% { opacity: 0; transform: translateX(-18%) scale(1.08) rotate(-5deg); }
+  }
+
+  @keyframes scare-close {
+    0% { opacity: 0; transform: scale(0.22) rotate(-5deg); }
+    20% { opacity: 1; transform: scale(1.08) rotate(3deg); }
+    62% { transform: scale(0.96) translate(8px, -5px); }
+    100% { opacity: 0; transform: scale(1.35) translate(-8px, 4px); }
+  }
+
+  @keyframes rush-darken {
+    0% { background: rgba(2, 3, 2, 0.06); }
+    55% { background: rgba(2, 3, 2, 0.3); }
+    100% { background: rgba(2, 3, 2, 0.9); }
+  }
+
+  @keyframes scare-rush {
+    0% { opacity: 0.2; transform: translateY(76vh) scale(0.04) rotate(-3deg); }
+    20% { opacity: 0.72; transform: translateY(44vh) scale(0.18) rotate(3deg); }
+    42% { opacity: 1; transform: translateY(18vh) scale(0.52) rotate(-2deg); }
+    63% { transform: translateY(1vh) scale(1.08) rotate(2deg); }
+    80% { transform: translateY(0) scale(2.05) rotate(-1deg); }
+    100% { opacity: 1; transform: translateY(0) scale(3.6) rotate(1deg); }
+  }
+
+  @keyframes scare-final {
+    0% { opacity: 0; transform: scale(0.2) rotate(-8deg); }
+    18% { opacity: 1; transform: scale(1.02) rotate(4deg); }
+    42% { transform: scale(1.18) translate(-18px, 10px) rotate(-2deg); }
+    72% { transform: scale(1.34) translate(20px, -9px) rotate(3deg); }
+    100% { opacity: 0.92; transform: scale(1.65) translate(-5px, 3px); }
+  }
+
+  .content-warning {
+    margin: 10px 0 0;
+    color: #9c6e67;
+    font-size: 0.53rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
   .screen {
     position: absolute;
     inset: 0;
@@ -731,6 +951,9 @@
     .brand i { animation: none; }
     .feed-message,
     .presence-fill { transition: none; }
+    .jumpscare::before,
+    .jumpscare,
+    .jumpscare .scare-face { animation: none; }
   }
 </style>
 </head>
@@ -794,6 +1017,16 @@
     </aside>
   </section>
 
+  <div class="jumpscare" id="jumpscare" aria-hidden="true" hidden>
+    <div class="scare-face">
+      <span class="scare-eye left"></span>
+      <span class="scare-eye right"></span>
+      <span class="scare-nose"></span>
+      <span class="scare-mouth"></span>
+    </div>
+    <div class="scare-caption" id="scare-caption"></div>
+  </div>
+
   <section class="screen" id="start-screen">
     <div class="screen-inner start-grid">
       <div>
@@ -808,6 +1041,7 @@
           <div class="dossier-row"><b>REGISTRE</b><span>Clique diretamente na mudan&ccedil;a. Um clique errado aumenta a presen&ccedil;a.</span></div>
           <div class="dossier-row"><b>SOBREVIVA</b><span>Mantenha a sala de seguran&ccedil;a isolada at&eacute; as 06:00.</span></div>
         </div>
+        <p class="content-warning">AVISO: CONT&Eacute;M FLASHES, RU&Iacute;DOS ALTOS E SUSTOS REPENTINOS</p>
         <button class="primary-btn" id="start-btn" type="button">Iniciar inspe&ccedil;&atilde;o</button>
         <div class="menu-meta">
           <span>RECORDE: <strong id="menu-best">000000</strong></span>
@@ -882,6 +1116,8 @@
   const errorsValue = document.getElementById("errors-value");
   const eventLog = document.getElementById("event-log");
   const soundButton = document.getElementById("sound-btn");
+  const jumpscare = document.getElementById("jumpscare");
+  const scareCaption = document.getElementById("scare-caption");
   const cameraButtons = Array.from(document.querySelectorAll(".camera-btn"));
   const menuBest = document.getElementById("menu-best");
 
@@ -972,6 +1208,8 @@
   let lastFrame = performance.now();
   let renderTime = 0;
   let messageTimer = 0;
+  let scareTimer = 0;
+  let cameraScareTimer = 0;
   let hudTimer = 0;
   let audioContext = null;
   let humOscillator = null;
@@ -995,6 +1233,10 @@
       roomUnlocked: false,
       specialFound: new Set(),
       specialSpawned: new Set(),
+      scareIndex: 0,
+      scareActive: false,
+      switchScareQueued: false,
+      switchScareDone: false,
       nextSpawn: 2.4,
       transition: 1,
       wrongFlash: 0,
@@ -1047,6 +1289,10 @@
     ensureAudio();
     startAmbient();
     game = createGame();
+    clearTimeout(scareTimer);
+    clearTimeout(cameraScareTimer);
+    jumpscare.hidden = true;
+    jumpscare.className = "jumpscare";
     state = "memorize";
     startScreen.hidden = true;
     pauseScreen.hidden = true;
@@ -1062,6 +1308,10 @@
   }
 
   function returnToMenu() {
+    clearTimeout(scareTimer);
+    clearTimeout(cameraScareTimer);
+    jumpscare.hidden = true;
+    jumpscare.className = "jumpscare";
     state = "menu";
     game = createGame();
     startScreen.hidden = false;
@@ -1073,6 +1323,7 @@
   }
 
   function togglePause(forceResume) {
+    if (game.scareActive) return;
     if ((state === "running" || state === "memorize") && !forceResume) {
       game.pausedState = state;
       state = "paused";
@@ -1089,7 +1340,7 @@
   }
 
   function finishGame(survived) {
-    if (state !== "running") return;
+    if (state !== "running" && state !== "jumpscare") return;
     state = "ended";
     game.result = survived ? "survived" : "caught";
     showGameUi(false);
@@ -1178,6 +1429,13 @@
     game.elapsed += dt;
     const progress = clamp(game.elapsed / SHIFT_LENGTH, 0, 1);
 
+    const scareTimes = [0.31, 0.71];
+    if (game.scareIndex < scareTimes.length && progress >= scareTimes[game.scareIndex]) {
+      const kind = game.scareIndex === 0 ? "glimpse" : "close";
+      game.scareIndex += 1;
+      triggerJumpscare(kind, kind === "glimpse" ? 400 : 560);
+    }
+
     if (game.elapsed >= SHIFT_LENGTH) {
       finishGame(true);
       return;
@@ -1210,7 +1468,7 @@
     game.threat = clamp(game.threat + pressure * dt, 0, 100);
 
     if (game.threat >= 100) {
-      finishGame(false);
+      beginFailure();
       return;
     }
 
@@ -1289,6 +1547,8 @@
       playTone(85, 0.13, "square", 0.035, 65);
       return;
     }
+    const changed = index !== game.currentRoom;
+    if (!changed && !silent) return;
     game.currentRoom = index;
     game.transition = silent ? 0.45 : 1;
     cameraButtons.forEach(function (button, buttonIndex) {
@@ -1296,7 +1556,25 @@
     });
     feedCode.textContent = rooms[index].code;
     feedRoom.textContent = rooms[index].name;
-    if (!silent) playCameraSwitch();
+    if (!silent) {
+      playCameraSwitch();
+      if (state === "running" && changed && !game.switchScareDone && !game.switchScareQueued) {
+        game.switchScareQueued = true;
+        cameraScareTimer = window.setTimeout(function waitForCameraRush() {
+          if (state !== "running") {
+            game.switchScareQueued = false;
+            return;
+          }
+          if (game.scareActive) {
+            cameraScareTimer = window.setTimeout(waitForCameraRush, 120);
+            return;
+          }
+          game.switchScareQueued = false;
+          game.switchScareDone = true;
+          triggerJumpscare("rush", 900);
+        }, 140);
+      }
+    }
   }
 
   function cycleRoom(direction) {
@@ -1306,6 +1584,7 @@
   }
 
   function reportAt(x, y) {
+    if (game.scareActive) return;
     if (state === "memorize") {
       game.reticle = { x: x, y: y, life: 0.45, hit: null };
       showMessage("INSPECAO INICIAL / APENAS OBSERVE", "", 1100);
@@ -1343,6 +1622,13 @@
     game.transition = 0.55;
     game.reticle = { x: x, y: y, life: 0.75, hit: true };
 
+    if (game.found === 1 && game.scareIndex === 0) {
+      game.scareIndex = 1;
+      window.setTimeout(function () {
+        if (state === "running" && !game.scareActive) triggerJumpscare("glimpse", 400);
+      }, 180);
+    }
+
     if (definition.special !== undefined) {
       game.specialFound.add(definition.special);
       showMessage(definition.label + " / ARQUIVADA", "good", 3000);
@@ -1368,8 +1654,34 @@
     addLog(formatClock(game.elapsed), rooms[game.currentRoom].code + " / Falso registro.", "bad");
     showMessage("FALSO REGISTRO / A PRESENCA SE APROXIMA", "alert", 1900);
     playWrong();
-    if (game.threat >= 100) finishGame(false);
+    if (game.threat >= 100) beginFailure();
     updateHud(true);
+  }
+
+  function triggerJumpscare(kind, duration, onComplete) {
+    if (game.scareActive && kind !== "final") return;
+    clearTimeout(scareTimer);
+    game.scareActive = true;
+    jumpscare.hidden = false;
+    jumpscare.className = "jumpscare";
+    void jumpscare.offsetWidth;
+    jumpscare.className = "jumpscare " + kind;
+    scareCaption.textContent = kind === "final" ? "NAO OLHE PARA TRAS" : (kind === "close" ? "VOCE NAO ESTA SOZINHO" : "");
+    playJumpscare(kind);
+    scareTimer = window.setTimeout(function () {
+      jumpscare.hidden = true;
+      jumpscare.className = "jumpscare";
+      game.scareActive = false;
+      if (onComplete) onComplete();
+    }, duration);
+  }
+
+  function beginFailure() {
+    if (state !== "running") return;
+    state = "jumpscare";
+    triggerJumpscare("final", 1000, function () {
+      finishGame(false);
+    });
   }
 
   function showMessage(text, tone, duration) {
@@ -2157,6 +2469,24 @@
     [262, 311, 392, 523].forEach(function (frequency, index) {
       playTone(frequency, 0.32, "sine", 0.028, frequency * 1.01, index * 0.08);
     });
+  }
+
+  function playJumpscare(kind) {
+    const finalScare = kind === "final";
+    const closeScare = kind === "close";
+    const rushScare = kind === "rush";
+    playNoise(finalScare ? 0.8 : (rushScare ? 0.78 : (closeScare ? 0.44 : 0.26)), finalScare ? 0.22 : (rushScare ? 0.2 : 0.13), finalScare ? 2700 : (rushScare ? 2500 : 1900));
+    playTone(finalScare ? 74 : (rushScare ? 68 : 102), finalScare ? 0.86 : (rushScare ? 0.82 : 0.4), "sawtooth", finalScare ? 0.11 : (rushScare ? 0.1 : 0.07), finalScare ? 31 : (rushScare ? 32 : 55));
+    if (rushScare) {
+      playTone(58, 0.12, "sine", 0.08, 43, 0.02);
+      playTone(64, 0.12, "sine", 0.09, 43, 0.18);
+      playTone(72, 0.15, "sine", 0.1, 37, 0.36);
+      playTone(82, 0.18, "sine", 0.11, 34, 0.53);
+      playTone(1080, 0.34, "sawtooth", 0.06, 130, 0.58);
+    }
+    if (closeScare || finalScare) {
+      playTone(finalScare ? 1450 : 1120, finalScare ? 0.62 : 0.34, "sawtooth", finalScare ? 0.075 : 0.045, 170, 0.02);
+    }
   }
 
   function toggleSound() {
