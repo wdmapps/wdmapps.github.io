@@ -15,32 +15,46 @@ service cloud.firestore {
 
     match /slugs/{slugId} {
       allow read: if true;
+
       allow create: if signedIn()
                     && request.resource.data.ownerId == request.auth.uid
                     && request.resource.data.storeId == request.auth.uid;
+
       allow update: if signedIn()
                     && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == resource.data.ownerId
                     && request.resource.data.storeId == resource.data.storeId;
-      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+
+      allow delete: if signedIn()
+                    && resource.data.ownerId == request.auth.uid;
     }
 
     match /stores/{storeId} {
-      allow read: if resource.data.published == true || isOwner(resource.data.ownerId);
-      allow create: if signedIn()
-                    && request.resource.data.ownerId == request.auth.uid
-                    && storeId == request.auth.uid;
-      allow update: if isOwner(resource.data.ownerId)
+      // O dono pode consultar o próprio caminho mesmo antes do documento existir.
+      // Lojas publicadas continuam visíveis para visitantes.
+      allow read: if isOwner(storeId)
+                  || resource.data.published == true;
+
+      allow create: if isOwner(storeId)
+                    && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isOwner(storeId)
+                    && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == resource.data.ownerId;
-      allow delete: if isOwner(resource.data.ownerId);
+
+      allow delete: if isOwner(storeId)
+                    && resource.data.ownerId == request.auth.uid;
 
       match /products/{productId} {
         function parentStore() {
           return get(/databases/$(database)/documents/stores/$(storeId));
         }
-        allow read: if isOwner(parentStore().data.ownerId)
-                    || (parentStore().data.published == true && resource.data.active == true);
-        allow create, update, delete: if isOwner(parentStore().data.ownerId);
+
+        allow read: if isOwner(storeId)
+                    || (parentStore().data.published == true
+                        && resource.data.active == true);
+
+        allow create, update, delete: if isOwner(storeId);
       }
     }
   }
