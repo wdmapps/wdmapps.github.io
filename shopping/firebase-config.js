@@ -1,10 +1,9 @@
-// WDM Shopping — configuração Firebase Web
-// Firebase Console > Configurações do projeto > Seus apps > Web > SDK setup and configuration
+// WDM Shopping — Firebase Web
 export const firebaseConfig = {
-  apiKey: "COLE_AQUI_API_KEY",
-  authDomain: "COLE_AQUI_AUTH_DOMAIN",
-  projectId: "COLE_AQUI_PROJECT_ID",
-  storageBucket: "COLE_AQUI_STORAGE_BUCKET",
-  messagingSenderId: "COLE_AQUI_MESSAGING_SENDER_ID",
-  appId: "COLE_AQUI_APP_ID"
+  apiKey: "AIzaSyAsFSEPowUrZrYLipkrQiCcc0Q7evJbcFo",
+  authDomain: "wdm-shopping-d0fab.firebaseapp.com",
+  projectId: "wdm-shopping-d0fab",
+  storageBucket: "wdm-shopping-d0fab.firebasestorage.app",
+  messagingSenderId: "680767376055",
+  appId: "1:680767376055:web:4f7db5be627c205d611b32"
 };
