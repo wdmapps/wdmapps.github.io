@@ -34,9 +34,13 @@ async function uniqueSlug(baseName) {
 }
 
 async function ensureStore(user) {
-  const storeRef = doc(db, 'stores', user.uid);
-  if ((await getDoc(storeRef)).exists()) return;
+  // Primeiro verificamos o perfil do próprio usuário. Esta leitura é permitida
+  // pelas regras mesmo quando o documento ainda não existe.
+  const userRef = doc(db, 'users', user.uid);
+  const profile = await getDoc(userRef);
+  if (profile.exists()) return;
 
+  const storeRef = doc(db, 'stores', user.uid);
   const businessField = document.querySelector('#authForm [name="business"]');
   const categoryField = document.querySelector('#authForm [name="category"]');
   const phoneField = document.querySelector('#authForm [name="phone"]');
@@ -66,7 +70,7 @@ async function ensureStore(user) {
     createdAt: serverTimestamp()
   });
 
-  await setDoc(doc(db, 'users', user.uid), {
+  await setDoc(userRef, {
     name: clean(user.displayName) || business,
     email: clean(user.email).toLowerCase(),
     storeId: user.uid,
@@ -81,8 +85,16 @@ function errorText(error) {
   if (code === 'auth/popup-blocked') return 'O navegador bloqueou a janela do Google. Permita pop-ups e tente novamente.';
   if (code === 'auth/unauthorized-domain') return 'Este domínio ainda precisa ser autorizado no Firebase Authentication.';
   if (code === 'auth/account-exists-with-different-credential') return 'Este e-mail já possui outra forma de login. Entre com e-mail e senha primeiro.';
-  if (code === 'permission-denied') return 'As regras do Firestore ainda precisam ser publicadas.';
+  if (code === 'permission-denied') return 'O login funcionou, mas o Firestore bloqueou a criação da loja. Atualize as regras e tente novamente.';
   return error?.message || 'Não foi possível entrar com Google.';
+}
+
+function openPanel() {
+  if (location.hash === '#painel') {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  } else {
+    location.hash = '#painel';
+  }
 }
 
 function addGoogleButton() {
@@ -111,7 +123,7 @@ function addGoogleButton() {
     try {
       const result = await signInWithPopup(auth, provider);
       await ensureStore(result.user);
-      location.hash = '#painel';
+      openPanel();
     } catch (error) {
       if (status) { status.className = 'status err'; status.textContent = errorText(error); }
     } finally {
