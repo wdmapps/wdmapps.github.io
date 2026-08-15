@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow create, read, update, delete: if isOwner(uid);
+    }
+
+    match /slugs/{slugId} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.storeId == request.auth.uid;
+      allow update: if signedIn()
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId
+                    && request.resource.data.storeId == resource.data.storeId;
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /stores/{storeId} {
+      allow read: if resource.data.published == true || isOwner(resource.data.ownerId);
+      allow create: if signedIn()
+                    && request.resource.data.ownerId == request.auth.uid
+                    && storeId == request.auth.uid;
+      allow update: if isOwner(resource.data.ownerId)
+                    && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if isOwner(resource.data.ownerId);
+
+      match /products/{productId} {
+        function parentStore() {
+          return get(/databases/$(database)/documents/stores/$(storeId));
+        }
+        allow read: if isOwner(parentStore().data.ownerId)
+                    || (parentStore().data.published == true && resource.data.active == true);
+        allow create, update, delete: if isOwner(parentStore().data.ownerId);
+      }
+    }
+  }
+}
