@@ -9,8 +9,21 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    function hasActiveSubscription(uid) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/subscriptions/$(uid))
+        && get(/databases/$(database)/documents/subscriptions/$(uid)).data.entitled == true;
+    }
+
     match /users/{uid} {
       allow create, read, update, delete: if isOwner(uid);
+    }
+
+    // O navegador pode apenas consultar a própria assinatura.
+    // A criação/alteração deste documento será feita pelo backend após validar o Google Play.
+    match /subscriptions/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update, delete: if false;
     }
 
     match /slugs/{slugId} {
@@ -18,31 +31,38 @@ service cloud.firestore {
 
       allow create: if signedIn()
                     && request.resource.data.ownerId == request.auth.uid
-                    && request.resource.data.storeId == request.auth.uid;
+                    && request.resource.data.storeId == request.auth.uid
+                    && hasActiveSubscription(request.auth.uid);
 
       allow update: if signedIn()
                     && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == resource.data.ownerId
-                    && request.resource.data.storeId == resource.data.storeId;
+                    && request.resource.data.storeId == resource.data.storeId
+                    && hasActiveSubscription(request.auth.uid);
 
       allow delete: if signedIn()
-                    && resource.data.ownerId == request.auth.uid;
+                    && resource.data.ownerId == request.auth.uid
+                    && hasActiveSubscription(request.auth.uid);
     }
 
     match /stores/{storeId} {
-      // O dono pode consultar o próprio caminho mesmo antes do documento existir.
-      // Lojas publicadas continuam visíveis para visitantes.
+      // O dono pode consultar os próprios dados mesmo com a assinatura vencida.
+      // A vitrine pública continua dependendo do campo published; quando a assinatura
+      // vencer, o backend do Google Play colocará published=false.
       allow read: if isOwner(storeId)
                   || resource.data.published == true;
 
       allow create: if isOwner(storeId)
+                    && hasActiveSubscription(storeId)
                     && request.resource.data.ownerId == request.auth.uid;
 
       allow update: if isOwner(storeId)
+                    && hasActiveSubscription(storeId)
                     && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == resource.data.ownerId;
 
       allow delete: if isOwner(storeId)
+                    && hasActiveSubscription(storeId)
                     && resource.data.ownerId == request.auth.uid;
 
       match /products/{productId} {
@@ -54,7 +74,8 @@ service cloud.firestore {
                     || (parentStore().data.published == true
                         && resource.data.active == true);
 
-        allow create, update, delete: if isOwner(storeId);
+        allow create, update, delete: if isOwner(storeId)
+                                      && hasActiveSubscription(storeId);
       }
     }
   }
