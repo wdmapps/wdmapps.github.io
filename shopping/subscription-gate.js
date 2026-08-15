@@ -1,0 +1,314 @@
+import { getApps, getApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+while (!getApps().length) await sleep(25);
+
+const firebaseApp = getApp();
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+const appRoot = document.getElementById('app');
+
+const PLAN_PRICE = 'R$ 29,90';
+const PRODUCT_ID = 'wdm_shopping_mensal';
+const BASE_PLAN_ID = 'mensal';
+let busy = false;
+let refreshTimer = 0;
+
+const clean = value => String(value || '').trim();
+const digits = value => String(value || '').replace(/\D/g, '');
+const whats = value => {
+  let d = digits(value);
+  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
+  return d.length >= 10 ? '55' + d : d;
+};
+const slug = value => clean(value || 'minha-loja')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '') || 'minha-loja';
+const initials = value => clean(value || 'Minha Loja').split(/\s+/).slice(0, 2)
+  .map(part => part[0] || '').join('').toUpperCase() || 'ML';
+const phone = value => {
+  let d = digits(value);
+  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
+  d = d.slice(0, 11);
+  if (!d) return '';
+  if (d.length <= 2) return `(${d}`;
+  const ddd = d.slice(0, 2), rest = d.slice(2);
+  if (d.length <= 10) return `(${ddd}) ${rest.slice(0, 4)}${rest.length > 4 ? '-' + rest.slice(4, 8) : ''}`;
+  return `(${ddd}) ${rest.slice(0, 1)}${rest.length > 1 ? ' ' + rest.slice(1, 5) : ''}${rest.length > 5 ? '-' + rest.slice(5, 9) : ''}`;
+};
+
+function addStyles() {
+  if (document.getElementById('wdmSubscriptionStyles')) return;
+  const style = document.createElement('style');
+  style.id = 'wdmSubscriptionStyles';
+  style.textContent = `
+    .subWrap{max-width:860px;margin:48px auto 110px;padding:0 18px}
+    .subCard{background:linear-gradient(180deg,#0c1829,#08111f);border:1px solid #243650;border-radius:22px;padding:28px;box-shadow:0 20px 60px #0005}
+    .subTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+    .subPrice{font-size:2.15rem;font-weight:900;line-height:1;color:#fff}.subPrice small{font-size:.9rem;color:#91a3bb;font-weight:700}
+    .subList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0}
+    .subItem{padding:13px 14px;border:1px solid #20334e;background:#091625;border-radius:14px;color:#c9d6e7}
+    .subStatus{padding:12px 14px;border-radius:12px;background:#101f32;color:#b9cbe1;margin:14px 0;line-height:1.45}
+    .subStatus.good{background:#0e2a20;color:#a9e9c9}.subStatus.warn{background:#30230d;color:#f2d59a}
+    .subActions{display:flex;gap:10px;flex-wrap:wrap}.subActions .btn,.subActions .btn2{min-height:48px;display:inline-flex;align-items:center;justify-content:center}
+    .subNote{font-size:.82rem;color:#8193aa;margin-top:12px;line-height:1.5}
+    .onboard{max-width:760px;margin:42px auto 110px;padding:0 18px}.onboard .auth{max-width:none}
+    @media(max-width:680px){.subList{grid-template-columns:1fr}.subCard{padding:20px}.subPrice{font-size:1.8rem}}
+  `;
+  document.head.appendChild(style);
+}
+addStyles();
+
+async function subscription(uid) {
+  const snap = await getDoc(doc(db, 'subscriptions', uid));
+  return snap.exists() ? snap.data() : null;
+}
+
+function entitled(data) {
+  if (!data) return false;
+  if (data.entitled === true) return true;
+  return ['active', 'grace_period'].includes(String(data.status || '').toLowerCase());
+}
+
+function statusLabel(data) {
+  const s = String(data?.status || 'inactive').toLowerCase();
+  return ({
+    active: 'Assinatura ativa',
+    grace_period: 'Pagamento em período de tolerância',
+    cancelled: 'Assinatura cancelada',
+    canceled: 'Assinatura cancelada',
+    on_hold: 'Pagamento pendente',
+    paused: 'Assinatura pausada',
+    expired: 'Assinatura vencida',
+    pending: 'Pagamento em processamento',
+    inactive: 'Sem assinatura ativa'
+  })[s] || 'Sem assinatura ativa';
+}
+
+function renderPaywall(data) {
+  if (appRoot.dataset.wdmSubscriptionView === 'paywall') return;
+  appRoot.dataset.wdmSubscriptionView = 'paywall';
+  const label = statusLabel(data);
+  const cls = data?.status === 'pending' || data?.status === 'on_hold' ? 'warn' : '';
+  appRoot.innerHTML = `
+    <div class="subWrap">
+      <section class="subCard">
+        <div class="subTop">
+          <div>
+            <span class="ey">WDM Shopping para lojistas</span>
+            <h1>Abra sua loja no Shopping</h1>
+            <p class="muted">Seu acesso ao Shopping é gratuito. Para publicar e administrar uma loja é necessária uma assinatura mensal.</p>
+          </div>
+          <div class="subPrice">${PLAN_PRICE}<small>/mês</small></div>
+        </div>
+        <div class="subList">
+          <div class="subItem">✓ Loja própria no WDM Shopping</div>
+          <div class="subItem">✓ Produtos com fotos otimizadas</div>
+          <div class="subItem">✓ Pedidos direto pelo WhatsApp</div>
+          <div class="subItem">✓ Promoções e vitrine personalizada</div>
+        </div>
+        <div class="subStatus ${cls}"><strong>${label}</strong><br>O painel da loja é liberado somente depois que o Google Play confirmar a assinatura.</div>
+        <div class="subActions">
+          <button id="subscribeGoogle" class="btn" type="button">Assinar pelo Google Play</button>
+          <button id="checkSubscription" class="btn2" type="button">Já paguei · verificar</button>
+          <button id="subscriptionLogout" class="btn2" type="button">Sair</button>
+        </div>
+        <div id="subscriptionMsg" class="subNote">Plano: ${PRODUCT_ID} · ${BASE_PLAN_ID}. A cobrança será feita pelo Google Play.</div>
+      </section>
+    </div>`;
+
+  document.getElementById('subscribeGoogle').onclick = () => {
+    const msg = document.getElementById('subscriptionMsg');
+    try {
+      if (window.WDMAndroid?.subscribe) {
+        window.WDMAndroid.subscribe(PRODUCT_ID);
+        msg.textContent = 'Abrindo a cobrança do Google Play...';
+      } else {
+        msg.textContent = 'A assinatura pelo Google Play será concluída dentro do app Android WDM Shopping. O site já está preparado para reconhecer a assinatura depois da confirmação.';
+      }
+    } catch (error) {
+      msg.textContent = 'Não foi possível abrir o Google Play agora. Tente novamente pelo app WDM Shopping.';
+    }
+  };
+
+  document.getElementById('checkSubscription').onclick = async () => {
+    const msg = document.getElementById('subscriptionMsg');
+    msg.textContent = 'Verificando sua assinatura...';
+    const latest = await subscription(auth.currentUser.uid).catch(() => null);
+    if (entitled(latest)) {
+      msg.textContent = 'Assinatura confirmada. Liberando sua loja...';
+      appRoot.dataset.wdmSubscriptionView = '';
+      await guardPanel(true);
+    } else {
+      msg.textContent = 'O Google ainda não confirmou uma assinatura ativa para esta conta.';
+    }
+  };
+
+  document.getElementById('subscriptionLogout').onclick = async () => {
+    await signOut(auth);
+    location.hash = '#home';
+  };
+}
+
+async function uniqueSlug(baseName) {
+  const base = slug(baseName);
+  let candidate = base;
+  let n = 2;
+  while ((await getDoc(doc(db, 'slugs', candidate))).exists()) candidate = `${base}-${n++}`;
+  return candidate;
+}
+
+async function renderOnboarding(user) {
+  if (appRoot.dataset.wdmSubscriptionView === 'onboarding') return;
+  appRoot.dataset.wdmSubscriptionView = 'onboarding';
+  const profileSnap = await getDoc(doc(db, 'users', user.uid));
+  const profile = profileSnap.exists() ? profileSnap.data() : {};
+  const pending = profile.pendingStore || {};
+  appRoot.innerHTML = `
+    <div class="onboard">
+      <section class="auth">
+        <span class="ey">Assinatura confirmada ✓</span>
+        <h1>Agora vamos criar sua loja</h1>
+        <p class="muted">Esses dados poderão ser alterados depois no painel.</p>
+        <form id="storeOnboarding" class="form">
+          <div class="two">
+            <div class="field"><label>Nome do negócio</label><input name="business" required value="${clean(pending.business).replace(/"/g, '&quot;')}"></div>
+            <div class="field"><label>Categoria</label><select name="category">${['Tecnologia','Alimentação','Casa','Moda','Beleza','Serviços','Outros'].map(x => `<option ${x === pending.category ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+          </div>
+          <div class="field"><label>WhatsApp</label><input id="onboardPhone" name="phone" inputmode="tel" value="${phone(pending.phone || '')}" placeholder="(11) 9 9999-9999"></div>
+          <div class="field"><label>Descrição</label><textarea name="description" placeholder="Conte um pouco sobre sua loja"></textarea></div>
+          <div id="onboardStatus" class="status"></div>
+          <button class="btn" type="submit">Criar minha loja</button>
+        </form>
+      </section>
+    </div>`;
+
+  const form = document.getElementById('storeOnboarding');
+  const phoneField = document.getElementById('onboardPhone');
+  phoneField.oninput = e => e.target.value = phone(e.target.value);
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const st = document.getElementById('onboardStatus');
+    const f = new FormData(form);
+    const business = clean(f.get('business'));
+    if (!business) return;
+    st.className = 'status';
+    st.textContent = 'Criando sua loja...';
+    try {
+      const sid = await uniqueSlug(business);
+      await setDoc(doc(db, 'stores', user.uid), {
+        ownerId: user.uid,
+        slug: sid,
+        name: business,
+        category: clean(f.get('category')) || 'Outros',
+        initials: initials(business),
+        primary: '#2f7df6',
+        description: clean(f.get('description')) || 'Bem-vindo à nossa vitrine no WDM Shopping.',
+        whatsapp: whats(f.get('phone')),
+        instagram: '',
+        promo: 'Confira nossas novidades!',
+        published: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'slugs', sid), { storeId: user.uid, ownerId: user.uid, createdAt: serverTimestamp() });
+      await setDoc(doc(db, 'users', user.uid), { storeId: user.uid, pendingStore: null, updatedAt: serverTimestamp() }, { merge: true });
+      appRoot.dataset.wdmSubscriptionView = '';
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (error) {
+      st.className = 'status err';
+      st.textContent = error?.code === 'permission-denied'
+        ? 'A assinatura ainda não foi liberada pelas regras do sistema.'
+        : (error?.message || 'Não foi possível criar a loja.');
+    }
+  };
+}
+
+async function guardPanel(force = false) {
+  if (location.hash !== '#painel' || !auth.currentUser || busy) return;
+  busy = true;
+  try {
+    const sub = await subscription(auth.currentUser.uid).catch(() => null);
+    if (!entitled(sub)) {
+      renderPaywall(sub);
+      return;
+    }
+    const storeSnap = await getDoc(doc(db, 'stores', auth.currentUser.uid));
+    if (!storeSnap.exists()) {
+      await renderOnboarding(auth.currentUser);
+      return;
+    }
+    if (appRoot.dataset.wdmSubscriptionView) {
+      appRoot.dataset.wdmSubscriptionView = '';
+      if (force) window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
+  } finally {
+    busy = false;
+  }
+}
+
+function scheduleGuard() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => guardPanel(false), 40);
+}
+
+function installRegistrationInterceptor() {
+  if (location.hash !== '#cadastro') return;
+  const form = document.getElementById('authForm');
+  if (!form || form.dataset.subscriptionIntercepted) return;
+  form.dataset.subscriptionIntercepted = '1';
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const status = document.getElementById('status');
+    const f = new FormData(form);
+    const email = clean(f.get('email')).toLowerCase();
+    const password = String(f.get('password') || '');
+    status.className = 'status';
+    status.textContent = 'Criando sua conta...';
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        name: clean(f.get('name')),
+        email,
+        provider: 'password',
+        pendingStore: {
+          business: clean(f.get('business')),
+          category: clean(f.get('category')) || 'Outros',
+          phone: clean(f.get('phone'))
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      location.hash = '#painel';
+    } catch (error) {
+      const code = error?.code || '';
+      const messages = {
+        'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
+        'auth/invalid-email': 'Digite um e-mail válido.',
+        'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+        'auth/operation-not-allowed': 'Ative E-mail/Senha no Firebase Authentication.'
+      };
+      status.className = 'status err';
+      status.textContent = messages[code] || error?.message || 'Não foi possível criar sua conta.';
+    }
+  }, true);
+}
+
+const observer = new MutationObserver(() => {
+  installRegistrationInterceptor();
+  scheduleGuard();
+});
+observer.observe(appRoot, { childList: true, subtree: true });
+window.addEventListener('hashchange', () => {
+  installRegistrationInterceptor();
+  scheduleGuard();
+});
+onAuthStateChanged(auth, () => scheduleGuard());
+installRegistrationInterceptor();
+scheduleGuard();
+
+window.wdmSubscriptionRefresh = () => guardPanel(true);
