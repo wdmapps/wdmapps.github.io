@@ -12,71 +12,18 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
 const clean = value => String(value || '').trim();
-const digits = value => String(value || '').replace(/\D/g, '');
-const whats = value => {
-  let d = digits(value);
-  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
-  return d.length >= 10 ? '55' + d : d;
-};
-const slug = value => clean(value || 'minha-loja')
-  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  .toLowerCase().replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-|-$/g, '') || 'minha-loja';
-const initials = value => clean(value || 'Minha Loja').split(/\s+/).slice(0, 2)
-  .map(part => part[0] || '').join('').toUpperCase() || 'ML';
 
-async function uniqueSlug(baseName) {
-  const base = slug(baseName);
-  let candidate = base;
-  let n = 2;
-  while ((await getDoc(doc(db, 'slugs', candidate))).exists()) candidate = `${base}-${n++}`;
-  return candidate;
-}
-
-async function ensureStore(user) {
-  // Primeiro verificamos o perfil do próprio usuário. Esta leitura é permitida
-  // pelas regras mesmo quando o documento ainda não existe.
+async function ensureProfile(user) {
   const userRef = doc(db, 'users', user.uid);
-  const profile = await getDoc(userRef);
-  if (profile.exists()) return;
-
-  const storeRef = doc(db, 'stores', user.uid);
-  const businessField = document.querySelector('#authForm [name="business"]');
-  const categoryField = document.querySelector('#authForm [name="category"]');
-  const phoneField = document.querySelector('#authForm [name="phone"]');
-  const business = clean(businessField?.value) || clean(user.displayName) || 'Minha Loja';
-  const category = clean(categoryField?.value) || 'Outros';
-  const sid = await uniqueSlug(business);
-
-  await setDoc(storeRef, {
-    ownerId: user.uid,
-    slug: sid,
-    name: business,
-    category,
-    initials: initials(business),
-    primary: '#2f7df6',
-    description: 'Bem-vindo à nossa vitrine no WDM Shopping.',
-    whatsapp: whats(phoneField?.value),
-    instagram: '',
-    promo: 'Confira nossas novidades!',
-    published: true,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-
-  await setDoc(doc(db, 'slugs', sid), {
-    storeId: user.uid,
-    ownerId: user.uid,
-    createdAt: serverTimestamp()
-  });
-
-  await setDoc(userRef, {
-    name: clean(user.displayName) || business,
+  const current = await getDoc(userRef);
+  const data = {
+    name: clean(user.displayName) || 'Lojista',
     email: clean(user.email).toLowerCase(),
-    storeId: user.uid,
     provider: 'google',
-    createdAt: serverTimestamp()
-  }, { merge: true });
+    updatedAt: serverTimestamp()
+  };
+  if (!current.exists()) data.createdAt = serverTimestamp();
+  await setDoc(userRef, data, { merge: true });
 }
 
 function errorText(error) {
@@ -85,7 +32,7 @@ function errorText(error) {
   if (code === 'auth/popup-blocked') return 'O navegador bloqueou a janela do Google. Permita pop-ups e tente novamente.';
   if (code === 'auth/unauthorized-domain') return 'Este domínio ainda precisa ser autorizado no Firebase Authentication.';
   if (code === 'auth/account-exists-with-different-credential') return 'Este e-mail já possui outra forma de login. Entre com e-mail e senha primeiro.';
-  if (code === 'permission-denied') return 'O login funcionou, mas o Firestore bloqueou a criação da loja. Atualize as regras e tente novamente.';
+  if (code === 'permission-denied') return 'O login funcionou, mas o Firestore bloqueou o acesso ao perfil.';
   return error?.message || 'Não foi possível entrar com Google.';
 }
 
@@ -122,7 +69,7 @@ function addGoogleButton() {
     if (status) { status.className = 'status'; status.textContent = ''; }
     try {
       const result = await signInWithPopup(auth, provider);
-      await ensureStore(result.user);
+      await ensureProfile(result.user);
       openPanel();
     } catch (error) {
       if (status) { status.className = 'status err'; status.textContent = errorText(error); }
