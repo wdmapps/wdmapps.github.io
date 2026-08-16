@@ -44,9 +44,17 @@ function subscriptionAccess(stripeStatus) {
   }
 }
 
+async function saveStripeCustomer(uid, customerId) {
+  if (!uid || !customerId) return;
+  await db.collection('stripeCustomers').doc(uid).set({
+    stripeCustomerId: customerId,
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true });
+}
+
 async function findUidByCustomer(customerId) {
   if (!customerId) return null;
-  const query = await db.collection('users')
+  const query = await db.collection('stripeCustomers')
     .where('stripeCustomerId', '==', customerId)
     .limit(1)
     .get();
@@ -78,7 +86,7 @@ async function syncStoreBillingState(uid, entitled) {
   }
 }
 
-async function syncStripeSubscription(stripe, subscription, fallbackUid = null) {
+async function syncStripeSubscription(subscription, fallbackUid = null) {
   const customerId = typeof subscription.customer === 'string'
     ? subscription.customer
     : subscription.customer?.id || null;
@@ -120,11 +128,7 @@ async function syncStripeSubscription(stripe, subscription, fallbackUid = null) 
 
   await Promise.all([
     db.collection('subscriptions').doc(uid).set(payload, { merge: true }),
-    db.collection('users').doc(uid).set({
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscription.id,
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true }),
+    saveStripeCustomer(uid, customerId),
   ]);
 
   await syncStoreBillingState(uid, access.entitled);
@@ -146,9 +150,8 @@ exports.createStripeCheckoutSession = onCall(
       throw new HttpsError('failed-precondition', 'Esta conta já possui uma assinatura ativa.');
     }
 
-    const userRef = db.collection('users').doc(uid);
-    const userSnap = await userRef.get();
-    let customerId = userSnap.exists ? userSnap.data()?.stripeCustomerId : null;
+    const customerMap = await db.collection('stripeCustomers').doc(uid).get();
+    let customerId = customerMap.exists ? customerMap.data()?.stripeCustomerId : null;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -159,10 +162,7 @@ exports.createStripeCheckoutSession = onCall(
         },
       });
       customerId = customer.id;
-      await userRef.set({
-        stripeCustomerId: customerId,
-        updatedAt: FieldValue.serverTimestamp(),
-      }, { merge: true });
+      await saveStripeCustomer(uid, customerId);
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -197,8 +197,8 @@ exports.createStripePortalSession = onCall(
     }
 
     const uid = request.auth.uid;
-    const userSnap = await db.collection('users').doc(uid).get();
-    const customerId = userSnap.exists ? userSnap.data()?.stripeCustomerId : null;
+    const subSnap = await db.collection('subscriptions').doc(uid).get();
+    const customerId = subSnap.exists ? subSnap.data()?.stripeCustomerId : null;
 
     if (!customerId) {
       throw new HttpsError('failed-precondition', 'Nenhum cliente Stripe foi encontrado para esta conta.');
@@ -253,13 +253,7 @@ exports.stripeWebhook = onRequest(
             : session.customer?.id || null;
 
           if (uid && customerId) {
-            await db.collection('users').doc(uid).set({
-              stripeCustomerId: customerId,
-              stripeSubscriptionId: typeof session.subscription === 'string'
-                ? session.subscription
-                : session.subscription?.id || null,
-              updatedAt: FieldValue.serverTimestamp(),
-            }, { merge: true });
+            await saveStripeCustomer(uid, customerId);
           }
 
           const subscriptionId = typeof session.subscription === 'string'
@@ -268,7 +262,7 @@ exports.stripeWebhook = onRequest(
 
           if (subscriptionId) {
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-            await syncStripeSubscription(stripe, subscription, uid);
+            await syncStripeSubscription(subscription, uid);
           }
           break;
         }
@@ -276,7 +270,7 @@ exports.stripeWebhook = onRequest(
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted': {
-          await syncStripeSubscription(stripe, event.data.object);
+          await syncStripeSubscription(event.data.object);
           break;
         }
 
