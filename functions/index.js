@@ -153,7 +153,7 @@ exports.createStripeCheckoutSession = onCall(
     const customerMap = await db.collection('stripeCustomers').doc(uid).get();
     let customerId = customerMap.exists ? customerMap.data()?.stripeCustomerId : null;
 
-    if (!customerId) {
+    const createCustomer = async () => {
       const customer = await stripe.customers.create({
         email: email || undefined,
         metadata: {
@@ -161,11 +161,13 @@ exports.createStripeCheckoutSession = onCall(
           project: 'wdm-shopping',
         },
       });
-      customerId = customer.id;
-      await saveStripeCustomer(uid, customerId);
-    }
+      await saveStripeCustomer(uid, customer.id);
+      return customer.id;
+    };
 
-    const session = await stripe.checkout.sessions.create({
+    if (!customerId) customerId = await createCustomer();
+
+    const createSession = () => stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
       client_reference_id: uid,
@@ -184,6 +186,15 @@ exports.createStripeCheckoutSession = onCall(
         },
       },
     });
+
+    let session;
+    try {
+      session = await createSession();
+    } catch (error) {
+      if (error?.code !== 'resource_missing' || error?.param !== 'customer') throw error;
+      customerId = await createCustomer();
+      session = await createSession();
+    }
 
     return { url: session.url };
   }
