@@ -1,6 +1,7 @@
 import { getApps, getApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 while (!getApps().length) await sleep(25);
@@ -8,13 +9,18 @@ while (!getApps().length) await sleep(25);
 const firebaseApp = getApp();
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
+const functions = getFunctions(firebaseApp);
 const appRoot = document.getElementById('app');
 
 const PLAN_PRICE = 'R$ 29,90';
-const PRODUCT_ID = 'wdm_shopping_mensal';
-const BASE_PLAN_ID = 'mensal';
+const STRIPE_PRICE_ID = 'price_1U56uLHYVjU33JYujLtK89Jd';
+const checkoutResult = new URLSearchParams(location.search).get('stripe');
 let busy = false;
 let refreshTimer = 0;
+let checkoutPolling = false;
+
+const createCheckoutSession = httpsCallable(functions, 'createStripeCheckoutSession');
+const createPortalSession = httpsCallable(functions, 'createStripePortalSession');
 
 const clean = value => String(value || '').trim();
 const digits = value => String(value || '').replace(/\D/g, '');
@@ -56,6 +62,8 @@ function addStyles() {
     .subActions{display:flex;gap:10px;flex-wrap:wrap}.subActions .btn,.subActions .btn2{min-height:48px;display:inline-flex;align-items:center;justify-content:center}
     .subNote{font-size:.82rem;color:#8193aa;margin-top:12px;line-height:1.5}
     .onboard{max-width:760px;margin:42px auto 110px;padding:0 18px}.onboard .auth{max-width:none}
+    .billingBar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;border:1px solid #20334e;background:#0a1728;border-radius:14px;color:#b9cbe1}
+    .billingBar strong{color:#b9f5d4}.billingBar button{margin:0}
     @media(max-width:680px){.subList{grid-template-columns:1fr}.subCard{padding:20px}.subPrice{font-size:1.8rem}}
   `;
   document.head.appendChild(style);
@@ -88,11 +96,54 @@ function statusLabel(data) {
   })[s] || 'Sem assinatura ativa';
 }
 
+function cleanCheckoutQuery() {
+  if (!location.search) return;
+  history.replaceState({}, '', `${location.pathname}${location.hash || '#painel'}`);
+}
+
+async function openStripeCheckout(messageElement) {
+  if (!auth.currentUser) return;
+  messageElement.textContent = 'Abrindo o pagamento seguro da Stripe...';
+  try {
+    const result = await createCheckoutSession();
+    const url = result?.data?.url;
+    if (!url) throw new Error('A Stripe não retornou o endereço do Checkout.');
+    location.href = url;
+  } catch (error) {
+    console.error('Stripe Checkout:', error);
+    const code = String(error?.code || '');
+    messageElement.textContent = code.includes('failed-precondition')
+      ? 'Esta conta já possui uma assinatura ativa. Clique em verificar.'
+      : 'Não foi possível abrir o pagamento agora. Tente novamente em instantes.';
+  }
+}
+
+async function openBillingPortal(messageElement) {
+  if (!auth.currentUser) return;
+  if (messageElement) messageElement.textContent = 'Abrindo o gerenciamento da assinatura...';
+  try {
+    const result = await createPortalSession();
+    const url = result?.data?.url;
+    if (!url) throw new Error('A Stripe não retornou o endereço do portal.');
+    location.href = url;
+  } catch (error) {
+    console.error('Stripe Portal:', error);
+    if (messageElement) messageElement.textContent = 'O portal da assinatura ainda não está disponível. Tente novamente mais tarde.';
+  }
+}
+
 function renderPaywall(data) {
   if (appRoot.dataset.wdmSubscriptionView === 'paywall') return;
   appRoot.dataset.wdmSubscriptionView = 'paywall';
   const label = statusLabel(data);
   const cls = data?.status === 'pending' || data?.status === 'on_hold' ? 'warn' : '';
+  const checkoutMessage = checkoutResult === 'success'
+    ? 'Pagamento concluído. Estamos aguardando a confirmação automática da Stripe...'
+    : checkoutResult === 'cancel'
+      ? 'Pagamento cancelado. Nenhuma assinatura foi iniciada.'
+      : `Pagamento seguro processado pela Stripe. Plano mensal ${PLAN_PRICE}.`;
+  const hasStripeCustomer = Boolean(data?.stripeCustomerId);
+
   appRoot.innerHTML = `
     <div class="subWrap">
       <section class="subCard">
@@ -100,7 +151,7 @@ function renderPaywall(data) {
           <div>
             <span class="ey">WDM Shopping para lojistas</span>
             <h1>Abra sua loja no Shopping</h1>
-            <p class="muted">Seu acesso ao Shopping é gratuito. Para publicar e administrar uma loja é necessária uma assinatura mensal.</p>
+            <p class="muted">Seu cadastro é gratuito. Para publicar e administrar uma loja é necessária uma assinatura mensal.</p>
           </div>
           <div class="subPrice">${PLAN_PRICE}<small>/mês</small></div>
         </div>
@@ -110,47 +161,62 @@ function renderPaywall(data) {
           <div class="subItem">✓ Pedidos direto pelo WhatsApp</div>
           <div class="subItem">✓ Promoções e vitrine personalizada</div>
         </div>
-        <div class="subStatus ${cls}"><strong>${label}</strong><br>O painel da loja é liberado somente depois que o Google Play confirmar a assinatura.</div>
+        <div class="subStatus ${cls}"><strong>${label}</strong><br>O painel da loja é liberado automaticamente depois que a Stripe confirmar a assinatura.</div>
         <div class="subActions">
-          <button id="subscribeGoogle" class="btn" type="button">Assinar pelo Google Play</button>
+          <button id="subscribeStripe" class="btn" type="button">Assinar ${PLAN_PRICE}/mês</button>
           <button id="checkSubscription" class="btn2" type="button">Já paguei · verificar</button>
+          ${hasStripeCustomer ? '<button id="manageStripe" class="btn2" type="button">Gerenciar assinatura</button>' : ''}
           <button id="subscriptionLogout" class="btn2" type="button">Sair</button>
         </div>
-        <div id="subscriptionMsg" class="subNote">Plano: ${PRODUCT_ID} · ${BASE_PLAN_ID}. A cobrança será feita pelo Google Play.</div>
+        <div id="subscriptionMsg" class="subNote">${checkoutMessage}</div>
       </section>
     </div>`;
 
-  document.getElementById('subscribeGoogle').onclick = () => {
-    const msg = document.getElementById('subscriptionMsg');
-    try {
-      if (window.WDMAndroid?.subscribe) {
-        window.WDMAndroid.subscribe(PRODUCT_ID);
-        msg.textContent = 'Abrindo a cobrança do Google Play...';
-      } else {
-        msg.textContent = 'A assinatura pelo Google Play será concluída dentro do app Android WDM Shopping. O site já está preparado para reconhecer a assinatura depois da confirmação.';
-      }
-    } catch (error) {
-      msg.textContent = 'Não foi possível abrir o Google Play agora. Tente novamente pelo app WDM Shopping.';
-    }
-  };
+  const msg = document.getElementById('subscriptionMsg');
+  document.getElementById('subscribeStripe').onclick = () => openStripeCheckout(msg);
 
   document.getElementById('checkSubscription').onclick = async () => {
-    const msg = document.getElementById('subscriptionMsg');
-    msg.textContent = 'Verificando sua assinatura...';
+    msg.textContent = 'Verificando sua assinatura na conta...';
     const latest = await subscription(auth.currentUser.uid).catch(() => null);
     if (entitled(latest)) {
       msg.textContent = 'Assinatura confirmada. Liberando sua loja...';
+      cleanCheckoutQuery();
       appRoot.dataset.wdmSubscriptionView = '';
       await guardPanel(true);
     } else {
-      msg.textContent = 'O Google ainda não confirmou uma assinatura ativa para esta conta.';
+      msg.textContent = 'A Stripe ainda não confirmou uma assinatura ativa para esta conta.';
     }
   };
+
+  const manage = document.getElementById('manageStripe');
+  if (manage) manage.onclick = () => openBillingPortal(msg);
 
   document.getElementById('subscriptionLogout').onclick = async () => {
     await signOut(auth);
     location.hash = '#home';
   };
+
+  if (checkoutResult === 'success') pollCheckoutConfirmation();
+}
+
+async function pollCheckoutConfirmation() {
+  if (checkoutPolling || !auth.currentUser) return;
+  checkoutPolling = true;
+  const msg = () => document.getElementById('subscriptionMsg');
+  for (let attempt = 0; attempt < 10; attempt++) {
+    await sleep(attempt === 0 ? 800 : 1800);
+    const latest = await subscription(auth.currentUser.uid).catch(() => null);
+    if (entitled(latest)) {
+      if (msg()) msg().textContent = 'Assinatura confirmada ✓ Liberando sua loja...';
+      cleanCheckoutQuery();
+      appRoot.dataset.wdmSubscriptionView = '';
+      checkoutPolling = false;
+      await guardPanel(true);
+      return;
+    }
+  }
+  if (msg()) msg().textContent = 'O pagamento foi concluído, mas a confirmação está demorando um pouco. Clique em “Já paguei · verificar” em alguns instantes.';
+  checkoutPolling = false;
 }
 
 async function uniqueSlug(baseName) {
@@ -227,6 +293,21 @@ async function renderOnboarding(user) {
   };
 }
 
+async function installBillingBar() {
+  if (location.hash !== '#painel' || appRoot.dataset.wdmSubscriptionView || !auth.currentUser) return;
+  if (document.getElementById('wdmBillingBar')) return;
+  const firstPanel = document.querySelector('.panelWrap .panel');
+  if (!firstPanel) return;
+  const data = await subscription(auth.currentUser.uid).catch(() => null);
+  if (!entitled(data) || document.getElementById('wdmBillingBar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'wdmBillingBar';
+  bar.className = 'billingBar';
+  bar.innerHTML = '<span><strong>Assinatura Stripe ativa ✓</strong><br><small>Plano WDM Shopping · R$ 29,90/mês</small></span><button class="btn2" type="button">Gerenciar pagamento</button>';
+  bar.querySelector('button').onclick = () => openBillingPortal(bar.querySelector('small'));
+  firstPanel.prepend(bar);
+}
+
 async function guardPanel(force = false) {
   if (location.hash !== '#painel' || !auth.currentUser || busy) return;
   busy = true;
@@ -238,13 +319,16 @@ async function guardPanel(force = false) {
     }
     const storeSnap = await getDoc(doc(db, 'stores', auth.currentUser.uid));
     if (!storeSnap.exists()) {
+      cleanCheckoutQuery();
       await renderOnboarding(auth.currentUser);
       return;
     }
     if (appRoot.dataset.wdmSubscriptionView) {
       appRoot.dataset.wdmSubscriptionView = '';
+      cleanCheckoutQuery();
       if (force) window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
+    setTimeout(installBillingBar, 80);
   } finally {
     busy = false;
   }
@@ -301,14 +385,18 @@ function installRegistrationInterceptor() {
 const observer = new MutationObserver(() => {
   installRegistrationInterceptor();
   scheduleGuard();
+  setTimeout(installBillingBar, 100);
 });
 observer.observe(appRoot, { childList: true, subtree: true });
 window.addEventListener('hashchange', () => {
   installRegistrationInterceptor();
   scheduleGuard();
+  setTimeout(installBillingBar, 100);
 });
 onAuthStateChanged(auth, () => scheduleGuard());
 installRegistrationInterceptor();
 scheduleGuard();
 
 window.wdmSubscriptionRefresh = () => guardPanel(true);
+window.wdmStripePortal = () => openBillingPortal(null);
+window.wdmStripePriceId = STRIPE_PRICE_ID;
