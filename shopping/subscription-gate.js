@@ -3,6 +3,8 @@ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } 
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js';
 
+window.wdmSubscriptionPanelAccess = false;
+
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 while (!getApps().length) await sleep(25);
 
@@ -314,9 +316,12 @@ async function guardPanel(force = false) {
   try {
     const sub = await subscription(auth.currentUser.uid).catch(() => null);
     if (!entitled(sub)) {
+      window.wdmSubscriptionPanelAccess = false;
       renderPaywall(sub);
       return;
     }
+    const shouldRefreshPanel = window.wdmSubscriptionPanelAccess !== true || force;
+    window.wdmSubscriptionPanelAccess = true;
     const storeSnap = await getDoc(doc(db, 'stores', auth.currentUser.uid));
     if (!storeSnap.exists()) {
       cleanCheckoutQuery();
@@ -326,8 +331,8 @@ async function guardPanel(force = false) {
     if (appRoot.dataset.wdmSubscriptionView) {
       appRoot.dataset.wdmSubscriptionView = '';
       cleanCheckoutQuery();
-      if (force) window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
+    if (shouldRefreshPanel) window.dispatchEvent(new HashChangeEvent('hashchange'));
     setTimeout(installBillingBar, 80);
   } finally {
     busy = false;
@@ -389,11 +394,15 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(appRoot, { childList: true, subtree: true });
 window.addEventListener('hashchange', () => {
+  if (location.hash !== '#painel') window.wdmSubscriptionPanelAccess = false;
   installRegistrationInterceptor();
   scheduleGuard();
   setTimeout(installBillingBar, 100);
 });
-onAuthStateChanged(auth, () => scheduleGuard());
+onAuthStateChanged(auth, () => {
+  window.wdmSubscriptionPanelAccess = false;
+  scheduleGuard();
+});
 installRegistrationInterceptor();
 scheduleGuard();
 
