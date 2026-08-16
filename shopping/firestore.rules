@@ -20,7 +20,7 @@ service cloud.firestore {
     }
 
     // O navegador pode apenas consultar a própria assinatura.
-    // A criação/alteração deste documento será feita pelo backend após validar o Google Play.
+    // A criação/alteração deste documento é feita pelo backend Stripe via Admin SDK.
     match /subscriptions/{uid} {
       allow read: if isOwner(uid);
       allow create, update, delete: if false;
@@ -47,8 +47,9 @@ service cloud.firestore {
 
     match /stores/{storeId} {
       // O dono pode consultar os próprios dados mesmo com a assinatura vencida.
-      // A vitrine pública continua dependendo do campo published; quando a assinatura
-      // vencer, o backend do Google Play colocará published=false.
+      // Quando a Stripe suspender/encerrar o direito de acesso, o backend coloca
+      // published=false; se o pagamento voltar e a suspensão foi por cobrança,
+      // o backend restaura a publicação.
       allow read: if isOwner(storeId)
                   || resource.data.published == true;
 
