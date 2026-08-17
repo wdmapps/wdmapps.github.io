@@ -125,7 +125,7 @@ async function compressImage(file) {
 function stateFor(form) {
   let state = states.get(form);
   if (!state) {
-    state = { blob: null, original: null, existingUrl: '', existingPath: '', remove: false, previewUrl: '' };
+    state = { blob: null, original: null, existingUrl: '', existingPath: '', remove: false, previewUrl: '', processing: false };
     states.set(form, state);
   }
   return state;
@@ -165,7 +165,10 @@ function renderPreview(form) {
 
 async function chooseFile(form, file) {
   const status = form.querySelector('#prodSt');
+  const button = form.querySelector('button[type="submit"]');
   const state = stateFor(form);
+  state.processing = true;
+  if (button) button.disabled = true;
   try {
     if (status) { status.className = 'status'; status.textContent = 'Otimizando foto...'; }
     const result = await compressImage(file);
@@ -178,6 +181,9 @@ async function chooseFile(form, file) {
     if (status) status.textContent = '';
   } catch (error) {
     if (status) { status.className = 'status err'; status.textContent = error.message || 'Não foi possível preparar a foto.'; }
+  } finally {
+    state.processing = false;
+    if (button) button.disabled = false;
   }
 }
 
@@ -297,6 +303,10 @@ document.addEventListener('submit', async event => {
   event.stopImmediatePropagation();
   const status = form.querySelector('#prodSt');
   const button = form.querySelector('button[type="submit"]');
+  if (stateFor(form).processing) {
+    if (status) { status.className = 'status'; status.textContent = 'Aguarde a foto ficar pronta antes de salvar.'; }
+    return;
+  }
   if (button) button.disabled = true;
   if (status) { status.className = 'status'; status.textContent = stateFor(form).blob ? 'Enviando foto otimizada...' : 'Salvando produto...'; }
   try {
