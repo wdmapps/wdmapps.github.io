@@ -1,11 +1,17 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isWdmOwner() {
+      return request.auth != null
+        && request.auth.uid == 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
+    }
+
     function hasActiveSubscription(storeId) {
       return request.auth != null
         && request.auth.uid == storeId
-        && firestore.exists(/databases/(default)/documents/subscriptions/$(storeId))
-        && firestore.get(/databases/(default)/documents/subscriptions/$(storeId)).data.entitled == true;
+        && (isWdmOwner()
+          || (firestore.exists(/databases/(default)/documents/subscriptions/$(storeId))
+            && firestore.get(/databases/(default)/documents/subscriptions/$(storeId)).data.entitled == true));
     }
 
     match /stores/{storeId}/products/{productId}/{fileName} {

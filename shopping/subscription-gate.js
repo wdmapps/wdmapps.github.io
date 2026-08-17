@@ -14,6 +14,7 @@ const db = getFirestore(firebaseApp);
 const functions = getFunctions(firebaseApp);
 const appRoot = document.getElementById('app');
 
+const WDM_OWNER_UID = 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
 const PLAN_PRICE = 'R$ 29,90';
 const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
 const checkoutResult = new URLSearchParams(location.search).get('stripe');
@@ -296,7 +297,7 @@ async function renderOnboarding(user) {
 }
 
 async function installBillingBar() {
-  if (location.hash !== '#painel' || appRoot.dataset.wdmSubscriptionView || !auth.currentUser) return;
+  if (location.hash !== '#painel' || appRoot.dataset.wdmSubscriptionView || !auth.currentUser || auth.currentUser.uid === WDM_OWNER_UID) return;
   if (document.getElementById('wdmBillingBar')) return;
   const firstPanel = document.querySelector('.panelWrap .panel');
   if (!firstPanel) return;
@@ -314,8 +315,9 @@ async function guardPanel(force = false) {
   if (location.hash !== '#painel' || !auth.currentUser || busy) return;
   busy = true;
   try {
-    const sub = await subscription(auth.currentUser.uid).catch(() => null);
-    if (!entitled(sub)) {
+    const isOwner = auth.currentUser.uid === WDM_OWNER_UID;
+    const sub = isOwner ? null : await subscription(auth.currentUser.uid).catch(() => null);
+    if (!isOwner && !entitled(sub)) {
       window.wdmSubscriptionPanelAccess = false;
       renderPaywall(sub);
       return;

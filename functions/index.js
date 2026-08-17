@@ -13,6 +13,7 @@ const db = getFirestore();
 const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 
+const WDM_OWNER_UID = 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
 // Preço mensal em produção da conta Stripe do WDM Shopping.
 const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
 const SITE_URL = 'https://wdmapps.com.br/shopping/';
@@ -141,6 +142,9 @@ exports.createStripeCheckoutSession = onCall(
     }
 
     const uid = request.auth.uid;
+    if (uid === WDM_OWNER_UID) {
+      throw new HttpsError('failed-precondition', 'A conta proprietária não requer assinatura.');
+    }
     const email = request.auth.token.email || null;
     const stripe = stripeClient();
 

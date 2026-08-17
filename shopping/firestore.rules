@@ -9,10 +9,16 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
-    function hasActiveSubscription(uid) {
+    function isWdmOwner() {
       return signedIn()
-        && exists(/databases/$(database)/documents/subscriptions/$(uid))
-        && get(/databases/$(database)/documents/subscriptions/$(uid)).data.entitled == true;
+        && request.auth.uid == 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
+    }
+
+    function hasActiveSubscription(uid) {
+      return isWdmOwner()
+        || (signedIn()
+          && exists(/databases/$(database)/documents/subscriptions/$(uid))
+          && get(/databases/$(database)/documents/subscriptions/$(uid)).data.entitled == true);
     }
 
     match /users/{uid} {
