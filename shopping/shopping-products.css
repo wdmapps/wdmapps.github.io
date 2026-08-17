@@ -1,0 +1,52 @@
+.homeAds .product,
+.storeProducts .product {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.product .productPhotoPlaceholder {
+  display: grid;
+  place-items: center;
+  color: #7f96b4;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #10213a, #0a1628);
+}
+
+.adStore {
+  display: block;
+  margin-bottom: 7px;
+  color: #73baff;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.productDescription {
+  min-height: 45px;
+  margin: 0 0 12px;
+}
+
+.productPriceLine {
+  min-height: 24px;
+}
+
+.homeAds .product .wa {
+  margin-top: 14px;
+}
+
+.prodMain {
+  min-width: 0;
+}
+
+.prodMain::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
+@media (max-width: 560px) {
+  .productDescription {
+    min-height: auto;
+  }
+}
