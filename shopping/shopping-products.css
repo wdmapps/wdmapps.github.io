@@ -216,6 +216,17 @@
   color: var(--muted);
 }
 
+.serviceAdsTitle {
+  margin: 42px 0 18px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+.serviceAdsTitle h3 {
+  margin: 7px 0 0;
+  font-size: 1.55rem;
+}
+
 .accountTypeSwitch {
   display: grid;
   grid-template-columns: 1fr 1fr;
