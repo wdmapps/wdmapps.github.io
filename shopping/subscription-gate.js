@@ -17,6 +17,8 @@ const appRoot = document.getElementById('app');
 const WDM_OWNER_UID = 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
 const PLAN_PRICE = 'R$ 29,90';
 const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
+const STORE_CATEGORIES = ['Tecnologia','Alimentação','Casa','Moda','Beleza','Serviços','Outros'];
+const PROVIDER_CATEGORIES = ['Eletricista','Pintor','Técnico de informática','Pedreiro','Encanador','Montador de móveis','Manutenção residencial','Limpeza','Jardinagem','Fotografia','Beleza e estética','Outros serviços'];
 const checkoutResult = new URLSearchParams(location.search).get('stripe');
 let busy = false;
 let refreshTimer = 0;
@@ -152,19 +154,19 @@ function renderPaywall(data) {
       <section class="subCard">
         <div class="subTop">
           <div>
-            <span class="ey">WDM Shopping para lojistas</span>
-            <h1>Abra sua loja no Shopping</h1>
-            <p class="muted">Seu cadastro é gratuito. Para publicar e administrar uma loja é necessária uma assinatura mensal.</p>
+            <span class="ey">WDM Shopping para negócios locais</span>
+            <h1>Publique sua loja ou perfil profissional</h1>
+            <p class="muted">Seu cadastro é gratuito. Para publicar e administrar sua página é necessária uma assinatura mensal.</p>
           </div>
           <div class="subPrice">${PLAN_PRICE}<small>/mês</small></div>
         </div>
         <div class="subList">
-          <div class="subItem">✓ Loja própria no WDM Shopping</div>
-          <div class="subItem">✓ Produtos com fotos otimizadas</div>
-          <div class="subItem">✓ Pedidos direto pelo WhatsApp</div>
-          <div class="subItem">✓ Promoções e vitrine personalizada</div>
+          <div class="subItem">✓ Loja ou perfil no WDM Shopping</div>
+          <div class="subItem">✓ Produtos e serviços com fotos</div>
+          <div class="subItem">✓ Contatos direto pelo WhatsApp</div>
+          <div class="subItem">✓ Página profissional personalizada</div>
         </div>
-        <div class="subStatus ${cls}"><strong>${label}</strong><br>O painel da loja é liberado automaticamente depois que a Stripe confirmar a assinatura.</div>
+        <div class="subStatus ${cls}"><strong>${label}</strong><br>O painel é liberado automaticamente depois que a Stripe confirmar a assinatura.</div>
         <div class="subActions">
           <button id="subscribeStripe" class="btn" type="button">Assinar ${PLAN_PRICE}/mês</button>
           <button id="checkSubscription" class="btn2" type="button">Já paguei · verificar</button>
@@ -236,21 +238,24 @@ async function renderOnboarding(user) {
   const profileSnap = await getDoc(doc(db, 'users', user.uid));
   const profile = profileSnap.exists() ? profileSnap.data() : {};
   const pending = profile.pendingStore || {};
+  const providerAccount = pending.accountType === 'provider';
+  const categories = providerAccount ? PROVIDER_CATEGORIES : STORE_CATEGORIES;
   appRoot.innerHTML = `
     <div class="onboard">
       <section class="auth">
         <span class="ey">Assinatura confirmada ✓</span>
-        <h1>Agora vamos criar sua loja</h1>
+        <h1>${providerAccount ? 'Agora vamos criar seu perfil profissional' : 'Agora vamos criar sua loja'}</h1>
         <p class="muted">Esses dados poderão ser alterados depois no painel.</p>
         <form id="storeOnboarding" class="form">
           <div class="two">
-            <div class="field"><label>Nome do negócio</label><input name="business" required value="${clean(pending.business).replace(/"/g, '&quot;')}"></div>
-            <div class="field"><label>Categoria</label><select name="category">${['Tecnologia','Alimentação','Casa','Moda','Beleza','Serviços','Outros'].map(x => `<option ${x === pending.category ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+            <div class="field"><label>${providerAccount ? 'Nome profissional ou empresa' : 'Nome do negócio'}</label><input name="business" required value="${clean(pending.business).replace(/"/g, '&quot;')}"></div>
+            <div class="field"><label>${providerAccount ? 'Profissão ou categoria' : 'Categoria'}</label><select name="category">${categories.map(x => `<option ${x === pending.category ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
           </div>
           <div class="field"><label>WhatsApp</label><input id="onboardPhone" name="phone" inputmode="tel" value="${phone(pending.phone || '')}" placeholder="(11) 9 9999-9999"></div>
-          <div class="field"><label>Descrição</label><textarea name="description" placeholder="Conte um pouco sobre sua loja"></textarea></div>
+          ${providerAccount ? `<div class="field"><label>Cidade e bairro onde atende</label><input name="location" value="${clean(pending.location).replace(/"/g, '&quot;')}" placeholder="Ex.: Salto — São Pedro e São Paulo"></div>` : ''}
+          <div class="field"><label>${providerAccount ? 'Apresentação profissional' : 'Descrição'}</label><textarea name="description" placeholder="${providerAccount ? 'Conte sua experiência e especialidades' : 'Conte um pouco sobre sua loja'}"></textarea></div>
           <div id="onboardStatus" class="status"></div>
-          <button class="btn" type="submit">Criar minha loja</button>
+          <button class="btn" type="submit">${providerAccount ? 'Criar meu perfil profissional' : 'Criar minha loja'}</button>
         </form>
       </section>
     </div>`;
@@ -265,26 +270,28 @@ async function renderOnboarding(user) {
     const business = clean(f.get('business'));
     if (!business) return;
     st.className = 'status';
-    st.textContent = 'Criando sua loja...';
+    st.textContent = providerAccount ? 'Criando seu perfil profissional...' : 'Criando sua loja...';
     try {
       const sid = await uniqueSlug(business);
       await setDoc(doc(db, 'stores', user.uid), {
         ownerId: user.uid,
         slug: sid,
+        accountType: providerAccount ? 'provider' : 'store',
         name: business,
         category: clean(f.get('category')) || 'Outros',
         initials: initials(business),
         primary: '#2f7df6',
-        description: clean(f.get('description')) || 'Bem-vindo à nossa vitrine no WDM Shopping.',
+        description: clean(f.get('description')) || (providerAccount ? 'Profissional disponível para atender você.' : 'Bem-vindo à nossa vitrine no WDM Shopping.'),
+        location: clean(f.get('location')),
         whatsapp: whats(f.get('phone')),
         instagram: '',
-        promo: 'Confira nossas novidades!',
+        promo: providerAccount ? 'Solicite seu orçamento pelo WhatsApp.' : 'Confira nossas novidades!',
         published: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       await setDoc(doc(db, 'slugs', sid), { storeId: user.uid, ownerId: user.uid, createdAt: serverTimestamp() });
-      await setDoc(doc(db, 'users', user.uid), { storeId: user.uid, pendingStore: null, updatedAt: serverTimestamp() }, { merge: true });
+      await setDoc(doc(db, 'users', user.uid), { accountType: providerAccount ? 'provider' : 'store', storeId: user.uid, pendingStore: null, updatedAt: serverTimestamp() }, { merge: true });
       appRoot.dataset.wdmSubscriptionView = '';
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     } catch (error) {
@@ -347,7 +354,7 @@ function scheduleGuard() {
 }
 
 function installRegistrationInterceptor() {
-  if (location.hash !== '#cadastro') return;
+  if (!location.hash.startsWith('#cadastro')) return;
   const form = document.getElementById('authForm');
   if (!form || form.dataset.subscriptionIntercepted) return;
   form.dataset.subscriptionIntercepted = '1';
@@ -367,9 +374,11 @@ function installRegistrationInterceptor() {
         email,
         provider: 'password',
         pendingStore: {
+          accountType: clean(f.get('accountType')) === 'provider' ? 'provider' : 'store',
           business: clean(f.get('business')),
           category: clean(f.get('category')) || 'Outros',
-          phone: clean(f.get('phone'))
+          phone: clean(f.get('phone')),
+          location: clean(f.get('location'))
         },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
