@@ -13,7 +13,7 @@ provider.setCustomParameters({ prompt: 'select_account' });
 
 const clean = value => String(value || '').trim();
 
-async function ensureProfile(user) {
+async function ensureProfile(user, pendingStore = null) {
   const userRef = doc(db, 'users', user.uid);
   const current = await getDoc(userRef);
   const data = {
@@ -22,6 +22,7 @@ async function ensureProfile(user) {
     provider: 'google',
     updatedAt: serverTimestamp()
   };
+  if (pendingStore) data.pendingStore = pendingStore;
   if (!current.exists()) data.createdAt = serverTimestamp();
   await setDoc(userRef, data, { merge: true });
 }
@@ -64,12 +65,20 @@ function addGoogleButton() {
 
   button.addEventListener('click', async () => {
     const status = document.getElementById('status');
+    const fields = new FormData(form);
+    const pendingStore = location.hash.startsWith('#cadastro') ? {
+      accountType: clean(fields.get('accountType')) === 'provider' ? 'provider' : 'store',
+      business: clean(fields.get('business')),
+      category: clean(fields.get('category')) || 'Outros',
+      phone: clean(fields.get('phone')),
+      location: clean(fields.get('location'))
+    } : null;
     button.disabled = true;
     button.querySelector('span:last-child').textContent = 'Entrando...';
     if (status) { status.className = 'status'; status.textContent = ''; }
     try {
       const result = await signInWithPopup(auth, provider);
-      await ensureProfile(result.user);
+      await ensureProfile(result.user, pendingStore);
       openPanel();
     } catch (error) {
       if (status) { status.className = 'status err'; status.textContent = errorText(error); }
