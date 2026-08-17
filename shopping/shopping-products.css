@@ -14,6 +14,23 @@
   background: #0c192c;
 }
 
+.productPhoto[data-full-image] {
+  cursor: zoom-in;
+}
+
+.product[data-store-href] {
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.product[data-store-href]:hover,
+.product[data-store-href]:focus-visible {
+  transform: translateY(-3px);
+  border-color: #3c77aa;
+  outline: none;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .28);
+}
+
 .prodThumb {
   float: left;
   width: 62px;
@@ -117,6 +134,58 @@
   align-items: center;
   gap: 7px;
   color: #ffb1b1;
+}
+
+.imageViewer {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 54px 18px 30px;
+  background: rgba(1, 6, 14, .94);
+  backdrop-filter: blur(8px);
+}
+
+.imageViewer.on {
+  display: grid;
+}
+
+.imageViewer img {
+  max-width: min(1200px, 96vw);
+  max-height: 84vh;
+  border: 1px solid #365373;
+  border-radius: 16px;
+  object-fit: contain;
+  background: #07111f;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+}
+
+.imageViewer span {
+  align-self: start;
+  margin-top: 12px;
+  color: #eaf5ff;
+  font-weight: 800;
+  text-align: center;
+}
+
+.imageViewerClose {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #55708f;
+  border-radius: 50%;
+  background: #10213a;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body.imageViewerOpen {
+  overflow: hidden;
 }
 
 @media (max-width: 560px) {
