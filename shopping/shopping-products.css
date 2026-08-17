@@ -61,15 +61,29 @@
 }
 
 .productDescription {
+  display: -webkit-box;
   min-height: 45px;
+  max-height: calc(1.55em * 6);
   margin: 0 0 12px;
+  overflow: hidden;
   line-height: 1.55;
   white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
 }
 
 #prodForm textarea[name="description"] {
   min-height: 150px;
   resize: vertical;
+}
+
+.lineLimitHint {
+  color: var(--muted);
+  text-align: right;
+}
+
+.lineLimitHint.limit {
+  color: #ffc56e;
 }
 
 .productPriceLine {
