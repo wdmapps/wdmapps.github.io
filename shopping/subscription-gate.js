@@ -277,6 +277,7 @@ async function renderOnboarding(user) {
         ownerId: user.uid,
         slug: sid,
         accountType: providerAccount ? 'provider' : 'store',
+        primaryRole: providerAccount ? 'provider' : 'store',
         name: business,
         category: clean(f.get('category')) || 'Outros',
         initials: initials(business),
@@ -304,7 +305,7 @@ async function renderOnboarding(user) {
 }
 
 async function installBillingBar() {
-  if (location.hash !== '#painel' || appRoot.dataset.wdmSubscriptionView || !auth.currentUser || auth.currentUser.uid === WDM_OWNER_UID) return;
+  if (!location.hash.startsWith('#painel') || appRoot.dataset.wdmSubscriptionView || !auth.currentUser || auth.currentUser.uid === WDM_OWNER_UID) return;
   if (document.getElementById('wdmBillingBar')) return;
   const firstPanel = document.querySelector('.panelWrap .panel');
   if (!firstPanel) return;
@@ -319,7 +320,7 @@ async function installBillingBar() {
 }
 
 async function guardPanel(force = false) {
-  if (location.hash !== '#painel' || !auth.currentUser || busy) return;
+  if (!location.hash.startsWith('#painel') || !auth.currentUser || busy) return;
   busy = true;
   try {
     const isOwner = auth.currentUser.uid === WDM_OWNER_UID;
@@ -405,7 +406,7 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(appRoot, { childList: true, subtree: true });
 window.addEventListener('hashchange', () => {
-  if (location.hash !== '#painel') window.wdmSubscriptionPanelAccess = false;
+  if (!location.hash.startsWith('#painel')) window.wdmSubscriptionPanelAccess = false;
   installRegistrationInterceptor();
   scheduleGuard();
   setTimeout(installBillingBar, 100);
