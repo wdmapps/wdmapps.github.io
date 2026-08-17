@@ -13,9 +13,8 @@ const db = getFirestore();
 const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 
-// Preço de TESTE criado na conta Stripe do WDM Shopping.
-// Ao entrar em produção, trocaremos apenas este ID pelo price_... do modo live.
-const STRIPE_PRICE_ID = 'price_1U56uLHYVjU33JYujLtK89Jd';
+// Preço mensal em produção da conta Stripe do WDM Shopping.
+const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
 const SITE_URL = 'https://wdmapps.com.br/shopping/';
 
 function stripeClient() {

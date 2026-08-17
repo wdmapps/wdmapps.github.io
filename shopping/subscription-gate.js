@@ -15,7 +15,7 @@ const functions = getFunctions(firebaseApp);
 const appRoot = document.getElementById('app');
 
 const PLAN_PRICE = 'R$ 29,90';
-const STRIPE_PRICE_ID = 'price_1U56uLHYVjU33JYujLtK89Jd';
+const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
 const checkoutResult = new URLSearchParams(location.search).get('stripe');
 let busy = false;
 let refreshTimer = 0;
