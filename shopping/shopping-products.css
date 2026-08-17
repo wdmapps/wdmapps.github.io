@@ -63,6 +63,13 @@
 .productDescription {
   min-height: 45px;
   margin: 0 0 12px;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+#prodForm textarea[name="description"] {
+  min-height: 150px;
+  resize: vertical;
 }
 
 .productPriceLine {
