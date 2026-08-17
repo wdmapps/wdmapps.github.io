@@ -11,7 +11,16 @@ service firebase.storage {
         && request.auth.uid == storeId
         && (isWdmOwner()
           || (firestore.exists(/databases/(default)/documents/subscriptions/$(storeId))
-            && firestore.get(/databases/(default)/documents/subscriptions/$(storeId)).data.entitled == true));
+            && subscriptionAllowsAccess(storeId)));
+    }
+
+    function subscriptionAllowsAccess(storeId) {
+      let subscription = firestore.get(/databases/(default)/documents/subscriptions/$(storeId)).data;
+      return subscription.entitled == true
+        && (!('provider' in subscription)
+          || subscription.provider != 'manual'
+          || (subscription.currentPeriodEnd is timestamp
+            && subscription.currentPeriodEnd > request.time));
     }
 
     match /stores/{storeId}/products/{productId}/{fileName} {

@@ -18,7 +18,16 @@ service cloud.firestore {
       return isWdmOwner()
         || (signedIn()
           && exists(/databases/$(database)/documents/subscriptions/$(uid))
-          && get(/databases/$(database)/documents/subscriptions/$(uid)).data.entitled == true);
+          && subscriptionAllowsAccess(uid));
+    }
+
+    function subscriptionAllowsAccess(uid) {
+      let subscription = get(/databases/$(database)/documents/subscriptions/$(uid)).data;
+      return subscription.entitled == true
+        && (!('provider' in subscription)
+          || subscription.provider != 'manual'
+          || (subscription.currentPeriodEnd is timestamp
+            && subscription.currentPeriodEnd > request.time));
     }
 
     match /users/{uid} {
@@ -57,6 +66,7 @@ service cloud.firestore {
       // published=false; se o pagamento voltar e a suspensão foi por cobrança,
       // o backend restaura a publicação.
       allow read: if isOwner(storeId)
+                  || isWdmOwner()
                   || resource.data.published == true;
 
       allow create: if isOwner(storeId)
@@ -77,12 +87,34 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/stores/$(storeId));
         }
 
-        allow read: if isOwner(storeId)
-                    || (parentStore().data.published == true
-                        && resource.data.active == true);
+        function isAdultStore() {
+          let store = parentStore().data;
+          return store.category == 'Sex Shop (18+)'
+            || (store.accountType == 'both'
+              && ('storeProfile' in store)
+              && store.storeProfile.category == 'Sex Shop (18+)');
+        }
 
-        allow create, update, delete: if isOwner(storeId)
-                                      && hasActiveSubscription(storeId);
+        allow read: if isOwner(storeId)
+                    || isWdmOwner()
+                    || (parentStore().data.published == true
+                        && (!('adminSuspended' in parentStore().data)
+                          || parentStore().data.adminSuspended != true)
+                        && resource.data.active == true
+                        && (!isAdultStore()
+                          || (('listingType' in resource.data)
+                            && resource.data.listingType == 'service')
+                          || resource.data.adultApprovalStatus == 'approved'));
+
+        // O lojista adulto sempre envia o anúncio como pendente. Somente o
+        // backend administrativo pode gravar o estado "approved".
+        allow create, update: if isOwner(storeId)
+                              && hasActiveSubscription(storeId)
+                              && (!('adultApprovalStatus' in request.resource.data)
+                                || request.resource.data.adultApprovalStatus != 'approved');
+
+        allow delete: if isOwner(storeId)
+                      && hasActiveSubscription(storeId);
       }
     }
   }

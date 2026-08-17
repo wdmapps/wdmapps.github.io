@@ -17,7 +17,8 @@ const appRoot = document.getElementById('app');
 const WDM_OWNER_UID = 'cNUIxdJzXIaut7VnoGBx9EAzgRM2';
 const PLAN_PRICE = 'R$ 29,90';
 const STRIPE_PRICE_ID = 'price_1U5E6WHA6Fom0zgZsj3LMmXu';
-const STORE_CATEGORIES = ['Tecnologia','Alimentação','Casa','Moda','Beleza','Serviços','Outros'];
+const ADULT_CATEGORY = 'Sex Shop (18+)';
+const STORE_CATEGORIES = ['Tecnologia','Alimentação','Casa','Moda','Beleza','Serviços','Sex Shop (18+)','Outros'];
 const PROVIDER_CATEGORIES = ['Eletricista','Pintor','Técnico de informática','Pedreiro','Encanador','Montador de móveis','Manutenção residencial','Limpeza','Jardinagem','Fotografia','Beleza e estética','Outros serviços'];
 const checkoutResult = new URLSearchParams(location.search).get('stripe');
 let busy = false;
@@ -82,8 +83,25 @@ async function subscription(uid) {
 
 function entitled(data) {
   if (!data) return false;
+  if (data.provider === 'manual' && data.currentPeriodEnd?.toMillis?.() <= Date.now()) return false;
   if (data.entitled === true) return true;
   return ['active', 'grace_period'].includes(String(data.status || '').toLowerCase());
+}
+
+async function isAdultAccount(uid) {
+  const [storeSnap, userSnap] = await Promise.all([
+    getDoc(doc(db, 'stores', uid)),
+    getDoc(doc(db, 'users', uid))
+  ]);
+  if (storeSnap.exists()) {
+    const store = storeSnap.data() || {};
+    const category = store.primaryRole === 'provider' && store.accountType === 'both'
+      ? store.storeProfile?.category
+      : store.category;
+    if (clean(category).toLowerCase() === ADULT_CATEGORY.toLowerCase()) return true;
+  }
+  const pendingCategory = userSnap.exists() ? userSnap.data()?.pendingStore?.category : '';
+  return clean(pendingCategory).toLowerCase() === ADULT_CATEGORY.toLowerCase();
 }
 
 function statusLabel(data) {
@@ -204,6 +222,29 @@ function renderPaywall(data) {
   if (checkoutResult === 'success') pollCheckoutConfirmation();
 }
 
+function renderAdultManualGate(data) {
+  if (appRoot.dataset.wdmSubscriptionView === 'adult-manual') return;
+  appRoot.dataset.wdmSubscriptionView = 'adult-manual';
+  appRoot.innerHTML = `
+    <div class="subWrap">
+      <section class="subCard adultManualCard">
+        <span class="ey">Cadastro de loja 18+</span>
+        <h1>Liberação manual do administrador</h1>
+        <p class="muted">Por regras do processador de pagamentos, lojas Sex Shop não assinam pela Stripe. Fale com o suporte para combinar o pagamento e a análise da loja.</p>
+        <div class="subStatus warn"><strong>${statusLabel(data)}</strong><br>Depois da confirmação, o administrador libera seu painel e sua vitrine manualmente.</div>
+        <div class="subActions">
+          <a class="btn" href="https://wa.me/5511969188837?text=${encodeURIComponent('Olá! Cadastrei uma loja Sex Shop no WDM Shopping e preciso solicitar a liberação manual.')}" target="_blank" rel="noreferrer">Solicitar liberação no WhatsApp</a>
+          <button id="adultSubscriptionLogout" class="btn2" type="button">Sair</button>
+        </div>
+        <div class="subNote">Anúncios de produtos adultos passam por aprovação individual antes de aparecerem na home.</div>
+      </section>
+    </div>`;
+  document.getElementById('adultSubscriptionLogout').onclick = async () => {
+    await signOut(auth);
+    location.hash = '#home';
+  };
+}
+
 async function pollCheckoutConfirmation() {
   if (checkoutPolling || !auth.currentUser) return;
   checkoutPolling = true;
@@ -239,6 +280,7 @@ async function renderOnboarding(user) {
   const profile = profileSnap.exists() ? profileSnap.data() : {};
   const pending = profile.pendingStore || {};
   const providerAccount = pending.accountType === 'provider';
+  const adultPending = !providerAccount && clean(pending.category).toLowerCase() === ADULT_CATEGORY.toLowerCase();
   const categories = providerAccount ? PROVIDER_CATEGORIES : STORE_CATEGORIES;
   appRoot.innerHTML = `
     <div class="onboard">
@@ -249,7 +291,7 @@ async function renderOnboarding(user) {
         <form id="storeOnboarding" class="form">
           <div class="two">
             <div class="field"><label>${providerAccount ? 'Nome profissional ou empresa' : 'Nome do negócio'}</label><input name="business" required value="${clean(pending.business).replace(/"/g, '&quot;')}"></div>
-            <div class="field"><label>${providerAccount ? 'Profissão ou categoria' : 'Categoria'}</label><select name="category">${categories.map(x => `<option ${x === pending.category ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+            <div class="field"><label>${providerAccount ? 'Profissão ou categoria' : 'Categoria'}</label><select name="category" ${adultPending ? 'disabled' : ''}>${categories.map(x => `<option ${x === pending.category ? 'selected' : ''}>${x}</option>`).join('')}</select>${adultPending ? '<small class="muted">Categoria 18+ confirmada no cadastro.</small>' : ''}</div>
           </div>
           <div class="field"><label>WhatsApp</label><input id="onboardPhone" name="phone" inputmode="tel" value="${phone(pending.phone || '')}" placeholder="(11) 9 9999-9999"></div>
           ${providerAccount ? `<div class="field"><label>Cidade e bairro onde atende</label><input name="location" value="${clean(pending.location).replace(/"/g, '&quot;')}" placeholder="Ex.: Salto — São Pedro e São Paulo"></div>` : ''}
@@ -279,7 +321,7 @@ async function renderOnboarding(user) {
         accountType: providerAccount ? 'provider' : 'store',
         primaryRole: providerAccount ? 'provider' : 'store',
         name: business,
-        category: clean(f.get('category')) || 'Outros',
+        category: adultPending ? ADULT_CATEGORY : (clean(f.get('category')) || 'Outros'),
         initials: initials(business),
         primary: '#2f7df6',
         description: clean(f.get('description')) || (providerAccount ? 'Profissional disponível para atender você.' : 'Bem-vindo à nossa vitrine no WDM Shopping.'),
@@ -314,8 +356,12 @@ async function installBillingBar() {
   const bar = document.createElement('div');
   bar.id = 'wdmBillingBar';
   bar.className = 'billingBar';
-  bar.innerHTML = '<span><strong>Assinatura Stripe ativa ✓</strong><br><small>Plano WDM Shopping · R$ 29,90/mês</small></span><button class="btn2" type="button">Gerenciar pagamento</button>';
-  bar.querySelector('button').onclick = () => openBillingPortal(bar.querySelector('small'));
+  const manual = data?.provider === 'manual';
+  const end = data?.currentPeriodEnd?.toDate?.();
+  bar.innerHTML = manual
+    ? `<span><strong>Acesso manual liberado ✓</strong><br><small>${end ? `Válido até ${end.toLocaleDateString('pt-BR')}` : 'Liberação administrada pelo WDM Shopping'}</small></span><a class="btn2" href="suporte.html">Falar com o suporte</a>`
+    : '<span><strong>Assinatura Stripe ativa ✓</strong><br><small>Plano WDM Shopping · R$ 29,90/mês</small></span><button class="btn2" type="button">Gerenciar pagamento</button>';
+  if (!manual) bar.querySelector('button').onclick = () => openBillingPortal(bar.querySelector('small'));
   firstPanel.prepend(bar);
 }
 
@@ -327,7 +373,8 @@ async function guardPanel(force = false) {
     const sub = isOwner ? null : await subscription(auth.currentUser.uid).catch(() => null);
     if (!isOwner && !entitled(sub)) {
       window.wdmSubscriptionPanelAccess = false;
-      renderPaywall(sub);
+      if (await isAdultAccount(auth.currentUser.uid)) renderAdultManualGate(sub);
+      else renderPaywall(sub);
       return;
     }
     const shouldRefreshPanel = window.wdmSubscriptionPanelAccess !== true || force;

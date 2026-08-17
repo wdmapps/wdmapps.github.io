@@ -57,6 +57,34 @@ As Functions esperadas são:
 - `createStripeCheckoutSession`
 - `createStripePortalSession`
 - `stripeWebhook`
+- `adminListStores`
+- `adminSetStoreStatus`
+- `adminGrantManualSubscription`
+- `adminCancelSubscription`
+- `adminModerateAdultProduct`
+- `adminDeleteStoreAccount`
+- `expireManualSubscriptions`
+
+Também publique as regras atualizadas:
+
+```bash
+firebase deploy --only firestore:rules,storage
+```
+
+## Lojas Sex Shop (18+)
+
+Não enviar lojas da categoria **Sex Shop (18+)** para o Checkout Stripe. Essa categoria usa o fluxo manual do administrador:
+
+1. O lojista cria a conta e solicita a liberação ao suporte.
+2. O administrador abre `#admin` e concede 30 dias de acesso manual.
+3. O lojista conclui a criação da vitrine.
+4. Cada produto é salvo como `adultApprovalStatus: pending`.
+5. Somente o administrador pode aprovar ou rejeitar o anúncio.
+6. Apenas anúncios `approved` podem ser lidos publicamente e aparecer na home.
+
+A Function agendada `expireManualSubscriptions` encerra acessos manuais vencidos e oculta a loja. As regras do Firestore e Storage também conferem `currentPeriodEnd`, impedindo gravações após o vencimento mesmo antes da rotina agendada.
+
+Motivo da separação: as regras da Stripe restringem negócios e produtos adultos. Não mude esse fluxo para Stripe sem revisão formal das regras vigentes e aprovação expressa do processador.
 
 ## Depois do deploy
 
@@ -85,3 +113,5 @@ Quando os testes estiverem aprovados:
 - `unpaid`, `paused`, `canceled`, `incomplete_expired` → loja bloqueada.
 - Quando o bloqueio for causado pela cobrança, o backend define `published=false` e marca `billingSuspended=true`.
 - Se a assinatura voltar a ficar ativa e a loja tiver sido suspensa pela cobrança, a publicação é restaurada automaticamente.
+- Lojas 18+ usam `provider: manual`, com `currentPeriodEnd` definido pelo administrador.
+- Suspensão administrativa é independente da cobrança e não é revertida por webhook.
