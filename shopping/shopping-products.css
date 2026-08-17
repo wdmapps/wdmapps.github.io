@@ -245,6 +245,35 @@
   max-width: 670px;
 }
 
+.side nav a.active {
+  background: #11223a;
+  color: #fff;
+  font-weight: 900;
+}
+
+.roleActivation {
+  max-width: 760px;
+}
+
+.roleActivation h1 {
+  margin-bottom: 8px;
+}
+
+.dualRoleBenefits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.dualRoleBenefits span {
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #07111f;
+  color: #cfe2f7;
+}
+
 .homeAds .product .wa {
   margin-top: 14px;
 }
@@ -415,6 +444,10 @@ body.imageViewerOpen {
   .providerEmpty .btn {
     width: 100%;
     text-align: center;
+  }
+
+  .dualRoleBenefits {
+    grid-template-columns: 1fr;
   }
 }
 
