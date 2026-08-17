@@ -2,5 +2,11 @@
   "functions": {
     "source": "functions",
     "runtime": "nodejs20"
+  },
+  "firestore": {
+    "rules": "shopping/firestore.rules"
+  },
+  "storage": {
+    "rules": "shopping/storage.rules"
   }
 }
