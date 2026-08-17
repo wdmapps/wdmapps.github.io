@@ -168,6 +168,7 @@ exports.createStripeCheckoutSession = onCall(
 
     const createSession = () => stripe.checkout.sessions.create({
       mode: 'subscription',
+      payment_method_types: ['card'],
       customer: customerId,
       client_reference_id: uid,
       line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
