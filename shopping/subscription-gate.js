@@ -30,6 +30,7 @@ const createPortalSession = httpsCallable(functions, 'createStripePortalSession'
 
 const clean = value => String(value || '').trim();
 const digits = value => String(value || '').replace(/\D/g, '');
+const sameUser = uid => Boolean(uid) && auth.currentUser?.uid === uid;
 const whats = value => {
   let d = digits(value);
   if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
@@ -77,6 +78,7 @@ function addStyles() {
 addStyles();
 
 async function subscription(uid) {
+  if (!uid) return null;
   const snap = await getDoc(doc(db, 'subscriptions', uid));
   return snap.exists() ? snap.data() : null;
 }
@@ -89,6 +91,7 @@ function entitled(data) {
 }
 
 async function isAdultAccount(uid) {
+  if (!uid) return false;
   const [storeSnap, userSnap] = await Promise.all([
     getDoc(doc(db, 'stores', uid)),
     getDoc(doc(db, 'users', uid))
@@ -125,27 +128,33 @@ function cleanCheckoutQuery() {
 }
 
 async function openStripeCheckout(messageElement) {
-  if (!auth.currentUser) return;
-  messageElement.textContent = 'Abrindo o pagamento seguro da Stripe...';
+  const user = auth.currentUser;
+  if (!user) return;
+  if (messageElement) messageElement.textContent = 'Abrindo o pagamento seguro da Stripe...';
   try {
     const result = await createCheckoutSession();
+    if (!sameUser(user.uid)) return;
     const url = result?.data?.url;
     if (!url) throw new Error('A Stripe não retornou o endereço do Checkout.');
     location.href = url;
   } catch (error) {
     console.error('Stripe Checkout:', error);
     const code = String(error?.code || '');
-    messageElement.textContent = code.includes('failed-precondition')
-      ? 'Esta conta já possui uma assinatura ativa. Clique em verificar.'
-      : 'Não foi possível abrir o pagamento agora. Tente novamente em instantes.';
+    if (messageElement) {
+      messageElement.textContent = code.includes('failed-precondition')
+        ? 'Esta conta já possui uma assinatura ativa. Clique em verificar.'
+        : 'Não foi possível abrir o pagamento agora. Tente novamente em instantes.';
+    }
   }
 }
 
 async function openBillingPortal(messageElement) {
-  if (!auth.currentUser) return;
+  const user = auth.currentUser;
+  if (!user) return;
   if (messageElement) messageElement.textContent = 'Abrindo o gerenciamento da assinatura...';
   try {
     const result = await createPortalSession();
+    if (!sameUser(user.uid)) return;
     const url = result?.data?.url;
     if (!url) throw new Error('A Stripe não retornou o endereço do portal.');
     location.href = url;
@@ -199,8 +208,14 @@ function renderPaywall(data) {
   document.getElementById('subscribeStripe').onclick = () => openStripeCheckout(msg);
 
   document.getElementById('checkSubscription').onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      msg.textContent = 'Sua sessão terminou. Entre novamente para verificar a assinatura.';
+      return;
+    }
     msg.textContent = 'Verificando sua assinatura na conta...';
-    const latest = await subscription(auth.currentUser.uid).catch(() => null);
+    const latest = await subscription(user.uid).catch(() => null);
+    if (!sameUser(user.uid) || !location.hash.startsWith('#painel')) return;
     if (entitled(latest)) {
       msg.textContent = 'Assinatura confirmada. Liberando sua loja...';
       cleanCheckoutQuery();
@@ -246,12 +261,22 @@ function renderAdultManualGate(data) {
 }
 
 async function pollCheckoutConfirmation() {
-  if (checkoutPolling || !auth.currentUser) return;
+  const user = auth.currentUser;
+  if (checkoutPolling || !user) return;
+  const uid = user.uid;
   checkoutPolling = true;
   const msg = () => document.getElementById('subscriptionMsg');
   for (let attempt = 0; attempt < 10; attempt++) {
     await sleep(attempt === 0 ? 800 : 1800);
-    const latest = await subscription(auth.currentUser.uid).catch(() => null);
+    if (!sameUser(uid) || !location.hash.startsWith('#painel')) {
+      checkoutPolling = false;
+      return;
+    }
+    const latest = await subscription(uid).catch(() => null);
+    if (!sameUser(uid) || !location.hash.startsWith('#painel')) {
+      checkoutPolling = false;
+      return;
+    }
     if (entitled(latest)) {
       if (msg()) msg().textContent = 'Assinatura confirmada ✓ Liberando sua loja...';
       cleanCheckoutQuery();
@@ -261,7 +286,9 @@ async function pollCheckoutConfirmation() {
       return;
     }
   }
-  if (msg()) msg().textContent = 'O pagamento foi concluído, mas a confirmação está demorando um pouco. Clique em “Já paguei · verificar” em alguns instantes.';
+  if (msg() && sameUser(uid) && location.hash.startsWith('#painel')) {
+    msg().textContent = 'O pagamento foi concluído, mas a confirmação está demorando um pouco. Clique em “Já paguei · verificar” em alguns instantes.';
+  }
   checkoutPolling = false;
 }
 
@@ -274,9 +301,11 @@ async function uniqueSlug(baseName) {
 }
 
 async function renderOnboarding(user) {
+  if (!user || !sameUser(user.uid)) return;
   if (appRoot.dataset.wdmSubscriptionView === 'onboarding') return;
   appRoot.dataset.wdmSubscriptionView = 'onboarding';
   const profileSnap = await getDoc(doc(db, 'users', user.uid));
+  if (!sameUser(user.uid) || !location.hash.startsWith('#painel')) return;
   const profile = profileSnap.exists() ? profileSnap.data() : {};
   const pending = profile.pendingStore || {};
   const providerAccount = pending.accountType === 'provider';
@@ -311,10 +340,16 @@ async function renderOnboarding(user) {
     const f = new FormData(form);
     const business = clean(f.get('business'));
     if (!business) return;
+    if (!sameUser(user.uid)) {
+      st.className = 'status err';
+      st.textContent = 'Sua sessão terminou. Entre novamente para continuar.';
+      return;
+    }
     st.className = 'status';
     st.textContent = providerAccount ? 'Criando seu perfil profissional...' : 'Criando sua loja...';
     try {
       const sid = await uniqueSlug(business);
+      if (!sameUser(user.uid) || !location.hash.startsWith('#painel')) return;
       await setDoc(doc(db, 'stores', user.uid), {
         ownerId: user.uid,
         slug: sid,
@@ -333,8 +368,10 @@ async function renderOnboarding(user) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
+      if (!sameUser(user.uid) || !location.hash.startsWith('#painel')) return;
       await setDoc(doc(db, 'slugs', sid), { storeId: user.uid, ownerId: user.uid, createdAt: serverTimestamp() });
       await setDoc(doc(db, 'users', user.uid), { accountType: providerAccount ? 'provider' : 'store', storeId: user.uid, pendingStore: null, updatedAt: serverTimestamp() }, { merge: true });
+      if (!sameUser(user.uid) || !location.hash.startsWith('#painel')) return;
       appRoot.dataset.wdmSubscriptionView = '';
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     } catch (error) {
@@ -347,11 +384,14 @@ async function renderOnboarding(user) {
 }
 
 async function installBillingBar() {
-  if (!location.hash.startsWith('#painel') || appRoot.dataset.wdmSubscriptionView || !auth.currentUser || auth.currentUser.uid === WDM_OWNER_UID) return;
+  const user = auth.currentUser;
+  if (!location.hash.startsWith('#painel') || appRoot.dataset.wdmSubscriptionView || !user || user.uid === WDM_OWNER_UID) return;
+  const uid = user.uid;
   if (document.getElementById('wdmBillingBar')) return;
   const firstPanel = document.querySelector('.panelWrap .panel');
   if (!firstPanel) return;
-  const data = await subscription(auth.currentUser.uid).catch(() => null);
+  const data = await subscription(uid).catch(() => null);
+  if (!sameUser(uid) || !location.hash.startsWith('#painel')) return;
   if (!entitled(data) || document.getElementById('wdmBillingBar')) return;
   const bar = document.createElement('div');
   bar.id = 'wdmBillingBar';
@@ -362,27 +402,33 @@ async function installBillingBar() {
     ? `<span><strong>Acesso manual liberado ✓</strong><br><small>${end ? `Válido até ${end.toLocaleDateString('pt-BR')}` : 'Liberação administrada pelo WDM Shopping'}</small></span><a class="btn2" href="suporte.html">Falar com o suporte</a>`
     : '<span><strong>Assinatura Stripe ativa ✓</strong><br><small>Plano WDM Shopping · R$ 29,90/mês</small></span><button class="btn2" type="button">Gerenciar pagamento</button>';
   if (!manual) bar.querySelector('button').onclick = () => openBillingPortal(bar.querySelector('small'));
-  firstPanel.prepend(bar);
+  if (sameUser(uid) && location.hash.startsWith('#painel')) firstPanel.prepend(bar);
 }
 
 async function guardPanel(force = false) {
-  if (!location.hash.startsWith('#painel') || !auth.currentUser || busy) return;
+  const user = auth.currentUser;
+  if (!location.hash.startsWith('#painel') || !user || busy) return;
+  const uid = user.uid;
   busy = true;
   try {
-    const isOwner = auth.currentUser.uid === WDM_OWNER_UID;
-    const sub = isOwner ? null : await subscription(auth.currentUser.uid).catch(() => null);
+    const isOwner = uid === WDM_OWNER_UID;
+    const sub = isOwner ? null : await subscription(uid).catch(() => null);
+    if (!sameUser(uid) || !location.hash.startsWith('#painel')) return;
     if (!isOwner && !entitled(sub)) {
       window.wdmSubscriptionPanelAccess = false;
-      if (await isAdultAccount(auth.currentUser.uid)) renderAdultManualGate(sub);
+      const adult = await isAdultAccount(uid);
+      if (!sameUser(uid) || !location.hash.startsWith('#painel')) return;
+      if (adult) renderAdultManualGate(sub);
       else renderPaywall(sub);
       return;
     }
     const shouldRefreshPanel = window.wdmSubscriptionPanelAccess !== true || force;
     window.wdmSubscriptionPanelAccess = true;
-    const storeSnap = await getDoc(doc(db, 'stores', auth.currentUser.uid));
+    const storeSnap = await getDoc(doc(db, 'stores', uid));
+    if (!sameUser(uid) || !location.hash.startsWith('#painel')) return;
     if (!storeSnap.exists()) {
       cleanCheckoutQuery();
-      await renderOnboarding(auth.currentUser);
+      await renderOnboarding(user);
       return;
     }
     if (appRoot.dataset.wdmSubscriptionView) {
