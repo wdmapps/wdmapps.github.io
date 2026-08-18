@@ -2,7 +2,7 @@
   "name": "wdm-shopping-functions",
   "version": "1.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "main.js",
   "engines": {
     "node": "20"
   },
