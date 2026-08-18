@@ -120,9 +120,10 @@ async function route(){
  }
  busy=true;
  try{
+  let requestedHash;
   do{
    routePending=false;
-   const requestedHash=location.hash||'#home';
+   requestedHash=location.hash||'#home';
    lastRenderedHash=requestedHash;
    nav();
    const h=requestedHash.slice(1),[r,id]=h.split('/');
