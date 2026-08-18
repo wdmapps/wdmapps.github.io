@@ -16,7 +16,8 @@ const startFreeTrial = httpsCallable(functions, 'startFreeTrial');
 const expireOwnTrial = httpsCallable(functions, 'expireOwnTrial');
 
 let checking = false;
-let retryTimer = 0;
+let syncTimer = 0;
+let refreshTimer = 0;
 let expiryTimer = 0;
 let lastUser = '';
 
@@ -29,8 +30,8 @@ function endMillis(value) {
 }
 
 function refreshPanel(delay = 220) {
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(() => {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => {
     window.wdmSubscriptionPanelAccess = false;
     if (typeof window.wdmSubscriptionRefresh === 'function') {
       window.wdmSubscriptionRefresh();
@@ -134,8 +135,8 @@ async function syncTrial() {
 }
 
 function scheduleSync(delay = 80) {
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(syncTrial, delay);
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncTrial, delay);
 }
 
 const observer = new MutationObserver(() => {
