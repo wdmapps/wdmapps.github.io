@@ -8,6 +8,15 @@
   <title>WDM Shopping</title>
   <link rel="stylesheet" href="shopping.css">
   <link rel="stylesheet" href="shopping-products.css?v=20260817-10">
+  <style>
+    .freeTrialBanner{max-width:1180px;margin:18px auto 0;padding:0 18px}
+    .freeTrialBanner[hidden]{display:none}
+    .freeTrialInner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 18px;border:1px solid #315c92;border-radius:18px;background:linear-gradient(135deg,#0b203a,#102d50);box-shadow:0 14px 34px #0004;color:#dcecff}
+    .freeTrialInner strong{display:block;color:#fff;font-size:1.08rem;margin-bottom:3px}
+    .freeTrialInner span{color:#b8cee8;font-size:.9rem;line-height:1.45}
+    .freeTrialInner .btn{white-space:nowrap;text-decoration:none}
+    @media(max-width:680px){.freeTrialInner{align-items:stretch;flex-direction:column}.freeTrialInner .btn{width:100%;text-align:center}}
+  </style>
 </head>
 <body>
   <header class="top">
@@ -23,6 +32,17 @@
       <a href="../">WDM Apps</a>
     </nav>
   </header>
+
+  <section id="freeTrialBanner" class="freeTrialBanner" aria-label="Teste grátis do WDM Shopping">
+    <div class="freeTrialInner">
+      <div>
+        <strong>🎁 Experimente o WDM Shopping por 5 dias grátis</strong>
+        <span>Crie sua loja ou perfil profissional sem cartão para começar. Depois do teste, continue por R$ 29,90/mês se quiser.</span>
+      </div>
+      <a class="btn" href="#cadastro">Começar grátis</a>
+    </div>
+  </section>
+
   <main id="app"></main>
   <nav class="mobile">
     <a href="#home">⌂ Início</a>
@@ -30,8 +50,21 @@
     <a href="#home-servicos">⚒ Serviços</a>
     <a id="accountMobile" href="#login">⚙ Entrar</a>
   </nav>
+
+  <script>
+    (() => {
+      const banner = document.getElementById('freeTrialBanner');
+      const sync = () => {
+        const hash = location.hash || '#home';
+        banner.hidden = !(hash === '#home' || hash.startsWith('#home-'));
+      };
+      window.addEventListener('hashchange', sync);
+      sync();
+    })();
+  </script>
   <script type="module" src="shopping-app.js?v=20260817-11"></script>
   <script type="module" src="google-login.js?v=20260817-1"></script>
   <script type="module" src="subscription-gate.js?v=20260817-3"></script>
+  <script type="module" src="trial-ui.js?v=20260818-1"></script>
 </body>
 </html>
