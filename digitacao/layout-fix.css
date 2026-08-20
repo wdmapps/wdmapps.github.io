@@ -13,5 +13,8 @@ html,body{max-width:100%;overflow-x:hidden}
 .hands{width:100%}
 .hand{overflow:hidden}
 .fingers{min-width:0}
+.keyboard-head{align-items:center;gap:10px;flex-wrap:wrap}
+.sound-toggle{margin-left:auto;border:1px solid #315372;background:#11243a;color:#e6f2ff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.sound-toggle:hover{border-color:#4ea1ff;background:#17304d}
 @media(max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}.course-card{width:100%}.sidebar{width:100%;max-width:100%}}
-@media(max-width:650px){.keyboard-section{padding:10px}.keyboard-head{gap:10px;flex-wrap:wrap}.typing-box{padding:16px;font-size:19px;line-height:1.6}.lesson-head h2{font-size:24px}.finish-actions{flex-wrap:wrap}}
+@media(max-width:650px){.keyboard-section{padding:10px}.keyboard-head{gap:10px;flex-wrap:wrap}.sound-toggle{margin-left:0}.typing-box{padding:16px;font-size:19px;line-height:1.6}.lesson-head h2{font-size:24px}.finish-actions{flex-wrap:wrap}}
