@@ -1,13 +1,20 @@
-import { getApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, updateDoc, deleteField } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
-
-const auth=getAuth(getApp());
-const db=getFirestore(getApp());
 const score={training:0,bronze:1,silver:2,gold:3};
 const label={gold:'🥇 Ouro',silver:'🥈 Prata',bronze:'🥉 Bronze',training:'🔁 Refaça a lição'};
 const PASSING_ACCURACY=70;
 let blockedPhase=null;
+let firebasePromise=null;
+
+// Ajuste visual: acertos em verde mais vivo/luminoso.
+const visualStyle=document.createElement('style');
+visualStyle.textContent=`
+.char.correct{
+  opacity:1!important;
+  color:#69ff9b!important;
+  text-shadow:0 0 7px rgba(105,255,155,.72),0 0 14px rgba(105,255,155,.28);
+  font-weight:700;
+}
+`;
+document.head.appendChild(visualStyle);
 
 function accuracyRank(acc){
   if(acc>=90)return'gold';
@@ -68,7 +75,10 @@ function paintPassed(result,rank){
   if(stars)stars.textContent='★'.repeat(starCount)+'☆'.repeat(3-starCount);
   if(rankEl)rankEl.textContent=`${label[rank]} · Pressione Enter para continuar`;
   if(retry)retry.textContent='Tentar novamente';
-  if(next&&!next.classList.contains('hidden'))next.textContent='Próxima fase →  Enter';
+  if(next){
+    if(result.index<449)next.classList.remove('hidden');
+    next.textContent='Próxima fase →  Enter';
+  }
   card?.removeAttribute('data-failed');
   document.getElementById('celebration')?.removeAttribute('aria-hidden');
 }
@@ -88,7 +98,7 @@ function paintFailed(result,previousPass=false){
   if(rankEl)rankEl.textContent=previousPass?'Sua aprovação anterior foi mantida.':'🔁 Refaça a lição para avançar';
   if(retry)retry.textContent='Refazer lição ↻';
   if(next){
-    if(previousPass)next.classList.remove('hidden');
+    if(previousPass&&result.index<449)next.classList.remove('hidden');
     else next.classList.add('hidden');
   }
   if(finishText&&!finishText.dataset.approvalMessage){
@@ -100,16 +110,46 @@ function paintFailed(result,previousPass=false){
   if(celebration){celebration.innerHTML='';celebration.setAttribute('aria-hidden','true')}
 }
 
+async function getFirebase(){
+  if(firebasePromise)return firebasePromise;
+  firebasePromise=(async()=>{
+    const appMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js');
+    const authMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js');
+    const fsMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+    let app=null;
+    for(let i=0;i<30&&!app;i++){
+      try{app=appMod.getApp()}catch(_){await new Promise(r=>setTimeout(r,50))}
+    }
+    if(!app)throw new Error('Firebase principal ainda não inicializado.');
+    return{
+      auth:authMod.getAuth(app),
+      db:fsMod.getFirestore(app),
+      doc:fsMod.doc,
+      getDoc:fsMod.getDoc,
+      updateDoc:fsMod.updateDoc,
+      deleteField:fsMod.deleteField
+    };
+  })();
+  return firebasePromise;
+}
+
 async function retune(){
-  const user=auth.currentUser;
-  if(!user)return;
   const result=parseResult();
   if(!result)return;
 
-  const ref=doc(db,'users',user.uid);
+  // A interface e o Enter não dependem mais do Firebase para funcionar.
+  const rank=accuracyRank(result.acc);
+  if(result.acc>=PASSING_ACCURACY)paintPassed(result,rank);
+
+  let fb;
+  try{fb=await getFirebase()}catch(err){console.error('Inicialização do ajuste:',err);return}
+  const user=fb.auth.currentUser;
+  if(!user)return;
+
+  const ref=fb.doc(fb.db,'users',user.uid);
   let data={};
   try{
-    const snap=await getDoc(ref);
+    const snap=await fb.getDoc(ref);
     data=snap.exists()?snap.data():{};
   }catch(err){
     console.error('Leitura do progresso:',err);
@@ -135,8 +175,8 @@ async function retune(){
 
     try{
       const currentUnlocked=Number(data?.digitacao?.unlocked||0);
-      await updateDoc(ref,{
-        [`digitacao.completed.${result.index}`]:deleteField(),
+      await fb.updateDoc(ref,{
+        [`digitacao.completed.${result.index}`]:fb.deleteField(),
         'digitacao.unlocked':Math.min(currentUnlocked,result.index)
       });
     }catch(err){
@@ -145,12 +185,9 @@ async function retune(){
     return;
   }
 
-  const rank=accuracyRank(result.acc);
-  paintPassed(result,rank);
-
   try{
     if(stored&&score[rank]>score[stored.rank||'training']){
-      await updateDoc(ref,{
+      await fb.updateDoc(ref,{
         [`digitacao.completed.${result.index}.rank`]:rank,
         [`digitacao.completed.${result.index}.stars`]:score[rank]
       });
@@ -167,7 +204,7 @@ async function retune(){
 const finish=document.getElementById('finishCard');
 if(finish){
   new MutationObserver(()=>{
-    if(!finish.classList.contains('hidden'))setTimeout(retune,120);
+    if(!finish.classList.contains('hidden'))setTimeout(retune,60);
     else{
       finish.removeAttribute('data-failed');
       const finishText=document.getElementById('finishText');
@@ -188,17 +225,19 @@ document.addEventListener('click',e=>{
   if(n>blockedPhase+1){e.preventDefault();e.stopPropagation();}
 },true);
 
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter')return;
+function advanceWithEnter(e){
+  if(e.key!=='Enter'&&e.code!=='Enter'&&e.code!=='NumpadEnter')return;
   const card=document.getElementById('finishCard');
   if(!card||card.classList.contains('hidden'))return;
   const result=parseResult();
-  if(!result||result.acc<PASSING_ACCURACY)return;
+  if(!result||result.acc<PASSING_ACCURACY||result.index>=449)return;
   const next=document.getElementById('nextBtn');
-  if(!next||next.classList.contains('hidden'))return;
+  if(!next)return;
+  next.classList.remove('hidden');
   e.preventDefault();
   e.stopPropagation();
+  e.stopImmediatePropagation();
   next.click();
-},true);
+}
 
-onAuthStateChanged(auth,()=>{});
+document.addEventListener('keydown',advanceWithEnter,true);
