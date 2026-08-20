@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="WDM Digitação — curso online progressivo com 450 fases, jogos, textos e testes de fluidez.">
+  <title>WDM Digitação | Curso Online</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="authGate" class="auth-gate">
+    <section class="auth-card">
+      <a class="back-link" href="https://wdmapps.com.br/">← WDM Apps</a>
+      <div class="brand-row"><div class="brand-mark">W</div><div><h1>WDM Digitação</h1><p>Aprenda a digitar com técnica, jogos e evolução real.</p></div></div>
+      <div class="auth-field"><label for="name">Nome do aluno</label><input id="name" autocomplete="name" placeholder="Seu nome"></div>
+      <div class="auth-field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="aluno@email.com"></div>
+      <div class="auth-field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" minlength="6" placeholder="Mínimo 6 caracteres"></div>
+      <div class="auth-actions"><button id="loginBtn" class="primary">Entrar</button><button id="createBtn" class="secondary">Criar conta</button></div>
+      <button id="googleBtn" class="google-btn">Entrar com Google</button>
+      <button id="resetPasswordBtn" class="link-btn">Esqueci minha senha</button>
+      <p id="authMessage" class="auth-message"></p>
+    </section>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand-row compact"><div class="brand-mark">W</div><div><strong>WDM Digitação</strong><span>450 fases progressivas</span></div></div>
+      <div class="top-stats">
+        <div><span>Progresso</span><b id="globalProgress">0%</b></div>
+        <div><span>Concluídas</span><b id="doneCount">0/450</b></div>
+        <div><span>Ouros</span><b id="goldCount">0</b></div>
+        <div><span>Nuvem</span><b id="cloudStatus">Conectando...</b></div>
+      </div>
+      <div class="user-box"><div><b id="studentName">Aluno</b><span id="studentEmail"></span></div><button id="logoutBtn">Sair</button></div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title"><span>Sua jornada</span><small id="moduleLabel">Módulo 1</small></div>
+        <div id="lessonList" class="lesson-list"></div>
+      </aside>
+
+      <section class="course-card">
+        <div class="lesson-head">
+          <div><span id="lessonModule" class="kicker">Módulo 1</span><h2 id="lessonTitle">F e J</h2><p id="lessonDesc"></p></div>
+          <button id="resetBtn" class="ghost">↻ Reiniciar</button>
+        </div>
+
+        <div class="metrics">
+          <div><span>Velocidade</span><b><i id="wpm">0</i> PPM</b></div>
+          <div><span>Precisão</span><b><i id="accuracy">100</i>%</b></div>
+          <div><span>Erros</span><b id="errors">0</b></div>
+          <div><span>Tempo</span><b id="time">00:00</b></div>
+        </div>
+
+        <div class="progress-track"><div id="lessonProgress"></div></div>
+
+        <div id="typingPanel">
+          <div id="typingBox" class="typing-box" tabindex="0" aria-label="Área de digitação"></div>
+          <div class="helper"><span>Clique no texto e comece a digitar.</span><span>Próxima tecla: <b id="nextKey">F</b></span></div>
+        </div>
+
+        <div id="gamePanel" class="game-panel hidden" tabindex="0">
+          <span class="kicker">Minijogo</span>
+          <div id="gameTarget" class="game-target">F</div>
+          <p>Aperte a tecla mostrada sem olhar para o teclado.</p>
+          <div class="game-stats"><span>Acertos <b id="gameHits">0</b></span><span>Erros <b id="gameMisses">0</b></span><span>Combo <b id="gameCombo">0</b></span></div>
+        </div>
+
+        <section class="keyboard-section">
+          <div class="keyboard-head"><strong>Teclado virtual</strong><span id="fingerHint">Indicador esquerdo</span></div>
+          <div id="keyboard" class="keyboard"></div>
+          <div class="hands">
+            <div class="hand"><b>Mão esquerda</b><div class="fingers" id="leftHand"></div></div>
+            <div class="hand"><b>Mão direita</b><div class="fingers" id="rightHand"></div></div>
+          </div>
+        </section>
+
+        <div id="finishCard" class="finish-card hidden">
+          <span class="kicker">Fase concluída</span><h3>🎉 Muito bem!</h3><div id="finishStars" class="finish-stars"></div><p id="finishText"></p><div id="finishRank" class="rank"></div>
+          <div class="finish-actions"><button id="nextBtn" class="primary">Próxima fase →</button><button id="retryBtn" class="secondary">Tentar novamente</button></div>
+        </div>
+
+        <div class="tip"><strong>💡 Dica:</strong> <span id="tipText"></span></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="celebration" class="celebration"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
