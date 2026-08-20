@@ -1,0 +1,17 @@
+/* WDM Digitação — correções de largura e navegação em telas menores */
+html,body{max-width:100%;overflow-x:hidden}
+.app,.layout,.course-card,#typingPanel,.keyboard-section,.typing-box,.hands,.hand{min-width:0;max-width:100%}
+.layout{grid-template-columns:300px minmax(0,1fr)}
+.course-card{overflow:hidden}
+.lesson-head>div{min-width:0}
+.lesson-head h2,.lesson-head p,.tip,.helper{overflow-wrap:anywhere}
+.typing-box{width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.helper{flex-wrap:wrap}
+.keyboard-section{width:100%;overflow:hidden}
+.keyboard{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
+.key-row{width:max-content;min-width:820px;margin-left:auto;margin-right:auto}
+.hands{width:100%}
+.hand{overflow:hidden}
+.fingers{min-width:0}
+@media(max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}.course-card{width:100%}.sidebar{width:100%;max-width:100%}}
+@media(max-width:650px){.keyboard-section{padding:10px}.keyboard-head{gap:10px;flex-wrap:wrap}.typing-box{padding:16px;font-size:19px;line-height:1.6}.lesson-head h2{font-size:24px}.finish-actions{flex-wrap:wrap}}
