@@ -24,9 +24,9 @@
   .game-panel.wdm-game-upgraded .game-target{position:relative;z-index:2;width:92px;height:92px;display:grid;place-items:center;margin:0;border-radius:24px;font-size:48px;font-weight:950;line-height:1;background:linear-gradient(145deg,#173454,#10243b);border:2px solid rgba(78,161,255,.5);box-shadow:0 16px 42px rgba(0,0,0,.35),inset 0 0 24px rgba(78,161,255,.08);text-transform:uppercase;user-select:none}
   .wdm-game-instruction{margin:7px 0 10px!important;text-align:center;color:#bed0e2}
   .wdm-game-hunt .game-target{animation:wdmHuntPulse .75s ease-in-out infinite alternate}
-  .wdm-game-balloon .game-target{position:absolute;width:104px;height:118px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 25%,#fff7,transparent 13%),linear-gradient(145deg,#ff7eb3,#8a5cff);border-color:#ffc3df;box-shadow:0 18px 42px rgba(138,92,255,.28);left:var(--wdm-x,45%);transform:translateX(-50%);animation:wdmBalloonRise var(--wdm-limit,2800ms) linear forwards}
-  .wdm-game-balloon .game-target:after{content:"";position:absolute;bottom:-12px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #8a5cff}
-  .wdm-game-rain .game-target{position:absolute;left:var(--wdm-x,45%);transform:translateX(-50%);animation:wdmRainFall var(--wdm-limit,2600ms) linear forwards;background:linear-gradient(145deg,#245b8e,#12395e);border-color:#69b7ff}
+  .game-panel.wdm-game-upgraded.wdm-game-balloon .game-target{position:absolute;width:104px;height:118px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 25%,#fff7,transparent 13%),linear-gradient(145deg,#ff7eb3,#8a5cff);border-color:#ffc3df;box-shadow:0 18px 42px rgba(138,92,255,.28);left:var(--wdm-x,45%);transform:translateX(-50%);animation:wdmBalloonRise var(--wdm-limit,2800ms) linear forwards;will-change:bottom,transform}
+  .game-panel.wdm-game-upgraded.wdm-game-balloon .game-target:after{content:"";position:absolute;bottom:-12px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #8a5cff}
+  .game-panel.wdm-game-upgraded.wdm-game-rain .game-target{position:absolute;left:var(--wdm-x,45%);transform:translateX(-50%);animation:wdmRainFall var(--wdm-limit,2600ms) linear forwards;background:linear-gradient(145deg,#245b8e,#12395e);border-color:#69b7ff;will-change:top,transform}
   .wdm-game-boss .wdm-game-arena{background:radial-gradient(circle at center,rgba(255,88,88,.18),transparent 32%),radial-gradient(circle at center,#152033,#08101d 70%)}
   .wdm-game-boss .game-target{width:126px;height:126px;border-radius:50%;background:radial-gradient(circle at 50% 45%,#ffcc66 0 8%,#ff695e 9% 20%,#591c39 21% 39%,#111d31 40% 100%);border:3px solid #ffbf66;color:#fff;box-shadow:0 0 0 12px rgba(255,105,94,.06),0 0 52px rgba(255,105,94,.35);animation:wdmBossCore .55s ease-in-out infinite alternate}
   .wdm-game-boss .game-target:before{content:"CHEFE";position:absolute;top:-34px;font-size:10px;letter-spacing:2px;color:#ffbf66}
@@ -129,7 +129,11 @@
       const mine=token;
       const x=12+Math.random()*76;
       target.style.setProperty('--wdm-x',`${x}%`);target.style.setProperty('--wdm-limit',`${theme.limit}ms`);
-      target.classList.remove('wdm-pop');void target.offsetWidth;
+      target.classList.remove('wdm-pop');
+      // Reinicia a animação a cada nova letra. Sem isso, o balão da fase 70 podia ficar parado.
+      target.style.animation='none';
+      void target.offsetWidth;
+      target.style.removeProperty('animation');
       deadline=performance.now()+theme.limit;
       if(timeBar)timeBar.style.width='100%';
       tick(mine);
