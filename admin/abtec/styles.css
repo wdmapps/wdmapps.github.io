@@ -361,3 +361,23 @@ input:focus, select:focus, textarea:focus { border-color: #1588ef; box-shadow: 0
   .calendar-day { min-height: 67px; }
   .day-number { width: 23px; height: 23px; font-size: 9px; }
 }
+
+/* Chamada: destaque visual de presença e falta. */
+.attendance-toggle .present.selected {
+  border-color: #8fd1ad;
+  color: #17643f;
+  background: #e7f7ee;
+  box-shadow: 0 4px 12px rgba(42, 145, 92, .16);
+}
+
+.attendance-toggle .absent.selected {
+  border-color: #eba7b3;
+  color: #a62f45;
+  background: #fdecef;
+  box-shadow: 0 4px 12px rgba(216, 71, 99, .14);
+}
+
+.present-icon {
+  color: #238254;
+  background: #e7f7ee;
+}
