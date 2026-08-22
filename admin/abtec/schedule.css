@@ -21,14 +21,24 @@
 }
 
 .schedule-toolbar {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   padding: 18px 22px;
   display: grid;
-  grid-template-columns: 1.25fr .9fr auto;
-  gap: 14px;
+  grid-template-columns: 1.15fr .8fr .8fr .8fr auto;
+  gap: 12px;
   align-items: end;
 }
-.schedule-toolbar .primary-button { min-width: 160px; }
+.schedule-toolbar .primary-button { min-width: 175px; }
+.schedule-recess-help {
+  margin: 0 0 18px;
+  padding: 10px 13px;
+  border: 1px solid #d9e5f2;
+  border-radius: 9px;
+  color: #6c7f97;
+  background: #f8fbff;
+  font-size: 10px;
+  line-height: 1.45;
+}
 .schedule-card { overflow: hidden; }
 .schedule-card .section-heading { gap: 18px; }
 .schedule-progress {
@@ -117,9 +127,15 @@
   line-height: 1.35;
 }
 
+@media (max-width: 1180px) {
+  .schedule-toolbar { grid-template-columns: 1fr 1fr 1fr; }
+  .schedule-toolbar .primary-button { width: 100%; }
+}
+
 @media (max-width: 760px) {
   .schedule-toolbar { grid-template-columns: 1fr; padding: 17px 16px; }
   .schedule-toolbar .primary-button { width: 100%; }
+  .schedule-recess-help { margin-bottom: 14px; }
   .schedule-holidays { margin: 0 16px 14px; }
   .schedule-card .section-heading { align-items: flex-start; }
 }
