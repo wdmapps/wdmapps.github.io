@@ -54,7 +54,7 @@
 
   function holidayMap(year) {
     const easter = easterISO(year);
-    const holidays = new Map([
+    return new Map([
       [`${year}-01-01`, "Confraternização Universal"],
       [addDays(easter, -2), "Paixão de Cristo"],
       [`${year}-04-21`, "Tiradentes"],
@@ -70,7 +70,6 @@
       [`${year}-11-20`, "Consciência Negra"],
       [`${year}-12-25`, "Natal"]
     ]);
-    return holidays;
   }
 
   function holidayName(iso) {
@@ -78,11 +77,16 @@
     return holidayMap(year).get(iso) || null;
   }
 
+  function isRecessDate(iso, recessStart, returnDate) {
+    if (!recessStart || !returnDate) return false;
+    return iso >= recessStart && iso < returnDate;
+  }
+
   function moduleForLesson(lesson) {
     return scheduleModules.find(module => lesson >= module.start && lesson <= module.end) || scheduleModules[0];
   }
 
-  function generateSchedule(startDate) {
+  function generateSchedule(startDate, recessStart = "", returnDate = "") {
     const schedule = [];
     const skipped = [];
     let candidate = startDate;
@@ -90,7 +94,9 @@
     while (schedule.length < TOTAL_LESSONS) {
       const holiday = holidayName(candidate);
       if (holiday) {
-        skipped.push({ date: candidate, holiday });
+        skipped.push({ date: candidate, reason: holiday, type: "holiday" });
+      } else if (isRecessDate(candidate, recessStart, returnDate)) {
+        skipped.push({ date: candidate, reason: "Recesso ABTEC", type: "recess" });
       } else {
         const lesson = schedule.length + 1;
         const module = moduleForLesson(lesson);
@@ -132,14 +138,29 @@
     return { label: "Agendada", className: "planned" };
   }
 
-  function saveScheduleForClass(classId, startDate) {
-    if (!classes[classId] || !startDate) return;
-    const generated = generateSchedule(startDate);
+  function validRecessRange(recessStart, returnDate) {
+    if (!recessStart && !returnDate) return true;
+    if (!recessStart || !returnDate) return false;
+    return returnDate > recessStart;
+  }
+
+  function saveScheduleForClass(classId, startDate, recessStart = "", returnDate = "") {
+    if (!classes[classId] || !startDate) return false;
+    if (!validRecessRange(recessStart, returnDate)) {
+      showToast("Informe início e retorno do recesso, ou deixe os dois em branco.");
+      return false;
+    }
+
+    const generated = generateSchedule(startDate, recessStart, returnDate);
     classes[classId].startDate = startDate;
+    classes[classId].recessStart = recessStart;
+    classes[classId].returnDate = returnDate;
     classes[classId].totalLessons = TOTAL_LESSONS;
     classes[classId].schedule = generated.schedule;
-    classes[classId].skippedHolidays = generated.skipped;
+    classes[classId].skippedDates = generated.skipped;
+    classes[classId].skippedHolidays = generated.skipped.filter(item => item.type === "holiday");
     saveClasses();
+    return true;
   }
 
   function ensureClassStartField() {
@@ -152,7 +173,7 @@
     field.innerHTML = `
       <label for="new-class-start">Data da primeira aula</label>
       <input id="new-class-start" type="date" required>
-      <small class="new-class-start-note">O sistema cria 33 aulas semanais e pula automaticamente os feriados.</small>`;
+      <small class="new-class-start-note">O sistema cria 33 aulas semanais e pula automaticamente os feriados. O recesso pode ser informado depois no Cronograma.</small>`;
     timeField.after(field);
   }
 
@@ -187,11 +208,22 @@
           <label for="schedule-start-date">Primeira aula</label>
           <input id="schedule-start-date" type="date">
         </div>
-        <button class="primary-button" id="generate-schedule" type="button">Gerar 33 aulas <span>→</span></button>
+        <div class="field">
+          <label for="schedule-recess-start">Início do recesso <span>(opcional)</span></label>
+          <input id="schedule-recess-start" type="date">
+        </div>
+        <div class="field">
+          <label for="schedule-return-date">Retorno das aulas <span>(opcional)</span></label>
+          <input id="schedule-return-date" type="date">
+        </div>
+        <button class="primary-button" id="generate-schedule" type="button">Atualizar cronograma <span>→</span></button>
+      </section>
+      <section class="schedule-recess-help">
+        Não sabe ainda quando será o recesso? Deixe os dois campos em branco. Quando definir as datas, informe o início e o retorno e atualize o cronograma.
       </section>
       <section class="card schedule-card">
         <div class="section-heading">
-          <div><span class="step">33</span><div><h2>Cronograma de aulas</h2><p>Datas semanais de referência, com feriados pulados automaticamente.</p></div></div>
+          <div><span class="step">33</span><div><h2>Cronograma de aulas</h2><p>Datas semanais de referência, com feriados e recesso pulados automaticamente.</p></div></div>
           <span class="schedule-progress" id="schedule-progress">0/33 aulas ministradas</span>
         </div>
         <div class="schedule-holidays" id="schedule-holidays"></div>
@@ -222,12 +254,16 @@
     const classId = currentScheduleClassId();
     const current = classes[classId];
     const startInput = document.getElementById("schedule-start-date");
+    const recessInput = document.getElementById("schedule-recess-start");
+    const returnInput = document.getElementById("schedule-return-date");
     const content = document.getElementById("schedule-content");
     const holidayBox = document.getElementById("schedule-holidays");
     const progress = document.getElementById("schedule-progress");
     if (!current || !content) return;
 
     if (startInput) startInput.value = current.startDate || "";
+    if (recessInput) recessInput.value = current.recessStart || "";
+    if (returnInput) returnInput.value = current.returnDate || "";
 
     if (!current.startDate) {
       if (holidayBox) holidayBox.innerHTML = "";
@@ -237,18 +273,22 @@
     }
 
     if (!Array.isArray(current.schedule) || current.schedule.length !== TOTAL_LESSONS) {
-      saveScheduleForClass(classId, current.startDate);
+      saveScheduleForClass(classId, current.startDate, current.recessStart || "", current.returnDate || "");
     }
 
     const schedule = classes[classId].schedule || [];
-    const skipped = classes[classId].skippedHolidays || [];
+    const skipped = classes[classId].skippedDates || (classes[classId].skippedHolidays || []).map(item => ({
+      date: item.date,
+      reason: item.reason || item.holiday,
+      type: "holiday"
+    }));
     const administered = getAdministeredDates(classId);
     const administeredCount = schedule.filter(item => administered.has(item.date)).length;
     if (progress) progress.textContent = `${administeredCount}/${TOTAL_LESSONS} aulas ministradas`;
 
     if (holidayBox) {
       holidayBox.innerHTML = skipped.length
-        ? `<strong>Feriados pulados no cronograma</strong>${skipped.map(item => `${formatScheduleDate(item.date)} — ${escapeHTML(item.holiday)}`).join(" · ")}`
+        ? `<strong>Datas puladas no cronograma</strong>${skipped.map(item => `${formatScheduleDate(item.date)} — ${escapeHTML(item.reason || "Sem aula")}`).join(" · ")}`
         : "";
     }
 
@@ -276,7 +316,7 @@
     document.getElementById("schedule-nav")?.classList.add("active");
     document.getElementById("view-eyebrow").textContent = "PLANEJAMENTO";
     document.getElementById("view-title").textContent = "Cronograma de aulas";
-    document.getElementById("view-description").textContent = "Acompanhe as 33 aulas previstas da turma e os feriados que alteram o calendário.";
+    document.getElementById("view-description").textContent = "Acompanhe as 33 aulas previstas, os feriados e o recesso da turma.";
     populateScheduleClasses(selectedClass);
     renderSchedule();
     document.querySelector(".sidebar")?.classList.remove("open");
@@ -307,9 +347,11 @@
   document.getElementById("generate-schedule")?.addEventListener("click", () => {
     const classId = currentScheduleClassId();
     const startDate = document.getElementById("schedule-start-date")?.value;
+    const recessStart = document.getElementById("schedule-recess-start")?.value || "";
+    const returnDate = document.getElementById("schedule-return-date")?.value || "";
     if (!startDate) return showToast("Informe a data da primeira aula.");
-    saveScheduleForClass(classId, startDate);
+    if (!saveScheduleForClass(classId, startDate, recessStart, returnDate)) return;
     renderSchedule();
-    showToast("Cronograma de 33 aulas gerado.");
+    showToast(recessStart ? "Cronograma atualizado com o recesso." : "Cronograma de 33 aulas atualizado.");
   });
 })();
