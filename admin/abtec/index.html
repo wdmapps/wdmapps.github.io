@@ -177,7 +177,7 @@
           </div>
 
           <div class="save-bar">
-            <p><span></span> As alterações ficarão salvas neste navegador.</p>
+            <p><span></span> Preencha a chamada e salve ao finalizar.</p>
             <button class="primary-button" id="save-lesson" type="button">Salvar aula <span>→</span></button>
           </div>
         </div>
@@ -280,5 +280,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
+  <script>
+    const originalShowToast = showToast;
+    showToast = message => originalShowToast(message === "Aula salva neste navegador." ? "Chamada salva." : message);
+  </script>
 </body>
 </html>
