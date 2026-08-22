@@ -1,0 +1,181 @@
+.grade-nav-item {
+  width: 100%;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 10px;
+  color: #a8c6df;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.grade-nav-item:hover { color: white; background: rgba(255,255,255,.05); }
+.grade-nav-item.active {
+  color: white;
+  background: linear-gradient(90deg, rgba(15, 133, 255, .3), rgba(26, 197, 245, .08));
+  box-shadow: inset 3px 0 var(--cyan), 0 0 24px rgba(0, 130, 255, .08);
+}
+
+.grades-toolbar {
+  margin-bottom: 18px;
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr .8fr;
+  gap: 16px;
+  align-items: end;
+}
+
+.grades-card,
+.grade-history-card { overflow: hidden; }
+
+.grade-student-list { padding: 4px 22px; }
+.grade-student-row {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.grade-student-row:last-child { border-bottom: 0; }
+.grade-student-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.grade-student-identity > span:last-child { min-width: 0; }
+.grade-student-identity strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.grade-student-identity small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.grade-input-wrap {
+  display: grid;
+  grid-template-columns: auto 76px;
+  gap: 8px;
+  align-items: center;
+}
+.grade-input-wrap > span {
+  color: #6d819c;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.grade-input {
+  height: 39px;
+  padding: 0 9px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.grade-save-bar {
+  padding: 17px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  background: #f8fbff;
+}
+.grade-edit-state {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.grade-save-actions { display: flex; gap: 8px; }
+.grade-save-actions .primary-button { min-width: 150px; }
+.grade-cancel-button {
+  min-width: 120px;
+  height: 47px;
+  padding: 0 15px;
+  border: 1px solid #cad9e8;
+  border-radius: 9px;
+  color: #61758f;
+  background: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.grade-history-card { margin-top: 18px; }
+.grade-history-list { padding: 4px 22px; }
+.grade-history-row {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.grade-history-row:last-child { border-bottom: 0; }
+.grade-history-row > div:first-child { min-width: 0; }
+.grade-history-row > div:first-child strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.grade-history-row > div:first-child span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.grade-average-chip {
+  padding: 7px 10px;
+  border-radius: 20px;
+  color: #087c6a;
+  background: #e7faf5;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.grade-history-actions { display: flex; gap: 6px; }
+.grade-history-actions button {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #c6dcf2;
+  border-radius: 7px;
+  color: #0873d7;
+  background: #f4f9ff;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.grade-history-actions .danger {
+  border-color: #f0c7cf;
+  color: #bd4058;
+  background: #fff4f6;
+}
+
+@media (max-width: 760px) {
+  .grades-toolbar { grid-template-columns: 1fr; padding: 17px 16px; }
+  .grade-student-list, .grade-history-list { padding: 4px 16px; }
+  .grade-save-bar { align-items: stretch; flex-direction: column; padding: 16px; }
+  .grade-save-actions { width: 100%; }
+  .grade-save-actions > * { flex: 1; }
+  .grade-history-row { grid-template-columns: 1fr auto; padding: 12px 0; }
+  .grade-history-actions { grid-column: 1 / -1; }
+}
+
+@media (max-width: 520px) {
+  .grade-student-row { grid-template-columns: 1fr 92px; gap: 8px; }
+  .grade-input-wrap { grid-template-columns: 1fr; gap: 3px; }
+  .grade-input-wrap > span { text-align: center; }
+  .grade-input { width: 100%; }
+  .grade-history-row { grid-template-columns: 1fr; }
+  .grade-average-chip { justify-self: start; }
+}
