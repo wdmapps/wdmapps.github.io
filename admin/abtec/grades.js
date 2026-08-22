@@ -309,3 +309,9 @@ if (!document.querySelector('script[src="schedule.js"]')) {
   scheduleScript.src = "schedule.js";
   document.body.appendChild(scheduleScript);
 }
+
+if (!document.querySelector('script[src="schedule-descriptions.js"]')) {
+  const scheduleDescriptionsScript = document.createElement("script");
+  scheduleDescriptionsScript.src = "schedule-descriptions.js";
+  document.body.appendChild(scheduleDescriptionsScript);
+}
