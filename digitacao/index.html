@@ -90,8 +90,51 @@
   <div id="celebration" class="celebration"></div>
   <script src="./backspace-lock.js"></script>
   <script src="./key-sound.js"></script>
-  <script type="module" src="./app-v2.js"></script>
+  <script type="module">
+    const VERSION='20260822-textos-jogos-v3';
+    const response=await fetch(`./app-v2.js?v=${VERSION}`,{cache:'no-store'});
+    let source=await response.text();
+
+    const replacements=[
+      [
+        `['Linha superior I','asdfghjklçqwert',['rede','arte','festa','terra','data','falar','rato','gato','tela','queda'],[]],`,
+        `['Linha superior I','asdfghjklçqwert',['rede','arte','festa','terra','data','falar','rato','gato','tela','queda'],['ela fala e relata a tarefa','a regra dela e falar sem olhar','ela relata a regra e a tarefa']],`
+      ],
+      [
+        `['Linha superior II','asdfghjklçqwertyuiop',['quero','poder','ideia','tipo','olhar','roupa','rua','futuro','estudo','portal'],[]],`,
+        `['Linha superior II','asdfghjklçqwertyuiop',['quero','poder','ideia','tipo','olhar','roupa','rua','futuro','estudo','portal'],['eu quero estudar e falar direito','o estudo ajuda a falar e digitar','eu leio e digito todo dia']],`
+      ],
+      [
+        `['Linha inferior','abcdefghijklmnopqrstuvwxyzç',['cama','navio','vinho','texto','baixo','banco','zero','zona','azul','vida','novo','mundo'],[]],`,
+        `['Linha inferior','abcdefghijklmnopqrstuvwxyzç',['cama','navio','vinho','texto','baixo','banco','zero','zona','azul','vida','novo','mundo'],['o aluno pratica no computador e melhora a cada fase','digitar um pequeno texto ajuda a criar ritmo e confianca','olhe para a tela e mantenha os dedos na posicao correta']],`
+      ],
+      [
+        `    let mode='practice';if(li===10||li===20)mode='game';else if(mi>=5&&(li===12||li===24))mode='fluency';else if(mi>=5&&(li===7||li===17||li===23))mode='text';else if(li===5||li===15||li===25)mode='words';`,
+        `    const globalNo=mi*25+li;let mode='practice';if(globalNo%10===0)mode='game';else if(mi>=5&&(li===12||li===24))mode='fluency';else if(mi>=2&&(li===7||li===17||li===23))mode='text';else if(li===5||li===15||li===25)mode='words';`
+      ]
+    ];
+
+    for(const [before,after] of replacements){
+      if(!source.includes(before))console.error('WDM Digitação: trecho de currículo não encontrado.',before);
+      else source=source.replace(before,after);
+    }
+
+    const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+    try{await import(url)}finally{URL.revokeObjectURL(url)}
+  </script>
   <script type="module" src="./difficulty.js"></script>
-  <script src="./game-upgrade.js"></script>
+  <script>
+    (async()=>{
+      const VERSION='20260822-textos-jogos-v3';
+      const response=await fetch(`./game-upgrade.js?v=${VERSION}`,{cache:'no-store'});
+      let source=await response.text();
+      const before=`function gameIndexFor(p){const mod=Math.floor((p-1)/25),within=((p-1)%25)+1;return mod*2+(within>=20?1:0)}`;
+      const after=`function gameIndexFor(p){return Math.max(0,Math.floor(p/10)-1)}`;
+      if(!source.includes(before))console.error('WDM Digitação: agenda dos jogos não encontrada.');
+      else source=source.replace(before,after);
+      const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+      const script=document.createElement('script');script.src=url;script.onload=()=>URL.revokeObjectURL(url);document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
