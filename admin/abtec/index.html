@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="grades.css">
   <script src="../auth.js"></script>
   <script>requireAuth();</script>
 </head>
@@ -32,6 +33,9 @@
         </button>
         <button class="nav-item" type="button" data-view="alunos">
           <span class="nav-icon" aria-hidden="true">◎</span> Alunos
+        </button>
+        <button class="grade-nav-item" id="grades-nav" type="button">
+          <span class="nav-icon" aria-hidden="true">10</span> Notas
         </button>
         <button class="nav-item" type="button" data-view="agenda">
           <span class="nav-icon" aria-hidden="true">□</span> Agenda
@@ -205,6 +209,44 @@
           </section>
         </div>
 
+        <div id="notas-view" class="view">
+          <section class="grades-toolbar card">
+            <div class="field">
+              <label for="grade-class-select">Turma</label>
+              <select id="grade-class-select"></select>
+            </div>
+            <div class="field">
+              <label for="grade-assessment-title">Avaliação</label>
+              <input id="grade-assessment-title" type="text" maxlength="80" placeholder="Ex.: Prova de Excel">
+            </div>
+            <div class="field">
+              <label for="grade-date">Data</label>
+              <input id="grade-date" type="date">
+            </div>
+          </section>
+
+          <section class="card grades-card">
+            <div class="section-heading">
+              <div><span class="step">10</span><div><h2>Lançamento de notas</h2><p>Notas de 0 a 10. Deixe em branco se o aluno ainda não foi avaliado.</p></div></div>
+            </div>
+            <div id="grade-student-list" class="grade-student-list"></div>
+            <div class="grade-save-bar">
+              <span class="grade-edit-state" id="grade-editing-label">Nova avaliação</span>
+              <div class="grade-save-actions">
+                <button class="grade-cancel-button" id="cancel-grade-edit" type="button" hidden>Cancelar edição</button>
+                <button class="primary-button" id="save-grades" type="button">Salvar notas <span>→</span></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card grade-history-card">
+            <div class="section-heading">
+              <div><span class="step">↺</span><div><h2>Avaliações salvas</h2><p>Consulte, edite ou exclua notas já lançadas.</p></div></div>
+            </div>
+            <div id="grade-history-list" class="grade-history-list"></div>
+          </section>
+        </div>
+
         <div id="agenda-view" class="view">
           <section class="card calendar-card">
             <div class="calendar-toolbar">
@@ -284,5 +326,6 @@
     const originalShowToast = showToast;
     showToast = message => originalShowToast(message === "Aula salva neste navegador." ? "Chamada salva." : message);
   </script>
+  <script src="grades.js"></script>
 </body>
 </html>
