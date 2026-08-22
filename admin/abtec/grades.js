@@ -303,3 +303,9 @@ populateGradeClassSelect(selectedClass);
 renderGradesForm();
 renderGradeHistory();
 renderDashboard();
+
+if (!document.querySelector('script[src="schedule.js"]')) {
+  const scheduleScript = document.createElement("script");
+  scheduleScript.src = "schedule.js";
+  document.body.appendChild(scheduleScript);
+}
