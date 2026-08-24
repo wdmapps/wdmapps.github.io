@@ -1,9 +1,8 @@
-const CACHE = 'wdm-leitor-v1';
+const CACHE = 'wdm-leitor-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js',
   './storage.js',
   './comic.js',
   './kindle-fix.js',
@@ -23,38 +22,49 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key !== CACHE && key.startsWith('wdm-leitor-')).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => key.startsWith('wdm-leitor-') && key !== CACHE).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
+
+async function networkFirst(request, fallback) {
+  const cache = await caches.open(CACHE);
+  try {
+    const fresh = await fetch(request, { cache: 'no-store' });
+    if (fresh && fresh.ok) cache.put(request, fresh.clone()).catch(() => {});
+    return fresh;
+  } catch (e) {
+    return (await caches.match(request)) || (fallback ? await caches.match(fallback) : undefined) || Response.error();
+  }
+}
 
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  // Navegação e arquivos de código: sempre tenta a versão mais nova primeiro.
   if (request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(request);
-        const cache = await caches.open(CACHE);
-        cache.put('./index.html', fresh.clone()).catch(() => {});
-        return fresh;
-      } catch (e) {
-        return (await caches.match('./index.html')) || (await caches.match('./'));
-      }
-    })());
+    event.respondWith(networkFirst(request, './index.html'));
     return;
   }
 
   if (url.origin !== self.location.origin) return;
 
+  const isCode = /\.(?:js|mjs|css|html|webmanifest)$/i.test(url.pathname);
+  if (isCode) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Imagens e outros arquivos estáticos podem usar cache primeiro.
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
     const fresh = await fetch(request);
     const cache = await caches.open(CACHE);
-    cache.put(request, fresh.clone()).catch(() => {});
+    if (fresh && fresh.ok) cache.put(request, fresh.clone()).catch(() => {});
     return fresh;
   })());
 });
