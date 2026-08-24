@@ -20,7 +20,7 @@ const readerStage = $('#readerStage'), bookTitle = $('#bookTitle'), bookType = $
 let mode = null, pdfDoc = null, pageFlip = null, ebookLoaded = false;
 let renderedPages = new Set(), renderingPages = new Set();
 let currentFile = null, currentFileName = '', currentFileId = '', currentExt = '', currentDetails = {};
-let comicObjectUrls = [], libraryObjectUrls = [], progressTimer = null;
+let comicObjectUrls = [], libraryObjectUrls = [];
 
 const supported = ['pdf','epub','mobi','azw','azw3','cbz','cbr'];
 const kindleExts = new Set(['mobi','azw','azw3']);
@@ -71,11 +71,9 @@ async function loadSavedProgress(kind) {
 }
 
 function saveReadingProgress(kind, value, percent = null) {
+  const id = currentFileId;
   localStorage.setItem(legacyKey(kind), String(value));
-  clearTimeout(progressTimer);
-  progressTimer = setTimeout(() => {
-    putProgress({ id: currentFileId, kind, value, percent, updatedAt: Date.now() }).catch(() => {});
-  }, 180);
+  putProgress({ id, kind, value, percent, updatedAt: Date.now() }).catch(() => {});
 }
 
 async function saveBookRecord(file, details = {}) {
@@ -270,7 +268,6 @@ async function openFile(file, opts = {}) {
 }
 
 async function destroyCurrent() {
-  clearTimeout(progressTimer);
   try { pageFlip?.destroy(); } catch (e) {}
   pageFlip = null;
   pdfDoc = null;
