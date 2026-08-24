@@ -1,0 +1,21 @@
+{
+  "name": "WDM Leitor",
+  "short_name": "WDM Leitor",
+  "description": "Leitor de PDF, EPUB, Kindle, CBZ e CBR com biblioteca local e progresso salvo.",
+  "id": "/leitor/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
+  "categories": ["books", "education", "productivity"],
+  "icons": [
+    {
+      "src": "../assets/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
