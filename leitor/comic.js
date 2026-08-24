@@ -1,5 +1,6 @@
 const imageRx = /\.(avif|bmp|gif|jpe?g|png|webp)$/i;
 let rarWasmPromise = null;
+let unrarModulePromise = null;
 
 const naturalSort = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 const imageMime = name => {
@@ -13,7 +14,7 @@ async function unzipCbz(file, onProgress) {
   const names = Object.keys(zip.files)
     .filter(name => !zip.files[name].dir && imageRx.test(name))
     .sort(naturalSort);
-  if (!names.length) throw new Error('CBZ sem imagens');
+  if (!names.length) throw new Error('Arquivo sem imagens compatíveis');
 
   const pages = [];
   for (let i = 0; i < names.length; i++) {
@@ -23,32 +24,108 @@ async function unzipCbz(file, onProgress) {
   return pages;
 }
 
+async function getUnrarModule() {
+  if (!unrarModulePromise) {
+    unrarModulePromise = (async () => {
+      const urls = [
+        'https://esm.sh/node-unrar-js@2.0.2?bundle&target=es2020',
+        'https://cdn.skypack.dev/node-unrar-js@2.0.2'
+      ];
+      let lastError;
+      for (const url of urls) {
+        try {
+          const mod = await import(url);
+          if (typeof mod.createExtractorFromData === 'function') return mod;
+        } catch (err) {
+          lastError = err;
+          console.warn('Falha ao carregar motor RAR por', url, err);
+        }
+      }
+      throw lastError || new Error('Não foi possível carregar o motor RAR');
+    })();
+  }
+  return unrarModulePromise;
+}
+
+async function getRarWasm() {
+  if (!rarWasmPromise) {
+    rarWasmPromise = (async () => {
+      const urls = [
+        'https://cdn.jsdelivr.net/npm/node-unrar-js@2.0.2/esm/js/unrar.wasm',
+        'https://unpkg.com/node-unrar-js@2.0.2/esm/js/unrar.wasm'
+      ];
+      let lastError;
+      for (const url of urls) {
+        try {
+          const r = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const buffer = await r.arrayBuffer();
+          if (buffer.byteLength > 100000) return buffer;
+        } catch (err) {
+          lastError = err;
+          console.warn('Falha ao carregar WASM RAR por', url, err);
+        }
+      }
+      throw lastError || new Error('Falha ao carregar descompactador RAR');
+    })();
+  }
+  return rarWasmPromise;
+}
+
+async function sniffArchive(file) {
+  const sig = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+  const isZip = sig[0] === 0x50 && sig[1] === 0x4b;
+  const isRar = sig[0] === 0x52 && sig[1] === 0x61 && sig[2] === 0x72 && sig[3] === 0x21 && sig[4] === 0x1a && sig[5] === 0x07;
+  return { isZip, isRar };
+}
+
 async function unrarCbr(file, onProgress) {
-  const [{ createExtractorFromData }, wasmBinary] = await Promise.all([
-    import('https://cdn.jsdelivr.net/npm/node-unrar-js@2.0.2/esm/index.esm.js'),
-    rarWasmPromise || (rarWasmPromise = fetch('https://cdn.jsdelivr.net/npm/node-unrar-js@2.0.2/esm/js/unrar.wasm').then(r => {
-      if (!r.ok) throw new Error('Falha ao carregar descompactador RAR');
-      return r.arrayBuffer();
-    }))
+  const signature = await sniffArchive(file);
+
+  // Alguns arquivos circulam como .CBR, mas por dentro são ZIP. Abre mesmo assim.
+  if (signature.isZip) return unzipCbz(file, onProgress);
+  if (!signature.isRar) throw new Error('Este CBR não parece ser um arquivo RAR válido');
+
+  const [{ createExtractorFromData }, wasmBinary, data] = await Promise.all([
+    getUnrarModule(),
+    getRarWasm(),
+    file.arrayBuffer()
   ]);
 
-  const extractor = await createExtractorFromData({ wasmBinary, data: await file.arrayBuffer() });
-  const result = extractor.extract({ files: h => !h.flags?.directory && imageRx.test(h.name || '') });
-  const entries = [...result.files];
-  const pages = [];
+  const extractor = await createExtractorFromData({ wasmBinary, data });
+
+  // Primeiro percorre toda a lista. O node-unrar-js usa iteradores lazy e eles precisam
+  // ser consumidos até o fim para liberar corretamente o objeto nativo.
+  const listing = extractor.getFileList();
+  const headers = [...listing.fileHeaders];
+  const imageHeaders = headers
+    .filter(h => !h.flags?.directory && imageRx.test(h.name || ''))
+    .sort((a, b) => naturalSort(a.name, b.name));
+
+  if (!imageHeaders.length) throw new Error('CBR sem imagens compatíveis');
+  if (imageHeaders.some(h => h.flags?.encrypted)) throw new Error('CBR protegido por senha');
+
+  const wanted = imageHeaders.map(h => h.name);
+  const result = extractor.extract({ files: wanted });
+  const extracted = [...result.files];
+  const byName = new Map();
+
   let done = 0;
-  for (const entry of entries) {
+  for (const entry of extracted) {
     done++;
-    onProgress?.(done, entries.length);
-    if (entry.extraction) {
-      pages.push({
-        name: entry.fileHeader.name,
-        blob: new Blob([entry.extraction], { type: imageMime(entry.fileHeader.name) })
-      });
+    onProgress?.(done, extracted.length || wanted.length);
+    const name = entry.fileHeader?.name || '';
+    if (entry.extraction && imageRx.test(name)) {
+      byName.set(name, new Blob([entry.extraction], { type: imageMime(name) }));
     }
   }
-  pages.sort((a, b) => naturalSort(a.name, b.name));
-  if (!pages.length) throw new Error('CBR sem imagens');
+
+  // Mantém a ordem natural da revista, independentemente da ordem interna do RAR.
+  const pages = wanted
+    .filter(name => byName.has(name))
+    .map(name => ({ name, blob: byName.get(name) }));
+
+  if (!pages.length) throw new Error('Não foi possível extrair as páginas do CBR');
   return pages;
 }
 
