@@ -4,107 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#070b14">
-  <meta name="description" content="WDM Leitor — leia PDF, EPUB e livros Kindle sem DRM no navegador com experiência de livro digital.">
+  <meta name="description" content="WDM Leitor — PDF, EPUB, Kindle, CBZ e CBR com biblioteca local e progresso salvo.">
   <link rel="icon" href="../assets/logo.png" type="image/png">
-  <title>WDM Leitor | PDF · EPUB · Kindle</title>
+  <title>WDM Leitor | PDF · EPUB · Kindle · HQ</title>
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-  <style>
-    :root{--bg:#070b14;--panel:#0d1321;--panel2:#111a2b;--line:rgba(255,255,255,.1);--text:#f7f9ff;--muted:#97a3b8;--accent:#7c5cff;--accent2:#23d5ff;--danger:#ff647c;--ok:#5dffb0;--shadow:0 28px 80px rgba(0,0,0,.45)}
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{overflow-x:hidden}
-    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 15% 15%,rgba(124,92,255,.16),transparent 32%),radial-gradient(circle at 85% 10%,rgba(35,213,255,.1),transparent 25%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:auto,auto,38px 38px,38px 38px;z-index:0}
-    button,input{font:inherit}
-    .app{position:relative;z-index:1;min-height:100vh;min-height:100dvh;display:grid;grid-template-rows:auto 1fr}
-    .topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);backdrop-filter:blur(16px);background:rgba(7,11,20,.78);position:sticky;top:0;z-index:40}
-    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text)}
-    .brand img{width:40px;height:40px;object-fit:contain}
-    .brand strong{display:block;font-size:15px;letter-spacing:.16em}
-    .brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.22em;margin-top:2px}
-    .top-actions{display:flex;gap:8px;align-items:center}
-    .btn{border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.04);border-radius:12px;padding:10px 14px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
-    .btn:hover{border-color:rgba(124,92,255,.55);background:rgba(124,92,255,.12);transform:translateY(-1px)}
-    .btn.primary{border-color:transparent;background:linear-gradient(135deg,var(--accent),#5d7cff);box-shadow:0 10px 28px rgba(124,92,255,.28)}
-    .btn.icon{width:42px;height:42px;padding:0;justify-content:center;font-size:18px}
-    .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
-    .workspace{min-height:calc(100vh - 76px);min-height:calc(100dvh - 76px);display:flex;flex-direction:column}
-    .welcome{width:min(1100px,calc(100% - 32px));margin:auto;padding:54px 0 70px;display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}
-    .eyebrow{font-size:11px;letter-spacing:.19em;text-transform:uppercase;color:#b5a8ff;margin-bottom:15px}
-    .welcome h1{font-size:clamp(42px,6vw,76px);line-height:.96;letter-spacing:-.055em;margin:0 0 22px}
-    .welcome h1 em{font-style:normal;background:linear-gradient(90deg,#fff,#a89bff 48%,#6ee7ff);-webkit-background-clip:text;color:transparent}
-    .welcome p{font-size:18px;line-height:1.65;color:var(--muted);max-width:620px;margin:0 0 28px}
-    .trust{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:12px}
-    .trust span{display:flex;gap:7px;align-items:center}
-    .trust i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px rgba(93,255,176,.6)}
-    .upload-card{background:linear-gradient(145deg,rgba(17,26,43,.93),rgba(10,15,27,.92));border:1px solid var(--line);border-radius:26px;padding:26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-    .upload-card:before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(124,92,255,.16);filter:blur(50px);right:-90px;top:-90px}
-    .dropzone{position:relative;border:1px dashed rgba(168,155,255,.42);border-radius:20px;min-height:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background:rgba(255,255,255,.018);cursor:pointer;transition:.25s}
-    .dropzone:hover,.dropzone.drag{border-color:var(--accent2);background:rgba(35,213,255,.05);transform:translateY(-2px)}
-    .file-icon{width:74px;height:90px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:linear-gradient(145deg,#18233a,#0b1020);display:grid;place-items:center;font-weight:800;font-size:15px;letter-spacing:.08em;box-shadow:0 20px 35px rgba(0,0,0,.3);margin-bottom:20px;transform:rotate(-3deg)}
-    .dropzone strong{font-size:19px}
-    .dropzone small{color:var(--muted);margin-top:8px;line-height:1.5}
-    .format-row{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-    .badge{padding:6px 9px;border:1px solid var(--line);border-radius:8px;font-size:10px;font-weight:700;letter-spacing:.1em;color:#c7d0e0}
-    .badge.epub{color:#8deaff;border-color:rgba(35,213,255,.25)}
-    .badge.kindle{color:#ffd38d;border-color:rgba(255,186,91,.28)}
-    .format-note{margin-top:14px!important;font-size:10px!important;color:#7f8ba0!important}
-    #fileInput{display:none}
-    .reader{display:none;min-height:calc(100vh - 76px);min-height:calc(100dvh - 76px)}
-    .reader.active{display:grid;grid-template-rows:auto 1fr}
-    .reader-toolbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;padding:12px clamp(12px,3vw,32px);border-bottom:1px solid var(--line);background:rgba(10,15,27,.82);backdrop-filter:blur(12px);z-index:30}
-    .book-info{min-width:0}
-    .book-info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
-    .book-info small{color:var(--muted);font-size:11px}
-    .nav-controls{display:flex;gap:8px;align-items:center}
-    .page-status{min-width:125px;text-align:center;color:#dce2ef;font-size:12px}
-    .right-controls{display:flex;justify-content:flex-end;gap:8px}
-    .reader-stage{position:relative;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(circle at center,rgba(124,92,255,.08),transparent 42%)}
-    .reader-stage:after{content:"";position:absolute;left:15%;right:15%;bottom:7%;height:40px;background:rgba(0,0,0,.55);filter:blur(28px);border-radius:50%;pointer-events:none}
-    .stage-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:12;width:48px;height:72px;border:1px solid rgba(255,255,255,.11);background:rgba(7,11,20,.58);color:#fff;border-radius:16px;backdrop-filter:blur(12px);cursor:pointer;font-size:30px;display:grid;place-items:center;opacity:.65;transition:.2s}
-    .stage-arrow:hover{opacity:1;background:rgba(124,92,255,.22);border-color:rgba(124,92,255,.5)}
-    .stage-arrow.prev{left:14px}.stage-arrow.next{right:14px}
-    #pdfBook{position:relative;z-index:3;margin:auto;flex:0 0 auto}
-    .page{background:#fff;overflow:hidden;box-shadow:0 0 1px rgba(0,0,0,.4)}
-    .page[data-density="hard"]{background:linear-gradient(145deg,#101726,#1c2941)}
-    .pdf-page{display:flex;align-items:center;justify-content:center;position:relative;background:#f6f4ee}
-    .pdf-page canvas{display:block;width:100%;height:100%;object-fit:contain;background:#fff}
-    .page-number{position:absolute;bottom:8px;right:12px;color:#7a7a7a;font-size:9px;background:rgba(255,255,255,.75);padding:2px 5px;border-radius:4px;pointer-events:none}
-    .loading-page{display:grid;place-items:center;width:100%;height:100%;color:#747b88;font-size:12px}
-    .spinner{width:24px;height:24px;border:2px solid #d5d9df;border-top-color:#775cff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    #ebookShell{display:none;z-index:4;width:min(980px,92vw);height:min(74vh,820px);height:min(74dvh,820px);perspective:1800px;position:relative;flex:0 0 auto}
-    .ebook-paper{width:100%;height:100%;background:#f7f4ec;border-radius:5px;box-shadow:0 25px 65px rgba(0,0,0,.48);overflow:hidden;position:relative;transform-style:preserve-3d}
-    .ebook-paper:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;box-shadow:inset 12px 0 24px rgba(0,0,0,.055),inset -12px 0 24px rgba(0,0,0,.055)}
-    foliate-view{display:block;width:100%;height:100%;background:#f7f4ec;color:#25211d}
-    .turn-next{animation:turnNext .48s ease-in-out}.turn-prev{animation:turnPrev .48s ease-in-out}
-    @keyframes turnNext{0%{transform:rotateY(0);filter:brightness(1)}46%{transform:rotateY(-13deg) scale(.988);filter:brightness(.76)}53%{transform:rotateY(10deg) scale(.988);filter:brightness(.84)}100%{transform:rotateY(0);filter:brightness(1)}}
-    @keyframes turnPrev{0%{transform:rotateY(0);filter:brightness(1)}46%{transform:rotateY(13deg) scale(.988);filter:brightness(.76)}53%{transform:rotateY(-10deg) scale(.988);filter:brightness(.84)}100%{transform:rotateY(0);filter:brightness(1)}}
-    .loader{position:absolute;inset:0;z-index:20;background:rgba(7,11,20,.78);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-    .loader.show{display:flex}
-    .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px;color:#dbe2f0;font-size:13px;text-align:center;padding:20px}
-    .loader-box .spinner{width:34px;height:34px;border-color:rgba(255,255,255,.18);border-top-color:var(--accent2)}
-    .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#141d2f;border:1px solid var(--line);padding:11px 16px;border-radius:12px;color:#e9edf6;font-size:12px;z-index:100;box-shadow:0 15px 35px rgba(0,0,0,.32);transition:.25s;max-width:min(90vw,620px);text-align:center}
-    .toast.show{opacity:1;transform:translate(-50%,0)}
-    .reader-stage:fullscreen,.reader-stage:-webkit-full-screen{width:100vw;height:100vh;height:100dvh;min-height:100vh;min-height:100dvh;max-height:100dvh;overflow:auto;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:var(--bg)}
-    .reader-stage:fullscreen:after,.reader-stage:-webkit-full-screen:after{display:none}
-    .reader-stage:fullscreen #pdfBook,.reader-stage:-webkit-full-screen #pdfBook{margin:auto;flex:0 0 auto}
-    .reader-stage:fullscreen #ebookShell,.reader-stage:-webkit-full-screen #ebookShell{width:min(1200px,calc(100vw - 90px));height:calc(100dvh - 32px);max-height:none;margin:auto}
-    .reader-stage:fullscreen .stage-arrow.prev,.reader-stage:-webkit-full-screen .stage-arrow.prev{left:12px}
-    .reader-stage:fullscreen .stage-arrow.next,.reader-stage:-webkit-full-screen .stage-arrow.next{right:12px}
-    @media(max-width:850px){
-      .welcome{grid-template-columns:1fr;gap:30px;padding-top:34px}.welcome h1{font-size:clamp(44px,14vw,66px)}.welcome p{font-size:16px}.upload-card{padding:16px}.dropzone{min-height:220px}
-      .reader-toolbar{grid-template-columns:1fr auto}.nav-controls{order:3;grid-column:1/-1;justify-content:center}.right-controls .label{display:none}.reader-stage{padding:12px}.topbar{height:66px}.workspace,.reader{min-height:calc(100vh - 66px);min-height:calc(100dvh - 66px)}#ebookShell{height:72vh;height:72dvh;width:95vw}.stage-arrow{width:42px;height:60px;font-size:26px}
-    }
-    @media(max-width:520px){
-      .brand small{display:none}.brand img{width:34px;height:34px}.topbar{padding:0 12px}.top-actions .home-label,.top-actions .open-label{display:none}.welcome{width:min(100% - 24px,1100px)}.trust{display:grid}.reader-toolbar{padding:9px 10px}.book-info strong{max-width:50vw}.btn{padding:9px 11px}.page-status{min-width:100px}.reader-stage{padding:8px}#ebookShell{height:74vh;height:74dvh}.stage-arrow{width:36px;height:52px;border-radius:12px;font-size:23px;opacity:.5}.stage-arrow.prev{left:5px}.stage-arrow.next{right:5px}
-      .reader-stage:fullscreen #ebookShell,.reader-stage:-webkit-full-screen #ebookShell{width:calc(100vw - 44px);height:calc(100dvh - 16px)}
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <a href="../" class="brand"><img src="../assets/logo.png" alt="WDM Apps"><span><strong>WDM LEITOR</strong><small>PDF · EPUB · KINDLE</small></span></a>
+    <a href="../" class="brand"><img src="../assets/logo.png" alt="WDM Apps"><span><strong>WDM LEITOR</strong><small>PDF · EPUB · KINDLE · HQ</small></span></a>
     <div class="top-actions">
       <button class="btn" id="openTop"><span>＋</span><span class="open-label">Abrir livro</span></button>
       <a href="../" class="btn"><span>←</span><span class="home-label">WDM Apps</span></a>
@@ -114,38 +23,36 @@
   <main class="workspace">
     <section class="welcome" id="welcome">
       <div>
-        <div class="eyebrow">Leitura digital · WDM Apps</div>
+        <div class="eyebrow">Leitura digital · biblioteca local</div>
         <h1>Seu livro com <em>cara de livro.</em></h1>
-        <p>Abra PDF, EPUB e livros Kindle compatíveis direto no navegador. Leitura paginada, efeito de virada, tela cheia e progresso salvo automaticamente.</p>
-        <div class="trust"><span><i></i>Processado no seu navegador</span><span><i></i>Nenhum upload do livro</span><span><i></i>PC e celular</span></div>
+        <p>Abra PDF, EPUB, Kindle e quadrinhos direto no navegador. O WDM Leitor guarda seus livros neste dispositivo e continua exatamente de onde você parou.</p>
+        <div class="trust"><span><i></i>Livro fica no seu dispositivo</span><span><i></i>Progresso automático</span><span><i></i>PC e celular</span></div>
       </div>
       <div class="upload-card">
         <label class="dropzone" id="dropzone" for="fileInput">
           <div class="file-icon">BOOK</div>
-          <strong>Escolha seu livro</strong>
+          <strong>Adicionar à biblioteca</strong>
           <small>Clique aqui ou arraste um arquivo<br>para começar a leitura.</small>
-          <div class="format-row"><span class="badge">PDF</span><span class="badge epub">EPUB</span><span class="badge kindle">MOBI</span><span class="badge kindle">AZW</span><span class="badge kindle">AZW3</span></div>
-          <small class="format-note">Kindle: arquivos sem DRM. KFX não é suportado.</small>
+          <div class="format-row"><span class="badge">PDF</span><span class="badge epub">EPUB</span><span class="badge kindle">MOBI</span><span class="badge kindle">AZW</span><span class="badge kindle">AZW3</span><span class="badge comic">CBZ</span><span class="badge comic">CBR</span></div>
+          <small class="format-note">Kindle sem DRM. CBR/CBZ são processados localmente no navegador.</small>
         </label>
       </div>
+    </section>
+
+    <section class="library-section" id="librarySection" hidden>
+      <div class="library-head"><div><div class="eyebrow">Continuar lendo</div><h2>Sua biblioteca</h2></div><p>Os arquivos e o progresso ficam guardados apenas neste navegador. Nada é enviado para a WDM Apps.</p></div>
+      <div class="library-grid" id="libraryGrid"></div>
     </section>
 
     <section class="reader" id="reader">
       <div class="reader-toolbar">
         <div class="book-info"><strong id="bookTitle">Livro</strong><small id="bookType">PDF</small></div>
-        <div class="nav-controls">
-          <button class="btn icon" id="prevBtn" title="Página anterior">‹</button>
-          <div class="page-status" id="pageStatus">Página 1</div>
-          <button class="btn icon" id="nextBtn" title="Próxima página">›</button>
-        </div>
-        <div class="right-controls">
-          <button class="btn" id="fullscreenBtn"><span>⛶</span><span class="label">Tela cheia</span></button>
-          <button class="btn" id="changeBtn"><span>↻</span><span class="label">Trocar livro</span></button>
-        </div>
+        <div class="nav-controls"><button class="btn icon" id="prevBtn" title="Página anterior">‹</button><div class="page-status" id="pageStatus">Página 1</div><button class="btn icon" id="nextBtn" title="Próxima página">›</button></div>
+        <div class="right-controls"><button class="btn" id="libraryBtn"><span>▦</span><span class="label">Biblioteca</span></button><button class="btn" id="fullscreenBtn"><span>⛶</span><span class="label">Tela cheia</span></button><button class="btn" id="changeBtn"><span>＋</span><span class="label">Abrir</span></button></div>
       </div>
       <div class="reader-stage" id="readerStage">
         <button class="stage-arrow prev" id="stagePrev" aria-label="Página anterior">‹</button>
-        <div id="pdfBook"></div>
+        <div id="pageBook"></div>
         <div id="ebookShell"><div class="ebook-paper" id="ebookPaper"><foliate-view id="ebookView"></foliate-view></div></div>
         <button class="stage-arrow next" id="stageNext" aria-label="Próxima página">›</button>
         <div class="loader" id="loader"><div class="loader-box"><div class="spinner"></div><span id="loaderText">Preparando livro…</span></div></div>
@@ -153,212 +60,8 @@
     </section>
   </main>
 </div>
-<input id="fileInput" type="file" accept=".pdf,.epub,.mobi,.azw,.azw3,application/pdf,application/epub+zip,application/x-mobipocket-ebook">
+<input id="fileInput" type="file" accept=".pdf,.epub,.mobi,.azw,.azw3,.cbz,.cbr,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.comicbook+zip,application/vnd.comicbook-rar">
 <div class="toast" id="toast"></div>
-
-<script type="module">
-  import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
-  import 'https://cdn.jsdelivr.net/npm/foliate-js@1.0.1/view.js';
-
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
-
-  const $ = s => document.querySelector(s);
-  const input = $('#fileInput'), welcome = $('#welcome'), reader = $('#reader'), dropzone = $('#dropzone');
-  const pdfBook = $('#pdfBook'), ebookShell = $('#ebookShell'), ebookPaper = $('#ebookPaper'), ebookView = $('#ebookView');
-  const prevBtn = $('#prevBtn'), nextBtn = $('#nextBtn'), stagePrev = $('#stagePrev'), stageNext = $('#stageNext'), status = $('#pageStatus');
-  const loader = $('#loader'), loaderText = $('#loaderText'), toast = $('#toast'), readerStage = $('#readerStage');
-  const bookTitle = $('#bookTitle'), bookType = $('#bookType');
-
-  let mode = null, pdfDoc = null, pageFlip = null, renderedPages = new Set(), renderingPages = new Set();
-  let currentFileName = '', currentExt = '', ebookLoaded = false;
-
-  const supported = ['pdf','epub','mobi','azw','azw3'];
-  const kindleExts = new Set(['mobi','azw','azw3']);
-
-  function showToast(text, ms=3400){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),ms)}
-  function setLoading(show,text='Preparando livro…'){loaderText.textContent=text;loader.classList.toggle('show',show)}
-  function storageKey(type,name){return `wdm-reader:${type}:${name}`}
-  function cleanName(name){return name.replace(/\.(pdf|epub|mobi|azw3?|kfx)$/i,'')}
-  function formatMeta(value){
-    if(!value)return '';
-    if(typeof value==='string')return value;
-    if(Array.isArray(value))return value.map(formatMeta).filter(Boolean).join(', ');
-    if(typeof value==='object'){if(value.name)return formatMeta(value.name);const k=Object.keys(value)[0];return k?formatMeta(value[k]):''}
-    return String(value);
-  }
-  function typeLabel(ext){return kindleExts.has(ext)?`KINDLE · ${ext.toUpperCase()}`:ext.toUpperCase()}
-
-  $('#openTop').onclick = () => input.click();
-  $('#changeBtn').onclick = () => input.click();
-  input.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)openFile(f);input.value=''});
-  ['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add('drag')}));
-  ['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove('drag')}));
-  dropzone.addEventListener('drop',e=>{const f=e.dataTransfer.files?.[0];if(f)openFile(f)});
-
-  ebookView.addEventListener('load',({detail:{doc}})=>{
-    try{
-      const style=doc.createElement('style');
-      style.textContent=`
-        :root{color-scheme:light!important;background:#f7f4ec!important}
-        html,body{background:#f7f4ec!important;color:#25211d!important}
-        body{font-family:Georgia,'Times New Roman',serif!important;padding:2% 4%!important}
-        p,li,blockquote,dd{line-height:1.65!important;text-align:justify;hyphens:auto}
-        img,svg{max-width:100%!important;height:auto!important}
-        pre{white-space:pre-wrap!important}
-        a{color:#5f52b8!important}
-      `;
-      doc.head.append(style);
-      doc.addEventListener('keydown',handleReaderKey);
-    }catch(e){console.warn(e)}
-  });
-
-  ebookView.addEventListener('relocate',({detail})=>{
-    const {fraction,cfi,tocItem,pageItem,location}=detail||{};
-    if(cfi && currentFileName)localStorage.setItem(storageKey('ebook',currentFileName),cfi);
-    if(typeof fraction==='number' && Number.isFinite(fraction)){
-      const pct=Math.max(0,Math.min(100,Math.round(fraction*100)));
-      status.textContent=tocItem?.label?`${pct}% · ${tocItem.label}`:`${pct}% do livro`;
-    }else if(pageItem?.label){status.textContent=`Página ${pageItem.label}`}
-    else if(location?.current!=null){status.textContent=`Posição ${location.current}`}
-    else status.textContent=typeLabel(currentExt);
-  });
-
-  ebookView.addEventListener('external-link',e=>{
-    e.preventDefault?.();
-    const href=e.detail?.href_;
-    if(href && confirm('Este link abre uma página externa. Deseja continuar?'))window.open(href,'_blank','noopener,noreferrer');
-  });
-
-  async function openFile(file){
-    const ext=(file.name.split('.').pop()||'').toLowerCase();
-    if(ext==='kfx'){
-      showToast('KFX não é suportado. Arquivos Kindle KFX normalmente também usam proteção da Amazon.',5200);return;
-    }
-    if(!supported.includes(ext)){
-      showToast('Escolha PDF, EPUB, MOBI, AZW ou AZW3.');return;
-    }
-    currentFileName=file.name;currentExt=ext;
-    bookTitle.textContent=cleanName(file.name);bookType.textContent=typeLabel(ext);
-    welcome.style.display='none';reader.classList.add('active');
-    setLoading(true,ext==='pdf'?'Abrindo PDF…':kindleExts.has(ext)?'Abrindo livro Kindle…':'Abrindo EPUB…');
-    await destroyCurrent();
-    try{
-      if(ext==='pdf')await openPdf(await file.arrayBuffer());
-      else await openEbook(file,ext);
-    }catch(err){
-      console.error(err);
-      const text=String(err?.message||err||'').toLowerCase();
-      if(kindleExts.has(ext)){
-        if(text.includes('drm')||text.includes('encrypt')||text.includes('unsupported')||text.includes('not supported'))
-          showToast('Não consegui abrir este Kindle. Ele pode estar protegido por DRM da Amazon ou usar uma variante não compatível.',6200);
-        else showToast('Não consegui abrir este arquivo Kindle. Tente MOBI/AZW3 sem DRM.',5200);
-      }else showToast('Não consegui abrir este arquivo. Ele pode estar corrompido ou protegido.',5000);
-      welcome.style.display='grid';reader.classList.remove('active');
-    }finally{setLoading(false)}
-  }
-
-  async function destroyCurrent(){
-    try{pageFlip?.destroy()}catch(e){}
-    pageFlip=null;pdfDoc=null;renderedPages.clear();renderingPages.clear();pdfBook.innerHTML='';pdfBook.style.display='none';
-    try{if(ebookLoaded)ebookView.close()}catch(e){console.warn(e)}
-    ebookLoaded=false;ebookShell.style.display='none';mode=null;
-  }
-
-  async function openPdf(buffer){
-    mode='pdf';pdfBook.style.display='block';ebookShell.style.display='none';
-    pdfDoc=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;
-    const pageCount=pdfDoc.numPages;
-    for(let i=1;i<=pageCount;i++){
-      const el=document.createElement('div');el.className='page pdf-page';el.dataset.page=i;
-      if(i===1)el.dataset.density='hard';
-      el.innerHTML=`<div class="loading-page"><div><div class="spinner"></div>página ${i}</div></div><span class="page-number">${i}</span>`;
-      pdfBook.appendChild(el);
-    }
-    pageFlip=new St.PageFlip(pdfBook,{width:560,height:760,size:'stretch',minWidth:280,maxWidth:900,minHeight:380,maxHeight:1220,maxShadowOpacity:.48,showCover:true,mobileScrollSupport:false,usePortrait:true,flippingTime:720,clickEventForward:true,swipeDistance:18});
-    pageFlip.loadFromHTML(pdfBook.querySelectorAll('.pdf-page'));
-    pageFlip.on('flip',e=>{
-      const n=e.data+1;status.textContent=`Página ${Math.min(n,pageCount)} de ${pageCount}`;
-      localStorage.setItem(storageKey('pdf',currentFileName),String(e.data));renderAround(n);
-    });
-    const saved=Math.max(0,Math.min(pageCount-1,Number(localStorage.getItem(storageKey('pdf',currentFileName))||0)));
-    status.textContent=`Página ${saved+1} de ${pageCount}`;
-    await renderAround(saved+1,true);
-    if(saved>0)setTimeout(()=>pageFlip.turnToPage(saved),100);
-  }
-
-  async function renderAround(center,wait=false){
-    if(!pdfDoc)return;const jobs=[];
-    for(let n=Math.max(1,center-3);n<=Math.min(pdfDoc.numPages,center+5);n++)jobs.push(renderPdfPage(n));
-    if(wait)await Promise.all(jobs);
-  }
-
-  async function renderPdfPage(n){
-    if(renderedPages.has(n)||renderingPages.has(n)||!pdfDoc)return;
-    renderingPages.add(n);
-    try{
-      const page=await pdfDoc.getPage(n),viewport=page.getViewport({scale:1.55});
-      const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{alpha:false});
-      canvas.width=Math.floor(viewport.width);canvas.height=Math.floor(viewport.height);
-      await page.render({canvasContext:ctx,viewport,background:'rgb(255,255,255)'}).promise;
-      const el=pdfBook.querySelector(`[data-page="${n}"]`);
-      if(el){el.querySelector('.loading-page')?.remove();el.insertBefore(canvas,el.firstChild)}
-      renderedPages.add(n);
-    }finally{renderingPages.delete(n)}
-  }
-
-  async function openEbook(file,ext){
-    mode='ebook';pdfBook.style.display='none';ebookShell.style.display='block';
-    await ebookView.open(file);ebookLoaded=true;
-    ebookView.renderer.setAttribute('flow','paginated');
-    ebookView.renderer.setStyles?.(`
-      @namespace epub "http://www.idpf.org/2007/ops";
-      html{color-scheme:light!important;background:#f7f4ec!important;color:#25211d!important}
-      body{background:#f7f4ec!important;color:#25211d!important;font-family:Georgia,'Times New Roman',serif!important;padding:2% 4%!important}
-      p,li,blockquote,dd{line-height:1.65!important;text-align:justify;hyphens:auto}
-      img,svg{max-width:100%!important;height:auto!important}
-      pre{white-space:pre-wrap!important}
-      a{color:#5f52b8!important}
-    `);
-    const metadata=ebookView.book?.metadata||{};
-    const title=formatMeta(metadata.title);
-    const author=formatMeta(metadata.author);
-    if(title)bookTitle.textContent=title;
-    bookType.textContent=author?`${typeLabel(ext)} · ${author}`:typeLabel(ext);
-    const saved=localStorage.getItem(storageKey('ebook',currentFileName));
-    status.textContent=kindleExts.has(ext)?'Preparando Kindle…':'Preparando EPUB…';
-    await ebookView.init({lastLocation:saved||undefined,showTextStart:!saved});
-  }
-
-  function animateEbook(direction){
-    if(!ebookLoaded||ebookPaper.classList.contains('turn-next')||ebookPaper.classList.contains('turn-prev'))return;
-    const cls=direction==='next'?'turn-next':'turn-prev';ebookPaper.classList.add(cls);
-    setTimeout(()=>{
-      try{direction==='next'?ebookView.goRight():ebookView.goLeft()}catch(e){console.warn(e)}
-    },205);
-    setTimeout(()=>ebookPaper.classList.remove(cls),500);
-  }
-
-  function goPrev(){if(mode==='pdf')pageFlip?.flipPrev();else if(mode==='ebook')animateEbook('prev')}
-  function goNext(){if(mode==='pdf')pageFlip?.flipNext();else if(mode==='ebook')animateEbook('next')}
-  prevBtn.onclick=goPrev;nextBtn.onclick=goNext;stagePrev.onclick=goPrev;stageNext.onclick=goNext;
-
-  function handleReaderKey(e){
-    if(!reader.classList.contains('active'))return;
-    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();goNext()}
-    if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goPrev()}
-  }
-  document.addEventListener('keydown',handleReaderKey);
-
-  $('#fullscreenBtn').onclick=async()=>{
-    try{if(!document.fullscreenElement)await readerStage.requestFullscreen();else await document.exitFullscreen()}
-    catch(e){showToast('Tela cheia não disponível neste navegador.')}
-  };
-
-  document.addEventListener('fullscreenchange',()=>{
-    setTimeout(()=>{
-      try{ebookView.renderer?.setAttribute('flow','paginated')}catch(e){}
-    },120);
-  });
-</script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
