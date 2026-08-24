@@ -17,7 +17,7 @@ const prevBtn = $('#prevBtn'), nextBtn = $('#nextBtn'), stagePrev = $('#stagePre
 const status = $('#pageStatus'), loader = $('#loader'), loaderText = $('#loaderText'), toast = $('#toast');
 const readerStage = $('#readerStage'), bookTitle = $('#bookTitle'), bookType = $('#bookType');
 
-let mode = null, pdfDoc = null, pageFlip = null, ebookLoaded = false;
+let mode = null, pdfDoc = null, pageFlip = null, ebookLoaded = false, ebookTurning = false;
 let renderedPages = new Set(), renderingPages = new Set();
 let currentFile = null, currentFileName = '', currentFileId = '', currentExt = '', currentDetails = {};
 let comicObjectUrls = [], libraryObjectUrls = [];
@@ -279,6 +279,13 @@ async function destroyCurrent() {
   comicObjectUrls = [];
   try { if (ebookLoaded) ebookView.close(); } catch (e) {}
   ebookLoaded = false;
+  ebookTurning = false;
+  ebookPaper.getAnimations?.().forEach(a => a.cancel());
+  ebookPaper.style.transform = '';
+  ebookPaper.style.transformOrigin = '';
+  ebookPaper.style.filter = '';
+  ebookPaper.style.opacity = '';
+  ebookPaper.style.willChange = '';
   ebookShell.style.display = 'none';
   mode = null;
 }
@@ -406,14 +413,107 @@ async function openEbook(file, ext) {
   await ebookView.init({ lastLocation: saved || undefined, showTextStart: !saved });
 }
 
-function animateEbook(direction) {
-  if (!ebookLoaded || ebookPaper.classList.contains('turn-next') || ebookPaper.classList.contains('turn-prev')) return;
-  const cls = direction === 'next' ? 'turn-next' : 'turn-prev';
-  ebookPaper.classList.add(cls);
-  setTimeout(() => {
-    try { direction === 'next' ? ebookView.goRight() : ebookView.goLeft(); } catch (e) {}
-  }, 205);
-  setTimeout(() => ebookPaper.classList.remove(cls), 500);
+async function animateEbook(direction) {
+  if (!ebookLoaded || ebookTurning) return;
+  ebookTurning = true;
+
+  const forward = direction === 'next';
+  const outAngle = forward ? -86 : 86;
+  const inAngle = forward ? 86 : -86;
+  const outOrigin = forward ? 'left center' : 'right center';
+  const inOrigin = forward ? 'right center' : 'left center';
+
+  try {
+    ebookPaper.getAnimations?.().forEach(a => a.cancel());
+    ebookPaper.style.willChange = 'transform, filter, opacity, box-shadow';
+    ebookPaper.style.transformStyle = 'preserve-3d';
+    ebookPaper.style.backfaceVisibility = 'hidden';
+    ebookPaper.style.transformOrigin = outOrigin;
+
+    if (typeof ebookPaper.animate !== 'function') {
+      const cls = forward ? 'turn-next' : 'turn-prev';
+      ebookPaper.classList.add(cls);
+      setTimeout(() => {
+        try { forward ? ebookView.goRight() : ebookView.goLeft(); } catch (e) {}
+      }, 205);
+      setTimeout(() => {
+        ebookPaper.classList.remove(cls);
+        ebookTurning = false;
+      }, 520);
+      return;
+    }
+
+    const out = ebookPaper.animate([
+      {
+        transform: 'perspective(2000px) rotateY(0deg) translateZ(0)',
+        filter: 'brightness(1)',
+        opacity: 1,
+        boxShadow: '0 25px 65px rgba(0,0,0,.48)'
+      },
+      {
+        transform: `perspective(2000px) rotateY(${outAngle * .42}deg) translateZ(8px)`,
+        filter: 'brightness(.82)',
+        opacity: .98,
+        boxShadow: forward ? '28px 28px 70px rgba(0,0,0,.52)' : '-28px 28px 70px rgba(0,0,0,.52)'
+      },
+      {
+        transform: `perspective(2000px) rotateY(${outAngle}deg) translateZ(2px)`,
+        filter: 'brightness(.55)',
+        opacity: .72,
+        boxShadow: forward ? '48px 18px 78px rgba(0,0,0,.64)' : '-48px 18px 78px rgba(0,0,0,.64)'
+      }
+    ], {
+      duration: 300,
+      easing: 'cubic-bezier(.55,.06,.68,.19)',
+      fill: 'forwards'
+    });
+    await out.finished.catch(() => {});
+
+    try {
+      const nav = forward ? ebookView.goRight() : ebookView.goLeft();
+      if (nav?.then) await nav;
+    } catch (e) { console.warn(e); }
+
+    ebookPaper.style.transformOrigin = inOrigin;
+    ebookPaper.style.transform = `perspective(2000px) rotateY(${inAngle}deg) translateZ(2px)`;
+    ebookPaper.style.filter = 'brightness(.62)';
+    ebookPaper.style.opacity = '.76';
+
+    const incoming = ebookPaper.animate([
+      {
+        transform: `perspective(2000px) rotateY(${inAngle}deg) translateZ(2px)`,
+        filter: 'brightness(.62)',
+        opacity: .76,
+        boxShadow: forward ? '-46px 18px 76px rgba(0,0,0,.62)' : '46px 18px 76px rgba(0,0,0,.62)'
+      },
+      {
+        transform: `perspective(2000px) rotateY(${inAngle * .38}deg) translateZ(8px)`,
+        filter: 'brightness(.88)',
+        opacity: .98,
+        boxShadow: forward ? '-22px 28px 68px rgba(0,0,0,.48)' : '22px 28px 68px rgba(0,0,0,.48)'
+      },
+      {
+        transform: 'perspective(2000px) rotateY(0deg) translateZ(0)',
+        filter: 'brightness(1)',
+        opacity: 1,
+        boxShadow: '0 25px 65px rgba(0,0,0,.48)'
+      }
+    ], {
+      duration: 340,
+      easing: 'cubic-bezier(.22,.72,.22,1)',
+      fill: 'forwards'
+    });
+    await incoming.finished.catch(() => {});
+  } finally {
+    ebookPaper.getAnimations?.().forEach(a => a.cancel());
+    ebookPaper.style.transform = '';
+    ebookPaper.style.transformOrigin = '';
+    ebookPaper.style.filter = '';
+    ebookPaper.style.opacity = '';
+    ebookPaper.style.willChange = '';
+    ebookPaper.style.backfaceVisibility = '';
+    ebookTurning = false;
+  }
 }
 function goPrev() { if (mode === 'pdf' || mode === 'comic') pageFlip?.flipPrev(); else if (mode === 'ebook') animateEbook('prev'); }
 function goNext() { if (mode === 'pdf' || mode === 'comic') pageFlip?.flipNext(); else if (mode === 'ebook') animateEbook('next'); }
