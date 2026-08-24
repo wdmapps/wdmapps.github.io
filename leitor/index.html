@@ -6,6 +6,12 @@
   <meta name="theme-color" content="#070b14">
   <meta name="description" content="WDM Leitor — PDF, EPUB, Kindle, CBZ e CBR com biblioteca local e progresso salvo.">
   <link rel="icon" href="../assets/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WDM Leitor">
   <title>WDM Leitor | PDF · EPUB · Kindle · HQ</title>
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,6 +21,7 @@
   <header class="topbar">
     <a href="../" class="brand"><img src="../assets/logo.png" alt="WDM Apps"><span><strong>WDM LEITOR</strong><small>PDF · EPUB · KINDLE · HQ</small></span></a>
     <div class="top-actions">
+      <button class="btn" id="installBtn" title="Instalar WDM Leitor"><span>📲</span><span class="install-label">Instalar</span></button>
       <button class="btn" id="openTop"><span>＋</span><span class="open-label">Abrir livro</span></button>
       <a href="../" class="btn"><span>←</span><span class="home-label">WDM Apps</span></a>
     </div>
@@ -64,5 +71,6 @@
 <div class="toast" id="toast"></div>
 <script type="module" src="app.js?v=5"></script>
 <script type="module" src="kindle-fix.js?v=1"></script>
+<script type="module" src="pwa-install.js?v=1"></script>
 </body>
 </html>
