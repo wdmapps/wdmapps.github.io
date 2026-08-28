@@ -1,13 +1,13 @@
-const CACHE_NAME = "contash-pwa-v2";
+const CACHE_NAME = "contash-pwa-v3";
 const APP_SHELL = [
   "./contash.html",
-  "./contash.css?v=2",
+  "./contash.css?v=3",
   "./contash.js",
   "./contash-core.mjs",
-  "./contash-install.js?v=2",
-  "./contash.webmanifest?v=2",
+  "./contash-install.js?v=3",
+  "./contash.webmanifest?v=3",
   "./img/contash.png",
-  "./img/contash-512.png?v=2",
+  "./img/contash-512.png?v=3",
   "./audio/contash/musica_fundo.mp3",
   "./audio/contash/acerto.wav",
   "./audio/contash/erro.mp3",
