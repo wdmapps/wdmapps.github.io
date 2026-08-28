@@ -116,6 +116,62 @@ a:focus-visible {
   transform: translateY(-1px);
 }
 
+.install-button {
+  position: fixed;
+  z-index: 20;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 2px solid rgba(217, 66, 95, 0.28);
+  border-radius: 999px;
+  color: var(--coral);
+  background: rgba(255, 254, 250, 0.9);
+  box-shadow: 0 5px 16px rgba(41, 51, 77, 0.1);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 850;
+  backdrop-filter: blur(8px);
+}
+
+.install-button:hover {
+  border-color: var(--coral);
+  transform: translateY(-1px);
+}
+
+.install-button.is-ready {
+  color: var(--white);
+  background: var(--coral);
+  box-shadow: 0 7px 18px rgba(217, 66, 95, 0.3);
+  animation: install-pulse 1.6s ease-in-out infinite;
+}
+
+.install-toast {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  width: min(calc(100% - 32px), 560px);
+  padding: 12px 16px;
+  border: 2px solid rgba(39, 93, 204, 0.2);
+  border-radius: 17px;
+  color: var(--ink);
+  background: rgba(255, 254, 250, 0.97);
+  box-shadow: 0 14px 35px rgba(41, 51, 77, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 750;
+  transform: translate(-50%, 20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.install-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .app-shell {
   min-height: 100vh;
   min-height: 100dvh;
@@ -717,6 +773,10 @@ a:focus-visible {
   from { opacity: 0; transform: scale(0.75); }
 }
 
+@keyframes install-pulse {
+  50% { transform: scale(1.04); }
+}
+
 @media (min-width: 600px) {
   .screen {
     padding-inline: 36px;
@@ -852,5 +912,11 @@ a:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (display-mode: standalone) {
+  .install-button {
+    display: none;
   }
 }

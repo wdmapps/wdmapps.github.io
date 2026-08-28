@@ -1,0 +1,28 @@
+{
+  "name": "Contas H - Matemática Divertida",
+  "short_name": "Contas H",
+  "description": "Aprenda as quatro operações contando frutas, marcando pontos e subindo no ranking.",
+  "lang": "pt-BR",
+  "id": "/jogos/contash",
+  "start_url": "./contash.html",
+  "scope": "./contash",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#DDF5FF",
+  "theme_color": "#DDF5FF",
+  "categories": ["education", "games", "kids"],
+  "icons": [
+    {
+      "src": "img/contash.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/contash-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

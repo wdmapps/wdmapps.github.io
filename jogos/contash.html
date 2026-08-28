@@ -5,8 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Contas H: aprenda matemática brincando com frutas, desafios e ranking local.">
   <meta name="theme-color" content="#DDF5FF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Contas H">
   <title>Contas H | WDM Jogos</title>
   <link rel="icon" href="img/contash.png">
+  <link rel="apple-touch-icon" href="img/contash.png">
+  <link rel="manifest" href="contash.webmanifest">
   <link rel="stylesheet" href="contash.css">
 </head>
 <body>
@@ -18,6 +24,7 @@
   </div>
 
   <a class="catalog-link" href="./" aria-label="Voltar para a lista de jogos">← Jogos</a>
+  <button id="install-button" class="install-button" type="button" title="Instalar Contas H">📲 Instalar</button>
 
   <main id="app" class="app-shell">
     <section id="splash-screen" class="screen splash-screen is-active" aria-labelledby="splash-title">
@@ -137,7 +144,9 @@
   <audio id="background-music" src="audio/contash/musica_fundo.mp3" preload="none" loop></audio>
   <audio id="correct-sound" src="audio/contash/acerto.wav" preload="auto"></audio>
   <audio id="wrong-sound" src="audio/contash/erro.mp3" preload="auto"></audio>
+  <div id="install-toast" class="install-toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="contash.js"></script>
+  <script type="module" src="contash-install.js"></script>
 </body>
 </html>
