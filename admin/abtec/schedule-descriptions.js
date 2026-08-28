@@ -42,6 +42,9 @@
       .schedule-table.with-descriptions { min-width: 1180px; }
       .schedule-table .schedule-description { min-width: 310px; max-width: 430px; line-height: 1.45; }
       .schedule-table th.schedule-description { min-width: 310px; }
+      .history-delete-row { grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 4px; }
+      .history-delete-button { padding: 9px 12px; border: 1px solid #f1c9d1; border-radius: 8px; color: #bd4058; background: #fff4f6; font-size: 10px; font-weight: 800; }
+      .history-delete-button:hover { color: #fff; border-color: #d84763; background: #d84763; }
     `;
     document.head.appendChild(style);
   }
@@ -75,7 +78,95 @@
     });
   }
 
-  const observer = new MutationObserver(() => decorateScheduleTable());
+  function deleteHistoryItem(item, classId) {
+    if (!item || !classes[classId]) return;
+    if (!confirm(`Excluir a chamada de ${formatDate(item.date)} — ${item.content}?\n\nEssa ação também ajustará as faltas acumuladas.`)) return;
+
+    const current = classes[classId];
+
+    if (item.imported) {
+      const importedIndex = Number(String(item.id).replace("imported-", ""));
+      const original = current.history[importedIndex];
+      if (!original) return showToast("Chamada não encontrada.");
+
+      const date = original[0];
+      const absentNames = Array.isArray(current.absences?.[date]) ? [...current.absences[date]] : [];
+      current.history.splice(importedIndex, 1);
+
+      const sameDateStillExists = current.history.some(row => row[0] === date);
+      if (!sameDateStillExists) {
+        absentNames.forEach(name => {
+          const student = current.students.find(([studentName]) => studentName === name);
+          if (student) student[1] = Math.max(0, Number(student[1] || 0) - 1);
+        });
+        if (current.absences) delete current.absences[date];
+      }
+    } else {
+      const lessons = getSavedLessons();
+      const lessonIndex = lessons.findIndex(lesson => String(lesson.id) === String(item.id) && lesson.classId === classId);
+      if (lessonIndex < 0) return showToast("Chamada não encontrada.");
+
+      const [lesson] = lessons.splice(lessonIndex, 1);
+      localStorage.setItem(storageKey, JSON.stringify(lessons));
+      current.students.forEach(student => {
+        if (lesson.attendance && lesson.attendance[student[0]] === "F") {
+          student[1] = Math.max(0, Number(student[1] || 0) - 1);
+        }
+      });
+    }
+
+    current.lessons = Math.max(0, Number(current.lessons || 0) - 1);
+    saveClasses();
+
+    if (selectedClass === classId) renderClass();
+    renderHistory();
+    renderRoster();
+    renderDashboard();
+    showToast("Chamada excluída.");
+  }
+
+  function decorateHistoryDeletes() {
+    if (typeof combinedHistory !== "function" || !historyClassSelect) return;
+    const classId = historyClassSelect.value || selectedClass;
+    if (!classes[classId]) return;
+
+    const history = combinedHistory(classId);
+    const cards = [...document.querySelectorAll("#history-list .history-item")];
+
+    cards.forEach((card, index) => {
+      if (card.querySelector(".history-delete-button")) return;
+      const item = history[index];
+      if (!item) return;
+      const details = card.querySelector(".attendance-details");
+      if (!details) return;
+
+      const row = document.createElement("div");
+      row.className = "history-delete-row";
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "history-delete-button";
+      button.textContent = "Excluir esta chamada";
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        deleteHistoryItem(item, classId);
+      });
+      row.appendChild(button);
+      details.appendChild(row);
+    });
+  }
+
+  let historyDecorateQueued = false;
+  const observer = new MutationObserver(() => {
+    decorateScheduleTable();
+    if (!historyDecorateQueued) {
+      historyDecorateQueued = true;
+      queueMicrotask(() => {
+        historyDecorateQueued = false;
+        decorateHistoryDeletes();
+      });
+    }
+  });
   observer.observe(document.body, { childList: true, subtree: true });
   decorateScheduleTable();
+  decorateHistoryDeletes();
 })();
