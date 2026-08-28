@@ -298,6 +298,7 @@ gradeModuleSelect.addEventListener("change", () => {
 });
 document.getElementById("save-grades").addEventListener("click", saveGrades);
 document.getElementById("cancel-grade-edit").addEventListener("click", cancelGradeEdit);
+historyClassSelect.addEventListener("change", () => renderHistory());
 
 populateGradeClassSelect(selectedClass);
 renderGradesForm();
