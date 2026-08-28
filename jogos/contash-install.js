@@ -23,7 +23,7 @@ function updateButton() {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./contash-sw.js", {
+      const registration = await navigator.serviceWorker.register("./contash-sw.js?v=2", {
         scope: "./contash",
         updateViaCache: "none",
       });
