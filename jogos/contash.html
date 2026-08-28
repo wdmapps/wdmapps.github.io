@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Contas H: aprenda matemática brincando com frutas, desafios e ranking local.">
+  <meta name="theme-color" content="#DDF5FF">
+  <title>Contas H | WDM Jogos</title>
+  <link rel="icon" href="img/contash.png">
+  <link rel="stylesheet" href="contash.css">
+</head>
+<body>
+  <div class="playful-bg" aria-hidden="true">
+    <span class="bubble bubble-one"></span>
+    <span class="bubble bubble-two"></span>
+    <span class="bubble bubble-three"></span>
+    <span class="bubble bubble-four"></span>
+  </div>
+
+  <a class="catalog-link" href="./" aria-label="Voltar para a lista de jogos">← Jogos</a>
+
+  <main id="app" class="app-shell">
+    <section id="splash-screen" class="screen splash-screen is-active" aria-labelledby="splash-title">
+      <div class="splash-content">
+        <div class="splash-fruit" aria-hidden="true">🍎</div>
+        <div class="hero-card splash-card">
+          <h1 id="splash-title">ContasH</h1>
+          <p>Aprender é uma aventura!</p>
+        </div>
+        <div class="presenter">WDM Games apresenta</div>
+      </div>
+    </section>
+
+    <section id="home-screen" class="screen home-screen" aria-labelledby="home-title" hidden>
+      <div class="home-layout content-width">
+        <header class="hero-card home-hero">
+          <h1 id="home-title">🍎 ContasH 🍊</h1>
+          <p>Conte, aprenda e se divirta!</p>
+        </header>
+
+        <div class="home-controls">
+          <div class="field-group">
+            <label for="player-name">Qual é o seu nome?</label>
+            <input id="player-name" type="text" maxlength="20" autocomplete="name" placeholder="Nome do jogador">
+          </div>
+
+          <fieldset class="mode-picker">
+            <legend>Escolha o modo de jogo:</legend>
+            <button class="mode-button green is-selected" type="button" role="radio" aria-checked="true" data-operations="+">✓ + Apenas Adição</button>
+            <button class="mode-button blue" type="button" role="radio" aria-checked="false" data-operations="-">- Apenas Subtração</button>
+            <button class="mode-button orange" type="button" role="radio" aria-checked="false" data-operations="×">× Apenas Multiplicação</button>
+            <button class="mode-button purple" type="button" role="radio" aria-checked="false" data-operations="÷">÷ Apenas Divisão</button>
+            <button class="mode-button coral" type="button" role="radio" aria-checked="false" data-operations="+,-,×,÷">🎲 Todas as Operações</button>
+          </fieldset>
+
+          <button id="start-button" class="primary-button" type="button" disabled>🚀 Começar a brincar!</button>
+          <div class="secondary-actions">
+            <button id="home-ranking-button" class="outline-button" type="button">🏆 Ranking</button>
+            <button id="about-button" class="outline-button" type="button">👤 Sobre Mim</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="game-screen" class="screen game-screen" aria-labelledby="game-greeting" hidden>
+      <div class="game-layout content-width">
+        <header class="game-status">
+          <h1 id="game-greeting">Olá! 👋</h1>
+          <div class="status-row" aria-label="Situação da partida">
+            <span id="score-chip" class="status-chip score-chip">⭐ 0</span>
+            <span id="lives-chip" class="status-chip lives-chip" aria-label="3 vidas">❤️❤️❤️</span>
+            <span id="level-chip" class="status-chip level-chip">🎯 Nv 1</span>
+          </div>
+          <p id="streak-label" class="streak-label" hidden>🔥 Streak: 2</p>
+        </header>
+
+        <div class="question-column">
+          <article id="question-card" class="question-card">
+            <h2>Conte as frutinhas!</h2>
+            <div id="question-visual" class="question-visual" role="img"></div>
+          </article>
+
+          <div id="answer-grid" class="answer-grid" aria-label="Escolha a resposta"></div>
+        </div>
+
+        <div class="feedback-column">
+          <p id="feedback" class="feedback" aria-live="polite" hidden></p>
+          <button id="restart-button" class="outline-button compact" type="button">↩ Reiniciar</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="ranking-screen" class="screen simple-screen" aria-labelledby="ranking-title" hidden>
+      <div class="simple-content content-width">
+        <h1 id="ranking-title" class="screen-title">🏆 Hall dos campeões</h1>
+        <div id="ranking-list" class="ranking-list"></div>
+        <div id="ranking-empty" class="empty-state" hidden>
+          <strong>Nenhuma pontuação ainda!</strong>
+          <span>Jogue e seja o primeiro!</span>
+        </div>
+        <button id="ranking-back-button" class="primary-button narrow" type="button">← Voltar</button>
+      </div>
+    </section>
+
+    <section id="about-screen" class="screen simple-screen" aria-labelledby="about-title" hidden>
+      <div class="simple-content content-width">
+        <h1 id="about-title" class="screen-title">👋 Quem criou o jogo?</h1>
+        <article class="about-card">
+          <p>Técnico em Informática e Desenvolvedor Android.</p>
+          <p>Trabalho com Android Studio, Kotlin e Jetpack Compose, criando aplicativos focados em praticidade, organização e produtividade.</p>
+          <p>Possuo experiência em suporte técnico, redes, manutenção de computadores e desenvolvimento de soluções tecnológicas para usuários e empresas.</p>
+          <strong>— William Moraes</strong>
+        </article>
+        <button id="about-back-button" class="primary-button narrow" type="button">← Voltar</button>
+      </div>
+    </section>
+
+    <section id="game-over-screen" class="screen simple-screen" aria-labelledby="game-over-title" hidden>
+      <div class="game-over-layout content-width">
+        <div class="game-over-result">
+          <h1 id="game-over-title" class="screen-title">🌟 Fim da rodada! 🌟</h1>
+          <p id="final-player">Sua pontuação:</p>
+          <strong id="final-score" class="final-score">0 pontos</strong>
+          <p id="final-medal" class="final-medal" hidden></p>
+        </div>
+        <div class="game-over-actions">
+          <p id="ranking-position" class="result-note" hidden></p>
+          <p id="new-record" class="record-note" hidden>🏆 Novo recorde!</p>
+          <button id="play-again-button" class="primary-button" type="button">🔄 Jogar novamente</button>
+          <button id="game-over-ranking-button" class="outline-button" type="button">🏆 Ver ranking</button>
+          <button id="go-home-button" class="outline-button" type="button">🏠 Voltar ao início</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <audio id="background-music" src="audio/contash/musica_fundo.mp3" preload="none" loop></audio>
+  <audio id="correct-sound" src="audio/contash/acerto.wav" preload="auto"></audio>
+  <audio id="wrong-sound" src="audio/contash/erro.mp3" preload="auto"></audio>
+
+  <script type="module" src="contash.js"></script>
+</body>
+</html>
