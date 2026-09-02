@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parceiros FREE · WDM Shopping</title>
+<link rel="stylesheet" href="shopping.css">
+<style>
+body{background:#07101f;color:#e8f0fb}.freeShell{max-width:1180px;margin:auto;padding:28px 18px 70px}.freeTop{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.freeStats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.freeStats div,.notice,.tableWrap{background:#0d1a2c;border:1px solid #223854;border-radius:16px}.freeStats div{padding:16px}.freeStats strong{display:block;font-size:1.8rem}.notice{padding:14px 16px;margin:18px 0}.tableWrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:13px 14px;border-bottom:1px solid #1d3048;text-align:left}th{color:#8ea3bd}.pill{padding:6px 10px;border-radius:999px;font-weight:800;font-size:.8rem}.free{background:#123522;color:#a9efc7}.paid{background:#162b45;color:#c9dff8}.blocked{background:#331c20;color:#ffc0c8}.action{border:0;border-radius:10px;padding:9px 12px;font-weight:800;background:#1d6fff;color:white;cursor:pointer}.action.remove{background:#4a2730}.action:disabled{opacity:.5}.small{font-size:.8rem;color:#91a6c0;margin-top:5px}@media(max-width:700px){.freeStats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="freeShell">
+<div class="freeTop"><div><span class="ey">WDM Shopping · Administração</span><h1>Parceiros FREE</h1></div><div><button id="refreshBtn" class="btn2">↻ Atualizar</button> <a class="btn2" href="./#admin">← Voltar ao ADM</a></div></div>
+<div id="notice" class="notice">Carregando contas...</div>
+<section class="freeStats"><div><strong id="countAll">—</strong><span>contas</span></div><div><strong id="countFree">—</strong><span>Parceiros FREE</span></div><div><strong id="countPaid">—</strong><span>pagas ativas</span></div></section>
+<div class="tableWrap"><table><thead><tr><th>Conta / loja</th><th>Categoria</th><th>Situação</th><th>Plano</th><th>Ação</th></tr></thead><tbody id="accountsBody"><tr><td colspan="5">Carregando...</td></tr></tbody></table></div>
+</main>
+<script type="module" src="admin-free-page.js?v=20260902-1"></script>
+</body>
+</html>
