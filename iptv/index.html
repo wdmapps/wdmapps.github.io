@@ -1,652 +1,310 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WDM IPTV - A melhor experiência em TV por internet. Canais ao vivo, filmes, séries e muito mais.">
-    <title>WDM IPTV | Sua TV em qualquer lugar</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #00aeff;
-            --primary-dark: #0070e8;
-            --primary-light: #42d9ff;
-            --secondary: #020409;
-            --accent: #005eff;
-            --text: #f5f5f5;
-            --text-light: #aaaaaa;
-            --text-dark: #ffffff;
-            --bg: #000000;
-            --bg-light: #030816;
-            --bg-dark: #000000;
-            --bg-card: #050b16;
-            --border: #0b3e6f;
-            --shadow: 0 1px 3px rgba(0,0,0,0.5);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
-            --radius: 8px;
-            --radius-lg: 16px;
-            --transition: all 0.3s ease;
-            --grad1: linear-gradient(135deg, #00d9ff, #005eff);
-            --grad2: linear-gradient(135deg, #ffffff, #00aeff);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            color: var(--text);
-            line-height: 1.6;
-            background: var(--bg);
-            overflow-x: hidden;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WDM IPTV - canais ao vivo, filmes, séries, esportes e muito mais.">
+  <title>WDM IPTV | Sua TV em qualquer lugar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#00b7ff;
+      --primary2:#0068ff;
+      --text:#f7fbff;
+      --muted:#a9b5c6;
+      --card:rgba(4,11,23,.78);
+      --border:rgba(72,173,255,.28);
+      --green:#18b85a;
+      --shadow:0 20px 60px rgba(0,0,0,.42);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Inter',sans-serif;
+      background:#02060d;
+      color:var(--text);
+      line-height:1.6;
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 50% 18%,rgba(0,140,255,.18),transparent 38%),
+        linear-gradient(180deg,rgba(0,0,0,.50),rgba(0,0,0,.91) 72%,#02060d 100%);
+      pointer-events:none;
+    }
+    .mosaic-bg{
+      position:fixed;
+      z-index:-3;
+      inset:-15vh -10vw;
+      display:grid;
+      grid-template-columns:repeat(8,minmax(120px,1fr));
+      gap:16px;
+      transform:rotate(-5deg) scale(1.07);
+      opacity:.42;
+      filter:saturate(.9) contrast(1.06);
+      pointer-events:none;
+    }
+    .poster{
+      min-height:260px;
+      aspect-ratio:2/3;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:0 14px 34px rgba(0,0,0,.55);
+      position:relative;
+      background-size:cover;
+      background-position:center;
+    }
+    .poster::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 28%,rgba(0,0,0,.90) 100%)}
+    .poster::after{content:attr(data-title);position:absolute;left:12px;right:12px;bottom:14px;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 2px 8px #000}
+    .poster:nth-child(4n+1){background-image:linear-gradient(135deg,rgba(0,80,255,.08),rgba(0,0,0,.25)),url('img/cinema.jpg')}
+    .poster:nth-child(4n+2){background-image:linear-gradient(135deg,rgba(0,174,255,.10),rgba(0,0,0,.28)),url('img/entretenimento.jpg');background-position:35% center}
+    .poster:nth-child(4n+3){background-image:linear-gradient(135deg,rgba(30,80,255,.08),rgba(0,0,0,.30)),url('img/esportes.jpg');background-position:60% center}
+    .poster:nth-child(4n){background-image:linear-gradient(135deg,rgba(0,120,255,.10),rgba(0,0,0,.32)),url('img/dispositivos.jpg');background-position:70% center}
+    .poster:nth-child(3n){transform:translateY(42px)}
+    .poster:nth-child(5n){transform:translateY(-26px)}
 
-        .header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: rgba(0,0,0,0.96); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border); transition: var(--transition);
-        }
-        .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; }
-        .logo { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-        .logo-img { width: 46px; height: 46px; object-fit: cover; border-radius: 12px; box-shadow: 0 0 18px rgba(0,170,255,0.25); }
-        .logo span { color: var(--primary); }
-        .nav-menu { display: flex; list-style: none; gap: 32px; }
-        .nav-menu a { text-decoration: none; color: var(--text); font-weight: 500; font-size: 0.95rem; transition: var(--transition); }
-        .nav-menu a:hover { color: var(--primary); }
-        .nav-menu .watch-link { color: var(--primary-light); font-weight: 700; }
+    .container{width:min(1180px,calc(100% - 40px));margin:auto}
+    header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(2,6,13,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)}
+    nav{height:74px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;color:white;text-decoration:none;font-family:'Poppins',sans-serif;font-weight:900;font-size:1.22rem}
+    .brand img{width:46px;height:46px;object-fit:cover;border-radius:12px;box-shadow:0 0 22px rgba(0,174,255,.22)}
+    .brand span{color:var(--primary)}
+    .menu{display:flex;gap:24px;align-items:center;list-style:none}
+    .menu a{color:#dce8f5;text-decoration:none;font-size:.9rem;font-weight:600;transition:.2s}
+    .menu a:hover{color:var(--primary)}
+    .watch-link{padding:10px 17px;border:1px solid rgba(0,183,255,.42);border-radius:10px;background:rgba(0,126,255,.10)}
 
-        .hero {
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: #000000;
-            position: relative; overflow: hidden; padding-top: 72px;
-        }
-        .hero::before {
-            content: ''; position: absolute; width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(0,174,255,0.20), transparent 70%);
-            top: -200px; right: -200px; animation: float 8s ease-in-out infinite;
-        }
-        .hero::after {
-            content: ''; position: absolute; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(0,94,255,0.16), transparent 70%);
-            bottom: -100px; left: -100px; animation: float 6s ease-in-out infinite reverse;
-        }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+    .hero{min-height:100vh;display:grid;place-items:center;padding:118px 0 70px;text-align:center}
+    .hero-inner{max-width:920px;padding:38px 34px;border:1px solid rgba(255,255,255,.08);border-radius:30px;background:linear-gradient(180deg,rgba(2,8,18,.72),rgba(2,8,18,.88));backdrop-filter:blur(8px);box-shadow:var(--shadow)}
+    .hero-logo{width:min(390px,82vw);border-radius:24px;display:block;margin:0 auto 24px;box-shadow:0 25px 65px rgba(0,0,0,.48),0 0 40px rgba(0,174,255,.12)}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(0,183,255,.11);border:1px solid rgba(0,183,255,.28);color:#76d8ff;font-size:.8rem;font-weight:700;margin-bottom:16px}
+    h1{font-family:'Poppins',sans-serif;font-size:clamp(2.3rem,5vw,4.4rem);line-height:1.02;margin-bottom:18px}
+    h1 span{background:linear-gradient(135deg,#65ddff,#0070ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{font-size:clamp(1rem,2vw,1.15rem);color:#c0cbd8;max-width:670px;margin:0 auto 30px}
+    .hero-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 25px;border-radius:12px;text-decoration:none;font-weight:800;transition:.25s;border:1px solid transparent}
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;box-shadow:0 12px 30px rgba(0,115,255,.32)}
+    .btn-outline{color:white;background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.15)}
+    .btn-green{background:linear-gradient(135deg,#1ac266,#0d8f44);color:white;box-shadow:0 12px 30px rgba(17,171,82,.25)}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:34px}
+    .stat{padding:17px;border-radius:16px;background:rgba(3,10,21,.72);border:1px solid rgba(255,255,255,.08)}
+    .stat strong{display:block;color:#63d9ff;font-family:'Poppins',sans-serif;font-size:1.35rem}
+    .stat span{font-size:.82rem;color:var(--muted)}
 
-        .hero-content { position: relative; z-index: 1; text-align: center; max-width: 900px; }
-        .hero-logo {
-            display: block; width: min(520px, 92vw); margin: 0 auto 28px;
-            border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.55), 0 0 40px rgba(0,170,255,0.18);
-        }
-        .hero-badge {
-            display: inline-block; padding: 8px 20px; border-radius: 50px;
-            background: rgba(0,174,255,0.14); border: 1px solid rgba(0,174,255,0.35);
-            font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 24px;
-        }
-        .hero h1 {
-            font-family: 'Poppins', sans-serif; font-size: 3.5rem; font-weight: 900;
-            line-height: 1.1; margin-bottom: 20px;
-        }
-        .hero h1 span { background: var(--grad1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 32px; }
-        .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-        .btn {
-            padding: 14px 32px; border-radius: var(--radius); font-size: 1rem; font-weight: 600;
-            font-family: inherit; cursor: pointer; transition: var(--transition);
-            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--grad1); color: #fff; border: none; box-shadow: 0 4px 20px rgba(0,174,255,0.38); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,174,255,0.55); }
-        .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+    section{padding:86px 0}
+    .section-panel{background:linear-gradient(180deg,rgba(2,7,15,.88),rgba(2,7,15,.94));border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+    .section-head{text-align:center;max-width:720px;margin:0 auto 44px}
+    .section-head small{color:#6edbff;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+    .section-head h2{font-family:'Poppins',sans-serif;font-size:clamp(1.8rem,3vw,2.7rem);margin:8px 0 10px}
+    .section-head p{color:var(--muted)}
 
-        .hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 48px; }
-        .stat { text-align: center; }
-        .stat-number { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; color: var(--primary); display: block; }
-        .stat-label { font-size: 0.85rem; color: var(--text-light); }
+    .categories{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 14px 35px rgba(0,0,0,.20);backdrop-filter:blur(8px);transition:.25s}
+    .card:hover{transform:translateY(-4px);border-color:rgba(0,183,255,.55)}
+    .icon{font-size:2rem;margin-bottom:10px}
+    .card h3{font-family:'Poppins',sans-serif;font-size:1.05rem;margin-bottom:6px}
+    .card p{color:var(--muted);font-size:.9rem}
 
-        .section { padding: 100px 0; }
-        .section-header { text-align: center; max-width: 700px; margin: 0 auto 60px; }
-        .section-tag {
-            display: inline-block; padding: 6px 16px; border-radius: 50px;
-            background: rgba(0,174,255,0.1); border: 1px solid rgba(0,174,255,0.24);
-            font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 16px;
-        }
-        .section-header h2 { font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; }
-        .section-header p { color: var(--text-light); font-size: 1.05rem; }
+    .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .plan{position:relative;text-align:center;padding:32px 26px}
+    .plan.featured{border-color:#00b7ff;box-shadow:0 20px 55px rgba(0,135,255,.16)}
+    .ribbon{position:absolute;top:14px;right:14px;font-size:.68rem;font-weight:900;color:#86e6ff;background:rgba(0,183,255,.12);border:1px solid rgba(0,183,255,.3);padding:5px 9px;border-radius:999px}
+    .price{font-family:'Poppins',sans-serif;font-size:2.6rem;font-weight:900;color:#68ddff;margin:10px 0 16px}
+    .price small{font-size:.8rem;color:var(--muted);font-weight:500}
+    .plan ul{list-style:none;text-align:left;margin:18px 0 24px}
+    .plan li{padding:7px 0;color:#c4cfda;font-size:.9rem}
+    .plan li::before{content:'✓';color:#43d487;margin-right:9px;font-weight:900}
 
-        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-        .plan-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-            padding: 40px 32px; text-align: center; transition: var(--transition); position: relative; overflow: hidden;
-        }
-        .plan-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,174,255,0.16); }
-        .plan-card.destaque {
-            border-color: var(--primary); background: linear-gradient(180deg, var(--bg-card), rgba(0,174,255,0.08));
-        }
-        .plan-card.destaque::before {
-            content: 'MAIS POPULAR'; position: absolute; top: 16px; right: -32px;
-            background: var(--grad1); color: #fff; padding: 4px 40px; font-size: 0.7rem; font-weight: 700;
-            transform: rotate(45deg); letter-spacing: 1px;
-        }
-        .plan-name { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
-        .plan-price { font-family: 'Poppins', sans-serif; font-size: 3rem; font-weight: 900; color: var(--primary); margin: 16px 0; }
-        .plan-price span { font-size: 1rem; color: var(--text-light); font-weight: 400; }
-        .plan-features { list-style: none; margin: 24px 0 32px; text-align: left; }
-        .plan-features li { padding: 8px 0; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-light); }
-        .plan-features li::before { content: '✓'; color: var(--primary); font-weight: 700; }
+    .device-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:stretch}
+    .device-copy{display:flex;flex-direction:column;justify-content:center}
+    .device-copy h2{font-family:'Poppins',sans-serif;font-size:2rem;margin-bottom:12px}
+    .device-copy p{color:var(--muted);margin-bottom:22px}
+    .device-image{min-height:360px;border-radius:22px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.55)),url('img/dispositivos.jpg') center/cover no-repeat;box-shadow:var(--shadow)}
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-        .feature-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-            padding: 32px; transition: var(--transition); text-align: center;
-        }
-        .feature-card:hover { transform: translateY(-4px); border-color: var(--primary); }
-        .feature-icon { font-size: 2.5rem; margin-bottom: 16px; }
-        .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .feature-card p { color: var(--text-light); font-size: 0.9rem; }
+    .faq{display:grid;gap:12px;max-width:850px;margin:auto}
+    details{background:rgba(4,11,23,.82);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+    summary{cursor:pointer;font-weight:800}
+    details p{color:var(--muted);margin-top:10px;font-size:.92rem}
 
-        .catalog-section { padding: 100px 0; background: #000; }
-        .media-showcase {
-            display: grid; grid-template-columns: 1.25fr 0.75fr; grid-template-rows: repeat(2, 250px);
-            gap: 16px;
-        }
-        .media-tile {
-            position: relative; overflow: hidden; border-radius: 22px; border: 1px solid var(--border);
-            isolation: isolate; min-height: 230px;
-        }
-        .media-tile:first-child { grid-row: 1 / 3; }
-        .media-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
-        .media-tile::before {
-            content: ''; position: absolute; inset: 0; z-index: 1;
-            background: linear-gradient(180deg, transparent 25%, rgba(0,0,0,0.94) 100%);
-        }
-        .media-tile::after {
-            content: ''; position: absolute; inset: 0; z-index: 1;
-            background: linear-gradient(135deg, rgba(0,174,255,0.18), transparent 45%);
-            pointer-events: none;
-        }
-        .media-tile:hover img { transform: scale(1.06); }
-        .media-copy { position: absolute; left: 26px; right: 26px; bottom: 24px; z-index: 2; }
-        .media-copy span {
-            display: inline-flex; padding: 5px 10px; border-radius: 999px; margin-bottom: 9px;
-            color: var(--primary-light); background: rgba(0,0,0,0.7); border: 1px solid rgba(0,174,255,0.35);
-            font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .media-copy h3 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; line-height: 1.2; }
-        .media-tile:first-child .media-copy h3 { font-size: clamp(1.7rem, 3vw, 2.5rem); max-width: 520px; }
-        .device-banner {
-            display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 36px;
-            background: linear-gradient(135deg, rgba(0,174,255,0.10), rgba(0,0,0,0.94));
-            border: 1px solid var(--border); border-radius: 24px; overflow: hidden;
-        }
-        .device-banner img { width: 100%; height: 360px; object-fit: cover; }
-        .device-copy { padding: 40px 0 40px 42px; }
-        .device-copy h2 { font-family: 'Poppins', sans-serif; font-size: 2rem; margin: 12px 0; }
-        .device-copy p { color: var(--text-light); margin-bottom: 22px; }
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
-        .category-card {
-            background: linear-gradient(180deg, rgba(0,174,255,0.08), rgba(5,11,22,0.92));
-            border: 1px solid var(--border); border-radius: var(--radius-lg);
-            padding: 24px; transition: var(--transition); position: relative; overflow: hidden;
-        }
-        .category-card::after {
-            content: ''; position: absolute; inset: auto -30px -40px auto; width: 100px; height: 100px;
-            background: radial-gradient(circle, rgba(0,174,255,0.18), transparent 70%);
-        }
-        .category-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 18px 40px rgba(0,174,255,0.12); }
-        .category-icon { font-size: 2rem; margin-bottom: 12px; }
-        .category-card h3 { font-size: 1.05rem; margin-bottom: 6px; }
-        .category-card strong { color: var(--primary-light); display: block; font-size: 0.82rem; margin-bottom: 8px; }
-        .category-card p { color: var(--text-light); font-size: 0.88rem; }
+    .contact{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}
+    .contact h2{font-family:'Poppins',sans-serif;font-size:2rem;margin-bottom:12px}
+    .contact p{color:var(--muted)}
+    .contact-list{display:grid;gap:12px;margin-top:24px}
+    .contact-list div{padding:14px 16px;border-radius:12px;background:rgba(5,12,24,.74);border:1px solid rgba(255,255,255,.08)}
+    form{background:rgba(4,11,23,.88);border:1px solid var(--border);border-radius:20px;padding:24px}
+    label{display:block;font-size:.82rem;font-weight:700;color:#b8c7d6;margin:0 0 6px}
+    input,select,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.11);background:#071120;color:white;font:inherit;outline:none;margin-bottom:14px}
+    input:focus,select:focus,textarea:focus{border-color:#00b7ff;box-shadow:0 0 0 3px rgba(0,183,255,.10)}
+    textarea{resize:vertical;min-height:100px}
+    button{cursor:pointer;width:100%}
 
-        .channels-strip {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;
-            margin-top: 30px;
-        }
-        .channel-pill {
-            background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(0,174,255,0.08));
-            border: 1px solid var(--border); border-radius: 18px; padding: 18px 14px;
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            transition: var(--transition); font-weight: 800; letter-spacing: 0.2px;
-        }
-        .channel-pill:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .channel-pill span { color: var(--primary-light); font-size: 0.72rem; border: 1px solid rgba(0,174,255,0.32); padding: 3px 8px; border-radius: 999px; }
+    footer{padding:28px 0;background:#02060d;border-top:1px solid rgba(255,255,255,.06);color:#8fa0b3;font-size:.86rem}
+    .footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .footer-row a{color:#9ccfe6;text-decoration:none}
 
-        .split-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
-        .showcase-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-            padding: 30px; min-height: 100%; transition: var(--transition);
-        }
-        .showcase-card:hover { border-color: var(--primary); box-shadow: 0 18px 40px rgba(0,174,255,0.1); }
-        .showcase-card h3 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; margin-bottom: 12px; }
-        .showcase-card p { color: var(--text-light); margin-bottom: 18px; }
-        .mini-list { display: grid; gap: 12px; }
-        .mini-list div { display: flex; align-items: center; gap: 10px; color: var(--text-light); font-size: 0.92rem; }
-        .mini-list div::before { content: '✓'; color: var(--primary-light); font-weight: 900; }
-
-        .update-panel {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
-            background: linear-gradient(135deg, rgba(0,174,255,0.08), rgba(0,94,255,0.04));
-            border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px;
-        }
-        .update-item h4 { font-size: 1rem; margin-bottom: 6px; }
-        .update-item p { color: var(--text-light); font-size: 0.88rem; }
-
-        .cta-section {
-            padding: 80px 0; text-align: center;
-            background: linear-gradient(135deg, rgba(0,174,255,0.07), rgba(0,94,255,0.05));
-            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-        }
-        .cta-section h2 { font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; }
-        .cta-section p { color: var(--text-light); font-size: 1.05rem; max-width: 500px; margin: 0 auto 32px; }
-
-        .contact-section { padding: 100px 0; }
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
-        .contact-info h2 { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 16px; }
-        .contact-info p { color: var(--text-light); margin-bottom: 32px; }
-        .contact-item { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-        .contact-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(0,174,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .contact-item h4 { font-size: 0.9rem; font-weight: 600; }
-        .contact-item p { color: var(--text-light); font-size: 0.85rem; margin: 0; }
-
-        .footer {
-            background: var(--bg-dark); border-top: 1px solid var(--border); padding: 40px 0;
-        }
-        .footer-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-        .footer p { color: var(--text-light); font-size: 0.85rem; }
-        .footer-links { display: flex; gap: 24px; }
-        .footer-links a { color: var(--text-light); text-decoration: none; font-size: 0.85rem; transition: var(--transition); }
-        .footer-links a:hover { color: var(--primary); }
-
-        .faq-grid { display: grid; gap: 16px; max-width: 800px; margin: 0 auto; }
-        .faq-item {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 20px 24px; cursor: pointer; transition: var(--transition);
-        }
-        .faq-item:hover { border-color: var(--primary); }
-        .faq-question { font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .faq-answer { color: var(--text-light); font-size: 0.9rem; margin-top: 12px; display: none; }
-        .faq-item.open .faq-answer { display: block; }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .hero-logo { width: min(360px, 94vw); border-radius: 18px; }
-            .hero-stats { gap: 24px; flex-wrap: wrap; }
-            .nav-menu { display: none; }
-            .contact-grid { grid-template-columns: 1fr; }
-            .split-section { grid-template-columns: 1fr; }
-            .media-showcase { grid-template-columns: 1fr; grid-template-rows: none; }
-            .media-tile:first-child { grid-row: auto; }
-            .media-tile { height: 280px; }
-            .device-banner { grid-template-columns: 1fr; }
-            .device-copy { padding: 30px 24px 0; }
-            .device-banner img { height: 260px; }
-            .section-header h2 { font-size: 1.8rem; }
-        }
-    </style>
+    @media(max-width:950px){
+      .mosaic-bg{grid-template-columns:repeat(6,minmax(110px,1fr));opacity:.35}
+      .categories{grid-template-columns:repeat(2,1fr)}
+      .plans{grid-template-columns:1fr}
+      .device-wrap,.contact{grid-template-columns:1fr}
+    }
+    @media(max-width:720px){
+      .menu li:not(:last-child){display:none}
+      .menu{gap:0}
+      .hero-inner{padding:28px 18px}
+      .stats{grid-template-columns:1fr}
+      .categories{grid-template-columns:1fr}
+      .mosaic-bg{grid-template-columns:repeat(4,minmax(100px,1fr));gap:10px;opacity:.28;inset:-8vh -25vw}
+      .poster{min-height:220px;border-radius:12px}
+      section{padding:68px 0}
+    }
+  </style>
 </head>
 <body>
-    <header class="header">
-        <nav class="nav container">
-            <a href="/" class="logo"><img src="img/logo-wdm-iptv.png" alt="WDM IPTV" class="logo-img">WDM <span>IPTV</span></a>
-            <ul class="nav-menu">
-                <li><a href="#planos">Planos</a></li>
-                <li><a href="#canais">Canais</a></li>
-                <li><a href="#recursos">Recursos</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="#contato">Contato</a></li>
-                <li><a href="player.html" class="watch-link">▶ Assistir</a></li>
-            </ul>
-        </nav>
-    </header>
+  <div class="mosaic-bg" aria-hidden="true">
+    <div class="poster" data-title="Cinema"></div><div class="poster" data-title="Séries"></div><div class="poster" data-title="Esportes"></div><div class="poster" data-title="Aventura"></div>
+    <div class="poster" data-title="Ação"></div><div class="poster" data-title="Drama"></div><div class="poster" data-title="Ao Vivo"></div><div class="poster" data-title="Família"></div>
+    <div class="poster" data-title="Suspense"></div><div class="poster" data-title="Comédia"></div><div class="poster" data-title="Futebol"></div><div class="poster" data-title="Clássicos"></div>
+    <div class="poster" data-title="Lançamentos"></div><div class="poster" data-title="Temporadas"></div><div class="poster" data-title="Eventos"></div><div class="poster" data-title="Documentários"></div>
+    <div class="poster" data-title="Filmes"></div><div class="poster" data-title="Maratona"></div><div class="poster" data-title="Premium"></div><div class="poster" data-title="Infantil"></div>
+    <div class="poster" data-title="Notícias"></div><div class="poster" data-title="Internacional"></div><div class="poster" data-title="Música"></div><div class="poster" data-title="Entretenimento"></div>
+  </div>
 
+  <header>
+    <nav class="container">
+      <a class="brand" href="/"><img src="img/logo-wdm-iptv.png" alt="WDM IPTV">WDM <span>IPTV</span></a>
+      <ul class="menu">
+        <li><a href="#conteudo">Conteúdo</a></li>
+        <li><a href="#planos">Planos</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contato">Contato</a></li>
+        <li><a class="watch-link" href="player.html">▶ Assistir</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
     <section class="hero">
-        <div class="hero-content">
-            <img src="img/logo-wdm-iptv.png" alt="WDM IPTV" class="hero-logo">
-            <div class="hero-badge">📺 Nova Plataforma</div>
-            <h1><span>WDM IPTV</span><br>A melhor TV por internet</h1>
-            <p>Canais ao vivo, filmes, séries, esportes e muito mais. Assista onde quiser, quando quiser, no dispositivo que preferir.</p>
-            <div class="hero-cta">
-                <a href="player.html" class="btn btn-primary">▶ Assistir Agora</a>
-                <a href="#planos" class="btn btn-secondary">Ver Planos</a>
-                <a href="#contato" class="btn btn-secondary">Fale Conosco</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat"><span class="stat-number">+18mil</span><span class="stat-label">Canais e transmissões</span></div>
-                <div class="stat"><span class="stat-number">+65mil</span><span class="stat-label">Filmes e séries</span></div>
-                <div class="stat"><span class="stat-number">4h</span><span class="stat-label">Teste grátis</span></div>
-            </div>
+      <div class="container">
+        <div class="hero-inner">
+          <img class="hero-logo" src="img/logo-wdm-iptv.png" alt="WDM IPTV">
+          <div class="badge">📺 Entretenimento em qualquer tela</div>
+          <h1>Sua programação, <span>do seu jeito.</span></h1>
+          <p>Canais ao vivo, filmes, séries, esportes e muito mais em uma experiência simples, organizada e compatível com seus principais dispositivos.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="player.html">▶ Assistir Agora</a>
+            <a class="btn btn-green" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20quero%20solicitar%20um%20teste%20da%20WDM%20IPTV" target="_blank" rel="noopener">💬 Teste Grátis</a>
+            <a class="btn btn-outline" href="#planos">Ver Planos</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>+18 mil</strong><span>Canais e transmissões</span></div>
+            <div class="stat"><strong>+65 mil</strong><span>Filmes e séries</span></div>
+            <div class="stat"><strong>4 horas</strong><span>Teste grátis</span></div>
+          </div>
         </div>
+      </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Sua programação</span>
-                <h2>Entretenimento para cada momento</h2>
-                <p>Da sessão de cinema ao jogo decisivo, escolha o que assistir com uma navegação simples e organizada.</p>
-            </div>
-            <div class="media-showcase">
-                <article class="media-tile">
-                    <img src="img/cinema.jpg" alt="Sala de cinema representando o catálogo de filmes da WDM IPTV" loading="lazy">
-                    <div class="media-copy"><span>Cinema em casa</span><h3>Filmes e séries para curtir do seu jeito</h3></div>
-                </article>
-                <article class="media-tile">
-                    <img src="img/esportes.jpg" alt="Atleta representando a programação esportiva da WDM IPTV" loading="lazy">
-                    <div class="media-copy"><span>Ao vivo</span><h3>Esportes e grandes eventos</h3></div>
-                </article>
-                <article class="media-tile">
-                    <img src="img/entretenimento.jpg" alt="Pessoa assistindo televisão em casa" loading="lazy">
-                    <div class="media-copy"><span>Conforto</span><h3>Assista sem sair do sofá</h3></div>
-                </article>
-            </div>
+    <section id="conteudo" class="section-panel">
+      <div class="container">
+        <div class="section-head"><small>Programação</small><h2>Tem conteúdo para todo mundo</h2><p>Escolha o que quer assistir e acesse uma grade organizada por categorias.</p></div>
+        <div class="categories">
+          <div class="card"><div class="icon">⚽</div><h3>Esportes</h3><p>Futebol, lutas, corridas, basquete e grandes eventos ao vivo.</p></div>
+          <div class="card"><div class="icon">🎬</div><h3>Filmes</h3><p>Lançamentos, clássicos e opções de vários gêneros.</p></div>
+          <div class="card"><div class="icon">📺</div><h3>Séries</h3><p>Temporadas completas, episódios e novidades frequentes.</p></div>
+          <div class="card"><div class="icon">🧸</div><h3>Infantil</h3><p>Desenhos, conteúdo educativo e programação para a família.</p></div>
+          <div class="card"><div class="icon">📰</div><h3>Notícias</h3><p>Canais nacionais e internacionais para acompanhar tudo em tempo real.</p></div>
+          <div class="card"><div class="icon">🌍</div><h3>Internacionais</h3><p>Conteúdo de diferentes países, idiomas e estilos.</p></div>
+          <div class="card"><div class="icon">🎵</div><h3>Música</h3><p>Shows, clipes, rádios e programação musical.</p></div>
+          <div class="card"><div class="icon">📚</div><h3>Documentários</h3><p>Natureza, história, ciência, investigação e muito mais.</p></div>
         </div>
+      </div>
     </section>
 
-    <section id="canais" class="catalog-section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Grade WDM IPTV</span>
-                <h2>Canais, filmes, séries e esportes em um só lugar</h2>
-                <p>Uma apresentação completa da programação WDM IPTV, com categorias organizadas para você encontrar rápido o que quer assistir.</p>
-            </div>
-            <div class="category-grid">
-                <div class="category-card"><div class="category-icon">⚽</div><h3>Esportes</h3><strong>Futebol, lutas e corridas</strong><p>Jogos, campeonatos, eventos e canais esportivos ao vivo.</p></div>
-                <div class="category-card"><div class="category-icon">🎬</div><h3>Filmes</h3><strong>Lançamentos e clássicos</strong><p>Catálogo organizado por gênero, qualidade e novidades.</p></div>
-                <div class="category-card"><div class="category-icon">📺</div><h3>Séries</h3><strong>Temporadas completas</strong><p>Opções dubladas, legendadas e atualizadas com frequência.</p></div>
-                <div class="category-card"><div class="category-icon">📰</div><h3>Notícias</h3><strong>Brasil e mundo</strong><p>Canais jornalísticos para acompanhar tudo em tempo real.</p></div>
-                <div class="category-card"><div class="category-icon">🧸</div><h3>Infantil</h3><strong>Conteúdo para crianças</strong><p>Desenhos, canais educativos e programação familiar.</p></div>
-                <div class="category-card"><div class="category-icon">🌍</div><h3>Internacionais</h3><strong>Conteúdo global</strong><p>Canais de vários países, idiomas e estilos de programação.</p></div>
-                <div class="category-card"><div class="category-icon">🎵</div><h3>Música</h3><strong>Clipes e rádios</strong><p>Programação musical, shows e canais 24 horas.</p></div>
-                <div class="category-card"><div class="category-icon">📑</div><h3>Documentários</h3><strong>Natureza, história e ciência</strong><p>Conteúdo informativo para todos os perfis.</p></div>
-            </div>
+    <section id="planos">
+      <div class="container">
+        <div class="section-head"><small>Planos</small><h2>Escolha o melhor para você</h2><p>Ativação rápida e suporte para configurar no seu dispositivo.</p></div>
+        <div class="plans">
+          <div class="card plan">
+            <h3>Mensal</h3><div class="price">R$25 <small>/mês</small></div>
+            <ul><li>1 tela simultânea</li><li>Canais ao vivo</li><li>Filmes e séries</li><li>Suporte via WhatsApp</li></ul>
+            <a class="btn btn-outline" href="#contato">Assinar</a>
+          </div>
+          <div class="card plan featured">
+            <span class="ribbon">MAIS POPULAR</span><h3>Trimestral</h3><div class="price">R$60 <small>/trimestre</small></div>
+            <ul><li>2 telas simultâneas</li><li>Canais ao vivo</li><li>Filmes e séries</li><li>Suporte prioritário</li></ul>
+            <a class="btn btn-primary" href="#contato">Assinar</a>
+          </div>
+          <div class="card plan">
+            <h3>Anual</h3><div class="price">R$250 <small>/ano</small></div>
+            <ul><li>4 telas simultâneas</li><li>Canais ao vivo</li><li>Filmes e séries</li><li>Suporte VIP</li></ul>
+            <a class="btn btn-outline" href="#contato">Assinar</a>
+          </div>
         </div>
+      </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Destaques</span>
-                <h2>Canais mais procurados</h2>
-                <p>Alguns exemplos de categorias e canais que os clientes mais costumam buscar na grade.</p>
-            </div>
-            <div class="channels-strip">
-                <div class="channel-pill">Globo <span>FHD</span></div>
-                <div class="channel-pill">SBT <span>FHD</span></div>
-                <div class="channel-pill">Record <span>FHD</span></div>
-                <div class="channel-pill">Band <span>FHD</span></div>
-                <div class="channel-pill">SporTV <span>FHD</span></div>
-                <div class="channel-pill">ESPN <span>FHD</span></div>
-                <div class="channel-pill">Premiere <span>HD</span></div>
-                <div class="channel-pill">TNT <span>HD</span></div>
-                <div class="channel-pill">Telecine <span>HD</span></div>
-                <div class="channel-pill">HBO <span>HD</span></div>
-                <div class="channel-pill">CNN Brasil <span>FHD</span></div>
-                <div class="channel-pill">Discovery <span>HD</span></div>
-            </div>
+    <section class="section-panel">
+      <div class="container device-wrap">
+        <div class="card device-copy">
+          <div><small style="color:#6edbff;font-weight:800">MULTIPLATAFORMA</small><h2>Assista onde quiser</h2><p>Compatível com Smart TV, TV Box, celular, tablet, computador e notebook. Se precisar, a gente ajuda na configuração.</p></div>
+          <div><a class="btn btn-green" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20quero%20solicitar%20um%20teste%20da%20WDM%20IPTV" target="_blank" rel="noopener">Solicitar teste de 4 horas</a></div>
         </div>
+        <div class="device-image" role="img" aria-label="Dispositivos compatíveis com WDM IPTV"></div>
+      </div>
     </section>
 
-    <section class="section" style="background:var(--bg-dark)">
-        <div class="container">
-            <div class="split-section">
-                <div class="showcase-card">
-                    <span class="section-tag">Ao Vivo</span>
-                    <h3>Esportes e eventos em tempo real</h3>
-                    <p>Tenha acesso a uma programação esportiva completa, com canais e transmissões para acompanhar grandes eventos.</p>
-                    <div class="mini-list">
-                        <div>Futebol brasileiro e internacional</div>
-                        <div>Champions, Libertadores e campeonatos nacionais</div>
-                        <div>UFC, boxe, automobilismo e basquete</div>
-                        <div>Eventos especiais conforme disponibilidade da grade</div>
-                    </div>
-                </div>
-                <div class="showcase-card">
-                    <span class="section-tag">Sob Demanda</span>
-                    <h3>Catálogo de filmes e séries</h3>
-                    <p>Além dos canais ao vivo, a WDM IPTV oferece opções sob demanda para assistir quando quiser.</p>
-                    <div class="mini-list">
-                        <div>Filmes recentes, clássicos e coleções</div>
-                        <div>Séries completas e episódios atualizados</div>
-                        <div>Animes, documentários e conteúdo infantil</div>
-                        <div>Opções dubladas e legendadas</div>
-                    </div>
-                </div>
-            </div>
+    <section id="faq">
+      <div class="container">
+        <div class="section-head"><small>Dúvidas</small><h2>Perguntas frequentes</h2></div>
+        <div class="faq">
+          <details><summary>Como funciona?</summary><p>Depois da ativação, você recebe suas credenciais de acesso e as orientações para assistir no dispositivo compatível.</p></details>
+          <details><summary>Quais dispositivos são compatíveis?</summary><p>Smart TVs, TV Box, Android, iPhone/iPad, computadores e notebooks, conforme o aplicativo usado.</p></details>
+          <details><summary>Precisa de antena?</summary><p>Não. O serviço funciona pela internet e precisa de uma conexão estável.</p></details>
+          <details><summary>Tem teste grátis?</summary><p>Sim. Você pode solicitar um teste gratuito de 4 horas para conhecer o serviço.</p></details>
+          <details><summary>Já sou cliente. Onde assisto?</summary><p>Clique em “Assistir” no menu ou em “Assistir Agora” no topo da página para abrir o player.</p></details>
         </div>
+      </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Estabilidade</span>
-                <h2>Atualização e suporte para assistir tranquilo</h2>
-                <p>Visual próprio da WDM IPTV, com foco em ativação rápida, estabilidade e atendimento direto.</p>
-            </div>
-            <div class="update-panel">
-                <div class="update-item"><h4>Novos conteúdos</h4><p>Catálogo revisado com novidades e organização por categorias.</p></div>
-                <div class="update-item"><h4>Grade atualizada</h4><p>Canais e transmissões ajustados conforme disponibilidade técnica.</p></div>
-                <div class="update-item"><h4>Ativação rápida</h4><p>Receba suas credenciais e orientação de instalação pelo atendimento.</p></div>
-                <div class="update-item"><h4>Suporte premium</h4><p>Ajuda para configurar no celular, Smart TV, TV Box, PC ou tablet.</p></div>
-            </div>
+    <section id="contato" class="section-panel">
+      <div class="container contact">
+        <div>
+          <small style="color:#6edbff;font-weight:800">CONTATO</small>
+          <h2>Vamos conversar?</h2>
+          <p>Solicite um teste, tire dúvidas ou escolha seu plano.</p>
+          <div class="contact-list">
+            <div>📱 WhatsApp: +55 (11) 96918-8837</div>
+            <div>📧 Email: contato@wdmapps.com.br</div>
+            <div>▶ Já é cliente? <a href="player.html" style="color:#65dcff">Abrir o player</a></div>
+          </div>
         </div>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="8c68bb0d-d427-4d8a-bad2-c40f89d3f893">
+          <input type="hidden" name="subject" value="Novo contato - WDM IPTV">
+          <input type="hidden" name="from_name" value="WDM IPTV">
+          <label>Nome</label><input type="text" name="name" required>
+          <label>WhatsApp / Telefone</label><input type="text" name="phone" required>
+          <label>Plano de interesse</label>
+          <select name="plano" required><option value="">Selecione</option><option>Mensal - R$25,00</option><option>Trimestral - R$60,00</option><option>Anual - R$250,00</option><option>Teste Grátis 4 horas</option></select>
+          <label>Mensagem</label><textarea name="message"></textarea>
+          <button class="btn btn-primary" type="submit">Enviar mensagem</button>
+        </form>
+      </div>
     </section>
+  </main>
 
-    <section class="section">
-        <div class="container">
-            <div class="device-banner">
-                <div class="device-copy">
-                    <span class="section-tag">Onde você estiver</span>
-                    <h2>Uma experiência que acompanha você</h2>
-                    <p>Use em Smart TV, TV Box, celular, tablet ou computador. Nossa equipe orienta a configuração no dispositivo compatível.</p>
-                    <a href="#contato" class="btn btn-primary">Solicitar teste de 4 horas</a>
-                </div>
-                <img src="img/dispositivos.jpg" alt="Dispositivos conectados representando o acesso multiplataforma" loading="lazy">
-            </div>
-        </div>
-    </section>
-
-    <section id="planos" class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Planos</span>
-                <h2>Escolha o melhor plano pra você</h2>
-                <p>Preços acessíveis com a melhor qualidade de transmissão do mercado.</p>
-            </div>
-            <div class="plans-grid">
-                <div class="plan-card">
-                    <div class="plan-name">Mensal</div>
-                    <div class="plan-price">R$25,00<span>/mês</span></div>
-                    <ul class="plan-features">
-                        <li>1.500+ canais ao vivo</li>
-                        <li>10.000+ filmes e séries</li>
-                        <li>Qualidade SD/HD</li>
-                        <li>1 tela simultânea</li>
-                        <li>Suporte via WhatsApp</li>
-                    </ul>
-                    <a href="#contato" class="btn btn-secondary" style="width:100%;justify-content:center">Assinar</a>
-                </div>
-                <div class="plan-card destaque">
-                    <div class="plan-name">Trimestral</div>
-                    <div class="plan-price">R$60,00<span>/trimestre</span></div>
-                    <ul class="plan-features">
-                        <li>1.500+ canais ao vivo</li>
-                        <li>10.000+ filmes e séries</li>
-                        <li>Qualidade HD/Full HD</li>
-                        <li>2 telas simultâneas</li>
-                        <li>Suporte prioritário</li>
-                        <li>Conteúdo 4K selecionado</li>
-                    </ul>
-                    <a href="#contato" class="btn btn-primary" style="width:100%;justify-content:center">Assinar</a>
-                </div>
-                <div class="plan-card">
-                    <div class="plan-name">Anual</div>
-                    <div class="plan-price">R$250,00<span>/ano</span></div>
-                    <ul class="plan-features">
-                        <li>1.500+ canais ao vivo</li>
-                        <li>10.000+ filmes e séries</li>
-                        <li>Qualidade HD/Full HD/4K</li>
-                        <li>4 telas simultâneas</li>
-                        <li>Suporte VIP 24h</li>
-                        <li>Conteúdo 4K e evento exclusivos</li>
-                        <li>Guia de programação (EPG)</li>
-                    </ul>
-                    <a href="#contato" class="btn btn-secondary" style="width:100%;justify-content:center">Assinar</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="recursos" class="section" style="background:var(--bg-dark)">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Recursos</span>
-                <h2>Por que escolher a WDM IPTV?</h2>
-                <p>Qualidade, variedade e suporte que você merece.</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📡</div>
-                    <h3>Canais ao Vivo</h3>
-                    <p>Mais de 1.500 canais nacionais e internacionais, incluindo esportes, filmes, notícias e infantis.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎬</div>
-                    <h3>Filmes e Séries</h3>
-                    <p>Acervo completo com mais de 10.000 títulos atualizados toda semana.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Multiplataforma</h3>
-                    <p>Funciona em Smart TV, celular, tablet, PC, TV Box e muito mais.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Alta Qualidade</h3>
-                    <p>Transmissão estável em SD, HD, Full HD e 4K sem travamentos.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Servidor Estável</h3>
-                    <p>Infraestrutura robusta com 99% de uptime garantido.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💬</div>
-                    <h3>Suporte Dedicado</h3>
-                    <p>Atendimento rápido via WhatsApp para ajudar no que precisar.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="faq" class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">FAQ</span>
-                <h2>Perguntas Frequentes</h2>
-            </div>
-            <div class="faq-grid">
-                <div class="faq-item" onclick="this.classList.toggle('open')">
-                    <div class="faq-question">Como funciona a WDM IPTV? <span style="font-size:1.2rem">+</span></div>
-                    <div class="faq-answer">Você assina um dos planos, instala o aplicativo no seu dispositivo e recebe as credenciais de acesso. Pronto, é só assistir!</div>
-                </div>
-                <div class="faq-item" onclick="this.classList.toggle('open')">
-                    <div class="faq-question">Quais dispositivos são compatíveis? <span style="font-size:1.2rem">+</span></div>
-                    <div class="faq-answer">Smart TVs (LG, Samsung, Android TV), TV Box, celulares Android e iOS, tablets, PC e notebooks.</div>
-                </div>
-                <div class="faq-item" onclick="this.classList.toggle('open')">
-                    <div class="faq-question">Precisa de antena ou cabo? <span style="font-size:1.2rem">+</span></div>
-                    <div class="faq-answer">Não! Funciona 100% pela internet. Só precisa de uma conexão estável com pelo menos 10 Mbps.</div>
-                </div>
-                <div class="faq-item" onclick="this.classList.toggle('open')">
-                    <div class="faq-question">Tem teste grátis? <span style="font-size:1.2rem">+</span></div>
-                    <div class="faq-answer">Sim! Oferecemos 4 horas de teste gratuito para você conhecer a qualidade do serviço.</div>
-                </div>
-                <div class="faq-item" onclick="this.classList.toggle('open')">
-                    <div class="faq-question">Como pagar? <span style="font-size:1.2rem">+</span></div>
-                    <div class="faq-answer">Aceitamos PIX, cartão de crédito e boleto bancário.</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta-section">
-        <div class="container">
-            <h2>Pronto para começar?</h2>
-            <p>Solicite seu teste grátis de 4 horas e descubra a melhor IPTV do Brasil.</p>
-            <div class="hero-cta">
-                <a href="#contato" class="btn btn-primary btn-large">Quero Testar Grátis</a>
-                <a href="player.html" class="btn btn-secondary btn-large">▶ Já sou cliente — Assistir</a>
-            </div>
-        </div>
-    </section>
-
-    <section id="contato" class="contact-section">
-        <div class="container">
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <span class="section-tag">Contato</span>
-                    <h2>Vamos conversar?</h2>
-                    <p>Entre em contato e descubra o plano ideal pra você. Teste grátis de 4 horas sem compromisso.</p>
-                    <div class="contact-item">
-                        <div class="contact-icon">📱</div>
-                        <div>
-                            <h4>WhatsApp</h4>
-                            <p>+55 (11) 9 6918-8837</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div>
-                            <h4>Email</h4>
-                            <p>contato@wdmapps.com.br</p>
-                        </div>
-                    </div>
-                </div>
-                <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
-                    <input type="hidden" name="access_key" value="8c68bb0d-d427-4d8a-bad2-c40f89d3f893">
-                    <input type="hidden" name="subject" value="Novo contato - WDM IPTV">
-                    <input type="hidden" name="from_name" value="WDM IPTV">
-                    <div class="form-group" style="margin-bottom:16px">
-                        <label style="display:block;font-size:0.85rem;font-weight:500;color:var(--text-light);margin-bottom:6px">Nome</label>
-                        <input type="text" name="name" required style="width:100%;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.95rem;font-family:inherit;outline:none">
-                    </div>
-                    <div class="form-group" style="margin-bottom:16px">
-                        <label style="display:block;font-size:0.85rem;font-weight:500;color:var(--text-light);margin-bottom:6px">WhatsApp / Telefone</label>
-                        <input type="text" name="phone" required style="width:100%;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.95rem;font-family:inherit;outline:none">
-                    </div>
-                    <div class="form-group" style="margin-bottom:16px">
-                        <label style="display:block;font-size:0.85rem;font-weight:500;color:var(--text-light);margin-bottom:6px">Plano de Interesse</label>
-                        <select name="plano" required style="width:100%;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.95rem;font-family:inherit;outline:none">
-                            <option value="">Selecione</option>
-                            <option value="mensal">Mensal - R$25,00</option>
-                            <option value="trimestral">Trimestral - R$60,00</option>
-                            <option value="anual">Anual - R$250,00</option>
-                            <option value="teste">Teste Grátis 4 horas</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom:20px">
-                        <label style="display:block;font-size:0.85rem;font-weight:500;color:var(--text-light);margin-bottom:6px">Mensagem</label>
-                        <textarea name="message" rows="4" style="width:100%;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.95rem;font-family:inherit;outline:none;resize:vertical"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Enviar</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container footer-content">
-            <p>&copy; 2026 WDM IPTV. Todos os direitos reservados.</p>
-            <div class="footer-links">
-                <a href="/">WDM Apps</a>
-                <a href="#planos">Planos</a>
-                <a href="#contato">Contato</a>
-                <a href="player.html">▶ Assistir</a>
-            </div>
-        </div>
-    </footer>
+  <footer>
+    <div class="container footer-row"><span>© 2026 WDM IPTV. Todos os direitos reservados.</span><span><a href="/">WDM Apps</a> · <a href="player.html">Player</a></span></div>
+  </footer>
 </body>
 </html>
