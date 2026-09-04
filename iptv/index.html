@@ -23,19 +23,23 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
-    body::after{content:"";position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(0,0,0,.48) 0%,rgba(1,6,14,.72) 45%,rgba(2,6,13,.97) 100%),radial-gradient(circle at 50% 28%,rgba(0,126,255,.24),transparent 34%);pointer-events:none}
-
-    .mosaic{position:fixed;z-index:-3;inset:-12vh -8vw;display:grid;grid-template-columns:repeat(9,minmax(120px,1fr));gap:13px;transform:rotate(-4deg) scale(1.08);opacity:.5;filter:saturate(.9) contrast(1.05);pointer-events:none}
-    .poster{aspect-ratio:2/3;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 32px rgba(0,0,0,.55);background-size:cover;background-position:center;position:relative}
-    .poster::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 15%,rgba(1,6,14,.78) 100%)}
-    .poster::after{content:attr(data-title);position:absolute;left:10px;right:10px;bottom:12px;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;text-shadow:0 2px 7px #000}
-    .poster:nth-child(4n+1){background-image:url('img/cinema.jpg')}
-    .poster:nth-child(4n+2){background-image:url('img/entretenimento.jpg');background-position:35% center}
-    .poster:nth-child(4n+3){background-image:url('img/esportes.jpg');background-position:60% center}
-    .poster:nth-child(4n){background-image:url('img/dispositivos.jpg');background-position:70% center}
-    .poster:nth-child(3n){transform:translateY(34px)}
-    .poster:nth-child(5n){transform:translateY(-22px)}
+    body{
+      font-family:'Inter',sans-serif;
+      background:url('../img/fundo.jpg') center/cover fixed no-repeat,var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      overflow-x:hidden;
+      min-height:100vh;
+      position:relative;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:rgba(6,14,26,.72);
+      pointer-events:none;
+    }
 
     .container{width:min(1180px,calc(100% - 38px));margin:auto}
     header{position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(2,6,13,.78);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07)}
@@ -49,7 +53,7 @@
     .watch-link{padding:10px 16px;border:1px solid rgba(0,183,255,.45);border-radius:11px;background:linear-gradient(135deg,rgba(0,183,255,.14),rgba(0,104,255,.16));color:#7edfff!important}
 
     .hero{min-height:100vh;display:flex;align-items:center;padding:116px 0 60px;text-align:center}
-    .hero-content{max-width:980px;margin:auto}
+    .hero-content{max-width:980px;margin:auto;padding:38px 34px;border:1px solid rgba(255,255,255,.08);border-radius:30px;background:linear-gradient(180deg,rgba(2,8,18,.60),rgba(2,8,18,.82));backdrop-filter:blur(7px);box-shadow:var(--shadow)}
     .hero-logo{display:block;width:min(360px,78vw);margin:0 auto 20px;border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 42px rgba(0,183,255,.15)}
     .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(0,183,255,.12);border:1px solid rgba(0,183,255,.3);color:#77ddff;font-size:.8rem;font-weight:800;margin-bottom:16px}
     h1{font-family:'Poppins',sans-serif;font-size:clamp(2.5rem,5.4vw,5rem);line-height:1.02;letter-spacing:-.03em;margin-bottom:18px;text-shadow:0 5px 30px rgba(0,0,0,.55)}
@@ -73,7 +77,7 @@
     .trial-strip p{color:var(--muted);font-size:.9rem}
 
     section{padding:88px 0}
-    .panel{background:linear-gradient(180deg,rgba(3,9,19,.9),rgba(2,7,15,.96));border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+    .panel{background:linear-gradient(180deg,rgba(3,9,19,.78),rgba(2,7,15,.90));border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);backdrop-filter:blur(4px)}
     .section-head{text-align:center;max-width:760px;margin:0 auto 42px}
     .section-head small{color:#71ddff;text-transform:uppercase;letter-spacing:.13em;font-weight:900}
     .section-head h2{font-family:'Poppins',sans-serif;font-size:clamp(1.9rem,3.4vw,2.8rem);margin:8px 0 10px}
@@ -122,21 +126,15 @@
     textarea{resize:vertical;min-height:100px}
     button{width:100%;cursor:pointer}
 
-    footer{padding:28px 0;background:#02060d;border-top:1px solid rgba(255,255,255,.06);color:#8fa0b3;font-size:.86rem}
+    footer{padding:28px 0;background:rgba(2,6,13,.9);border-top:1px solid rgba(255,255,255,.06);color:#8fa0b3;font-size:.86rem}
     .footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
     .footer-row a{color:#9edfff;text-decoration:none}
 
-    @media(max-width:980px){.feature-row{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}.plans{grid-template-columns:1fr}.device-wrap,.contact{grid-template-columns:1fr}.trust{grid-template-columns:repeat(2,1fr)}.mosaic{grid-template-columns:repeat(6,minmax(110px,1fr));opacity:.38}}
-    @media(max-width:720px){.menu li:not(:last-child){display:none}.feature-row{grid-template-columns:1fr 1fr}.trial-strip{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr}.trust{grid-template-columns:1fr 1fr}.mosaic{grid-template-columns:repeat(4,minmax(100px,1fr));inset:-8vh -28vw;gap:9px;opacity:.28}.hero{padding-top:105px}.hero-logo{width:min(315px,80vw)}section{padding:68px 0}}
+    @media(max-width:980px){.feature-row{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}.plans{grid-template-columns:1fr}.device-wrap,.contact{grid-template-columns:1fr}.trust{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:720px){.menu li:not(:last-child){display:none}.feature-row{grid-template-columns:1fr 1fr}.trial-strip{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr}.trust{grid-template-columns:1fr 1fr}.hero{padding-top:105px}.hero-logo{width:min(315px,80vw)}section{padding:68px 0}.hero-content{padding:28px 18px}}
   </style>
 </head>
 <body>
-  <div class="mosaic" aria-hidden="true">
-    <div class="poster" data-title="Cinema"></div><div class="poster" data-title="Séries"></div><div class="poster" data-title="Esportes"></div><div class="poster" data-title="Aventura"></div><div class="poster" data-title="Ação"></div><div class="poster" data-title="Drama"></div><div class="poster" data-title="Ao Vivo"></div><div class="poster" data-title="Família"></div><div class="poster" data-title="Suspense"></div>
-    <div class="poster" data-title="Comédia"></div><div class="poster" data-title="Futebol"></div><div class="poster" data-title="Clássicos"></div><div class="poster" data-title="Lançamentos"></div><div class="poster" data-title="Temporadas"></div><div class="poster" data-title="Eventos"></div><div class="poster" data-title="Documentários"></div><div class="poster" data-title="Filmes"></div><div class="poster" data-title="Maratona"></div>
-    <div class="poster" data-title="Premium"></div><div class="poster" data-title="Infantil"></div><div class="poster" data-title="Cinema"></div><div class="poster" data-title="Séries"></div><div class="poster" data-title="Esportes"></div><div class="poster" data-title="Aventura"></div><div class="poster" data-title="Ação"></div><div class="poster" data-title="Drama"></div><div class="poster" data-title="Ao Vivo"></div>
-  </div>
-
   <header>
     <nav class="container">
       <a class="brand" href="/"><img src="img/logo-wdm-iptv.png" alt="WDM IPTV">WDM <span>IPTV</span></a>
