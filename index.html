@@ -14,6 +14,27 @@
   <link rel="icon" href="assets/logo.png" type="image/png">
   <title>WDM Apps | Desenvolvimento de Aplicativos</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    @media (min-width: 901px) {
+      .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .project-media-contash {
+      padding: 30px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 72% 22%, rgba(92,229,255,.24), transparent 34%),
+        linear-gradient(135deg, #061224, #0b2d58);
+    }
+    .project-media-contash img {
+      width: min(210px, 68%);
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: 34px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.34), 0 0 32px rgba(57,185,255,.16);
+    }
+  </style>
 </head>
 <body>
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJR4CNWT" height="0" width="0" title="Google Tag Manager" class="gtm-frame"></iframe></noscript>
@@ -81,6 +102,7 @@
           <a class="project-card" href="https://telhasporto.com.br/" target="_blank" rel="noreferrer"><div class="project-media project-media-telhas"><img src="assets/telhas-porto-logo.png" alt="Projeto Telhas Porto"><span class="project-index">01</span><span class="project-type">Site institucional</span></div><div class="project-body"><div class="project-title-row"><h3>Telhas Porto</h3><span>↗</span></div><p>Presença digital completa para uma empresa de portas, janelas e coberturas metálicas.</p><div class="tag-row"><span>HTML</span><span>CSS</span><span>JavaScript</span></div><strong class="project-action">Visitar projeto</strong></div></a>
           <a class="project-card" href="https://play.google.com/store/apps/details?id=com.wdmapps.encontrapet" target="_blank" rel="noreferrer"><div class="project-media"><img src="assets/encontrapet-portfolio.webp" alt="Projeto EncontraPet"><span class="project-index">02</span><span class="project-type">Aplicativo mobile</span></div><div class="project-body"><div class="project-title-row"><h3>EncontraPet</h3><span>↗</span></div><p>Uma rede solidária para divulgar animais perdidos e reunir pets às suas famílias.</p><div class="tag-row"><span>Android</span><span>Kotlin</span><span>Firebase</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
           <a class="project-card" href="https://play.google.com/store/apps/details?id=com.will.vendezap" target="_blank" rel="noreferrer"><div class="project-media"><img src="assets/vendezap-portfolio.webp" alt="Projeto VendeZap"><span class="project-index">03</span><span class="project-type">Aplicativo mobile</span></div><div class="project-body"><div class="project-title-row"><h3>VendeZap</h3><span>↗</span></div><p>Criação de anúncios profissionais e compartilhamento rápido para vender mais pelo WhatsApp.</p><div class="tag-row"><span>Android</span><span>Compose</span><span>Google Play</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
+          <a class="project-card" href="https://play.google.com/store/apps/details?id=com.wdmgames.contash" target="_blank" rel="noreferrer"><div class="project-media project-media-contash"><img src="jogos/img/contash-512.png" alt="Projeto ContasH"><span class="project-index">04</span><span class="project-type">Jogo educativo</span></div><div class="project-body"><div class="project-title-row"><h3>ContasH</h3><span>↗</span></div><p>Jogo educativo de matemática para praticar contas de forma simples, divertida e interativa.</p><div class="tag-row"><span>Android</span><span>Matemática</span><span>Educação</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
         </div>
       </div>
     </section>
