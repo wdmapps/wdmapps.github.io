@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDM TV - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066ff;
+            --accent: #00aaff;
+            --bg: #060e1a;
+            --bg-light: #0f1f3d;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --border: #1e3a5f;
+            --danger: #e50914;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: url('../img/fundo.jpg') center/cover fixed no-repeat, var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            position: relative;
+        }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(6,14,26,0.7); z-index: 0; pointer-events: none; }
+
+        .glow { position: fixed; border-radius: 50%; filter: blur(140px); opacity: 0.35; pointer-events: none; animation: float 14s ease-in-out infinite; }
+        .glow-1 { width: 560px; height: 560px; background: var(--primary); top: -180px; left: -120px; }
+        .glow-2 { width: 480px; height: 480px; background: var(--accent); bottom: -140px; right: -140px; animation-delay: -7s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-40px) scale(1.1); } }
+
+        .card {
+            position: relative; z-index: 2; width: 100%; max-width: 420px; margin: 20px; padding: 48px 40px;
+            background: rgba(15, 31, 61, 0.55); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: cardIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(40px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .brand { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 12px; }
+        .brand img { max-height: 64px; border-radius: 14px; }
+        .brand h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; }
+        .brand h1 span { background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .sub { text-align: center; color: var(--text-light); font-size: 0.95rem; margin-bottom: 32px; }
+
+        .campo { margin-bottom: 20px; }
+        .campo label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .campo .input-wrap { position: relative; }
+        .campo input {
+            width: 100%; padding: 14px 16px; font-size: 1rem; color: var(--text);
+            background: rgba(6, 14, 26, 0.6); border: 1px solid var(--border); border-radius: 14px; outline: none;
+            transition: all 0.3s;
+        }
+        .campo input::placeholder { color: var(--text-light); }
+        .campo input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 170, 255, 0.15); }
+
+        .btn {
+            width: 100%; padding: 15px; font-size: 1rem; font-weight: 700; color: white;
+            background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px; margin-top: 8px;
+            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.4);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0, 102, 255, 0.5); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .erro {
+            display: none; background: rgba(229, 9, 20, 0.12); border: 1px solid rgba(229, 9, 20, 0.4);
+            color: #ff7b85; padding: 12px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 20px;
+        }
+        .erro.mostrar { display: block; animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+        .rodape { text-align: center; margin-top: 24px; color: var(--text-light); font-size: 0.75rem; }
+        .credito { text-align: center; margin-top: 6px; color: var(--text-light); font-size: 0.75rem; opacity: 0.7; }
+        .credito a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="card">
+        <div class="brand">
+            <h1>WDM <span>TV</span></h1>
+        </div>
+        <p class="sub">Acesse sua conta para começar</p>
+
+        <div class="erro" id="erro"></div>
+
+        <form id="formLogin" autocomplete="off">
+            <div class="campo">
+                <label for="username">Usuário</label>
+                <div class="input-wrap">
+                    <input type="text" id="username" placeholder="Digite seu usuário" required>
+                </div>
+            </div>
+            <div class="campo">
+                <label for="password">Senha</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" placeholder="Digite sua senha" required>
+                </div>
+            </div>
+            <button type="submit" class="btn" id="btnEntrar">Entrar</button>
+        </form>
+
+        <p class="rodape">Se ainda não tem conta, <a href="#" style="color:var(--accent);">fale conosco</a></p>
+        <p class="credito">© 2026 <a href="https://wdmapps.com.br" target="_blank">WDM Apps</a></p>
+    </div>
+
+    <script src="config.js?v=3"></script>
+    <script src="api.js?v=3"></script>
+    <script>
+        // Se já estiver logado, vai direto pro painel
+        if (localStorage.getItem("username") && localStorage.getItem("password")) window.location.href = "painel.html";
+
+        const form = document.getElementById("formLogin");
+        const erro = document.getElementById("erro");
+        const btn = document.getElementById("btnEntrar");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value.trim();
+
+            erro.classList.remove("mostrar");
+
+            if (user.length < 3) {
+                showErro("Usuário inválido. Digite pelo menos 3 caracteres.");
+                return;
+            }
+            if (pass.length < 4) {
+                showErro("Senha inválida. Mínimo de 4 caracteres.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Entrando...";
+
+            try {
+                const teste = await api("auth", { username: user, password: pass });
+
+                erro.classList.remove("mostrar");
+
+                if (teste && teste.ok) {
+                    localStorage.setItem("username", user);
+                    localStorage.setItem("password", pass);
+                    localStorage.setItem("server", String(teste.server ?? 0));
+                    localStorage.setItem("logging_in", "1");
+                    window.location.href = "painel.html";
+                } else {
+                    localStorage.removeItem("username");
+                    localStorage.removeItem("password");
+                    showErro((teste && teste.message) || "Login falhou.");
+                }
+            } catch (e) {
+                showErro("Falha de conexão. Tente novamente.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Entrar";
+            }
+        });
+
+        function showErro(msg) {
+            erro.textContent = msg;
+            erro.classList.add("mostrar");
+        }
+    </script>
+</body>
+</html>
