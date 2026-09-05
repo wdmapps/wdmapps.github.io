@@ -87,3 +87,13 @@
   }
   rebuildShortcuts();
 })();
+
+(() => {
+  const mobileMode = () => window.matchMedia('(max-width:760px)').matches || window.matchMedia('(pointer:coarse)').matches;
+  desktopIcons.addEventListener('click', event => {
+    if (!mobileMode()) return;
+    const shortcut = event.target.closest('.desktop-icon');
+    if (!shortcut) return;
+    makeWindow(shortcut.dataset.open);
+  });
+})();
