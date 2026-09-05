@@ -11,9 +11,27 @@
 <title>WDM Apps | Desktop</title>
 <link rel="stylesheet" href="desktop.css">
 <link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="login.css">
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJR4CNWT" height="0" width="0" title="Google Tag Manager" class="gtm-frame"></iframe></noscript>
+
+<div class="login-screen" id="loginScreen" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="login-clock"><strong id="loginTime">--:--</strong><span id="loginDate"></span></div>
+  <section class="login-card">
+    <img class="login-logo" src="assets/logo.png" alt="WDM Apps">
+    <div class="login-avatar" id="loginAvatar">W</div>
+    <h1 id="loginTitle">WDM Desktop</h1>
+    <p>Digite seu nome para iniciar sua experiência.</p>
+    <form class="login-form" id="loginForm">
+      <input class="login-name" id="loginName" type="text" maxlength="28" autocomplete="name" placeholder="Seu nome" aria-label="Seu nome">
+      <button class="login-enter" type="submit">Entrar no WDM Desktop</button>
+      <p class="login-error" id="loginError" aria-live="polite"></p>
+    </form>
+    <div class="login-hint">Seu nome fica salvo somente neste navegador. <button class="login-reset" id="resetUserBtn" type="button">Esquecer usuário</button></div>
+  </section>
+</div>
+
 <div class="desktop" id="desktop">
   <div class="icons" id="desktopIcons"></div>
   <div class="brand-watermark"><small>WDM DIGITAL DESKTOP</small><strong>WDM Apps</strong><span>Aplicativos · Sites · Sistemas</span></div>
@@ -22,7 +40,7 @@
   <div class="start-search">🔎 &nbsp; Pesquisar aplicativos e páginas</div>
   <div class="start-title"><strong>Fixados</strong><span>WDM Apps</span></div>
   <div class="pin-grid" id="pinGrid"></div>
-  <div class="start-bottom"><div class="user"><span class="avatar">W</span><span>WDM Apps</span></div><span>⏻</span></div>
+  <div class="start-bottom"><div class="user"><span class="avatar" id="menuUserAvatar">W</span><span id="menuUserName">WDM Apps</span></div><button class="power-button" id="logoutBtn" type="button" title="Sair do WDM Desktop" aria-label="Sair do WDM Desktop">⏻</button></div>
 </div>
 <div class="taskbar">
   <div class="task-left">
@@ -35,5 +53,6 @@
 <div class="toast">💡 Duplo clique abre. Clique com o botão direito no desktop para personalizar.</div>
 <script src="desktop.js"></script>
 <script src="themes.js"></script>
+<script src="login.js"></script>
 </body>
 </html>
