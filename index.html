@@ -8,138 +8,353 @@
   })(window,document,'script','dataLayer','GTM-PJR4CNWT');</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="WDM Apps — desenvolvimento de aplicativos, sites e sistemas sob medida para transformar ideias em produtos digitais.">
+  <meta name="theme-color" content="#05080f">
+  <meta name="description" content="WDM Apps — aplicativos, sites e sistemas sob medida. Tecnologia, design e desenvolvimento para transformar ideias em produtos digitais.">
   <meta name="google-site-verification" content="d72OJvQaPZ9sE9san8__VsqtbfdRksTqQjiPpHCXOSg">
   <link rel="canonical" href="https://wdmapps.com.br/">
   <link rel="icon" href="assets/logo.png" type="image/png">
-  <title>WDM Apps | Desenvolvimento de Aplicativos</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    @media (min-width: 901px) {
-      .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .nav-shell { padding-inline: 18px; }
-      .desktop-nav { width: 100%; margin-left: 0; justify-content: space-between; gap: 8px; }
-      .desktop-nav a { flex: 1; text-align: center; padding: 12px 4px; white-space: nowrap; border-radius: 10px; }
-      .desktop-nav a:hover { background: rgba(57,185,255,.08); }
-    }
-    .desktop-nav a {
-      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-      color: #fff;
-      text-shadow: 0 1px 1px rgba(0,0,0,.35);
-    }
-    .mobile-menu nav a {
-      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .project-media-contash {
-      padding: 0;
-      display: block;
-      background: #0e2034;
-    }
-    .project-media-contash img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      border-radius: 0;
-      box-shadow: none;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>WDM Apps | Tecnologia que transforma ideias</title>
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJR4CNWT" height="0" width="0" title="Google Tag Manager" class="gtm-frame"></iframe></noscript>
-  <main>
-    <header class="site-header">
-      <div class="container nav-shell">
-        <nav class="desktop-nav" aria-label="Navegação principal">
-          <a href="#servicos">Serviços</a>
-          <a href="#portfolio">Portfólio</a>
+
+  <div class="page-noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="#inicio" aria-label="WDM Apps - início">
+        <img src="assets/logo.png" alt="WDM Apps">
+        <span><strong>WDM</strong><small>APPS</small></span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegação principal">
+        <a href="#solucoes">Soluções</a>
+        <a href="#portfolio">Projetos</a>
+        <a href="#ecossistema">Ecossistema</a>
+        <a href="#processo">Processo</a>
+      </nav>
+
+      <a class="nav-cta" href="#contato">Falar sobre um projeto <span>↗</span></a>
+
+      <details class="mobile-menu">
+        <summary aria-label="Abrir menu"><i></i><i></i></summary>
+        <nav>
+          <a href="#solucoes">Soluções</a>
+          <a href="#portfolio">Projetos</a>
+          <a href="#ecossistema">Ecossistema</a>
           <a href="#processo">Processo</a>
           <a href="https://wdmapps.com.br/shopping/">Shopping</a>
           <a href="https://wdmapps.com.br/digitacao/">Digitação</a>
-          <a href="https://wdmapps.com.br/leitor/">Leitor</a>
-          <a href="https://wdmapps.com.br/iptv/" target="_blank" rel="noreferrer">IPTV</a>
-          <a href="https://wdmapps.com.br/jogos/" target="_blank" rel="noreferrer">Jogos</a>
-          <a href="https://wdmapps.com.br/admin/" target="_blank" rel="noreferrer">Admin</a>
-          <a href="#contato">Iniciar projeto</a>
+          <a href="#contato">Contato</a>
         </nav>
-        <details class="mobile-menu">
-          <summary aria-label="Abrir menu"><span></span><span></span></summary>
-          <nav aria-label="Navegação móvel"><a href="#servicos">Serviços</a><a href="#portfolio">Portfólio</a><a href="#processo">Processo</a><a href="https://wdmapps.com.br/shopping/">Shopping</a><a href="https://wdmapps.com.br/digitacao/">Digitação</a><a href="https://wdmapps.com.br/leitor/">Leitor</a><a href="https://wdmapps.com.br/iptv/">IPTV</a><a href="https://wdmapps.com.br/jogos/">Jogos</a><a href="https://wdmapps.com.br/admin/">Admin</a><a href="#contato">Iniciar projeto</a></nav>
-        </details>
-      </div>
-    </header>
+      </details>
+    </div>
+  </header>
 
+  <main>
     <section class="hero" id="inicio">
-      <div class="hero-grid" aria-hidden="true"></div><div class="hero-glow hero-glow-one" aria-hidden="true"></div><div class="hero-glow hero-glow-two" aria-hidden="true"></div>
-      <div class="container hero-layout">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
+
+      <div class="shell hero-layout">
         <div class="hero-copy">
-          <div class="eyebrow"><span></span> Produto digital, do conceito ao lançamento</div>
-          <h1>Criamos o <em>próximo nível</em> da sua ideia.</h1>
-          <p>Aplicativos, sites e sistemas sob medida para empresas que querem transformar tecnologia em resultado real.</p>
-          <div class="hero-actions"><a class="button button-primary" href="#contato">Tirar a ideia do papel <span>↗</span></a><a class="button button-ghost" href="#portfolio">Explorar projetos <span>↓</span></a></div>
-          <div class="hero-proof"><div><strong>50+</strong><span>projetos entregues</span></div><div><strong>98%</strong><span>clientes satisfeitos</span></div><div><strong>10</strong><span>anos criando soluções</span></div></div>
+          <div class="status-pill"><span></span> WDM APPS · PRODUTOS DIGITAIS</div>
+          <h1>Tecnologia que tira sua ideia do <em>papel</em> e coloca no <em>mundo.</em></h1>
+          <p>Aplicativos, sites e sistemas sob medida com design profissional, desempenho e uma experiência pensada para pessoas de verdade.</p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#portfolio">Conhecer projetos <span>↗</span></a>
+            <a class="button button-secondary" href="#contato">Iniciar um projeto</a>
+          </div>
+
+          <div class="hero-signals" aria-label="Áreas de atuação">
+            <div><span>01</span><strong>Apps Android</strong><small>Kotlin · Compose</small></div>
+            <div><span>02</span><strong>Web & PWA</strong><small>Responsivo · rápido</small></div>
+            <div><span>03</span><strong>Cloud</strong><small>Firebase · APIs</small></div>
+          </div>
         </div>
-        <div class="hero-stage" role="img" aria-label="Ecossistema de soluções WDM Apps">
-          <div class="stage-orbit orbit-one"></div><div class="stage-orbit orbit-two"></div>
-          <div class="stage-core"><img src="assets/logo.png" alt="WDM Apps"><span class="stage-status"><i></i> SISTEMAS ONLINE</span></div>
-          <div class="stage-card stage-card-app"><small>APLICATIVOS</small><strong>Android<br>&amp; Mobile</strong><span>01</span></div>
-          <div class="stage-card stage-card-web"><small>EXPERIÊNCIA</small><strong>Web<br>responsiva</strong><span>02</span></div>
-          <div class="stage-card stage-card-cloud"><small>ESTRUTURA</small><strong>Cloud<br>&amp; Firebase</strong><span>03</span></div>
-          <div class="code-pill code-pill-one">&lt;/&gt; build: ready</div><div class="code-pill code-pill-two">● secure connection</div>
+
+        <div class="hero-visual" aria-label="Painel visual do ecossistema WDM Apps">
+          <div class="visual-halo halo-a"></div>
+          <div class="visual-halo halo-b"></div>
+
+          <div class="cockpit">
+            <div class="cockpit-top">
+              <span class="cockpit-label">WDM / DIGITAL LAB</span>
+              <span class="online"><i></i> ONLINE</span>
+            </div>
+
+            <div class="cockpit-center">
+              <div class="core-ring core-ring-1"></div>
+              <div class="core-ring core-ring-2"></div>
+              <div class="core-ring core-ring-3"></div>
+              <div class="core-logo"><img src="assets/logo.png" alt=""></div>
+              <div class="core-caption"><span>SYSTEM</span><strong>WDM</strong><small>BUILDING IDEAS</small></div>
+            </div>
+
+            <div class="cockpit-bottom">
+              <div><small>STACK</small><strong>Android / Web</strong></div>
+              <div><small>BACKEND</small><strong>Firebase</strong></div>
+              <div><small>STATUS</small><strong class="accent">Ready</strong></div>
+            </div>
+          </div>
+
+          <div class="float-card float-card-a">
+            <span class="float-icon">⌁</span>
+            <div><small>PRODUTO</small><strong>Experiência fluida</strong></div>
+          </div>
+
+          <div class="float-card float-card-b">
+            <span class="float-icon">&lt;/&gt;</span>
+            <div><small>DESENVOLVIMENTO</small><strong>Código sob medida</strong></div>
+          </div>
+
+          <div class="float-card float-card-c">
+            <span class="pulse-dot"></span>
+            <div><small>PUBLICAÇÃO</small><strong>Do build ao lançamento</strong></div>
+          </div>
         </div>
       </div>
-      <div class="tech-rail"><div class="container tech-rail-inner"><span>ANDROID</span><i></i><span>KOTLIN</span><i></i><span>REACT</span><i></i><span>FIREBASE</span><i></i><span>NEXT.JS</span><i></i><span>CLOUD</span></div></div>
+
+      <div class="tech-strip" aria-label="Tecnologias">
+        <div class="tech-track">
+          <span>ANDROID</span><i></i><span>KOTLIN</span><i></i><span>JETPACK COMPOSE</span><i></i><span>FIREBASE</span><i></i><span>HTML</span><i></i><span>CSS</span><i></i><span>JAVASCRIPT</span><i></i><span>PWA</span><i></i>
+          <span>ANDROID</span><i></i><span>KOTLIN</span><i></i><span>JETPACK COMPOSE</span><i></i><span>FIREBASE</span><i></i><span>HTML</span><i></i><span>CSS</span><i></i><span>JAVASCRIPT</span><i></i><span>PWA</span><i></i>
+        </div>
+      </div>
     </section>
 
-    <section class="section services" id="servicos">
-      <div class="container">
-        <div class="section-heading split-heading"><div><span class="kicker">O que construímos</span><h2>Tecnologia com estratégia,<br>design e propósito.</h2></div><p>Do primeiro rascunho ao produto funcionando: cuidamos de cada etapa para entregar uma solução confiável, bonita e fácil de usar.</p></div>
+    <section class="section intro" id="solucoes">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">O QUE A WDM CONSTRÓI</span>
+            <h2>Projetos digitais com aparência profissional e estrutura para crescer.</h2>
+          </div>
+          <p>Não é só “fazer funcionar”. Cada solução é pensada para ser simples de usar, bonita de apresentar e prática de manter.</p>
+        </div>
+
         <div class="service-grid">
-          <article class="service-card"><div class="service-top"><span>01</span><i>↗</i></div><h3>Aplicativos Android</h3><p>Apps rápidos, intuitivos e preparados para publicação na Google Play.</p><div class="tag-row"><span>Kotlin</span><span>Jetpack Compose</span></div></article>
-          <article class="service-card"><div class="service-top"><span>02</span><i>↗</i></div><h3>Sistemas Web</h3><p>Sites e plataformas modernas que funcionam perfeitamente em qualquer tela.</p><div class="tag-row"><span>React</span><span>Next.js</span></div></article>
-          <article class="service-card"><div class="service-top"><span>03</span><i>↗</i></div><h3>Experiência &amp; Design</h3><p>Interfaces claras, bonitas e pensadas para transformar visitantes em clientes.</p><div class="tag-row"><span>UI/UX</span><span>Design System</span></div></article>
-          <article class="service-card"><div class="service-top"><span>04</span><i>↗</i></div><h3>Cloud &amp; Firebase</h3><p>Infraestrutura segura para autenticação, dados, notificações e crescimento.</p><div class="tag-row"><span>Firebase</span><span>APIs</span></div></article>
+          <article class="service-card featured">
+            <div class="service-number">01</div>
+            <div class="service-icon">APP</div>
+            <h3>Aplicativos Android</h3>
+            <p>Apps modernos, intuitivos e preparados para publicação na Google Play.</p>
+            <div class="chip-row"><span>Kotlin</span><span>Jetpack Compose</span><span>Firebase</span></div>
+            <div class="service-line"></div>
+          </article>
+
+          <article class="service-card">
+            <div class="service-number">02</div>
+            <div class="service-icon">WEB</div>
+            <h3>Sites & PWA</h3>
+            <p>Experiências rápidas e responsivas para apresentar, vender, ensinar ou atender.</p>
+            <div class="chip-row"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+            <div class="service-line"></div>
+          </article>
+
+          <article class="service-card">
+            <div class="service-number">03</div>
+            <div class="service-icon">SYS</div>
+            <h3>Sistemas sob medida</h3>
+            <p>Ferramentas digitais construídas em torno do processo e da necessidade real do projeto.</p>
+            <div class="chip-row"><span>APIs</span><span>Automação</span><span>Cloud</span></div>
+            <div class="service-line"></div>
+          </article>
         </div>
       </div>
     </section>
 
     <section class="section portfolio" id="portfolio">
-      <div class="container">
-        <div class="section-heading portfolio-heading"><div><span class="kicker">Projetos em destaque</span><h2>Produtos reais.<br><em>Impacto visível.</em></h2></div><p>Uma seleção de soluções desenvolvidas pela WDM Apps para negócios, pessoas e comunidades.</p></div>
-        <div class="project-grid">
-          <a class="project-card" href="https://telhasporto.com.br/" target="_blank" rel="noreferrer"><div class="project-media project-media-telhas"><img src="assets/telhas-porto-logo.png" alt="Projeto Telhas Porto"><span class="project-index">01</span><span class="project-type">Site institucional</span></div><div class="project-body"><div class="project-title-row"><h3>Telhas Porto</h3><span>↗</span></div><p>Presença digital completa para uma empresa de portas, janelas e coberturas metálicas.</p><div class="tag-row"><span>HTML</span><span>CSS</span><span>JavaScript</span></div><strong class="project-action">Visitar projeto</strong></div></a>
-          <a class="project-card" href="https://play.google.com/store/apps/details?id=com.wdmapps.encontrapet" target="_blank" rel="noreferrer"><div class="project-media"><img src="assets/encontrapet-portfolio.webp" alt="Projeto EncontraPet"><span class="project-index">02</span><span class="project-type">Aplicativo mobile</span></div><div class="project-body"><div class="project-title-row"><h3>EncontraPet</h3><span>↗</span></div><p>Uma rede solidária para divulgar animais perdidos e reunir pets às suas famílias.</p><div class="tag-row"><span>Android</span><span>Kotlin</span><span>Firebase</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
-          <a class="project-card" href="https://play.google.com/store/apps/details?id=com.will.vendezap" target="_blank" rel="noreferrer"><div class="project-media"><img src="assets/vendezap-portfolio.webp" alt="Projeto VendeZap"><span class="project-index">03</span><span class="project-type">Aplicativo mobile</span></div><div class="project-body"><div class="project-title-row"><h3>VendeZap</h3><span>↗</span></div><p>Criação de anúncios profissionais e compartilhamento rápido para vender mais pelo WhatsApp.</p><div class="tag-row"><span>Android</span><span>Compose</span><span>Google Play</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
-          <a class="project-card" href="https://play.google.com/store/apps/details?id=com.wdmgames.contash" target="_blank" rel="noreferrer"><div class="project-media project-media-contash"><img src="assets/contash-portfolio.jpg" alt="Projeto ContasH"><span class="project-index">04</span><span class="project-type">Jogo educativo</span></div><div class="project-body"><div class="project-title-row"><h3>ContasH</h3><span>↗</span></div><p>Jogo educativo de matemática para praticar contas de forma simples, divertida e interativa.</p><div class="tag-row"><span>Android</span><span>Matemática</span><span>Educação</span></div><strong class="project-action">Ver na Google Play</strong></div></a>
+      <div class="shell">
+        <div class="section-head portfolio-head">
+          <div>
+            <span class="eyebrow">PROJETOS EM DESTAQUE</span>
+            <h2>Produtos reais, publicados e em uso.</h2>
+          </div>
+          <a class="text-link" href="#ecossistema">Explorar ecossistema <span>→</span></a>
+        </div>
+
+        <div class="bento">
+          <a class="project-card project-wide" href="https://play.google.com/store/apps/details?id=com.wdmapps.encontrapet" target="_blank" rel="noreferrer">
+            <div class="project-image">
+              <img src="assets/encontrapet-portfolio.webp" alt="EncontraPet">
+              <span class="project-badge">ANDROID · COMUNIDADE</span>
+            </div>
+            <div class="project-content">
+              <span class="project-id">01 / ENCONTRAPET</span>
+              <h3>Uma rede para ajudar pets perdidos a voltar para casa.</h3>
+              <p>Aplicativo com publicação de pets, busca e recursos conectados ao Firebase.</p>
+              <span class="project-link">Ver na Google Play ↗</span>
+            </div>
+          </a>
+
+          <a class="project-card" href="https://play.google.com/store/apps/details?id=com.will.vendezap" target="_blank" rel="noreferrer">
+            <div class="project-image compact">
+              <img src="assets/vendezap-portfolio.webp" alt="VendeZap">
+              <span class="project-badge">ANDROID · VENDAS</span>
+            </div>
+            <div class="project-content">
+              <span class="project-id">02 / VENDEZAP</span>
+              <h3>Anúncios prontos para vender pelo WhatsApp.</h3>
+              <span class="project-link">Google Play ↗</span>
+            </div>
+          </a>
+
+          <a class="project-card" href="https://telhasporto.com.br/" target="_blank" rel="noreferrer">
+            <div class="project-image compact brand-image">
+              <img src="assets/telhas-porto-logo.png" alt="Telhas Porto">
+              <span class="project-badge">WEB · NEGÓCIOS</span>
+            </div>
+            <div class="project-content">
+              <span class="project-id">03 / TELHAS PORTO</span>
+              <h3>Presença digital para um negócio local.</h3>
+              <span class="project-link">Visitar site ↗</span>
+            </div>
+          </a>
+
+          <a class="project-card project-horizontal" href="https://play.google.com/store/apps/details?id=com.wdmgames.contash" target="_blank" rel="noreferrer">
+            <div class="project-image">
+              <img src="assets/contash-portfolio.jpg" alt="ContasH">
+              <span class="project-badge">ANDROID · EDUCAÇÃO</span>
+            </div>
+            <div class="project-content">
+              <span class="project-id">04 / CONTASH</span>
+              <h3>Matemática de um jeito mais leve e interativo.</h3>
+              <p>Jogo educativo criado para praticar contas com uma experiência simples.</p>
+              <span class="project-link">Ver projeto ↗</span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
 
-    <section class="access-section" aria-labelledby="access-title"><div class="container access-shell"><div class="access-copy"><span class="kicker">Acessos rápidos</span><h2 id="access-title">Ecossistema WDM</h2><p>As áreas atuais continuam disponíveis em seus endereços originais.</p></div><div class="access-grid">
-      <a href="https://wdmapps.com.br/digitacao/" class="access-card"><span class="access-icon">DIG</span><span><strong>WDM Digitação</strong><small>Curso online com 450 fases</small></span><i>↗</i></a>
-      <a href="https://wdmapps.com.br/iptv/" target="_blank" rel="noreferrer" class="access-card"><span class="access-icon">TV</span><span><strong>WDM IPTV</strong><small>Acesso à plataforma</small></span><i>↗</i></a>
-      <a href="https://wdmapps.com.br/jogos/" target="_blank" rel="noreferrer" class="access-card"><span class="access-icon">JOG</span><span><strong>Jogos</strong><small>Área de entretenimento</small></span><i>↗</i></a>
-      <a href="https://wdmapps.com.br/admin/" target="_blank" rel="noreferrer" class="access-card"><span class="access-icon">ADM</span><span><strong>Admin</strong><small>Painel administrativo</small></span><i>↗</i></a>
-    </div></div></section>
+    <section class="section ecosystem" id="ecossistema">
+      <div class="shell ecosystem-shell">
+        <div class="ecosystem-copy">
+          <span class="eyebrow">ECOSSISTEMA WDM</span>
+          <h2>Mais do que um portfólio. Um laboratório de produtos digitais.</h2>
+          <p>Projetos próprios, ferramentas, conteúdo educativo e plataformas que continuam evoluindo.</p>
+          <div class="ecosystem-status"><i></i><span>Serviços e plataformas online</span></div>
+        </div>
 
-    <section class="section process" id="processo"><div class="container process-layout"><div class="process-intro"><span class="kicker">Método WDM</span><h2>Clareza em cada etapa.</h2><p>Você acompanha a evolução do projeto do início ao lançamento, sem surpresas e sem complicação.</p><div class="process-signal"><span></span> Comunicação direta durante todo o projeto</div></div><ol class="process-list">
-      <li><span>01</span><div><strong>Descoberta</strong><p>Entendemos sua ideia, seu público e o resultado esperado.</p></div></li>
-      <li><span>02</span><div><strong>Estratégia &amp; Design</strong><p>Organizamos a experiência e desenhamos uma interface profissional.</p></div></li>
-      <li><span>03</span><div><strong>Desenvolvimento</strong><p>Construímos, testamos e refinamos cada funcionalidade.</p></div></li>
-      <li><span>04</span><div><strong>Lançamento</strong><p>Publicamos a solução e acompanhamos os próximos passos.</p></div></li>
-    </ol></div></section>
+        <div class="launch-grid">
+          <a href="https://wdmapps.com.br/shopping/" class="launch-card">
+            <div class="launch-top"><span>SHOP</span><i>↗</i></div>
+            <strong>WDM Shopping</strong>
+            <small>Marketplace local</small>
+          </a>
+          <a href="https://wdmapps.com.br/digitacao/" class="launch-card">
+            <div class="launch-top"><span>TYPE</span><i>↗</i></div>
+            <strong>WDM Digitação</strong>
+            <small>Curso gamificado</small>
+          </a>
+          <a href="https://wdmapps.com.br/leitor/" class="launch-card">
+            <div class="launch-top"><span>READ</span><i>↗</i></div>
+            <strong>Leitor</strong>
+            <small>Ferramenta de leitura</small>
+          </a>
+          <a href="https://wdmapps.com.br/jogos/" class="launch-card" target="_blank" rel="noreferrer">
+            <div class="launch-top"><span>PLAY</span><i>↗</i></div>
+            <strong>Jogos</strong>
+            <small>Experiências web</small>
+          </a>
+          <a href="https://wdmapps.com.br/iptv/" class="launch-card" target="_blank" rel="noreferrer">
+            <div class="launch-top"><span>TV</span><i>↗</i></div>
+            <strong>WDM IPTV</strong>
+            <small>Área da plataforma</small>
+          </a>
+          <a href="https://wdmapps.com.br/admin/" class="launch-card" target="_blank" rel="noreferrer">
+            <div class="launch-top"><span>ADM</span><i>↗</i></div>
+            <strong>Admin</strong>
+            <small>Acesso administrativo</small>
+          </a>
+        </div>
+      </div>
+    </section>
 
-    <section class="contact" id="contato"><div class="container contact-shell"><div class="contact-orb" aria-hidden="true"></div><div class="contact-copy"><span class="kicker">Seu projeto pode ser o próximo</span><h2>Vamos construir algo<br><em>incrível juntos?</em></h2><p>Conte sua ideia. A WDM Apps ajuda você a encontrar o melhor caminho para transformá-la em um produto digital de verdade.</p></div><div class="contact-action"><a class="button button-light" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20WDM%20Apps%20e%20quero%20falar%20sobre%20um%20projeto." target="_blank" rel="noreferrer">Conversar no WhatsApp <span>↗</span></a><small>Atendimento direto · (11) 96918-8837</small></div></div></section>
+    <section class="section process" id="processo">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">PROCESSO WDM</span>
+            <h2>Da primeira conversa ao produto no ar.</h2>
+          </div>
+          <p>Um fluxo simples para transformar uma ideia em algo que você consegue testar, usar, mostrar e evoluir.</p>
+        </div>
 
-    <footer class="footer"><div class="container footer-main"><div class="footer-brand"><a class="brand" href="#inicio"><img src="assets/logo.png" alt=""><span><strong>WDM</strong><small>APPS</small></span></a><p>Tecnologia sob medida para transformar boas ideias em produtos digitais relevantes.</p></div><div class="footer-links"><div><strong>Empresa</strong><a href="#servicos">Serviços</a><a href="#portfolio">Portfólio</a><a href="#processo">Processo</a></div><div><strong>Plataformas</strong><a href="https://wdmapps.com.br/digitacao/">Digitação</a><a href="https://wdmapps.com.br/iptv/">IPTV</a><a href="https://wdmapps.com.br/jogos/">Jogos</a><a href="https://wdmapps.com.br/admin/">Admin</a></div><div><strong>Contato</strong><a href="mailto:contato@wdmapps.com.br">contato@wdmapps.com.br</a><a href="https://wa.me/5511969188837">WhatsApp</a><span>Salto · SP</span></div></div></div><div class="container footer-bottom"><span>© 2026 WDM Apps</span><span>DESIGN · CÓDIGO · RESULTADO</span></div></footer>
-    <a class="whatsapp-float" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20WDM%20Apps%20e%20quero%20falar%20sobre%20um%20projeto." target="_blank" rel="noreferrer" aria-label="Falar com a WDM Apps pelo WhatsApp"><span aria-hidden="true">◉</span> WhatsApp</a>
+        <div class="process-track">
+          <article>
+            <span>01</span>
+            <div class="process-dot"></div>
+            <h3>Entender</h3>
+            <p>Objetivo, público e o problema que o projeto precisa resolver.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <div class="process-dot"></div>
+            <h3>Desenhar</h3>
+            <p>Estrutura, navegação e interface antes de complicar o código.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <div class="process-dot"></div>
+            <h3>Construir</h3>
+            <p>Desenvolvimento, testes e ajustes em ciclos rápidos.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <div class="process-dot"></div>
+            <h3>Publicar</h3>
+            <p>Deploy, lançamento e evolução a partir do uso real.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contato">
+      <div class="shell contact-shell">
+        <div class="contact-grid" aria-hidden="true"></div>
+        <div class="contact-copy">
+          <span class="eyebrow">TEM UMA IDEIA?</span>
+          <h2>Vamos transformar isso em um produto de verdade.</h2>
+          <p>Conte o que você precisa. A conversa começa simples, sem compromisso e sem enrolação.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="button button-light" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20WDM%20Apps%20e%20quero%20falar%20sobre%20um%20projeto." target="_blank" rel="noreferrer">Conversar no WhatsApp <span>↗</span></a>
+          <a class="contact-mail" href="mailto:contato@wdmapps.com.br">contato@wdmapps.com.br</a>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer class="footer">
+    <div class="shell footer-top">
+      <a class="brand footer-brand" href="#inicio">
+        <img src="assets/logo.png" alt="">
+        <span><strong>WDM</strong><small>APPS</small></span>
+      </a>
+      <p>Tecnologia, design e desenvolvimento para transformar boas ideias em produtos digitais.</p>
+      <div class="footer-links">
+        <a href="#solucoes">Soluções</a>
+        <a href="#portfolio">Projetos</a>
+        <a href="#ecossistema">Ecossistema</a>
+        <a href="#contato">Contato</a>
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <span>© 2026 WDM Apps · Salto, SP</span>
+      <span>DESIGN · CÓDIGO · PRODUTO</span>
+    </div>
+  </footer>
+
+  <a class="whatsapp-float" href="https://wa.me/5511969188837?text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20WDM%20Apps%20e%20quero%20falar%20sobre%20um%20projeto." target="_blank" rel="noreferrer" aria-label="Falar no WhatsApp">
+    <span>◉</span><b>WhatsApp</b>
+  </a>
 </body>
 </html>
