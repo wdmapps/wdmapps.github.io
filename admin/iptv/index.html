@@ -2,123 +2,62 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Clientes IPTV - WDM Admin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{--primary:#0066ff;--primary-dark:#0052cc;--bg:#0a1628;--bg-light:#0f1f3d;--card:#132244;--border:#1e3a5f;--text:#e2e8f0;--muted:#94a3b8;--ok:#2ecc71;--warn:#f1c40f;--danger:#ff6b6b;--radius:10px}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}.header{background:var(--bg-light);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}.header h1{font-size:1.2rem;margin:0}.header h1 span{color:var(--primary)}.header-actions{display:flex;gap:10px;align-items:center}.container{max-width:1250px;margin:auto;padding:28px 22px}.btn{border:0;border-radius:8px;padding:9px 14px;font:600 .85rem Inter;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}.btn-small{padding:7px 9px;font-size:.75rem}.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}.title-row h2{margin:0 0 5px;font-size:1.5rem}.muted{color:var(--muted);font-size:.88rem}.status-banner{background:#17294c;border:1px solid #28518e;border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;line-height:1.5}.status-banner strong{color:#78aaff}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}.stat span{font-size:.78rem;color:var(--muted)}.stat strong{display:block;margin-top:8px;font-size:1.8rem}.stat.soon strong{color:var(--warn)}.stat.late strong{color:var(--danger)}.stat.ok strong{color:var(--ok)}.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}.panel h3{margin:0 0 16px}.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.form-grid label{display:flex;flex-direction:column;gap:7px;font-size:.8rem;color:#cbd5e1}.form-grid input,.form-grid select,.toolbar input,.toolbar select{width:100%;background:#0c1830;color:var(--text);border:1px solid #2c466c;border-radius:8px;padding:10px 11px;outline:none}.form-grid input:focus,.form-grid select:focus,.toolbar input:focus,.toolbar select:focus{border-color:var(--primary)}.check{flex-direction:row!important;align-items:center;margin-top:24px}.check input{width:auto}.form-actions{grid-column:1/-1;display:flex;gap:10px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px}.toolbar-controls{display:flex;gap:10px;min-width:min(520px,100%)}.table-wrap{overflow:auto;margin-top:15px}table{width:100%;border-collapse:collapse;min-width:930px}th,td{text-align:left;padding:12px 9px;border-bottom:1px solid #21395a;font-size:.8rem}th{font-size:.7rem;color:var(--muted);text-transform:uppercase}.name{font-weight:700}.sub{display:block;color:var(--muted);font-size:.7rem;margin-top:3px}.badge{display:inline-flex;border-radius:999px;padding:5px 8px;font-weight:700;font-size:.68rem}.badge.ok{background:#123b2b;color:#8ef0bd}.badge.soon{background:#453b12;color:#ffe783}.badge.late{background:#451e28;color:#ffadb8}.row-actions{display:flex;gap:5px;flex-wrap:wrap}.empty{text-align:center;color:var(--muted);padding:25px;display:none}.cloud{font-size:.75rem;color:var(--muted);margin-left:8px}.cloud.ok{color:#76e0a5}.cloud.err{color:#ff9da8}@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr 1fr}.toolbar{align-items:flex-start;flex-direction:column}.toolbar-controls{width:100%}}@media(max-width:620px){.header{padding:14px;flex-direction:column;align-items:flex-start}.container{padding:18px 14px}.stats,.form-grid{grid-template-columns:1fr}.toolbar-controls{flex-direction:column}.check{margin-top:0}}
+    :root{--p:#0066ff;--bg:#0a1628;--card:#132244;--border:#1e3a5f;--text:#e2e8f0;--muted:#94a3b8;--ok:#2ecc71;--warn:#f1c40f;--danger:#ff6b6b}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{background:#0f1f3d;border-bottom:1px solid var(--border);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}header h1{margin:0;font-size:20px}header span{color:var(--p)}
+    .container{max-width:1250px;margin:auto;padding:24px}.actions,.row-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:9px 13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.primary{background:var(--p);color:white}.outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+    .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.top h2{margin:0 0 5px}.muted{color:var(--muted);font-size:13px}.cloud.ok{color:#76e0a5}.cloud.err{color:#ff9da8}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat,.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}.stat span{color:var(--muted);font-size:12px}.stat strong{display:block;font-size:28px;margin-top:7px}.soon strong{color:var(--warn)}.late strong{color:var(--danger)}.ok strong{color:var(--ok)}
+    .panel{margin-bottom:18px}.panel h3{margin:0 0 16px}.form{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#cbd5e1}.form input,.form select,.toolbar input,.toolbar select{width:100%;background:#0c1830;color:var(--text);border:1px solid #2c466c;border-radius:8px;padding:10px}.check{flex-direction:row!important;align-items:center;margin-top:22px}.check input{width:auto}.form-actions{grid-column:1/-1;display:flex;gap:8px}
+    .toolbar{display:flex;justify-content:space-between;gap:14px;align-items:center}.toolbar-controls{display:flex;gap:8px;min-width:min(520px,100%)}.table-wrap{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:930px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid #21395a;font-size:12px}th{color:var(--muted);font-size:11px;text-transform:uppercase}.name{font-weight:700}.sub{display:block;color:var(--muted);font-size:10px;margin-top:3px}.badge{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800}.badge.ok{background:#123b2b;color:#8ef0bd}.badge.soon{background:#453b12;color:#ffe783}.badge.late{background:#451e28;color:#ffadb8}.small{padding:7px 9px;font-size:11px}.empty{text-align:center;color:var(--muted);padding:25px;display:none}
+    @media(max-width:900px){.stats,.form{grid-template-columns:1fr 1fr}.toolbar{align-items:flex-start;flex-direction:column}.toolbar-controls{width:100%}}@media(max-width:620px){header{flex-direction:column;align-items:flex-start}.container{padding:15px}.stats,.form{grid-template-columns:1fr}.toolbar-controls{flex-direction:column}.check{margin-top:0}}
   </style>
 </head>
 <body>
-  <header class="header">
-    <h1><span>WDM</span> Admin · Clientes IPTV</h1>
-    <div class="header-actions">
-      <a href="/admin/dashboard.html" class="btn btn-outline">← Painel</a>
-      <button class="btn btn-danger" onclick="logout()">Sair</button>
-    </div>
-  </header>
-
-  <main class="container">
-    <div class="title-row">
-      <div><h2>Clientes e renovações</h2><div class="muted">Controle vencimentos e avisos de renovação.</div></div>
-      <span id="cloudStatus" class="cloud">Conectando ao Firebase…</span>
-    </div>
-
-    <div class="status-banner"><strong>WhatsApp automático:</strong> o cadastro e os vencimentos já ficam preparados para automação. Enquanto a API oficial do WhatsApp Business não estiver ativada, use o botão “WhatsApp” para enviar a mensagem pronta manualmente.</div>
-
-    <section class="stats">
-      <article class="stat"><span>Total</span><strong id="stTotal">0</strong></article>
-      <article class="stat soon"><span>Vencem em até 3 dias</span><strong id="stSoon">0</strong></article>
-      <article class="stat late"><span>Vencidos</span><strong id="stLate">0</strong></article>
-      <article class="stat ok"><span>Em dia</span><strong id="stOk">0</strong></article>
-    </section>
-
-    <section class="panel">
-      <h3>Cadastrar cliente</h3>
-      <form id="clientForm" class="form-grid">
-        <input type="hidden" id="clientId">
-        <label>Nome<input id="name" required placeholder="Nome do cliente"></label>
-        <label>Usuário IPTV<input id="username" required placeholder="Usuário"></label>
-        <label>WhatsApp<input id="whatsapp" required inputmode="tel" placeholder="5511999999999"></label>
-        <label>E-mail<input id="email" type="email" placeholder="cliente@email.com"></label>
-        <label>Plano<select id="plan"><option>Mensal</option><option>Trimestral</option><option>Semestral</option><option>Anual</option></select></label>
-        <label>Valor (R$)<input id="value" type="number" min="0" step="0.01" value="25.00"></label>
-        <label>Data de renovação<input id="renewalDate" type="date" required></label>
-        <label class="check"><input id="autoNotify" type="checkbox" checked> Aviso automático</label>
-        <div class="form-actions"><button class="btn btn-primary" type="submit">Salvar cliente</button><button id="cancelEdit" class="btn btn-outline" type="button" hidden>Cancelar edição</button></div>
-      </form>
-    </section>
-
-    <section class="panel">
-      <div class="toolbar">
-        <div><h3 style="margin:0">Clientes</h3><div class="muted">Clique em renovar para avançar a próxima cobrança.</div></div>
-        <div class="toolbar-controls"><input id="search" placeholder="Buscar nome, usuário ou WhatsApp"><select id="filter"><option value="all">Todos</option><option value="soon">Vencendo</option><option value="late">Vencidos</option><option value="ok">Em dia</option></select></div>
-      </div>
-      <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Usuário</th><th>WhatsApp</th><th>Renovação</th><th>Status</th><th>Plano</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table></div>
-      <div id="empty" class="empty">Nenhum cliente cadastrado.</div>
-    </section>
-  </main>
-
-  <script src="../auth.js"></script>
-  <script>
-    let clients=[];
-    let db=null;
-    const $=id=>document.getElementById(id);
-    const docPath=()=>db.collection('wdmAdmin').doc('iptv');
-    const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
-    const parseDate=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
-    const fmt=s=>parseDate(s).toLocaleDateString('pt-BR');
-    const days=s=>Math.ceil((parseDate(s)-today())/86400000);
-    const status=s=>{const d=days(s);if(d<0)return{k:'late',t:`Vencido há ${Math.abs(d)} dia${Math.abs(d)==1?'':'s'}`};if(d===0)return{k:'soon',t:'Vence hoje'};if(d<=3)return{k:'soon',t:`Vence em ${d} dia${d===1?'':'s'}`};return{k:'ok',t:'Em dia'}};
-    const phone=s=>String(s||'').replace(/\D/g,'');
-    const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    const msg=c=>encodeURIComponent(`Olá, ${c.name}! 👋 Passando para lembrar que seu acesso WDM IPTV ${days(c.renewalDate)<0?'venceu em':'vence em'} ${fmt(c.renewalDate)}. Se quiser renovar, me chama por aqui. Obrigado!`);
-    const wa=c=>`https://wa.me/${phone(c.whatsapp)}?text=${msg(c)}`;
-
-    function setDefaultDate(){if(!$('renewalDate').value){const d=new Date();d.setDate(d.getDate()+30);$('renewalDate').value=d.toISOString().slice(0,10)}}
-    function cloud(text,kind=''){const el=$('cloudStatus');el.textContent=text;el.className='cloud '+kind}
-
-    async function saveCloud(){
-      cloud('Salvando…');
-      await docPath().set({clients,ownerEmail:ADMIN_EMAIL,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-      cloud('Sincronizado online','ok');
-    }
-
-    async function loadCloud(){
-      const snap=await docPath().get();
-      clients=snap.exists&&Array.isArray(snap.data().clients)?snap.data().clients:[];
-      render();cloud('Sincronizado online','ok');
-    }
-
-    function resetForm(){
-      $('clientForm').reset();$('clientId').value='';$('value').value='25.00';$('autoNotify').checked=true;$('cancelEdit').hidden=true;setDefaultDate();
-    }
-
-    $('clientForm').addEventListener('submit',async e=>{
-      e.preventDefault();
-      const id=$('clientId').value||((crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now()));
-      const item={id,name:$('name').value.trim(),username:$('username').value.trim(),whatsapp:phone($('whatsapp').value),email:$('email').value.trim(),plan:$('plan').value,value:Number($('value').value||0),renewalDate:$('renewalDate').value,autoNotify:$('autoNotify').checked,updatedAt:new Date().toISOString()};
-      const i=clients.findIndex(c=>c.id===id);if(i>=0)clients[i]=item;else clients.push(item);
-      await saveCloud();resetForm();render();
-    });
-
-    function editClient(id){const c=clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('name').value=c.name;$('username').value=c.username;$('whatsapp').value=c.whatsapp;$('email').value=c.email||'';$('plan').value=c.plan||'Mensal';$('value').value=c.value??25;$('renewalDate').value=c.renewalDate;$('autoNotify').checked=c.autoNotify!==false;$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
-    async function deleteClient(id){if(!confirm('Excluir este cliente?'))return;clients=clients.filter(c=>c.id!==id);await saveCloud();render()}
-    async function renewClient(id){const c=clients.find(x=>x.id===id);if(!c)return;let d=parseDate(c.renewalDate);if(d<today())d=today();const add=c.plan==='Trimestral'?90:c.plan==='Semestral'?180:c.plan==='Anual'?365:30;d.setDate(d.getDate()+add);c.renewalDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;c.lastRenewedAt=new Date().toISOString();await saveCloud();render()}
-
-    function render(){
-      const q=$('search').value.toLowerCase().trim(),f=$('filter').value;
-      const list=clients.filter(c=>{const st=status(c.renewalDate).k;const match=!q||[c.name,c.username,c.whatsapp,c.email].join(' ').toLowerCase().includes(q);return match&&(f==='all'||f===st)}).sort((a,b)=>a.renewalDate.localeCompare(b.renewalDate));
-      $('rows').innerHTML=list.map(c=>{const st=status(c.renewalDate);return `<tr><td><span class="name">${esc(c.name)}</span><span class="sub">${esc(c.email||'sem e-mail')}</span></td><td>${esc(c.username)}</td><td>${esc(c.whatsapp)}</td><td>${fmt(c.renewalDate)}</td><td><span class="badge ${st.k}">${st.t}</span></td><td>${esc(c.plan)}<span class="sub">R$ ${Number(c.value||0).toFixed(2).replace('.',',')}</span></td><td><div class="row-actions"><a class="btn btn-small btn-primary" target="_blank" rel="noopener" href="${wa(c)}">WhatsApp</a><button class="btn btn-small btn-outline" onclick="renewClient('${c.id}')">Renovar</button><button class="btn btn-small btn-outline" onclick="editClient('${c.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteClient('${c.id}')">Excluir</button></div></td></tr>`}).join('');
-      $('empty').style.display=list.length?'none':'block';$('stTotal').textContent=clients.length;$('stSoon').textContent=clients.filter(c=>status(c.renewalDate).k==='soon').length;$('stLate').textContent=clients.filter(c=>status(c.renewalDate).k==='late').length;$('stOk').textContent=clients.filter(c=>status(c.renewalDate).k==='ok').length;
-    }
-
-    $('cancelEdit').onclick=resetForm;$('search').oninput=render;$('filter').onchange=render;window.editClient=editClient;window.deleteClient=deleteClient;window.renewClient=renewClient;
-
-    (async()=>{try{await requireAuth();const sdk=await window.WDM_FIREBASE_READY;db=sdk.firestore();setDefaultDate();await loadCloud()}catch(e){console.error(e);cloud('Erro ao sincronizar','err')}})();
-  </script>
+<header>
+  <h1><span>WDM</span> Admin · Clientes IPTV</h1>
+  <div class="actions"><a href="/admin/dashboard.html" class="btn outline">← Painel</a><button class="btn danger" onclick="logout()">Sair</button></div>
+</header>
+<main class="container">
+  <div class="top"><div><h2>Clientes e renovações</h2><div class="muted">Controle vencimentos e avisos de renovação.</div></div><span id="cloudStatus" class="muted">Conectando ao Firebase...</span></div>
+  <section class="stats"><article class="stat"><span>Total</span><strong id="stTotal">0</strong></article><article class="stat soon"><span>Vencem em até 3 dias</span><strong id="stSoon">0</strong></article><article class="stat late"><span>Vencidos</span><strong id="stLate">0</strong></article><article class="stat ok"><span>Em dia</span><strong id="stOk">0</strong></article></section>
+  <section class="panel">
+    <h3>Cadastrar cliente</h3>
+    <form id="clientForm" class="form">
+      <input type="hidden" id="clientId">
+      <label>Nome<input id="name" required placeholder="Nome do cliente"></label>
+      <label>Usuário IPTV<input id="username" required placeholder="Usuário"></label>
+      <label>WhatsApp<input id="whatsapp" required inputmode="tel" placeholder="5511999999999"></label>
+      <label>E-mail<input id="email" type="email" placeholder="cliente@email.com"></label>
+      <label>Plano<select id="plan"><option>Mensal</option><option>Trimestral</option><option>Semestral</option><option>Anual</option></select></label>
+      <label>Valor (R$)<input id="value" type="number" min="0" step="0.01" value="25.00"></label>
+      <label>Data de renovação<input id="renewalDate" type="date" required></label>
+      <label class="check"><input id="autoNotify" type="checkbox" checked> Aviso automático</label>
+      <div class="form-actions"><button class="btn primary" type="submit">Salvar cliente</button><button id="cancelEdit" class="btn outline" type="button" hidden>Cancelar edição</button></div>
+    </form>
+  </section>
+  <section class="panel">
+    <div class="toolbar"><div><h3 style="margin:0">Clientes</h3><div class="muted">Clique em renovar para avançar a próxima cobrança.</div></div><div class="toolbar-controls"><input id="search" placeholder="Buscar nome, usuário ou WhatsApp"><select id="filter"><option value="all">Todos</option><option value="soon">Vencendo</option><option value="late">Vencidos</option><option value="ok">Em dia</option></select></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Usuário</th><th>WhatsApp</th><th>Renovação</th><th>Status</th><th>Plano</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table></div><div id="empty" class="empty">Nenhum cliente cadastrado.</div>
+  </section>
+</main>
+<script src="../auth.js"></script>
+<script>
+let clients=[],db=null;const $=id=>document.getElementById(id);const ref=()=>db.collection('wdmAdmin').doc('iptv');
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};const parseDate=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};const fmt=s=>parseDate(s).toLocaleDateString('pt-BR');const days=s=>Math.ceil((parseDate(s)-today())/86400000);
+const status=s=>{const d=days(s);if(d<0)return{k:'late',t:`Vencido há ${Math.abs(d)} dia${Math.abs(d)===1?'':'s'}`};if(d===0)return{k:'soon',t:'Vence hoje'};if(d<=3)return{k:'soon',t:`Vence em ${d} dia${d===1?'':'s'}`};return{k:'ok',t:'Em dia'}};
+const phone=s=>String(s||'').replace(/\D/g,'');const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const msg=c=>encodeURIComponent(`Olá, ${c.name}! Passando para lembrar que seu acesso WDM IPTV ${days(c.renewalDate)<0?'venceu em':'vence em'} ${fmt(c.renewalDate)}. Se quiser renovar, me chama por aqui. Obrigado!`);const wa=c=>`https://wa.me/${phone(c.whatsapp)}?text=${msg(c)}`;
+function setDefaultDate(){if(!$('renewalDate').value){const d=new Date();d.setDate(d.getDate()+30);$('renewalDate').value=d.toISOString().slice(0,10)}}function cloud(t,k=''){const e=$('cloudStatus');e.textContent=t;e.className='muted cloud '+k}
+async function saveCloud(){cloud('Salvando...');await ref().set({clients,ownerEmail:ADMIN_EMAIL,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});cloud('Sincronizado online','ok')}async function loadCloud(){const s=await ref().get();clients=s.exists&&Array.isArray(s.data().clients)?s.data().clients:[];render();cloud('Sincronizado online','ok')}
+function resetForm(){$('clientForm').reset();$('clientId').value='';$('value').value='25.00';$('autoNotify').checked=true;$('cancelEdit').hidden=true;setDefaultDate()}
+$('clientForm').addEventListener('submit',async e=>{e.preventDefault();const id=$('clientId').value||(crypto.randomUUID?crypto.randomUUID():String(Date.now()));const item={id,name:$('name').value.trim(),username:$('username').value.trim(),whatsapp:phone($('whatsapp').value),email:$('email').value.trim(),plan:$('plan').value,value:Number($('value').value||0),renewalDate:$('renewalDate').value,autoNotify:$('autoNotify').checked,updatedAt:new Date().toISOString()};const i=clients.findIndex(c=>c.id===id);if(i>=0)clients[i]=item;else clients.push(item);await saveCloud();resetForm();render()});
+function editClient(id){const c=clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('name').value=c.name;$('username').value=c.username;$('whatsapp').value=c.whatsapp;$('email').value=c.email||'';$('plan').value=c.plan||'Mensal';$('value').value=c.value??25;$('renewalDate').value=c.renewalDate;$('autoNotify').checked=c.autoNotify!==false;$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}async function deleteClient(id){if(!confirm('Excluir este cliente?'))return;clients=clients.filter(c=>c.id!==id);await saveCloud();render()}async function renewClient(id){const c=clients.find(x=>x.id===id);if(!c)return;let d=parseDate(c.renewalDate);if(d<today())d=today();const add=c.plan==='Trimestral'?90:c.plan==='Semestral'?180:c.plan==='Anual'?365:30;d.setDate(d.getDate()+add);c.renewalDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;c.lastRenewedAt=new Date().toISOString();await saveCloud();render()}
+function render(){const q=$('search').value.toLowerCase().trim(),f=$('filter').value;const list=clients.filter(c=>{const st=status(c.renewalDate).k;const match=!q||[c.name,c.username,c.whatsapp,c.email].join(' ').toLowerCase().includes(q);return match&&(f==='all'||f===st)}).sort((a,b)=>a.renewalDate.localeCompare(b.renewalDate));$('rows').innerHTML=list.map(c=>{const st=status(c.renewalDate);return `<tr><td><span class="name">${esc(c.name)}</span><span class="sub">${esc(c.email||'sem e-mail')}</span></td><td>${esc(c.username)}</td><td>${esc(c.whatsapp)}</td><td>${fmt(c.renewalDate)}</td><td><span class="badge ${st.k}">${st.t}</span></td><td>${esc(c.plan)}<span class="sub">R$ ${Number(c.value||0).toFixed(2).replace('.',',')}</span></td><td><div class="row-actions"><a class="btn small primary" target="_blank" rel="noopener" href="${wa(c)}">WhatsApp</a><button class="btn small outline" onclick="renewClient('${c.id}')">Renovar</button><button class="btn small outline" onclick="editClient('${c.id}')">Editar</button><button class="btn small danger" onclick="deleteClient('${c.id}')">Excluir</button></div></td></tr>`}).join('');$('empty').style.display=list.length?'none':'block';$('stTotal').textContent=clients.length;$('stSoon').textContent=clients.filter(c=>status(c.renewalDate).k==='soon').length;$('stLate').textContent=clients.filter(c=>status(c.renewalDate).k==='late').length;$('stOk').textContent=clients.filter(c=>status(c.renewalDate).k==='ok').length}
+$('cancelEdit').onclick=resetForm;$('search').oninput=render;$('filter').onchange=render;window.editClient=editClient;window.deleteClient=deleteClient;window.renewClient=renewClient;(async()=>{try{await requireAuth();const sdk=await window.WDM_FIREBASE_READY;db=sdk.firestore();setDefaultDate();await loadCloud()}catch(e){console.error(e);cloud('Erro ao sincronizar','err')}})();
+</script>
 </body>
 </html>
