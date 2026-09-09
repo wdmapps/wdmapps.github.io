@@ -7,6 +7,8 @@ const icons={
  jogos:icon(['#f472b6','#be185d'],'<path d="M21 24h22c5 0 8 4 9 10l2 10c1 6-5 9-9 5l-6-6H25l-6 6c-4 4-10 1-9-5l2-10c1-6 4-10 9-10z" fill="#fff"/><path d="M22 31v10M17 36h10" stroke="#db2777" stroke-width="3" stroke-linecap="round"/><circle cx="42" cy="33" r="2.5" fill="#db2777"/><circle cx="47" cy="38" r="2.5" fill="#db2777"/>'),
  encontrapet:icon(['#fb923c','#ea580c'],'<ellipse cx="32" cy="39" rx="10" ry="8" fill="#fff"/><circle cx="20" cy="29" r="5" fill="#fff"/><circle cx="28" cy="23" r="5" fill="#fff"/><circle cx="36" cy="23" r="5" fill="#fff"/><circle cx="44" cy="29" r="5" fill="#fff"/>'),
  vendezap:icon(['#4ade80','#15803d'],'<path d="M17 20h21l10 10-21 21-10-10z" fill="#fff"/><circle cx="31" cy="28" r="3" fill="#16a34a"/><path d="M27 40h13M33 34v12" stroke="#16a34a" stroke-width="3" stroke-linecap="round"/>'),
+ docs:icon(['#3b82f6','#1d4ed8'],'<path d="M18 12h22l8 8v32H18z" fill="#fff"/><path d="M40 12v10h10" fill="#bfdbfe"/><path d="M24 29h18M24 36h18M24 43h13" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>'),
+ sheets:icon(['#22c55e','#15803d'],'<rect x="15" y="13" width="34" height="38" rx="4" fill="#fff"/><path d="M15 25h34M15 36h34M27 13v38M39 13v38" stroke="#16a34a" stroke-width="2.5"/><path d="M19 18h7v4h-7z" fill="#bbf7d0"/>'),
  admin:icon(['#64748b','#1e293b'],'<rect x="14" y="17" width="36" height="30" rx="6" fill="#fff"/><rect x="19" y="22" width="12" height="8" rx="2" fill="#334155"/><rect x="34" y="22" width="11" height="8" rx="2" fill="#94a3b8"/><rect x="19" y="34" width="26" height="3" rx="1.5" fill="#64748b"/><rect x="19" y="40" width="18" height="3" rx="1.5" fill="#cbd5e1"/>'),
  sobre:icon(['#60a5fa','#1d4ed8'],'<rect x="13" y="17" width="38" height="26" rx="6" fill="#fff"/><path d="M23 50h18M28 43v7M36 43v7" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M20 25l5 10 6-10 6 10 7-10" fill="none" stroke="#2563eb" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>'),
  contato:icon(['#475569','#111827'],'<path d="M15 19h34v25H31l-10 7v-7h-6z" fill="#fff"/><circle cx="24" cy="32" r="2.4" fill="#334155"/><circle cx="32" cy="32" r="2.4" fill="#334155"/><circle cx="40" cy="32" r="2.4" fill="#334155"/>')
@@ -17,6 +19,8 @@ const apps={
  leitor:{title:'WDM Leitor',label:'Leitor',url:'https://wdmapps.com.br/leitor/',icon:'leitor',mode:'iframe'},
  iptv:{title:'WDM IPTV',label:'IPTV',url:'https://wdmapps.com.br/iptv/',icon:'iptv',mode:'iframe'},
  jogos:{title:'Jogos WDM',label:'Jogos',url:'https://wdmapps.com.br/jogos/',icon:'jogos',mode:'iframe'},
+ docs:{title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'},
+ sheets:{title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'},
  encontrapet:{title:'EncontraPet',label:'EncontraPet',url:'https://play.google.com/store/apps/details?id=com.wdmapps.encontrapet',icon:'encontrapet',mode:'external',description:'Rede solidária para divulgar animais perdidos e ajudar no reencontro com suas famílias.'},
  vendezap:{title:'VendeZap',label:'VendeZap',url:'https://play.google.com/store/apps/details?id=com.will.vendezap',icon:'vendezap',mode:'external',description:'Crie anúncios de forma rápida e compartilhe direto pelo WhatsApp.'},
  admin:{title:'Admin WDM',label:'Admin',url:'https://wdmapps.com.br/admin/',icon:'admin',mode:'iframe'},
