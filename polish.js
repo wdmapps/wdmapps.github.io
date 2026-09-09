@@ -1,11 +1,15 @@
 (() => {
   icons.contash = icon(['#38bdf8','#1d4ed8'],'<rect x="14" y="14" width="36" height="36" rx="8" fill="#fff"/><path d="M22 26h8M26 22v8M36 22h8M36 30h8M22 39h8M37 36l7 7M44 36l-7 7" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>');
   icons.telhas = icon(['#0ea5e9','#0f3b66'],'<path d="M11 31L32 16l21 15-5 7-16-11-16 11z" fill="#fff"/><rect x="20" y="33" width="24" height="16" rx="3" fill="#dbeafe"/><path d="M20 38h24M20 43h24" stroke="#2563eb" stroke-width="2"/>');
+  icons.docs = icon(['#3b82f6','#1d4ed8'],'<path d="M18 12h22l8 8v32H18z" fill="#fff"/><path d="M40 12v10h10" fill="#bfdbfe"/><path d="M24 29h18M24 36h18M24 43h13" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>');
+  icons.sheets = icon(['#22c55e','#15803d'],'<rect x="15" y="13" width="34" height="38" rx="4" fill="#fff"/><path d="M15 25h34M15 36h34M27 13v38M39 13v38" stroke="#16a34a" stroke-width="2.5"/><path d="M19 18h7v4h-7z" fill="#bbf7d0"/>');
 
   const original = {...apps};
   const enhanced = {
     shopping: original.shopping,
     digitacao: original.digitacao,
+    docs: {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'},
+    sheets: {title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'},
     leitor: original.leitor,
     iptv: original.iptv,
     jogos: original.jogos,
