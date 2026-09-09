@@ -3,7 +3,7 @@
     icons.docs = icon(['#3b82f6','#1d4ed8'],'<path d="M18 12h22l8 8v32H18z" fill="#fff"/><path d="M40 12v10h10" fill="#bfdbfe"/><path d="M24 29h18M24 36h18M24 43h13" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>');
     icons.sheets = icon(['#22c55e','#15803d'],'<rect x="15" y="13" width="34" height="38" rx="4" fill="#fff"/><path d="M15 25h34M15 36h34M27 13v38M39 13v38" stroke="#16a34a" stroke-width="2.5"/><path d="M19 18h7v4h-7z" fill="#bbf7d0"/>');
 
-    apps.docs = {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/docs.html',icon:'docs',mode:'iframe'};
+    apps.docs = {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/docs.html?v=20260909-1014',icon:'docs',mode:'iframe'};
     apps.sheets = {title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'};
 
     function add(key) {
