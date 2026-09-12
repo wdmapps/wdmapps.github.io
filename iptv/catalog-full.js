@@ -24,6 +24,17 @@
             scroller.appendChild(progress);
         }
 
+        function updateSidebarTotal() {
+            const totalEl = document.querySelector('#cats .cat-head:first-child .num');
+            if (!totalEl) return;
+
+            if (page === 'filmes.html' && typeof filmes !== 'undefined' && String(catAtiva) === '0') {
+                totalEl.textContent = Number(filmes.length || 0).toLocaleString('pt-BR');
+            } else if (page === 'series.html' && typeof series !== 'undefined' && String(catAtiva) === '0') {
+                totalEl.textContent = Number(series.length || 0).toLocaleString('pt-BR');
+            }
+        }
+
         function makeImage(src, className) {
             if (!src) return null;
             const img = document.createElement('img');
@@ -165,6 +176,7 @@
             shown = 0;
             grid.replaceChildren();
             scroller.scrollTop = 0;
+            updateSidebarTotal();
 
             if (!current.length) {
                 const empty = document.createElement('p');
