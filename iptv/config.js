@@ -1,6 +1,5 @@
 // config.js
-// O servidor é fixo e fica oculto dentro do proxy (Deno Deploy).
-// O usuário final nunca vê o DNS real.
+// O proxy oferece os serviços e DNS configurados em /servers.
 const CONFIG = {
     worker: "https://wdmappsgithubio.wdmapps.deno.net"
 };

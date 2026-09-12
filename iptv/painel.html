@@ -66,6 +66,9 @@
         /* Menu glass */
         .menu-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 4%; width: 100%; }
         .grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .connection-tools { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:22px; }
+        .connection-tools a { color:var(--accent); text-decoration:none; border:1px solid var(--border); border-radius:12px; padding:12px 18px; font-size:.9rem; }
+        .connection-tools a:hover { background:var(--bg-light); }
         .glass-btn {
             background: rgba(15, 31, 61, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 48px 30px;
@@ -142,6 +145,10 @@
         </header>
 
         <main class="menu-wrapper">
+            <div class="connection-tools">
+                <a href="player.html?trocar=1">Trocar serviço / DNS</a>
+                <a href="m3u.html">Abrir lista M3U</a>
+            </div>
             <div class="grid-menu">
                 <a href="canais.html" class="glass-btn"><div class="icon-size">📺</div><h2>Canais</h2><p>TV ao vivo com dezenas de canais</p></a>
                 <a href="filmes.html" class="glass-btn"><div class="icon-size">🎬</div><h2>Filmes</h2><p>Catálogo completo de filmes</p></a>
@@ -162,7 +169,7 @@
     </div>
 
     <script src="config.js?v=3"></script>
-    <script src="api.js?v=3"></script>
+    <script src="api.js?v=5"></script>
     <script>
         setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR'), 1000);
 
@@ -170,7 +177,10 @@
         document.getElementById("lblUser")?.remove();
         document.getElementById("avatar").innerText = nome.charAt(0).toUpperCase();
 
-        function efetuarLogout() { localStorage.clear(); window.location.href = "index.html"; }
+        function efetuarLogout() {
+            for (const key of ["username", "password", "server", "iptv_provider", "iptv_server_choice", "logging_in", "canal_atual", "chosen_stream_id", "chosen_serie_id", "favoritos", "recentes"]) localStorage.removeItem(key);
+            window.location.href = "player.html";
+        }
 
         const demo = [
             { name: "Demo 01", categoria: "Ação", color: "#1e3a5f" },

@@ -7,13 +7,23 @@
 //     (/m/<índice>/...) -> tokens dos segmentos só são válidos no
 //     servidor que os gerou; sem isso a rotação causa 404 e o canal
 //     reconecta a cada ~10s
-// O DNS real fica em DNS_LIST (env var do projeto) e nunca é exposto.
+// O frontend escolhe serviço e índice; o proxy mantém as URLs de origem.
 // =====================================================================
 
-const DNS_LIST = (Deno.env.get("DNS_LIST") || "")
+const PLAYNOW_DNS = (Deno.env.get("PLAYNOW_DNS") || "http://dns1.prontonline.com,http://pnow.space,http://nowplay.sbs")
   .split(",")
-  .map((s) => s.trim())
+  .map((s) => s.trim().replace(/\/+$/, ""))
   .filter(Boolean);
+
+const REXTV_DNS = (Deno.env.get("REXTV_DNS") || "http://rexmax.sbs").trim().replace(/\/+$/, "");
+// PlayNow ocupa os índices 0–2; a RexTV vem em seguida.
+const DNS_LIST = [...PLAYNOW_DNS, ...(REXTV_DNS ? [REXTV_DNS] : [])];
+const PROVIDERS = [
+  { id: "playnow", label: "PlayNow", servers: PLAYNOW_DNS.map((_, id) => id) },
+  { id: "rextv", label: "RexTV", servers: REXTV_DNS ? [PLAYNOW_DNS.length] : [] },
+];
+
+const DNS_LABELS = (Deno.env.get("DNS_LABELS") || "").split(",").map((s) => s.trim());
 
 const CORS = {
   "Content-Type": "application/json",
@@ -98,7 +108,7 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
     if (!u) return "";
     if (u.startsWith(origin + "/m/")) return u;
     let abs = u;
-    if (!/^(https?:)?\/\//.test(u)) {
+    if (!/^https?:\/\//.test(u)) {
       if (!baseUrl) return u;
       try {
         abs = new URL(u, baseUrl).href;
@@ -119,7 +129,7 @@ function rewriteLine(line: string, dnsList: string[], origin: string, usedIdx: n
   if (/URI="[^"]+"/.test(line)) {
     return line.replace(/URI="([^"]+)"/g, (_m, u) => `URI="${fix(u)}"`);
   }
-  if (/^[^\s#,]+$/.test(t) && /\.(ts|m3u8|key)(\?.*)?$/i.test(t)) {
+  if (!t.startsWith("#")) {
     return line.replace(t, fix(t));
   }
   return line;
@@ -169,15 +179,15 @@ function rewriteImages(obj: unknown, dnsList: string[], origin: string): void {
     for (const k of Object.keys(record)) {
       if (KEYS.includes(k) && typeof record[k] === "string" && record[k]) {
         const val = record[k] as string;
-        for (const b of bases) {
+        for (const [i, b] of bases.entries()) {
           const host = b.split("//")[1];
           if (val.startsWith(b)) {
-            record[k] = origin + "/m/" + val.slice(b.length).replace(/^\/+/, "");
+            record[k] = origin + "/m/" + i + "/" + val.slice(b.length).replace(/^\/+/, "");
             break;
           }
           if (val.startsWith("//" + host) || val.startsWith("http://" + host) || val.startsWith("https://" + host)) {
             const cut = val.replace(/^(https?:)?(\/\/)+[^/]+/, "");
-            record[k] = origin + "/m/" + cut.replace(/^\/+/, "");
+            record[k] = origin + "/m/" + i + "/" + cut.replace(/^\/+/, "");
             break;
           }
         }
@@ -192,31 +202,49 @@ async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const origin = url.origin;
   const dnsList = DNS_LIST;
-  if (dnsList.length === 0) return json({ error: "Servidor não configurado." }, 500);
 
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS });
   }
+  if (request.method !== "GET") return json({ error: "Método não permitido." }, 405);
+  if (dnsList.length === 0) return json({ error: "Servidor não configurado." }, 500);
 
   const path = url.pathname;
   const q = url.searchParams;
-  const dnsDefault = dnsList[defaultServer % dnsList.length];
+  const requested = q.get("server");
+  const explicitServer = requested !== null && requested !== "auto";
+  const selectedServer = explicitServer ? Number(requested) : defaultServer % dnsList.length;
+  if (explicitServer && (!/^\d+$/.test(requested!) || !Number.isSafeInteger(selectedServer) || selectedServer >= dnsList.length)) {
+    return json({ ok: false, message: "Servidor inválido. Escolha uma opção da lista." }, 400);
+  }
+  let dnsDefault = dnsList[selectedServer];
 
   try {
+    if (path === "/servers") {
+      return json({ ok: true, providers: PROVIDERS.map((provider) => ({
+        id: provider.id, label: provider.label,
+        servers: provider.servers.map((id, index) => ({ id, label: DNS_LABELS[id] || `DNS ${index + 1}` })),
+      })) });
+    }
     // ===== AUTENTICAÇÃO =====
     if (path === "/auth") {
       const user = (q.get("username") || "").trim();
       const pass = (q.get("password") || "").trim();
       if (!user || !pass) return json({ ok: false, message: "Usuário e senha obrigatórios." }, 400);
 
-      for (let i = 0; i < dnsList.length; i++) {
+      const provider = PROVIDERS.find((item) => item.id === (q.get("provider") || "playnow"));
+      if (!provider) return json({ ok: false, message: "Serviço inválido." }, 400);
+      if (!provider.servers.length) return json({ ok: false, message: "O DNS deste serviço ainda não foi configurado." }, 503);
+      if (explicitServer && !provider.servers.includes(selectedServer)) return json({ ok: false, message: "Este DNS não pertence ao serviço escolhido." }, 400);
+      const candidates = explicitServer ? [selectedServer] : provider.servers;
+      for (const i of candidates) {
         const srv = dnsList[i];
         const apiUrl = `${srv}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`;
         try {
-          const r = await fetch(apiUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+          const r = await fetch(apiUrl, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(8000) });
           if (!r.ok) continue;
           const data = await r.json();
-          if (data && data.user_info && data.user_info.auth === 1) {
+          if (data && data.user_info && Number(data.user_info.auth) === 1) {
             if (data.user_info.status === "Active") {
               defaultServer = i;
               return json({
@@ -224,6 +252,7 @@ async function handleRequest(request: Request): Promise<Response> {
                 user: data.user_info.username,
                 exp: data.user_info.exp_ts || null,
                 server: i,
+                provider: provider.id,
               });
             }
             return json({ ok: false, message: "Esta conta encontra-se vencida ou inativa." });
@@ -253,17 +282,21 @@ async function handleRequest(request: Request): Promise<Response> {
 
       let r = await fetch(apiUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
       // se o servidor ativo falhar, tenta os demais
-      if (!r.ok || r.status >= 400) {
-        for (const sA of dnsList) {
-          const alt = `${sA}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}`;
+      if (!r.ok && !explicitServer) {
+        const fallbackServers = PROVIDERS.find((provider) => provider.servers.includes(selectedServer))?.servers || [selectedServer];
+        for (const index of fallbackServers) {
+          const sA = dnsList[index];
+          const alt = `${sA}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}${extras.length ? "&" + extras.join("&") : ""}`;
           const rr = await fetch(alt, { headers: { "User-Agent": "Mozilla/5.0" } });
 if (rr.ok) {
               r = rr;
               defaultServer = dnsList.indexOf(sA);
+              dnsDefault = sA;
               break;
             }
         }
       }
+      if (!r.ok) return json({ error: "O servidor selecionado está indisponível." }, 502);
       const body = await r.text();
 
       // Cortar listas grandes (opcional via &limit=)
@@ -323,6 +356,7 @@ if (rr.ok) {
       const mIdx = resto.match(/^(\d+)\//);
       if (mIdx) {
         pinIdx = parseInt(mIdx[1], 10);
+        if (!Number.isSafeInteger(pinIdx) || pinIdx >= dnsList.length) return json({ error: "Servidor inválido." }, 400);
         resto = resto.slice(mIdx[0].length);
       }
       const rel = resto + (url.search ? url.search : "");
@@ -342,10 +376,19 @@ if (rr.ok) {
           if (v) headers[h] = v;
         }
         try {
-          const rr = await fetch(target, { headers });
+          const rr = await fetch(target, { headers, signal: q.get("playlist") === "1" ? AbortSignal.timeout(25000) : request.signal });
           if (!rr) return json({ error: "Falha no upstream." }, 502);
+          // A lista mantém sua URL efetiva para resolver caminhos relativos após redirects.
+          if (q.get("playlist") === "1") {
+            if (!rr.ok) return json({ error: "Não foi possível carregar a lista M3U." }, rr.status);
+            const text = await readPlaylist(rr);
+            return json({ text, baseUrl: rr.url || target });
+          }
+          const isHls = /mpegurl/i.test(rr.headers.get("content-type") || "") || /\.m3u8(?:\?|$)/i.test(target);
+          if (isHls && rr.ok) return playlistResponse(rr, dnsList, origin, sel, target);
           const respHeaders = new Headers(rr.headers);
           respHeaders.set("Access-Control-Allow-Origin", "*");
+          respHeaders.set("Access-Control-Expose-Headers", "Content-Length, Content-Range, Content-Type");
           respHeaders.set("Cache-Control", "no-store");
           return new Response(rr.body, { status: rr.status, headers: respHeaders });
         } catch {
@@ -372,8 +415,9 @@ if (rr.ok) {
 
       // Segmentos tokenizados permanecem no servidor fixado. Para o
       // manifesto inicial, porém, um 404 também tenta os demais servidores.
-      if (!response || response.status >= 500 || (isLive && response.status === 404 && /\.m3u8(\?.*)?$/i.test(rel))) {
-        for (let i = 0; i < dnsList.length; i++) {
+      if (pinIdx < 0 && (!response || response.status >= 500 || (isLive && response.status === 404 && /\.m3u8(\?.*)?$/i.test(rel)))) {
+        const fallbackServers = PROVIDERS.find((provider) => provider.servers.includes(sel))?.servers || [sel];
+        for (const i of fallbackServers) {
           if (i === sel) continue;
           try {
             if (isLive) await ensureLiveSession(dnsList[i], i, rel);
@@ -403,35 +447,7 @@ if (rr.ok) {
       respHeaders.set("Cache-Control", "no-store");
 
       if (isM3u8) {
-        // headers do corpo ORIGINAL não valem para o texto reescrito
-        for (const h of ["content-length", "content-encoding", "transfer-encoding", "content-range", "etag", "last-modified", "date", "content-type"]) {
-          respHeaders.delete(h);
-        }
-        respHeaders.set("Content-Type", "application/vnd.apple.mpegurl");
-
-        // reescrita em STREAMING: processa linha a linha, sem bufferizar a playlist
-        const encoder = new TextEncoder();
-        const decoder = new TextDecoder();
-        let resto2 = "";
-        const baseUrl = response.url || "";
-        const ts = new TransformStream<Uint8Array, Uint8Array>({
-          transform(chunk, controller) {
-            resto2 += decoder.decode(chunk, { stream: true });
-            let i;
-            while ((i = resto2.indexOf("\n")) !== -1) {
-              controller.enqueue(encoder.encode(rewriteLine(resto2.slice(0, i), dnsList, origin, usedIdx, baseUrl) + "\n"));
-              resto2 = resto2.slice(i + 1);
-            }
-          },
-          flush(controller) {
-            if (resto2.length) controller.enqueue(encoder.encode(rewriteLine(resto2, dnsList, origin, usedIdx, baseUrl)));
-          },
-        });
-
-        return new Response(response.body!.pipeThrough(ts), {
-          status: response.status >= 400 ? response.status : 200,
-          headers: respHeaders,
-        });
+        return playlistResponse(response, dnsList, origin, usedIdx);
       }
 
       return new Response(response.body, { status: response.status, headers: respHeaders });
@@ -444,4 +460,51 @@ if (rr.ok) {
   }
 }
 
-Deno.serve({ port: 8000 }, handleRequest);
+async function readPlaylist(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("Lista vazia.");
+  const decoder = new TextDecoder();
+  let size = 0, text = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > 20 * 1024 * 1024) throw new Error("A lista excede 20 MB.");
+      text += decoder.decode(value, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
+function playlistResponse(response: Response, dnsList: string[], origin: string, server: number, fallbackBase = ""): Response {
+  const headers = new Headers(response.headers);
+  for (const h of ["content-length", "content-encoding", "transfer-encoding", "content-range", "etag", "last-modified", "date", "content-type"]) headers.delete(h);
+  headers.set("Content-Type", "application/vnd.apple.mpegurl");
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Cache-Control", "no-store");
+  const encoder = new TextEncoder(), decoder = new TextDecoder();
+  const base = response.url || fallbackBase;
+  let pending = "";
+  const transform = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      pending += decoder.decode(chunk, { stream: true });
+      let i;
+      while ((i = pending.indexOf("\n")) !== -1) {
+        controller.enqueue(encoder.encode(rewriteLine(pending.slice(0, i), dnsList, origin, server, base) + "\n"));
+        pending = pending.slice(i + 1);
+      }
+    },
+    flush(controller) {
+      pending += decoder.decode();
+      if (pending) controller.enqueue(encoder.encode(rewriteLine(pending, dnsList, origin, server, base)));
+    },
+  });
+  return new Response(response.body?.pipeThrough(transform) || null, { status: response.status, headers });
+}
+
+export { handleRequest, rewriteLine };
+if (import.meta.main) Deno.serve({ port: 8000 }, handleRequest);

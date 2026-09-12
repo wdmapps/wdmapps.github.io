@@ -3,20 +3,23 @@ const API = CONFIG.worker || "";
 
 function apiUrl(endpoint, params) {
     const qs = new URLSearchParams(params);
+    // O catálogo sempre acompanha a sessão, mesmo com outros usuários online.
+    if (endpoint === "mcp" && !qs.has("server")) qs.set("server", String(getServer()));
     return `${API}/${endpoint}?${qs.toString()}`;
 }
 
 // wrapper de fetch JSON (nunca trava: timeout de 25s e erro tratado)
 async function api(endpoint, params) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
     try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 25000);
         const r = await fetch(apiUrl(endpoint, params), { signal: ctrl.signal });
-        clearTimeout(timer);
         return await r.json();
     } catch (e) {
         console.error("Falha de rede no API:", e);
         return { ok: false, message: "Falha de conexão. Tente novamente." };
+    } finally {
+        clearTimeout(timer);
     }
 }
 
@@ -55,8 +58,8 @@ function mUrl(rel) {
 
 // índice do servidor pinado na última autenticação (/auth devolve `server`)
 function getServer() {
-    const s = parseInt(localStorage.getItem("server") || "0", 10);
-    return isNaN(s) ? 0 : s;
+    const s = Number(localStorage.getItem("server") || "0");
+    return Number.isSafeInteger(s) && s >= 0 ? s : 0;
 }
 
 // URL de stream ao vivo (playlist + segmentos fixados no mesmo servidor)

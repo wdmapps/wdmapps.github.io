@@ -22,7 +22,7 @@
 
         body {
             background: url('../img/fundo.jpg') center/cover fixed no-repeat, var(--bg); color: var(--text);
-            min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden;
             position: relative;
         }
         body::before { content: ''; position: fixed; inset: 0; background: rgba(6,14,26,0.7); z-index: 0; pointer-events: none; }
@@ -51,13 +51,20 @@
         .campo { margin-bottom: 20px; }
         .campo label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
         .campo .input-wrap { position: relative; }
-        .campo input {
+        .campo input, .campo select {
             width: 100%; padding: 14px 16px; font-size: 1rem; color: var(--text);
             background: rgba(6, 14, 26, 0.6); border: 1px solid var(--border); border-radius: 14px; outline: none;
             transition: all 0.3s;
         }
         .campo input::placeholder { color: var(--text-light); }
         .campo input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 170, 255, 0.15); }
+        .campo select { color-scheme: dark; }
+        .campo select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .hint { color: var(--text-light); font-size: .78rem; line-height: 1.5; margin-top: 8px; }
+        .alternativa { display: block; text-align: center; margin-top: 22px; color: var(--accent); font-weight: 600; text-decoration: none; }
+        #cancelarTroca { margin-top: 14px; }
+        [hidden] { display: none !important; }
+        @media (max-width: 480px) { .card { margin: 16px; padding: 30px 24px; } }
 
         .btn {
             width: 100%; padding: 15px; font-size: 1rem; font-weight: 700; color: white;
@@ -92,9 +99,21 @@
         </div>
         <p class="sub">Acesse sua conta para começar</p>
 
-        <div class="erro" id="erro"></div>
+        <div class="erro" id="erro" role="alert"></div>
 
         <form id="formLogin" autocomplete="off">
+            <div class="campo">
+                <label for="provider">Serviço</label>
+                <select id="provider" disabled>
+                    <option value="playnow">PlayNow</option>
+                    <option value="rextv">RexTV</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="server">Servidor / DNS</label>
+                <select id="server" disabled><option value="auto">Carregando DNS...</option></select>
+                <p class="hint" id="serverHint" aria-live="polite"></p>
+            </div>
             <div class="campo">
                 <label for="username">Usuário</label>
                 <div class="input-wrap">
@@ -107,70 +126,18 @@
                     <input type="password" id="password" placeholder="Digite sua senha" required>
                 </div>
             </div>
-            <button type="submit" class="btn" id="btnEntrar">Entrar</button>
+            <button type="submit" class="btn" id="btnEntrar" disabled>Entrar</button>
         </form>
+
+        <a class="alternativa" href="m3u.html">Abrir lista M3U por link ou arquivo →</a>
+        <a class="alternativa" id="cancelarTroca" href="painel.html" hidden>Voltar ao painel</a>
 
         <p class="rodape">Se ainda não tem conta, <a href="#" style="color:var(--accent);">fale conosco</a></p>
         <p class="credito">© 2026 <a href="https://wdmapps.com.br" target="_blank">WDM Apps</a></p>
     </div>
 
     <script src="config.js?v=3"></script>
-    <script src="api.js?v=3"></script>
-    <script>
-        // Se já estiver logado, vai direto pro painel
-        if (localStorage.getItem("username") && localStorage.getItem("password")) window.location.href = "painel.html";
-
-        const form = document.getElementById("formLogin");
-        const erro = document.getElementById("erro");
-        const btn = document.getElementById("btnEntrar");
-
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const user = document.getElementById("username").value.trim();
-            const pass = document.getElementById("password").value.trim();
-
-            erro.classList.remove("mostrar");
-
-            if (user.length < 3) {
-                showErro("Usuário inválido. Digite pelo menos 3 caracteres.");
-                return;
-            }
-            if (pass.length < 4) {
-                showErro("Senha inválida. Mínimo de 4 caracteres.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = "Entrando...";
-
-            try {
-                const teste = await api("auth", { username: user, password: pass });
-
-                erro.classList.remove("mostrar");
-
-                if (teste && teste.ok) {
-                    localStorage.setItem("username", user);
-                    localStorage.setItem("password", pass);
-                    localStorage.setItem("server", String(teste.server ?? 0));
-                    localStorage.setItem("logging_in", "1");
-                    window.location.href = "painel.html";
-                } else {
-                    localStorage.removeItem("username");
-                    localStorage.removeItem("password");
-                    showErro((teste && teste.message) || "Login falhou.");
-                }
-            } catch (e) {
-                showErro("Falha de conexão. Tente novamente.");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Entrar";
-            }
-        });
-
-        function showErro(msg) {
-            erro.textContent = msg;
-            erro.classList.add("mostrar");
-        }
-    </script>
+    <script src="api.js?v=5"></script>
+    <script src="login.js?v=1"></script>
 </body>
 </html>
