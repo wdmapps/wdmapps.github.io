@@ -13,10 +13,14 @@ const response = (data, url, options = {}) => {
     return res;
 };
 
-test('Menu oferece três DNS PlayNow e um RexTV sem endereços no payload', async () => {
+test('Menu oferece três DNS PlayNow e onze RexTV sem endereços no payload', async () => {
     const data = await (await request('/servers')).json();
-    assert.deepEqual(data.providers.map((p) => [p.id, p.label, p.servers.length]), [['playnow', 'PlayNow', 3], ['rextv', 'RexTV', 1]]);
+    assert.deepEqual(data.providers.map((p) => [p.id, p.label, p.servers.length]), [['playnow', 'PlayNow', 3], ['rextv', 'RexTV', 11]]);
     assert.deepEqual(data.providers[0].servers.map((s) => s.label), ['DNS 1', 'DNS 2', 'DNS 3']);
+    assert.deepEqual(data.providers[1].servers.map((s) => s.label), [
+        'Rex Max', 'Rex Plus', 'T-REX', 'RexTitanium', 'RexOn', 'RexX',
+        'RexBoom', 'Rex Imperial', 'RexRaptor', 'Rex Prestige', 'Rex Platinum',
+    ]);
     assert.equal(JSON.stringify(data).includes('http://'), false);
 });
 
@@ -29,12 +33,20 @@ test('PlayNow automático tenta somente os DNS da PlayNow', async () => {
     assert.equal(result.provider, 'playnow');
 });
 
-test('RexTV autentica somente no DNS rexmax.sbs', async () => {
+test('RexTV automático percorre somente o pool RexTV', async () => {
+    const expected = [
+        'rexmax.sbs', 'rexplus.sbs', 't-rex.fun', 'rextitanium.site', 'rexon.fun',
+        'rexxx.sbs', 'rexboom.sbs', 'reximperial.lol', 'rexraptor.sbs', 'surohcdn.top', 'pltinum.fun',
+    ];
     const calls = [];
-    globalThis.fetch = async (url) => { calls.push(new URL(url).hostname); return response(authData); };
+    globalThis.fetch = async (url) => {
+        calls.push(new URL(url).hostname);
+        return response(calls.length < expected.length ? {} : authData);
+    };
     const result = await (await request('/auth?username=test&password=test&provider=rextv&server=auto')).json();
-    assert.deepEqual(calls, ['rexmax.sbs']);
-    assert.equal(result.server, 3);
+    assert.deepEqual(calls, expected);
+    assert.equal(result.server, 13);
+    assert.equal(result.provider, 'rextv');
 });
 
 test('Escolha manual nunca tenta outro DNS e rejeita índices/serviços incompatíveis', async () => {
