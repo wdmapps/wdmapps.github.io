@@ -17,6 +17,7 @@
     vendezap: {...original.vendezap, mode:'showcase', image:'assets/vendezap-portfolio.webp', badge:'APLICATIVO ANDROID', meta:['Vendas','WhatsApp','Google Play']},
     contash: {title:'ContasH',label:'ContasH',url:'https://play.google.com/store/apps/details?id=com.wdmgames.contash',icon:'contash',mode:'showcase',image:'assets/contash-portfolio.jpg',badge:'JOGO EDUCATIVO',description:'Um jogo educativo de matemática criado para praticar contas de forma simples, divertida e interativa.',meta:['Android','Matemática','Educação']},
     telhas: {title:'Telhas Porto',label:'Telhas Porto',url:'https://telhasporto.com.br/',icon:'telhas',mode:'showcase',image:'assets/telhas-porto-logo.png',logoMode:true,badge:'SITE INSTITUCIONAL',description:'Projeto web desenvolvido para a Telhas Porto, com presença digital profissional para apresentar produtos, serviços e facilitar o contato com clientes.',meta:['Website','Responsivo','Projeto WDM']},
+    ferrarigesso: original.ferrarigesso,
     admin: original.admin,
     sobre: {title:'Sobre a WDM Apps',label:'Sobre a WDM',url:'https://wdmapps.com.br/',icon:'sobre',mode:'about'},
     contato: original.contato
