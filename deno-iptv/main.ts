@@ -15,15 +15,41 @@ const PLAYNOW_DNS = (Deno.env.get("PLAYNOW_DNS") || "http://dns1.prontonline.com
   .map((s) => s.trim().replace(/\/+$/, ""))
   .filter(Boolean);
 
-const REXTV_DNS = (Deno.env.get("REXTV_DNS") || "http://rexmax.sbs").trim().replace(/\/+$/, "");
-// PlayNow ocupa os índices 0–2; a RexTV vem em seguida.
-const DNS_LIST = [...PLAYNOW_DNS, ...(REXTV_DNS ? [REXTV_DNS] : [])];
+const normalizeDns = (s: string) => s.trim().replace(/\/+$/, "");
+const REXTV_DEFAULTS = [
+  ["Rex Max", "http://rexmax.sbs"],
+  ["Rex Plus", "http://rexplus.sbs"],
+  ["T-REX", "http://t-rex.fun"],
+  ["RexTitanium", "http://rextitanium.site"],
+  ["RexOn", "http://rexon.fun"],
+  ["RexX", "http://rexxx.sbs"],
+  ["RexBoom", "http://rexboom.sbs"],
+  ["Rex Imperial", "http://reximperial.lol"],
+  ["RexRaptor", "http://rexraptor.sbs"],
+  ["Rex Prestige", "http://surohcdn.top"],
+  ["Rex Platinum", "http://pltinum.fun"],
+] as const;
+
+// Mantém o pool padrão completo e acrescenta DNS extras do ambiente, se houver.
+// Assim uma variável antiga REXTV_DNS contendo apenas rexmax.sbs não esconde
+// os novos servidores configurados no site.
+const REXTV_EXTRA = (Deno.env.get("REXTV_DNS") || "")
+  .split(",")
+  .map(normalizeDns)
+  .filter(Boolean);
+const REXTV_DNS = [...new Set([...REXTV_DEFAULTS.map(([, dns]) => dns), ...REXTV_EXTRA])];
+
+// PlayNow ocupa os primeiros índices; todos os DNS RexTV vêm em seguida.
+const DNS_LIST = [...PLAYNOW_DNS, ...REXTV_DNS];
 const PROVIDERS = [
   { id: "playnow", label: "PlayNow", servers: PLAYNOW_DNS.map((_, id) => id) },
-  { id: "rextv", label: "RexTV", servers: REXTV_DNS ? [PLAYNOW_DNS.length] : [] },
+  { id: "rextv", label: "RexTV", servers: REXTV_DNS.map((_, index) => PLAYNOW_DNS.length + index) },
 ];
 
 const DNS_LABELS = (Deno.env.get("DNS_LABELS") || "").split(",").map((s) => s.trim());
+const BUILTIN_LABELS = new Map<string, string>(
+  REXTV_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
+);
 
 const CORS = {
   "Content-Type": "application/json",
@@ -223,7 +249,10 @@ async function handleRequest(request: Request): Promise<Response> {
     if (path === "/servers") {
       return json({ ok: true, providers: PROVIDERS.map((provider) => ({
         id: provider.id, label: provider.label,
-        servers: provider.servers.map((id, index) => ({ id, label: DNS_LABELS[id] || `DNS ${index + 1}` })),
+        servers: provider.servers.map((id, index) => ({
+          id,
+          label: DNS_LABELS[id] || BUILTIN_LABELS.get(DNS_LIST[id]) || `DNS ${index + 1}`,
+        })),
       })) });
     }
     // ===== AUTENTICAÇÃO =====
@@ -288,12 +317,12 @@ async function handleRequest(request: Request): Promise<Response> {
           const sA = dnsList[index];
           const alt = `${sA}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=${encodeURIComponent(action)}${extras.length ? "&" + extras.join("&") : ""}`;
           const rr = await fetch(alt, { headers: { "User-Agent": "Mozilla/5.0" } });
-if (rr.ok) {
-              r = rr;
-              defaultServer = dnsList.indexOf(sA);
-              dnsDefault = sA;
-              break;
-            }
+          if (rr.ok) {
+            r = rr;
+            defaultServer = dnsList.indexOf(sA);
+            dnsDefault = sA;
+            break;
+          }
         }
       }
       if (!r.ok) return json({ error: "O servidor selecionado está indisponível." }, 502);
