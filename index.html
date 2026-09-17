@@ -17,82 +17,22 @@
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJR4CNWT" height="0" width="0" title="Google Tag Manager" class="gtm-frame"></iframe></noscript>
-
-<div class="login-screen" id="loginScreen" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-  <div class="login-clock"><strong id="loginTime">--:--</strong><span id="loginDate"></span></div>
-  <section class="login-card">
-    <img class="login-logo" src="assets/logo.png" alt="WDM Apps">
-    <div class="login-avatar" id="loginAvatar">W</div>
-    <h1 id="loginTitle">WDM Desktop</h1>
-    <p>Digite seu nome para iniciar sua experiência.</p>
-    <form class="login-form" id="loginForm">
-      <input class="login-name" id="loginName" type="text" maxlength="28" autocomplete="name" placeholder="Seu nome" aria-label="Seu nome">
-      <button class="login-enter" type="submit">Entrar no WDM Desktop</button>
-      <p class="login-error" id="loginError" aria-live="polite"></p>
-    </form>
-    <div class="login-hint">Seu nome fica salvo somente neste navegador. <button class="login-reset" id="resetUserBtn" type="button">Esquecer usuário</button></div>
-  </section>
-</div>
-
-<div class="desktop" id="desktop">
-  <div class="icons" id="desktopIcons"></div>
-  <div class="brand-watermark"><small>WDM DIGITAL DESKTOP</small><strong>WDM Apps</strong><span>Aplicativos · Sites · Sistemas</span></div>
-</div>
-<div class="start-menu" id="startMenu">
-  <div class="start-search">🔎 &nbsp; Pesquisar aplicativos e páginas</div>
-  <div class="start-title"><strong>Fixados</strong><span>WDM Apps</span></div>
-  <div class="pin-grid" id="pinGrid"></div>
-  <div class="start-bottom"><div class="user"><span class="avatar" id="menuUserAvatar">W</span><span id="menuUserName">WDM Apps</span></div><button class="power-button" id="logoutBtn" type="button" title="Sair do WDM Desktop" aria-label="Sair do WDM Desktop">⏻</button></div>
-</div>
-<div class="taskbar">
-  <div class="task-left">
-    <button class="startbtn" id="startBtn" aria-label="Iniciar"><span class="start-logo"><i></i><i></i><i></i><i></i></span></button>
-    <div class="search">🔎 &nbsp; Pesquisar</div>
-    <div class="running" id="running"></div>
-  </div>
-  <div class="tray"><div class="tray-icons"><span>⌃</span><span>◉</span><span>🔊</span><span>📶</span></div><div class="clock"><span id="time"></span><br><span id="date"></span></div></div>
-</div>
+<div class="login-screen" id="loginScreen" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="login-clock"><strong id="loginTime">--:--</strong><span id="loginDate"></span></div><section class="login-card"><img class="login-logo" src="assets/logo.png" alt="WDM Apps"><div class="login-avatar" id="loginAvatar">W</div><h1 id="loginTitle">WDM Desktop</h1><p>Digite seu nome para iniciar sua experiência.</p><form class="login-form" id="loginForm"><input class="login-name" id="loginName" type="text" maxlength="28" autocomplete="name" placeholder="Seu nome" aria-label="Seu nome"><button class="login-enter" type="submit">Entrar no WDM Desktop</button><p class="login-error" id="loginError" aria-live="polite"></p></form><div class="login-hint">Seu nome fica salvo somente neste navegador. <button class="login-reset" id="resetUserBtn" type="button">Esquecer usuário</button></div></section></div>
+<div class="desktop" id="desktop"><div class="icons" id="desktopIcons"></div><div class="brand-watermark"><small>WDM DIGITAL DESKTOP</small><strong>WDM Apps</strong><span>Aplicativos · Sites · Sistemas</span></div></div>
+<div class="start-menu" id="startMenu"><div class="start-search">🔎 &nbsp; Pesquisar aplicativos e páginas</div><div class="start-title"><strong>Fixados</strong><span>WDM Apps</span></div><div class="pin-grid" id="pinGrid"></div><div class="start-bottom"><div class="user"><span class="avatar" id="menuUserAvatar">W</span><span id="menuUserName">WDM Apps</span></div><button class="power-button" id="logoutBtn" type="button" title="Sair do WDM Desktop" aria-label="Sair do WDM Desktop">⏻</button></div></div>
+<div class="taskbar"><div class="task-left"><button class="startbtn" id="startBtn" aria-label="Iniciar"><span class="start-logo"><i></i><i></i><i></i><i></i></span></button><div class="search">🔎 &nbsp; Pesquisar</div><div class="running" id="running"></div></div><div class="tray"><div class="tray-icons"><span>⌃</span><span>◉</span><span>🔊</span><span>📶</span></div><div class="clock"><span id="time"></span><br><span id="date"></span></div></div></div>
 <div class="toast">💡 Duplo clique abre. Clique com o botão direito no desktop para personalizar.</div>
-<script src="desktop.js"></script>
+<script src="desktop.js?v=ferrari-gesso-1"></script>
 <script>
 (() => {
   const docsSvg = icon(['#3b82f6','#1d4ed8'],'<path d="M18 12h22l8 8v32H18z" fill="#fff"/><path d="M40 12v10h10" fill="#bfdbfe"/><path d="M24 29h18M24 36h18M24 43h13" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>');
   const sheetsSvg = icon(['#22c55e','#15803d'],'<rect x="15" y="13" width="34" height="38" rx="4" fill="#fff"/><path d="M15 25h34M15 36h34M27 13v38M39 13v38" stroke="#16a34a" stroke-width="2.5"/><path d="M19 18h7v4h-7z" fill="#bbf7d0"/>');
-  icons.docs = docsSvg;
-  icons.sheets = sheetsSvg;
+  icons.docs = docsSvg; icons.sheets = sheetsSvg;
   apps.docs = {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'};
   apps.sheets = {title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'};
-
-  function addOfficeShortcut(key) {
-    const app = apps[key];
-    if (document.querySelector(`[data-open="${key}"]`)) return;
-    const d = document.createElement('button');
-    d.className = 'desktop-icon';
-    d.dataset.open = key;
-    d.innerHTML = iconHtml(app.icon) + `<span class="label">${app.label}</span>`;
-    desktopIcons.appendChild(d);
-    d.addEventListener('dblclick', () => makeWindow(key));
-    d.addEventListener('click', () => {
-      document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
-      d.classList.add('selected');
-    });
-
-    const p = document.createElement('button');
-    p.className = 'pin';
-    p.dataset.open = key;
-    p.innerHTML = iconHtml(app.icon) + `<span>${app.label}</span>`;
-    pinGrid.appendChild(p);
-    p.addEventListener('click', () => {
-      makeWindow(key);
-      startMenu.classList.remove('show');
-    });
-  }
-  addOfficeShortcut('docs');
-  addOfficeShortcut('sheets');
+  function addOfficeShortcut(key){const app=apps[key];if(document.querySelector(`[data-open="${key}"]`))return;const d=document.createElement('button');d.className='desktop-icon';d.dataset.open=key;d.innerHTML=iconHtml(app.icon)+`<span class="label">${app.label}</span>`;desktopIcons.appendChild(d);d.addEventListener('dblclick',()=>makeWindow(key));d.addEventListener('click',()=>{document.querySelectorAll('.desktop-icon').forEach(x=>x.classList.remove('selected'));d.classList.add('selected')});const p=document.createElement('button');p.className='pin';p.dataset.open=key;p.innerHTML=iconHtml(app.icon)+`<span>${app.label}</span>`;pinGrid.appendChild(p);p.addEventListener('click',()=>{makeWindow(key);startMenu.classList.remove('show')})}
+  addOfficeShortcut('docs'); addOfficeShortcut('sheets');
 })();
 </script>
-<script src="polish.js"></script>
-<script src="themes.js"></script>
-<script src="login.js"></script>
-</body>
-</html>
+<script src="polish.js"></script><script src="themes.js"></script><script src="login.js"></script>
+</body></html>
