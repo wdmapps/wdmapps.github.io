@@ -140,10 +140,10 @@ const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
             try {
                 let lista;
                 if (catAtiva && catAtiva !== "0") {
-                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_streams", category_id: catAtiva, limit: 5000 });
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_streams", category_id: catAtiva });
                     lista = await r.json();
                 } else {
-                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_streams", limit: 5000 });
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_vod_streams" });
                     lista = await r.json();
                 }
                 filmes = lista;
@@ -180,5 +180,6 @@ const palavrasSenha = ["adulto", "+18", "privado", "xxx", "porn"];
 
         init();
     </script>
+    <script src="catalog-full.js?v=search-2"></script>
 </body>
 </html>
