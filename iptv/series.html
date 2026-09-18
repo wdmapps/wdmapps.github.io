@@ -138,10 +138,10 @@
             try {
                 let lista;
                 if (catAtiva && catAtiva !== "0") {
-                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", category_id: catAtiva, limit: 5000 });
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", category_id: catAtiva });
                     lista = await r.json();
                 } else {
-                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series", limit: 5000 });
+                    const r = await apiFetch("mcp", { username: user, password: pass, action: "get_series" });
                     lista = await r.json();
                 }
                 series = lista;
@@ -181,5 +181,6 @@
 
         init();
     </script>
+    <script src="catalog-full.js?v=search-2"></script>
 </body>
 </html>
