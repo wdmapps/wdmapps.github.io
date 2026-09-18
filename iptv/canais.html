@@ -98,7 +98,7 @@
             if (precisaLogin()) { alert("Sessão expirada."); window.location.href = "index.html"; return; }
             try {
                 const resCat = await apiFetch("mcp", { username: user, password: pass, action: "get_live_categories", limit: 2000 });
-                const resChan = await apiFetch("mcp", { username: user, password: pass, action: "get_live_streams", limit: 5000 });
+                const resChan = await apiFetch("mcp", { username: user, password: pass, action: "get_live_streams" });
                 categorias = Object.values(await resCat.json());
                 todosCanais = await resChan.json();
                 renderizarMenuPadrao();
@@ -190,5 +190,6 @@
 
         init();
     </script>
+    <script src="catalog-full.js?v=search-2"></script>
 </body>
 </html>
