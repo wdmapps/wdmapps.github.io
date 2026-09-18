@@ -22,12 +22,12 @@ const REXTV_DEFAULTS = [
   ["T-REX", "http://t-rex.fun"],
   ["RexTitanium", "http://rextitanium.site"],
   ["RexOn", "http://rexon.fun"],
-  ["RexX", "http://rexxx.sbs"],
+  ["RexX", "http://rexx.sbs"],
   ["RexBoom", "http://rexboom.sbs"],
-  ["Rex Imperial", "http://reximperial.lol"],
+  ["RexImperial", "http://reximperial.lol"],
   ["RexRaptor", "http://rexraptor.sbs"],
-  ["Rex Prestige", "http://surohcdn.top"],
-  ["Rex Platinum", "http://pltinum.fun"],
+  ["RexPrestige", "http://surohcdn.top"],
+  ["Rex Platinum", "http://pltinun.fun"],
 ] as const;
 
 // Mantém o pool padrão completo e acrescenta DNS extras do ambiente, se houver.
