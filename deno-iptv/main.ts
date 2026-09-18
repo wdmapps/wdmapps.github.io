@@ -35,9 +35,10 @@ const ALIEN_DEFAULTS = [
   ["Alien Parceria", "http://glove1.sbs"],
 ] as const;
 
-const KIXAR_DEFAULTS = [
-  ["Kixar Principal", "https://kixar.xyz"],
-  ["Kixar Alternativo", "https://gufila.com"],
+const SLIMTV_DEFAULTS = [
+  ["SlimTV Principal", "http://fragata.lat"],
+  ["SlimTV XC", "http://obcgn.click"],
+  ["SlimTV Portugal", "http://slimpt.site"],
 ] as const;
 
 // Mantém o pool padrão completo e acrescenta DNS extras do ambiente, se houver.
@@ -55,29 +56,29 @@ const ALIEN_EXTRA = (Deno.env.get("ALIEN_DNS") || "")
   .filter(Boolean);
 const ALIEN_DNS = [...new Set([...ALIEN_DEFAULTS.map(([, dns]) => dns), ...ALIEN_EXTRA])];
 
-const KIXAR_EXTRA = (Deno.env.get("KIXAR_DNS") || "")
+const SLIMTV_EXTRA = (Deno.env.get("SLIMTV_DNS") || "")
   .split(",")
   .map(normalizeDns)
   .filter(Boolean);
-const KIXAR_DNS = [...new Set([...KIXAR_DEFAULTS.map(([, dns]) => dns), ...KIXAR_EXTRA])];
+const SLIMTV_DNS = [...new Set([...SLIMTV_DEFAULTS.map(([, dns]) => dns), ...SLIMTV_EXTRA])];
 
-// PlayNow ocupa os primeiros índices; RexTV, Alien e Kixar vêm em seguida.
+// PlayNow ocupa os primeiros índices; RexTV, Alien e SlimTV vêm em seguida.
 const REX_OFFSET = PLAYNOW_DNS.length;
 const ALIEN_OFFSET = REX_OFFSET + REXTV_DNS.length;
-const KIXAR_OFFSET = ALIEN_OFFSET + ALIEN_DNS.length;
-const DNS_LIST = [...PLAYNOW_DNS, ...REXTV_DNS, ...ALIEN_DNS, ...KIXAR_DNS];
+const SLIMTV_OFFSET = ALIEN_OFFSET + ALIEN_DNS.length;
+const DNS_LIST = [...PLAYNOW_DNS, ...REXTV_DNS, ...ALIEN_DNS, ...SLIMTV_DNS];
 const PROVIDERS = [
   { id: "playnow", label: "PlayNow", servers: PLAYNOW_DNS.map((_, id) => id) },
   { id: "rextv", label: "RexTV", servers: REXTV_DNS.map((_, index) => REX_OFFSET + index) },
   { id: "alien", label: "Alien", servers: ALIEN_DNS.map((_, index) => ALIEN_OFFSET + index) },
-  { id: "kixar", label: "Kixar", servers: KIXAR_DNS.map((_, index) => KIXAR_OFFSET + index) },
+  { id: "slimtv", label: "SlimTV", servers: SLIMTV_DNS.map((_, index) => SLIMTV_OFFSET + index) },
 ];
 
 const DNS_LABELS = (Deno.env.get("DNS_LABELS") || "").split(",").map((s) => s.trim());
 const BUILTIN_LABELS = new Map<string, string>([
   ...REXTV_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
   ...ALIEN_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
-  ...KIXAR_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
+  ...SLIMTV_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
 ]);
 
 const CORS = {
