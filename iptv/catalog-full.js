@@ -132,6 +132,14 @@
 
         const appendItem = page === 'canais.html' ? appendChannel : page === 'filmes.html' ? appendMovie : appendSeries;
 
+        function normalizeSearch(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
         function updateProgress() {
             if (!current.length) {
                 progress.textContent = '';
@@ -192,18 +200,18 @@
         // Retira também o corte da busca dos canais (antes limitava a 300).
         if (page === 'canais.html') {
             window.buscar = function buscarCatalogoCompleto() {
-                const q = document.getElementById('search').value.toLowerCase();
-                window.renderizar(todosCanais.filter(ch => String(ch.name || '').toLowerCase().includes(q)));
+                const q = normalizeSearch(document.getElementById('search').value);
+                window.renderizar(todosCanais.filter(ch => normalizeSearch(ch.name).includes(q)));
             };
         } else if (page === 'filmes.html') {
             window.buscar = function buscarCatalogoCompleto() {
-                const q = document.getElementById('search').value.toLowerCase();
-                window.renderizar(filmes.filter(f => String(f.name || '').toLowerCase().includes(q)));
+                const q = normalizeSearch(document.getElementById('search').value);
+                window.renderizar(filmes.filter(f => normalizeSearch(f.name).includes(q)));
             };
         } else {
             window.buscar = function buscarCatalogoCompleto() {
-                const q = document.getElementById('search').value.toLowerCase();
-                window.renderizar(series.filter(s => String(s.name || '').toLowerCase().includes(q)));
+                const q = normalizeSearch(document.getElementById('search').value);
+                window.renderizar(series.filter(s => normalizeSearch(s.name).includes(q)));
             };
         }
 
