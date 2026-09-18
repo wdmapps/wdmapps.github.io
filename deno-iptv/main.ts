@@ -30,6 +30,11 @@ const REXTV_DEFAULTS = [
   ["Rex Platinum", "http://pltinun.fun"],
 ] as const;
 
+const ALIEN_DEFAULTS = [
+  ["Alien Universal", "http://alienplay.online"],
+  ["Alien Parceria", "http://glove1.sbs"],
+] as const;
+
 // Mantém o pool padrão completo e acrescenta DNS extras do ambiente, se houver.
 // Assim uma variável antiga REXTV_DNS contendo apenas rexmax.sbs não esconde
 // os novos servidores configurados no site.
@@ -39,17 +44,27 @@ const REXTV_EXTRA = (Deno.env.get("REXTV_DNS") || "")
   .filter(Boolean);
 const REXTV_DNS = [...new Set([...REXTV_DEFAULTS.map(([, dns]) => dns), ...REXTV_EXTRA])];
 
-// PlayNow ocupa os primeiros índices; todos os DNS RexTV vêm em seguida.
-const DNS_LIST = [...PLAYNOW_DNS, ...REXTV_DNS];
+const ALIEN_EXTRA = (Deno.env.get("ALIEN_DNS") || "")
+  .split(",")
+  .map(normalizeDns)
+  .filter(Boolean);
+const ALIEN_DNS = [...new Set([...ALIEN_DEFAULTS.map(([, dns]) => dns), ...ALIEN_EXTRA])];
+
+// PlayNow ocupa os primeiros índices; RexTV e Alien vêm em seguida.
+const REX_OFFSET = PLAYNOW_DNS.length;
+const ALIEN_OFFSET = REX_OFFSET + REXTV_DNS.length;
+const DNS_LIST = [...PLAYNOW_DNS, ...REXTV_DNS, ...ALIEN_DNS];
 const PROVIDERS = [
   { id: "playnow", label: "PlayNow", servers: PLAYNOW_DNS.map((_, id) => id) },
-  { id: "rextv", label: "RexTV", servers: REXTV_DNS.map((_, index) => PLAYNOW_DNS.length + index) },
+  { id: "rextv", label: "RexTV", servers: REXTV_DNS.map((_, index) => REX_OFFSET + index) },
+  { id: "alien", label: "Alien", servers: ALIEN_DNS.map((_, index) => ALIEN_OFFSET + index) },
 ];
 
 const DNS_LABELS = (Deno.env.get("DNS_LABELS") || "").split(",").map((s) => s.trim());
-const BUILTIN_LABELS = new Map<string, string>(
-  REXTV_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
-);
+const BUILTIN_LABELS = new Map<string, string>([
+  ...REXTV_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
+  ...ALIEN_DEFAULTS.map(([label, dns]) => [dns, label] as [string, string]),
+]);
 
 const CORS = {
   "Content-Type": "application/json",
