@@ -78,6 +78,7 @@
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
     .task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
     .task input{width:17px;height:17px}.task .grow{flex:1}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}
+    .mission-card{border:1px solid var(--border);border-radius:16px;padding:16px;background:rgba(255,255,255,.025);margin-bottom:12px}.mission-card:last-child{margin-bottom:0}.mission-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mission-meta{color:var(--muted);font-size:11px;margin-top:5px}.mission-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}.mission-step{padding:7px 4px;border:1px solid var(--border);border-radius:9px;text-align:center;font-size:10px;color:var(--muted);background:#091124}.mission-step.done{border-color:rgba(45,212,160,.38);color:#9bf2d8;background:rgba(45,212,160,.08)}.mission-step.current{border-color:rgba(79,140,255,.55);color:#bdd1ff;background:rgba(79,140,255,.12)}.mission-result{margin-top:9px;border:1px solid var(--border);border-radius:11px;background:#091124;overflow:hidden}.mission-result summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700}.mission-result-body{padding:0 12px 12px;color:#c8d2e4;font-size:12px;line-height:1.6;white-space:normal}.mission-error{color:#ffb1ba;font-size:12px;margin-top:8px}.mission-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
     .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}
     .modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;background:#0d1427;border:1px solid #2d4167;border-radius:20px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
@@ -98,6 +99,7 @@
       <button data-view="clients">🏢 Clientes</button>
       <button data-view="leads">🎯 Leads</button>
       <button data-view="agents">🤖 Agentes</button>
+      <button data-view="missions">⚡ Missões IA</button>
       <button data-view="campaigns">🚀 Campanhas</button>
       <button data-view="tasks">✅ Tarefas</button>
     </nav>
@@ -121,7 +123,7 @@
       <section class="view active" id="view-overview">
         <div class="hero">
           <div><div class="eyebrow">WDM Squad · Command Center</div><h1>Sua agência trabalhando em equipe.</h1><p>Centralize clientes, oportunidades, campanhas e agentes especializados. A Ferrari Gesso já entra como primeiro case da Squad.</p></div>
-          <button class="btn primary" onclick="runAgent('growth')">⚡ Iniciar missão</button>
+          <button class="btn primary" onclick="openMissionModal()">⚡ Nova missão automática</button>
         </div>
         <div class="stats">
           <div class="stat"><span>Clientes ativos</span><strong id="stClients">0</strong><small>carteira da agência</small></div>
@@ -156,8 +158,19 @@
       </section>
 
       <section class="view" id="view-agents">
-        <div class="hero"><div><div class="eyebrow">Equipe digital</div><h1>Agentes da Squad</h1><p>Cada agente gera uma missão especializada usando os dados do cliente selecionado. A execução de IA fica em modo assistido: você copia o briefing pronto para ChatGPT/Work sem expor chave de API no site.</p></div></div>
+        <div class="hero"><div><div class="eyebrow">Equipe digital</div><h1>Agentes da Squad</h1><p>Você ainda pode executar um agente isolado em modo assistido. Para o fluxo completo, use Missões IA: a Squad executa os sete agentes em sequência e salva cada resultado automaticamente.</p></div></div>
         <div class="agents-grid" id="agentsGrid"></div>
+      </section>
+
+      <section class="view" id="view-missions">
+        <div class="hero">
+          <div><div class="eyebrow">Automação</div><h1>Missões IA</h1><p>Escolha um cliente, diga o objetivo e deixe Radar, Scout, Copy, Studio, Web, Growth e Analyst trabalharem em sequência. Nenhuma mensagem ou publicação externa é feita sem sua aprovação.</p></div>
+          <button class="btn primary" onclick="openMissionModal()">+ Nova missão</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>⚡ Histórico de missões</h2><span class="tiny muted">resultados salvos na sua nuvem</span></div>
+          <div id="missionsList"></div>
+        </div>
       </section>
 
       <section class="view" id="view-campaigns">
@@ -181,6 +194,7 @@
 const DB_DOC = 'squad';
 let db = null;
 let state = null;
+const SQUAD_API_URL = 'https://wdmappsgithubio.wdmapps.deno.net/squad/agent';
 
 const AGENTS = [
   {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas e oportunidades para alimentar o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios com presença digital fraca e potencial claro de site, automação ou marketing.'},
@@ -208,6 +222,10 @@ function defaultState(){
   };
 }
 function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
+function normalizeState(){
+  if(!state || typeof state!=='object')state=defaultState();
+  ['clients','leads','campaigns','tasks','activity','missions'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[]});
+}
 function clientName(id){const c=state.clients.find(x=>x.id===id);return c?c.name:'Sem cliente'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function fmtDate(s){if(!s)return '—';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('pt-BR')}
@@ -217,10 +235,12 @@ function addActivity(icon,title,detail){state.activity.unshift({id:uid(),icon,ti
 async function loadState(){
   const local = safeParse(localStorage.getItem('wdm_squad_state'));
   state = local || defaultState();
+  normalizeState();
   try{
     const snap = await db.collection('wdmAdmin').doc(DB_DOC).get();
     if(snap.exists && snap.data().payload){state = snap.data().payload}
-    else await saveState();
+    normalizeState();
+    if(!snap.exists || !snap.data().payload) await saveState();
     cloudStatus('Sincronizado online','ok');
   }catch(e){
     console.warn('WDM Squad cloud load:',e);
@@ -240,7 +260,7 @@ async function saveState(){
 }
 function cloudStatus(text,kind){document.getElementById('sideStatus').textContent=text;const d=document.getElementById('sideDot');d.className='dot '+(kind||'')}
 
-const pageNames={overview:'Central de Operações',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',campaigns:'Campanhas',tasks:'Tarefas'};
+const pageNames={overview:'Central de Operações',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',missions:'Missões IA',campaigns:'Campanhas',tasks:'Tarefas'};
 function showView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
@@ -252,7 +272,7 @@ function showView(v){
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
 
-function renderAll(){if(!state)return;renderOverview();renderClients();renderLeads();renderAgents();renderCampaigns();renderTasks()}
+function renderAll(){if(!state)return;renderOverview();renderClients();renderLeads();renderAgents();renderMissions();renderCampaigns();renderTasks()}
 function renderOverview(){
   document.getElementById('stClients').textContent=state.clients.filter(x=>x.status!=='Inativo').length;
   document.getElementById('stLeads').textContent=state.leads.filter(x=>!['Ganho','Perdido'].includes(x.status)).length;
@@ -283,6 +303,129 @@ function campaignCard(c,actions=true){
   const pct=Math.max(0,Math.min(100,Number(c.progress||0)));
   return '<div class="campaign"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.name)+'</h3><span class="tiny muted">'+esc(clientName(c.clientId))+' · '+esc(c.channel||'')+'</span></div><span class="badge '+(c.status==='Concluída'?'':'blue')+'">'+esc(c.status||'Planejamento')+'</span></div><p>'+esc(c.goal||'')+'</p><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% concluído</div>'+(actions?'<div class="row-actions" style="margin-top:12px"><button class="btn" onclick="openCampaignModal(\''+c.id+'\')">Editar</button><button class="btn" onclick="runAgent(\'growth\',\''+c.clientId+'\')">Growth</button></div>':'')+'</div>';
 }
+
+function missionStatusClass(status){
+  if(status==='Concluída')return '';
+  if(status==='Erro')return 'red';
+  if(status==='Executando')return 'blue';
+  return 'yellow';
+}
+function renderMissions(){
+  if(!state)return;
+  const host=document.getElementById('missionsList');
+  if(!host)return;
+  const missions=state.missions||[];
+  if(!missions.length){host.innerHTML='<div class="empty">Nenhuma missão automática executada ainda.</div>';return}
+  host.innerHTML=missions.map(m=>{
+    const client=state.clients.find(c=>c.id===m.clientId);
+    const completed=new Set((m.results||[]).map(r=>r.agentId));
+    const steps=AGENTS.map(a=>{
+      const cls=completed.has(a.id)?'done':(m.currentAgentId===a.id&&m.status==='Executando'?'current':'');
+      return '<div class="mission-step '+cls+'" title="'+esc(a.role)+'">'+a.icon+' '+esc(a.name)+'</div>';
+    }).join('');
+    const results=(m.results||[]).map(r=>{
+      const a=AGENTS.find(x=>x.id===r.agentId);
+      return '<details class="mission-result"><summary>'+(a?a.icon:'🤖')+' '+esc(r.agentName||a?.name||r.agentId)+' · '+esc(r.role||a?.role||'')+'</summary><div class="mission-result-body">'+esc(r.text||'').replace(/\n/g,'<br>')+'</div></details>';
+    }).join('');
+    const pct=Number(m.progress||0);
+    return '<div class="mission-card"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+results+'<div class="mission-actions"><button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
+  }).join('');
+}
+function openMissionModal(){
+  if(!state.clients.length)return alert('Cadastre um cliente primeiro.');
+  document.getElementById('modalTitle').textContent='Nova missão automática';
+  const defaultObjective='Analisar a presença digital, encontrar oportunidades comerciais e preparar um plano completo de conteúdo, site e divulgação para gerar mais contatos.';
+  document.getElementById('modalBody').innerHTML='<form id="missionForm" class="form-grid"><select id="mfClient">'+clientOptions(state.clients[0]?.id||'')+'</select><div></div><textarea class="full" id="mfObjective" required placeholder="Qual é o objetivo desta missão?">'+esc(defaultObjective)+'</textarea><div class="full tiny muted">A Squad executará os 7 agentes em sequência. Radar e Scout podem pesquisar informações públicas atuais. Nada será enviado ou publicado automaticamente.</div><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">⚡ Iniciar Squad</button></div></form>';
+  document.getElementById('missionForm').onsubmit=e=>{e.preventDefault();const clientId=mfClient.value;const objective=mfObjective.value.trim();closeModal('formModal');runFullMission(clientId,objective)};
+  openModal('formModal');
+}
+async function runFullMission(clientId,objective){
+  const client=state.clients.find(c=>c.id===clientId);
+  if(!client)return alert('Cliente não encontrado.');
+  const mission={
+    id:uid(),clientId:client.id,clientName:client.name,objective,status:'Preparando',
+    progress:0,currentAgentId:'',currentLabel:'Preparando a Squad...',results:[],
+    error:'',createdAt:new Date().toISOString(),finishedAt:''
+  };
+  state.missions.unshift(mission);
+  state.missions=state.missions.slice(0,8);
+  addActivity('⚡','Missão automática iniciada',client.name);
+  await saveState();
+  showView('missions');
+
+  try{
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
+    const previousResults={};
+
+    for(let i=0;i<AGENTS.length;i++){
+      const a=AGENTS[i];
+      mission.status='Executando';
+      mission.currentAgentId=a.id;
+      mission.currentLabel=a.name+' trabalhando...';
+      mission.progress=Math.round((i/AGENTS.length)*100);
+      await saveState();
+
+      const response=await fetch(SQUAD_API_URL,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+idToken
+        },
+        body:JSON.stringify({
+          agentId:a.id,
+          client:{
+            name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
+            instagram:client.instagram||'',notes:client.notes||''
+          },
+          objective,
+          previousResults
+        })
+      });
+      let data={};
+      try{data=await response.json()}catch(_){}
+      if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
+
+      const result={
+        agentId:a.id,agentName:data.agentName||a.name,role:data.role||a.role,
+        text:data.text||'',model:data.model||'',usedWeb:Boolean(data.usedWeb),completedAt:new Date().toISOString()
+      };
+      mission.results.push(result);
+      previousResults[a.id]=result.text;
+      mission.progress=Math.round(((i+1)/AGENTS.length)*100);
+      mission.currentLabel=a.name+' concluído';
+      addActivity(a.icon,'Agente concluído: '+a.name,client.name);
+      await saveState();
+    }
+
+    mission.status='Concluída';
+    mission.progress=100;
+    mission.currentAgentId='';
+    mission.currentLabel='Missão concluída';
+    mission.finishedAt=new Date().toISOString();
+    addActivity('🏁','Missão automática concluída',client.name);
+    await saveState();
+  }catch(e){
+    console.error('WDM Squad mission failed',e);
+    mission.status='Erro';
+    mission.currentLabel='Missão interrompida';
+    mission.error=(e?.message||'Falha ao executar a missão.').slice(0,600);
+    mission.finishedAt=new Date().toISOString();
+    addActivity('⚠️','Missão automática interrompida',client.name);
+    await saveState();
+  }
+}
+function repeatMission(id){
+  const m=state.missions.find(x=>x.id===id);if(!m)return;
+  runFullMission(m.clientId,m.objective);
+}
+async function deleteMission(id){
+  const m=state.missions.find(x=>x.id===id);if(!m||!confirm('Excluir esta missão e seus resultados?'))return;
+  state.missions=state.missions.filter(x=>x.id!==id);
+  await saveState();
+}
+
 function renderCampaigns(){
   if(!state)return;document.getElementById('campaignGrid').innerHTML=state.campaigns.length?state.campaigns.map(c=>campaignCard(c,true)).join(''):'<div class="empty">Nenhuma campanha ainda.</div>';
 }
@@ -346,7 +489,7 @@ function runAgent(agentId,clientId){
 async function copyPrompt(){const el=document.getElementById('agentPrompt');try{await navigator.clipboard.writeText(el.value);alert('Briefing copiado!')}catch(e){el.select();document.execCommand('copy');alert('Briefing copiado!')}}
 function openQuickAction(){
   document.getElementById('modalTitle').textContent='Ação rápida';
-  document.getElementById('modalBody').innerHTML='<div class="section-grid"><button class="btn primary" onclick="closeModal(\'formModal\');openClientModal()">🏢 Novo cliente</button><button class="btn primary" onclick="closeModal(\'formModal\');openLeadModal()">🎯 Novo lead</button><button class="btn primary" onclick="closeModal(\'formModal\');openCampaignModal()">🚀 Nova campanha</button><button class="btn primary" onclick="closeModal(\'formModal\');openTaskModal()">✅ Nova tarefa</button><button class="btn primary" onclick="closeModal(\'formModal\');runAgent(\'scout\')">🔎 Diagnóstico</button><button class="btn primary" onclick="closeModal(\'formModal\');runAgent(\'growth\')">⚡ Divulgação</button></div>';
+  document.getElementById('modalBody').innerHTML='<div class="section-grid"><button class="btn primary" onclick="closeModal(\'formModal\');openClientModal()">🏢 Novo cliente</button><button class="btn primary" onclick="closeModal(\'formModal\');openLeadModal()">🎯 Novo lead</button><button class="btn primary" onclick="closeModal(\'formModal\');openCampaignModal()">🚀 Nova campanha</button><button class="btn primary" onclick="closeModal(\'formModal\');openTaskModal()">✅ Nova tarefa</button><button class="btn primary" onclick="closeModal(\'formModal\');openMissionModal()">⚡ Missão automática</button><button class="btn primary" onclick="closeModal(\'formModal\');runAgent(\'scout\')">🔎 Diagnóstico assistido</button></div>';
   openModal('formModal');
 }
 

@@ -84,8 +84,8 @@ const BUILTIN_LABELS = new Map<string, string>([
 const CORS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Range, X-Requested-With",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Range, X-Requested-With, Authorization",
   "Access-Control-Expose-Headers": "Content-Length, Content-Range, Content-Type",
   "Cache-Control": "no-store",
 };
@@ -254,6 +254,206 @@ function rewriteImages(obj: unknown, dnsList: string[], origin: string): void {
   }
 }
 
+
+const SQUAD_ADMIN_EMAIL = "williamwdm@gmail.com";
+const FIREBASE_WEB_API_KEY = Deno.env.get("FIREBASE_WEB_API_KEY") || "AIzaSyBtE4QpAxbatvPvwFxtXwJ7KgNoZiHFpKY";
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5.6-luna";
+
+const SQUAD_AGENTS: Record<string, { name: string; role: string; web: boolean; prompt: string }> = {
+  radar: {
+    name: "Radar", role: "Prospecção", web: true,
+    prompt: "Pesquise oportunidades comerciais e sinais de demanda para a WDM Apps. Considere o segmento e a região do cliente, presença digital dos concorrentes, lacunas locais e serviços que podem gerar valor. Entregue oportunidades priorizadas e fontes quando usar a web.",
+  },
+  scout: {
+    name: "Scout", role: "Diagnóstico", web: true,
+    prompt: "Faça uma auditoria prática da presença digital do cliente. Analise site, posicionamento local, Google, redes sociais, clareza da oferta, confiança, conversão, SEO local e gargalos. Entregue achados priorizados, evidências e ações recomendadas.",
+  },
+  copy: {
+    name: "Copy", role: "Conteúdo", web: false,
+    prompt: "Crie conteúdo comercial pronto para revisão da WDM Apps. Produza mensagens de WhatsApp, textos para Instagram/Facebook, headline, oferta e chamadas para ação coerentes com o diagnóstico e sem inventar fatos.",
+  },
+  studio: {
+    name: "Studio", role: "Criativo", web: false,
+    prompt: "Crie direção criativa para o cliente: conceito visual, headline, composição da arte, ideias de imagens, roteiro curto de vídeo e variações de campanha. Evite aparência genérica e mantenha foco local e comercial.",
+  },
+  web: {
+    name: "Web", role: "Sites", web: false,
+    prompt: "Proponha a estrutura do site ou landing page com foco em conversão e SEO local. Defina seções, CTAs, provas sociais, conteúdo, melhorias técnicas e prioridades de implementação para a WDM Apps.",
+  },
+  growth: {
+    name: "Growth", role: "Divulgação", web: false,
+    prompt: "Monte um plano de divulgação de baixo custo e mensurável usando os achados anteriores. Defina canais, calendário, ações, orçamento inicial opcional, testes e métricas. Não publique nem envie nada: deixe tudo pronto para aprovação humana.",
+  },
+  analyst: {
+    name: "Analyst", role: "Resultados", web: false,
+    prompt: "Consolide toda a missão em um resumo executivo. Liste diagnóstico, oportunidades, materiais produzidos, próximos passos, métricas a acompanhar e uma ordem prática de execução. Separe fatos de hipóteses.",
+  },
+};
+
+function cleanText(value: unknown, max = 5000): string {
+  return String(value == null ? "" : value).slice(0, max);
+}
+
+async function verifySquadAdmin(request: Request): Promise<{ email: string }> {
+  const auth = request.headers.get("authorization") || "";
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  if (!match) throw new Error("AUTH_REQUIRED");
+
+  const response = await fetch(
+    "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + encodeURIComponent(FIREBASE_WEB_API_KEY),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: match[1] }),
+    },
+  );
+
+  if (!response.ok) throw new Error("AUTH_INVALID");
+  const data = await response.json();
+  const email = cleanText(data?.users?.[0]?.email, 320).toLowerCase();
+  if (email !== SQUAD_ADMIN_EMAIL.toLowerCase()) throw new Error("AUTH_FORBIDDEN");
+  return { email };
+}
+
+function extractOpenAIText(payload: any): string {
+  if (typeof payload?.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+  const chunks: string[] = [];
+  for (const item of Array.isArray(payload?.output) ? payload.output : []) {
+    for (const part of Array.isArray(item?.content) ? item.content : []) {
+      if (part?.type === "output_text" && typeof part.text === "string") chunks.push(part.text);
+    }
+  }
+  return chunks.join("\n").trim();
+}
+
+async function runSquadAgentWithOpenAI(
+  agentId: string,
+  client: Record<string, unknown>,
+  objective: string,
+  previousResults: Record<string, unknown>,
+) {
+  const agent = SQUAD_AGENTS[agentId];
+  if (!agent) throw new Error("AGENT_INVALID");
+
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_KEY_MISSING");
+
+  const prior = Object.entries(previousResults || {})
+    .slice(-6)
+    .map(([key, value]) => key.toUpperCase() + ":\n" + cleanText(value, 3500))
+    .join("\n\n");
+
+  const input = [
+    "Você faz parte da WDM Squad, agência de IA da WDM Apps.",
+    "AGENTE: " + agent.name + " · " + agent.role,
+    "",
+    "CLIENTE:",
+    "Nome: " + (cleanText(client?.name, 220) || "não informado"),
+    "Segmento: " + (cleanText(client?.segment, 300) || "não informado"),
+    "Região: " + (cleanText(client?.city, 220) || "não informada"),
+    "Site: " + (cleanText(client?.site, 500) || "não informado"),
+    "Instagram: " + (cleanText(client?.instagram, 220) || "não informado"),
+    "Observações: " + (cleanText(client?.notes, 1500) || "nenhuma"),
+    "",
+    "OBJETIVO DA MISSÃO: " + (cleanText(objective, 1800) || "Encontrar oportunidades e preparar um plano comercial e digital acionável."),
+    prior ? "\nRESULTADOS DOS AGENTES ANTERIORES:\n" + prior : "",
+    "",
+    "MISSÃO DESTE AGENTE:",
+    agent.prompt,
+    "",
+    "REGRAS:",
+    "- Responda em português do Brasil.",
+    "- Seja prático, organizado e específico.",
+    "- Não invente informações sobre o cliente.",
+    "- Quando houver incerteza, sinalize como hipótese.",
+    "- Não envie mensagens, não publique, não compre mídia e não execute ações externas. Prepare tudo para aprovação do administrador.",
+    "- Termine com uma seção \"Próxima passagem\" explicando o que o próximo agente deve aproveitar.",
+  ].filter(Boolean).join("\n");
+
+  const body: Record<string, unknown> = {
+    model: OPENAI_MODEL,
+    input,
+    max_output_tokens: 1800,
+  };
+  if (agent.web) body.tools = [{ type: "web_search" }];
+
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(180000),
+  });
+
+  const raw = await response.text();
+  let payload: any = null;
+  try { payload = JSON.parse(raw); } catch { /* usa a mensagem bruta abaixo */ }
+
+  if (!response.ok) {
+    const apiMessage = cleanText(payload?.error?.message || raw || ("HTTP " + response.status), 900);
+    throw new Error("OPENAI_ERROR:" + response.status + ":" + apiMessage);
+  }
+
+  const text = extractOpenAIText(payload);
+  if (!text) throw new Error("OPENAI_EMPTY");
+
+  return {
+    agentId,
+    agentName: agent.name,
+    role: agent.role,
+    model: OPENAI_MODEL,
+    usedWeb: agent.web,
+    text,
+  };
+}
+
+async function handleSquadRequest(request: Request): Promise<Response> {
+  if (request.method !== "POST") return json({ ok: false, error: "Método não permitido." }, 405);
+
+  try {
+    await verifySquadAdmin(request);
+  } catch (error) {
+    const code = String((error as Error).message || error);
+    if (code === "AUTH_REQUIRED") return json({ ok: false, error: "Faça login no painel da WDM Apps." }, 401);
+    if (code === "AUTH_FORBIDDEN") return json({ ok: false, error: "Usuário sem permissão para a WDM Squad." }, 403);
+    return json({ ok: false, error: "Sessão inválida ou expirada." }, 401);
+  }
+
+  let data: any;
+  try {
+    data = await request.json();
+  } catch {
+    return json({ ok: false, error: "JSON inválido." }, 400);
+  }
+
+  const agentId = cleanText(data?.agentId, 40).toLowerCase();
+  const client = data?.client && typeof data.client === "object" ? data.client : {};
+  const objective = cleanText(data?.objective, 1800);
+  const previousResults = data?.previousResults && typeof data.previousResults === "object"
+    ? data.previousResults
+    : {};
+
+  if (!SQUAD_AGENTS[agentId]) return json({ ok: false, error: "Agente inválido." }, 400);
+  if (!cleanText(client?.name, 220)) return json({ ok: false, error: "O cliente precisa ter um nome." }, 400);
+
+  try {
+    const result = await runSquadAgentWithOpenAI(agentId, client, objective, previousResults);
+    return json({ ok: true, ...result });
+  } catch (error) {
+    const message = cleanText((error as Error)?.message || error, 1000);
+    console.error("WDM Squad:", agentId, message);
+    if (message === "OPENAI_KEY_MISSING") {
+      return json({ ok: false, error: "A OPENAI_API_KEY ainda não foi configurada no Deno Deploy." }, 503);
+    }
+    return json({ ok: false, error: message.replace(/^OPENAI_ERROR:\d+:/, "") || "Falha ao executar o agente." }, 502);
+  }
+}
+
+
 async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const origin = url.origin;
@@ -262,10 +462,12 @@ async function handleRequest(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS });
   }
-  if (request.method !== "GET") return json({ error: "Método não permitido." }, 405);
-  if (dnsList.length === 0) return json({ error: "Servidor não configurado." }, 500);
 
   const path = url.pathname;
+  if (path === "/squad/agent") return handleSquadRequest(request);
+
+  if (request.method !== "GET") return json({ error: "Método não permitido." }, 405);
+  if (dnsList.length === 0) return json({ error: "Servidor não configurado." }, 500);
   const q = url.searchParams;
   const requested = q.get("server");
   const explicitServer = requested !== null && requested !== "auto";
