@@ -75,7 +75,7 @@
     .agent-card .btn{margin-top:auto;align-self:flex-start}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}
     .campaign{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}.campaign h3{font-size:15px}.campaign p{color:var(--muted);font-size:12px;line-height:1.5}
-    .radar-box{margin-bottom:14px;border-color:rgba(51,215,255,.28);background:linear-gradient(180deg,rgba(51,215,255,.055),rgba(13,20,39,.92))}.radar-status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.radar-candidates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.radar-candidate{padding:13px;border:1px solid var(--border);border-radius:13px;background:#091124}.radar-candidate h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:16px;line-height:1.35;margin:0 0 5px}.radar-candidate p{font-family:Inter,system-ui,sans-serif;font-size:13px;color:#c8d2e4;line-height:1.65;margin:8px 0}.radar-candidate .row-actions{margin-top:10px}.radar-source{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.radar-source a{font-size:12px;font-weight:600;line-height:1.4}
+    .radar-box{margin-bottom:14px;border-color:rgba(51,215,255,.28);background:linear-gradient(180deg,rgba(51,215,255,.055),rgba(13,20,39,.92))}.radar-status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.radar-candidates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.radar-candidate{padding:13px;border:1px solid var(--border);border-radius:13px;background:#091124}.radar-candidate h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:16px;line-height:1.35;margin:0 0 5px}.radar-candidate p{font-family:Inter,system-ui,sans-serif;font-size:13px;color:#c8d2e4;line-height:1.65;margin:8px 0}.radar-candidate .row-actions{margin-top:10px}.radar-source{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.radar-source a{font-size:12px;font-weight:600;line-height:1.4}.scout-analysis{margin-top:12px;padding:12px;border:1px solid rgba(79,140,255,.28);border-radius:11px;background:rgba(79,140,255,.065)}.scout-analysis strong{display:block;font-size:12px;margin-bottom:6px;color:#bdd1ff}.scout-analysis div{font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:1.65;color:#d7e0ec}.scout-analysis small{display:block;margin-top:7px;color:var(--muted);font-size:10px}.scout-loading{margin-top:10px;padding:9px 11px;border-radius:10px;background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.2);color:#ffe39a;font-size:11px}
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
     .task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
     .task input[type="checkbox"]{width:17px;height:17px;margin-top:3px}.task .grow{flex:1;min-width:0}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}.task-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.task-actions select{padding:6px 8px;font-size:10px;min-width:118px}.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.task-column{min-width:0}.task-source{display:inline-flex;margin-top:5px;padding:3px 6px;border-radius:999px;border:1px solid var(--border);font-size:9px!important;color:#a9b8cf!important}.task-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.task-detail-box{padding:12px;border:1px solid var(--border);border-radius:12px;background:#091124}.task-detail-box small{display:block;color:var(--muted);margin-bottom:4px}.task-detail-box strong{font-size:13px}.task-note{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);color:#c8d2e4;font-size:12px;line-height:1.55}
@@ -340,7 +340,12 @@ function renderLeadCandidates(){
       (c.reason?'<p>'+esc(c.reason)+'</p>':'')+
       (c.contact?'<p><b>Contato público:</b> '+esc(c.contact)+'</p>':'')+
       '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(source&&source!==site?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
-      '<div class="row-actions"><button class="btn primary" onclick="approveLeadCandidate(\''+c.id+'\')">✓ Adicionar ao funil</button><button class="btn danger" onclick="rejectLeadCandidate(\''+c.id+'\')">Descartar</button></div></article>';
+      (c.scoutStatus==='running'?'<div class="scout-loading">🔎 Scout analisando a empresa e a presença digital...</div>':'')+
+      (c.scoutAnalysis?'<div class="scout-analysis"><strong>🔎 Diagnóstico do Scout</strong><div>'+esc(c.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+(c.scoutAt?'<small>Analisado em '+new Date(c.scoutAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
+      (c.scoutError?'<div class="mission-error">⚠ '+esc(c.scoutError)+'</div>':'')+
+      '<div class="row-actions">'+
+        (c.scoutStatus==='running'?'<button class="btn" disabled>🔎 Analisando...</button>':'<button class="btn" onclick="analyzeLeadCandidate(\''+c.id+'\')">'+(c.scoutAnalysis?'↻ Refazer análise':'🔎 Analisar empresa')+'</button>')+
+        '<button class="btn primary" onclick="approveLeadCandidate(\''+c.id+'\')">✓ Adicionar ao funil</button><button class="btn danger" onclick="rejectLeadCandidate(\''+c.id+'\')">Descartar</button></div></article>';
   }).join('')+'</div>';
 }
 function renderLeads(){
@@ -351,7 +356,7 @@ function renderLeads(){
   document.getElementById('leadCount').textContent=list.length+' lead(s)';
   document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Oportunidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>{
     const site=safePublicUrl(l.website);
-    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions"><button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
+    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions">'+(l.scoutAnalysis?'<button class="btn" onclick="openLeadScoutAnalysis(\''+l.id+'\')">🔎 Scout</button>':'')+'<button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
   }).join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
 }
 function renderAgents(){
@@ -765,11 +770,71 @@ async function runRadarLeadSearch(region,segment,qty,notes){
     await saveState();
   }
 }
+async function analyzeLeadCandidate(id){
+  const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
+  if(c.scoutStatus==='running')return;
+  c.scoutStatus='running';c.scoutError='';
+  await saveState();
+  try{
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
+    const objective=[
+      'Faça uma análise comercial curta desta empresa como potencial lead da WDM Apps.',
+      'Pesquise informações públicas atuais antes de concluir.',
+      'Valide o que for possível sobre site, presença digital e operação.',
+      'Considere a oportunidade sugerida pelo Radar, mas NÃO assuma que ela é verdadeira sem evidência.',
+      'OPORTUNIDADE SUGERIDA: '+(c.need||'Avaliar presença digital')+'.',
+      'MOTIVO DO RADAR: '+(c.reason||'não informado')+'.',
+      c.sourceUrl?'FONTE INICIAL: '+c.sourceUrl+'.':'',
+      'Entregue no máximo 5 blocos curtos: 1) O que foi confirmado; 2) Gargalos ou lacunas observáveis; 3) Oportunidade para a WDM; 4) Solução inicial sugerida; 5) Antes de abordar.',
+      'Não invente sistema ausente, problema interno, faturamento, equipe ou necessidade que não possa ser observada publicamente.',
+      'Não entre em contato com a empresa.'
+    ].filter(Boolean).join('\n');
+    const data=await squadApiCall(idToken,{
+      agentId:'scout',
+      client:{
+        name:c.company,
+        segment:c.need||'Potencial cliente da WDM Apps',
+        city:c.city||'',
+        site:c.site||'',
+        instagram:'',
+        notes:[
+          c.contact?'Contato comercial público: '+c.contact:'',
+          c.reason?'Radar: '+c.reason:'',
+          c.sourceUrl?'Fonte pública: '+c.sourceUrl:''
+        ].filter(Boolean).join(' | ')
+      },
+      objective,
+      previousResults:{radar:(c.reason||'')+'\n'+(c.need||'')}
+    });
+    c.scoutAnalysis=String(data.text||'').trim().slice(0,5000);
+    if(!c.scoutAnalysis)throw new Error('O Scout não retornou uma análise.');
+    c.scoutAt=new Date().toISOString();
+    c.scoutStatus='done';c.scoutError='';
+    addActivity('🔎','Scout analisou lead',c.company);
+    await saveState();
+  }catch(e){
+    c.scoutStatus='error';
+    c.scoutError=String(e?.message||e).slice(0,400);
+    await saveState();
+  }
+}
+function openLeadScoutAnalysis(id){
+  const l=state.leads.find(x=>x.id===id);if(!l||!l.scoutAnalysis)return;
+  document.getElementById('modalTitle').textContent='🔎 Scout · '+l.company;
+  document.getElementById('modalBody').innerHTML=
+    '<div class="tiny muted" style="margin-bottom:10px">Análise pública feita antes da prospecção. Confirme informações importantes antes de apresentar uma proposta.</div>'+
+    '<div class="mission-result-body" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:#091124">'+esc(l.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+
+    (l.scoutAt?'<div class="tiny muted" style="margin-top:8px">Analisado em '+new Date(l.scoutAt).toLocaleString('pt-BR')+'</div>':'')+
+    '<div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn primary" onclick="closeModal(\'formModal\')">Fechar</button></div>';
+  openModal('formModal');
+}
 async function approveLeadCandidate(id){
   const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
   const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
   if(!duplicate){
-    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
+    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
     addActivity('🎯','Lead aprovado pelo Radar',c.company);
   }
   state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
@@ -781,7 +846,7 @@ async function approveAllLeadCandidates(){
   let added=0;
   for(const c of items){
     const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
-    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
+    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
   }
   state.leadCandidates=[];
   addActivity('🎯','Sugestões do Radar aprovadas',added+' lead(s) adicionados ao funil');
@@ -807,7 +872,7 @@ function openLeadModal(id){
   openModal('formModal');
 }
 async function changeLeadStatus(id,status){const l=state.leads.find(x=>x.id===id);if(!l)return;l.status=status;addActivity('🔁','Funil atualizado',l.company+' → '+status);await saveState()}
-async function convertLead(id){const l=state.leads.find(x=>x.id===id);if(!l)return;if(state.clients.some(c=>c.name.toLowerCase()===l.company.toLowerCase()))return alert('Esse cliente já existe.');state.clients.push({id:uid(),name:l.company,segment:l.need,city:l.city,site:l.website||'',whatsapp:l.contact,instagram:'',notes:['Convertido do funil de leads.',l.reason||'',l.sourceUrl?'Fonte: '+l.sourceUrl:''].filter(Boolean).join(' '),status:'Ativo',createdAt:new Date().toISOString()});l.status='Ganho';addActivity('🏆','Lead convertido em cliente',l.company);await saveState();showView('clients')}
+async function convertLead(id){const l=state.leads.find(x=>x.id===id);if(!l)return;if(state.clients.some(c=>c.name.toLowerCase()===l.company.toLowerCase()))return alert('Esse cliente já existe.');state.clients.push({id:uid(),name:l.company,segment:l.need,city:l.city,site:l.website||'',whatsapp:l.contact,instagram:'',notes:['Convertido do funil de leads.',l.reason||'',l.scoutAnalysis?'Scout: '+l.scoutAnalysis:'',l.sourceUrl?'Fonte: '+l.sourceUrl:''].filter(Boolean).join(' '),status:'Ativo',createdAt:new Date().toISOString()});l.status='Ganho';addActivity('🏆','Lead convertido em cliente',l.company);await saveState();showView('clients')}
 
 function openCampaignModal(id){
   const c=state.campaigns.find(x=>x.id===id)||{clientId:state.clients[0]?.id||'',name:'',channel:'WhatsApp + Instagram',status:'Planejamento',progress:0,goal:''};
