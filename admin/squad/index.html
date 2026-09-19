@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>WDM Squad - Agência de IA</title>
+  <meta name="theme-color" content="#070b18">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#070b18;--panel:#0d1427;--panel2:#101a31;--panel3:#141f39;
+      --border:#223252;--text:#f4f7fb;--muted:#91a0ba;--blue:#4f8cff;
+      --cyan:#33d7ff;--purple:#8b5cf6;--green:#2dd4a0;--yellow:#f5c451;
+      --red:#ff6b7a;--shadow:0 22px 60px rgba(0,0,0,.32);--r:18px;
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:
+      radial-gradient(circle at 20% -10%,rgba(79,140,255,.16),transparent 31rem),
+      radial-gradient(circle at 100% 10%,rgba(139,92,246,.14),transparent 28rem),var(--bg);
+      color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}
+    .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+    .sidebar{position:sticky;top:0;height:100vh;padding:22px 16px;border-right:1px solid var(--border);
+      background:rgba(7,11,24,.88);backdrop-filter:blur(18px);z-index:20}
+    .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 24px}
+    .brand-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:22px;
+      background:linear-gradient(135deg,var(--blue),var(--purple));box-shadow:0 0 30px rgba(79,140,255,.25)}
+    .brand strong{font-family:"Space Grotesk";font-size:20px}.brand small{display:block;color:var(--muted);margin-top:1px}
+    .nav{display:flex;flex-direction:column;gap:5px}.nav button{border:0;background:transparent;color:var(--muted);
+      text-align:left;padding:11px 12px;border-radius:11px;font-weight:600;display:flex;align-items:center;gap:10px}
+    .nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(79,140,255,.15),rgba(139,92,246,.08));color:white}
+    .nav button.active{box-shadow:inset 3px 0 0 var(--blue)}
+    .sidebar-bottom{position:absolute;left:16px;right:16px;bottom:18px}
+    .mini-status{padding:12px;border:1px solid var(--border);border-radius:13px;background:var(--panel);font-size:12px;color:var(--muted)}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--yellow);margin-right:6px;box-shadow:0 0 10px currentColor}
+    .dot.ok{background:var(--green)}.dot.err{background:var(--red)}
+    .main{min-width:0}.topbar{height:74px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+      justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:15;background:rgba(7,11,24,.78);backdrop-filter:blur(18px)}
+    .top-title strong{font-family:"Space Grotesk";font-size:18px}.top-title span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .top-actions{display:flex;gap:9px;align-items:center}
+    .btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:9px 13px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none}
+    .btn:hover{border-color:#3c5684;transform:translateY(-1px)}.btn.primary{border:0;background:linear-gradient(135deg,var(--blue),var(--purple))}
+    .btn.danger{color:#ffb2ba;border-color:#713344;background:rgba(255,107,122,.07)}
+    .content{padding:26px;max-width:1500px;margin:auto}.view{display:none}.view.active{display:block}
+    .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:22px}
+    .eyebrow{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    h1,h2,h3{font-family:"Space Grotesk";margin:0}.hero h1{font-size:clamp(26px,4vw,42px);margin-top:5px}
+    .hero p{margin:8px 0 0;color:var(--muted);max-width:760px;line-height:1.55}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+    .stat,.card{background:linear-gradient(180deg,rgba(20,31,57,.92),rgba(13,20,39,.92));border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+    .stat{padding:18px;position:relative;overflow:hidden}.stat::after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-34px;top:-34px;background:rgba(79,140,255,.11)}
+    .stat span{color:var(--muted);font-size:12px}.stat strong{display:block;font-size:31px;margin-top:6px;font-family:"Space Grotesk"}.stat small{color:var(--green)}
+    .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.card{padding:18px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .card-head h2{font-size:17px}.muted{color:var(--muted)}.tiny{font-size:12px}
+    .agents-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .agent-mini,.agent-card{border:1px solid var(--border);background:rgba(255,255,255,.025);border-radius:14px;padding:13px}
+    .agent-mini strong,.agent-card strong{display:block;margin-bottom:4px}.agent-mini span,.agent-card p{color:var(--muted);font-size:12px;line-height:1.45;margin:0}
+    .agent-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}.agent-icon{font-size:24px}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(45,212,160,.11);color:#86efd0;border:1px solid rgba(45,212,160,.22)}
+    .badge.blue{background:rgba(79,140,255,.12);color:#a8c5ff;border-color:rgba(79,140,255,.25)}
+    .badge.yellow{background:rgba(245,196,81,.1);color:#ffe39a;border-color:rgba(245,196,81,.25)}
+    .badge.red{background:rgba(255,107,122,.1);color:#ffb1ba;border-color:rgba(255,107,122,.25)}
+    .activity{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(34,50,82,.7)}.activity:last-child{border-bottom:0}
+    .activity i{font-style:normal;width:30px;height:30px;border-radius:9px;background:rgba(79,140,255,.12);display:grid;place-items:center}
+    .activity strong{font-size:12px;display:block}.activity span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+    .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}.toolbar .filters{display:flex;gap:8px;flex-wrap:wrap}
+    input,select,textarea{background:#091124;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 11px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--blue)}textarea{resize:vertical;min-height:100px}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:760px;background:rgba(13,20,39,.62)}
+    th,td{text-align:left;padding:12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+    tr:last-child td{border-bottom:0}.link{color:#9cc2ff;text-decoration:none}.row-actions{display:flex;gap:6px;flex-wrap:wrap}.row-actions button,.row-actions a{padding:6px 8px;font-size:10px}
+    .section-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .agent-card{background:linear-gradient(180deg,rgba(20,31,57,.8),rgba(10,17,36,.85));min-height:185px;display:flex;flex-direction:column}
+    .agent-card .btn{margin-top:auto;align-self:flex-start}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}
+    .campaign{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}.campaign h3{font-size:15px}.campaign p{color:var(--muted);font-size:12px;line-height:1.5}
+    .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
+    .task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
+    .task input{width:17px;height:17px}.task .grow{flex:1}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}
+    .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}
+    .modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;background:#0d1427;border:1px solid #2d4167;border-radius:20px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.close{border:0;background:transparent;color:var(--muted);font-size:24px}
+    .prompt-box{width:100%;min-height:260px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.5}
+    .mobile-menu{display:none}
+    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.agents-grid,.section-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:-270px;width:250px;transition:.25s;box-shadow:20px 0 50px rgba(0,0,0,.45)}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.content{padding:18px}.topbar{padding:0 16px}.top-title span{display:none}.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.agents-grid,.section-grid,.agents-mini,.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.top-actions .hide-mobile{display:none}}
+    @media(max-width:430px){.stats{grid-template-columns:1fr}.hero h1{font-size:28px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-mark">⚡</div><div><strong>WDM Squad</strong><small>Agência de IA</small></div></div>
+    <nav class="nav">
+      <button class="active" data-view="overview">◈ Visão geral</button>
+      <button data-view="clients">🏢 Clientes</button>
+      <button data-view="leads">🎯 Leads</button>
+      <button data-view="agents">🤖 Agentes</button>
+      <button data-view="campaigns">🚀 Campanhas</button>
+      <button data-view="tasks">✅ Tarefas</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="mini-status"><span id="sideDot" class="dot"></span><span id="sideStatus">Conectando à nuvem...</span></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn mobile-menu" id="menuBtn">☰</button>
+        <div class="top-title"><strong id="pageTitle">Central de Operações</strong><span>WDM Apps · inteligência comercial e marketing</span></div>
+      </div>
+      <div class="top-actions">
+        <a class="btn hide-mobile" href="/admin/dashboard.html">← Admin</a>
+        <button class="btn primary" onclick="openQuickAction()">+ Ação rápida</button>
+        <button class="btn danger hide-mobile" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view active" id="view-overview">
+        <div class="hero">
+          <div><div class="eyebrow">WDM Squad · Command Center</div><h1>Sua agência trabalhando em equipe.</h1><p>Centralize clientes, oportunidades, campanhas e agentes especializados. A Ferrari Gesso já entra como primeiro case da Squad.</p></div>
+          <button class="btn primary" onclick="runAgent('growth')">⚡ Iniciar missão</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>Clientes ativos</span><strong id="stClients">0</strong><small>carteira da agência</small></div>
+          <div class="stat"><span>Leads no funil</span><strong id="stLeads">0</strong><small>oportunidades abertas</small></div>
+          <div class="stat"><span>Campanhas</span><strong id="stCampaigns">0</strong><small>em andamento</small></div>
+          <div class="stat"><span>Tarefas abertas</span><strong id="stTasks">0</strong><small>próximas ações</small></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-head"><h2>🤖 Squad de agentes</h2><button class="btn" onclick="showView('agents')">Ver todos</button></div>
+            <div class="agents-mini" id="agentsMini"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>⚡ Atividade recente</h2><span class="tiny muted">últimas ações</span></div>
+            <div id="activityList"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><h2>🚀 Campanhas em foco</h2><button class="btn" onclick="showView('campaigns')">Gerenciar</button></div>
+          <div class="section-grid" id="campaignFocus"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-clients">
+        <div class="hero"><div><div class="eyebrow">Carteira</div><h1>Clientes</h1><p>Negócios atendidos pela WDM Squad e seus canais principais.</p></div><button class="btn primary" onclick="openClientModal()">+ Novo cliente</button></div>
+        <div class="card"><div class="toolbar"><input id="clientSearch" placeholder="Buscar cliente..." oninput="renderClients()"><span class="muted tiny" id="clientCount"></span></div><div id="clientsTable"></div></div>
+      </section>
+
+      <section class="view" id="view-leads">
+        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>Empresas que podem virar clientes da WDM Apps.</p></div><button class="btn primary" onclick="openLeadModal()">+ Novo lead</button></div>
+        <div class="card"><div class="toolbar"><div class="filters"><input id="leadSearch" placeholder="Buscar lead..." oninput="renderLeads()"><select id="leadFilter" onchange="renderLeads()"><option value="all">Todos</option><option>Novo</option><option>Contato</option><option>Proposta</option><option>Ganho</option><option>Perdido</option></select></div><span class="muted tiny" id="leadCount"></span></div><div id="leadsTable"></div></div>
+      </section>
+
+      <section class="view" id="view-agents">
+        <div class="hero"><div><div class="eyebrow">Equipe digital</div><h1>Agentes da Squad</h1><p>Cada agente gera uma missão especializada usando os dados do cliente selecionado. A execução de IA fica em modo assistido: você copia o briefing pronto para ChatGPT/Work sem expor chave de API no site.</p></div></div>
+        <div class="agents-grid" id="agentsGrid"></div>
+      </section>
+
+      <section class="view" id="view-campaigns">
+        <div class="hero"><div><div class="eyebrow">Marketing</div><h1>Campanhas</h1><p>Planeje ações e acompanhe o que está sendo divulgado.</p></div><button class="btn primary" onclick="openCampaignModal()">+ Nova campanha</button></div>
+        <div class="section-grid" id="campaignGrid"></div>
+      </section>
+
+      <section class="view" id="view-tasks">
+        <div class="hero"><div><div class="eyebrow">Execução</div><h1>Tarefas</h1><p>Próximas ações da agência para não perder nenhum cliente ou oportunidade.</p></div><button class="btn primary" onclick="openTaskModal()">+ Nova tarefa</button></div>
+        <div class="grid2"><div class="card"><div class="card-head"><h2>Em aberto</h2><span class="tiny muted" id="openTaskCount"></span></div><div id="openTasks"></div></div><div class="card"><div class="card-head"><h2>Concluídas</h2></div><div id="doneTasks"></div></div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="formModal"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">Cadastro</h2><button class="close" onclick="closeModal('formModal')">×</button></div><div id="modalBody"></div></div></div>
+<div class="modal" id="agentModal"><div class="modal-card"><div class="modal-head"><h2 id="agentModalTitle">Missão do agente</h2><button class="close" onclick="closeModal('agentModal')">×</button></div><p class="muted tiny" style="margin-top:0">Briefing pronto para usar no ChatGPT/Work.</p><textarea id="agentPrompt" class="prompt-box"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal('agentModal')">Fechar</button><button class="btn primary" onclick="copyPrompt()">Copiar briefing</button></div></div></div>
+
+<script src="../auth.js"></script>
+<script>
+const DB_DOC = 'squad';
+let db = null;
+let state = null;
+
+const AGENTS = [
+  {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas e oportunidades para alimentar o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios com presença digital fraca e potencial claro de site, automação ou marketing.'},
+  {id:'scout',icon:'🔎',name:'Scout',role:'Diagnóstico',desc:'Audita site, Google e redes sociais e encontra gargalos.',prompt:'Faça uma auditoria da presença digital do cliente. Analise site, posicionamento local, Google, redes sociais, clareza da oferta, confiança, conversão e oportunidades de melhoria. Entregue achados priorizados.'},
+  {id:'copy',icon:'✍️',name:'Copy',role:'Conteúdo',desc:'Cria textos, anúncios, posts e mensagens comerciais.',prompt:'Crie conteúdo comercial para o cliente com foco em gerar contatos. Produza opções de texto para WhatsApp, Instagram/Facebook e chamada curta para anúncio, respeitando a identidade e os serviços do negócio.'},
+  {id:'studio',icon:'🎨',name:'Studio',role:'Criativo',desc:'Transforma a oferta em conceitos visuais e roteiros.',prompt:'Crie uma direção criativa para campanha do cliente: conceito visual, headline, elementos da arte, roteiro curto de vídeo e ideias de antes/depois. O material deve parecer profissional e local, não genérico.'},
+  {id:'web',icon:'💻',name:'Web',role:'Sites',desc:'Planeja landing pages e melhorias de conversão.',prompt:'Analise o site do cliente e proponha melhorias de conversão e SEO local. Sugira estrutura, seções, CTAs, provas sociais, palavras-chave locais e ações técnicas com maior impacto.'},
+  {id:'growth',icon:'🚀',name:'Growth',role:'Divulgação',desc:'Monta plano de distribuição, canais e campanhas.',prompt:'Monte um plano de divulgação para o cliente usando Google, WhatsApp, Instagram, Facebook e canais locais relevantes. Priorize ações de baixo custo e mensuráveis, com calendário de execução.'},
+  {id:'analyst',icon:'📊',name:'Analyst',role:'Resultados',desc:'Organiza métricas, testes e próximos passos.',prompt:'Defina um painel simples de resultados para o cliente. Inclua métricas de tráfego, cliques, contatos, origem dos leads, campanhas e ações recomendadas a partir dos números.'}
+];
+
+function uid(){return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(16).slice(2)}
+function defaultState(){
+  const now = new Date().toISOString();
+  return {
+    clients:[{id:'ferrari-gesso',name:'Ferrari Gesso',segment:'Gesso, Drywall e Forros',city:'Itu e região',site:'https://ferrarigesso.com.br',whatsapp:'5511940867283',instagram:'',notes:'Primeiro case oficial da WDM Squad.',status:'Ativo',createdAt:now}],
+    leads:[],
+    campaigns:[{id:'camp-ferrari-site',clientId:'ferrari-gesso',name:'Divulgação do site Ferrari Gesso',channel:'Google + Redes + WhatsApp',status:'Planejamento',progress:25,goal:'Gerar pedidos de orçamento e fortalecer presença local.',createdAt:now}],
+    tasks:[
+      {id:'task-google',clientId:'ferrari-gesso',title:'Otimizar Perfil da Empresa no Google',due:'',priority:'Alta',done:false,createdAt:now},
+      {id:'task-fotos',clientId:'ferrari-gesso',title:'Separar fotos reais de obras para substituir imagens genéricas',due:'',priority:'Alta',done:false,createdAt:now},
+      {id:'task-share',clientId:'ferrari-gesso',title:'Divulgar ferrarigesso.com.br no WhatsApp e redes sociais',due:'',priority:'Média',done:false,createdAt:now}
+    ],
+    activity:[{id:uid(),icon:'🏁',title:'WDM Squad criada',detail:'Ferrari Gesso adicionada como primeiro case.',at:now}]
+  };
+}
+function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
+function clientName(id){const c=state.clients.find(x=>x.id===id);return c?c.name:'Sem cliente'}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function fmtDate(s){if(!s)return '—';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('pt-BR')}
+function waLink(p){const n=String(p||'').replace(/\D/g,'');return n?'https://wa.me/'+n:''}
+function addActivity(icon,title,detail){state.activity.unshift({id:uid(),icon,title,detail,at:new Date().toISOString()});state.activity=state.activity.slice(0,30)}
+
+async function loadState(){
+  const local = safeParse(localStorage.getItem('wdm_squad_state'));
+  state = local || defaultState();
+  try{
+    const snap = await db.collection('wdmAdmin').doc(DB_DOC).get();
+    if(snap.exists && snap.data().payload){state = snap.data().payload}
+    else await saveState();
+    cloudStatus('Sincronizado online','ok');
+  }catch(e){
+    console.warn('WDM Squad cloud load:',e);
+    cloudStatus('Modo local','err');
+  }
+  renderAll();
+}
+async function saveState(){
+  localStorage.setItem('wdm_squad_state',JSON.stringify(state));
+  renderAll();
+  if(!db)return;
+  try{
+    cloudStatus('Salvando...','');
+    await db.collection('wdmAdmin').doc(DB_DOC).set({payload:state,ownerEmail:ADMIN_EMAIL,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    cloudStatus('Sincronizado online','ok');
+  }catch(e){console.error(e);cloudStatus('Salvo localmente','err')}
+}
+function cloudStatus(text,kind){document.getElementById('sideStatus').textContent=text;const d=document.getElementById('sideDot');d.className='dot '+(kind||'')}
+
+const pageNames={overview:'Central de Operações',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',campaigns:'Campanhas',tasks:'Tarefas'};
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('pageTitle').textContent=pageNames[v];
+  document.getElementById('sidebar').classList.remove('open');
+  if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+
+function renderAll(){if(!state)return;renderOverview();renderClients();renderLeads();renderAgents();renderCampaigns();renderTasks()}
+function renderOverview(){
+  document.getElementById('stClients').textContent=state.clients.filter(x=>x.status!=='Inativo').length;
+  document.getElementById('stLeads').textContent=state.leads.filter(x=>!['Ganho','Perdido'].includes(x.status)).length;
+  document.getElementById('stCampaigns').textContent=state.campaigns.filter(x=>x.status!=='Concluída').length;
+  document.getElementById('stTasks').textContent=state.tasks.filter(x=>!x.done).length;
+  document.getElementById('agentsMini').innerHTML=AGENTS.slice(0,4).map(a=>'<div class="agent-mini"><strong>'+a.icon+' '+esc(a.name)+' · '+esc(a.role)+'</strong><span>'+esc(a.desc)+'</span></div>').join('');
+  const acts=state.activity.slice(0,7);
+  document.getElementById('activityList').innerHTML=acts.length?acts.map(a=>'<div class="activity"><i>'+esc(a.icon)+'</i><div><strong>'+esc(a.title)+'</strong><span>'+esc(a.detail)+' · '+new Date(a.at).toLocaleString('pt-BR')+'</span></div></div>').join(''):'<div class="empty">Nenhuma atividade ainda.</div>';
+  const camps=state.campaigns.slice(0,3);
+  document.getElementById('campaignFocus').innerHTML=camps.length?camps.map(c=>campaignCard(c,false)).join(''):'<div class="empty">Crie a primeira campanha.</div>';
+}
+function renderClients(){
+  if(!state)return;const q=(document.getElementById('clientSearch')?.value||'').toLowerCase();
+  const list=state.clients.filter(c=>[c.name,c.segment,c.city,c.site].join(' ').toLowerCase().includes(q));
+  document.getElementById('clientCount').textContent=list.length+' cliente(s)';
+  document.getElementById('clientsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Segmento</th><th>Região</th><th>Status</th><th>Canais</th><th>Ações</th></tr></thead><tbody>'+list.map(c=>'<tr><td><strong>'+esc(c.name)+'</strong><div class="tiny muted">'+esc(c.notes||'')+'</div></td><td>'+esc(c.segment||'—')+'</td><td>'+esc(c.city||'—')+'</td><td><span class="badge">'+esc(c.status||'Ativo')+'</span></td><td>'+(c.site?'<a class="link" target="_blank" href="'+esc(c.site)+'">Site</a> ':'')+(c.whatsapp?'<a class="link" target="_blank" href="'+waLink(c.whatsapp)+'">WhatsApp</a>':'')+'</td><td><div class="row-actions"><button class="btn" onclick="openClientModal(\''+c.id+'\')">Editar</button><button class="btn" onclick="runAgent(\'scout\',\''+c.id+'\')">Diagnóstico</button></div></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum cliente encontrado.</div>';
+}
+function renderLeads(){
+  if(!state)return;const q=(document.getElementById('leadSearch')?.value||'').toLowerCase(),f=document.getElementById('leadFilter')?.value||'all';
+  const list=state.leads.filter(l=>(f==='all'||l.status===f)&&[l.company,l.contact,l.city,l.need].join(' ').toLowerCase().includes(q));
+  document.getElementById('leadCount').textContent=list.length+' lead(s)';
+  document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Necessidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>'<tr><td><strong>'+esc(l.company)+'</strong></td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions"><button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
+}
+function renderAgents(){
+  if(!state)return;document.getElementById('agentsGrid').innerHTML=AGENTS.map(a=>'<article class="agent-card"><div class="agent-top"><div><div class="agent-icon">'+a.icon+'</div><strong>'+esc(a.name)+' · '+esc(a.role)+'</strong></div><span class="badge blue">Assistido</span></div><p>'+esc(a.desc)+'</p><button class="btn primary" onclick="runAgent(\''+a.id+'\')">Executar missão</button></article>').join('');
+}
+function campaignCard(c,actions=true){
+  const pct=Math.max(0,Math.min(100,Number(c.progress||0)));
+  return '<div class="campaign"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.name)+'</h3><span class="tiny muted">'+esc(clientName(c.clientId))+' · '+esc(c.channel||'')+'</span></div><span class="badge '+(c.status==='Concluída'?'':'blue')+'">'+esc(c.status||'Planejamento')+'</span></div><p>'+esc(c.goal||'')+'</p><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% concluído</div>'+(actions?'<div class="row-actions" style="margin-top:12px"><button class="btn" onclick="openCampaignModal(\''+c.id+'\')">Editar</button><button class="btn" onclick="runAgent(\'growth\',\''+c.clientId+'\')">Growth</button></div>':'')+'</div>';
+}
+function renderCampaigns(){
+  if(!state)return;document.getElementById('campaignGrid').innerHTML=state.campaigns.length?state.campaigns.map(c=>campaignCard(c,true)).join(''):'<div class="empty">Nenhuma campanha ainda.</div>';
+}
+function renderTasks(){
+  if(!state)return;const open=state.tasks.filter(t=>!t.done),done=state.tasks.filter(t=>t.done);
+  document.getElementById('openTaskCount').textContent=open.length+' tarefa(s)';
+  document.getElementById('openTasks').innerHTML=open.length?open.map(taskRow).join(''):'<div class="empty">Tudo em dia.</div>';
+  document.getElementById('doneTasks').innerHTML=done.length?done.map(taskRow).join(''):'<div class="empty">Nenhuma concluída ainda.</div>';
+}
+function taskRow(t){return '<div class="task '+(t.done?'done':'')+'"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')"><div class="grow"><strong>'+esc(t.title)+'</strong><span>'+esc(clientName(t.clientId))+' · '+esc(t.priority||'Média')+(t.due?' · '+fmtDate(t.due):'')+'</span></div><button class="btn danger" onclick="deleteTask(\''+t.id+'\')">Excluir</button></div>'}
+
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+window.closeModal=closeModal;
+function clientOptions(selected){return state.clients.map(c=>'<option value="'+c.id+'" '+(c.id===selected?'selected':'')+'>'+esc(c.name)+'</option>').join('')}
+
+function openClientModal(id){
+  const c=state.clients.find(x=>x.id===id)||{id:'',name:'',segment:'',city:'',site:'',whatsapp:'',instagram:'',notes:'',status:'Ativo'};
+  document.getElementById('modalTitle').textContent=id?'Editar cliente':'Novo cliente';
+  document.getElementById('modalBody').innerHTML='<form id="clientForm" class="form-grid"><input id="cfName" required placeholder="Nome da empresa" value="'+esc(c.name)+'"><input id="cfSegment" placeholder="Segmento" value="'+esc(c.segment)+'"><input id="cfCity" placeholder="Cidade/região" value="'+esc(c.city)+'"><select id="cfStatus"><option '+(c.status==='Ativo'?'selected':'')+'>Ativo</option><option '+(c.status==='Pausa'?'selected':'')+'>Pausa</option><option '+(c.status==='Inativo'?'selected':'')+'>Inativo</option></select><input class="full" id="cfSite" placeholder="https://site.com.br" value="'+esc(c.site)+'"><input id="cfWhatsapp" placeholder="WhatsApp com DDD" value="'+esc(c.whatsapp)+'"><input id="cfInstagram" placeholder="Instagram" value="'+esc(c.instagram||'')+'"><textarea class="full" id="cfNotes" placeholder="Observações">'+esc(c.notes)+'</textarea><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Salvar</button></div></form>';
+  document.getElementById('clientForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),name:cfName.value.trim(),segment:cfSegment.value.trim(),city:cfCity.value.trim(),site:cfSite.value.trim(),whatsapp:cfWhatsapp.value.trim(),instagram:cfInstagram.value.trim(),notes:cfNotes.value.trim(),status:cfStatus.value,createdAt:c.createdAt||new Date().toISOString()};const i=state.clients.findIndex(x=>x.id===item.id);if(i>=0)state.clients[i]=item;else state.clients.push(item);addActivity('🏢',id?'Cliente atualizado':'Novo cliente',item.name);closeModal('formModal');await saveState()};
+  openModal('formModal');
+}
+function openLeadModal(id){
+  const l=state.leads.find(x=>x.id===id)||{company:'',contact:'',city:'',need:'Site / presença digital',status:'Novo'};
+  document.getElementById('modalTitle').textContent=id?'Editar lead':'Novo lead';
+  document.getElementById('modalBody').innerHTML='<form id="leadForm" class="form-grid"><input id="lfCompany" required placeholder="Empresa" value="'+esc(l.company)+'"><input id="lfContact" placeholder="Contato / WhatsApp" value="'+esc(l.contact)+'"><input id="lfCity" placeholder="Cidade" value="'+esc(l.city)+'"><select id="lfStatus">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select><textarea class="full" id="lfNeed" placeholder="O que essa empresa precisa?">'+esc(l.need)+'</textarea><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Salvar</button></div></form>';
+  document.getElementById('leadForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),company:lfCompany.value.trim(),contact:lfContact.value.trim(),city:lfCity.value.trim(),need:lfNeed.value.trim(),status:lfStatus.value,createdAt:l.createdAt||new Date().toISOString()};const i=state.leads.findIndex(x=>x.id===item.id);if(i>=0)state.leads[i]=item;else state.leads.push(item);addActivity('🎯',id?'Lead atualizado':'Novo lead',item.company);closeModal('formModal');await saveState()};
+  openModal('formModal');
+}
+async function changeLeadStatus(id,status){const l=state.leads.find(x=>x.id===id);if(!l)return;l.status=status;addActivity('🔁','Funil atualizado',l.company+' → '+status);await saveState()}
+async function convertLead(id){const l=state.leads.find(x=>x.id===id);if(!l)return;if(state.clients.some(c=>c.name.toLowerCase()===l.company.toLowerCase()))return alert('Esse cliente já existe.');state.clients.push({id:uid(),name:l.company,segment:l.need,city:l.city,site:'',whatsapp:l.contact,instagram:'',notes:'Convertido do funil de leads.',status:'Ativo',createdAt:new Date().toISOString()});l.status='Ganho';addActivity('🏆','Lead convertido em cliente',l.company);await saveState();showView('clients')}
+
+function openCampaignModal(id){
+  const c=state.campaigns.find(x=>x.id===id)||{clientId:state.clients[0]?.id||'',name:'',channel:'WhatsApp + Instagram',status:'Planejamento',progress:0,goal:''};
+  document.getElementById('modalTitle').textContent=id?'Editar campanha':'Nova campanha';
+  document.getElementById('modalBody').innerHTML='<form id="campaignForm" class="form-grid"><select id="cafClient">'+clientOptions(c.clientId)+'</select><input id="cafName" required placeholder="Nome da campanha" value="'+esc(c.name)+'"><input id="cafChannel" placeholder="Canais" value="'+esc(c.channel)+'"><select id="cafStatus">'+['Planejamento','Em andamento','Pausada','Concluída'].map(s=>'<option '+(s===c.status?'selected':'')+'>'+s+'</option>').join('')+'</select><input class="full" id="cafProgress" type="range" min="0" max="100" value="'+Number(c.progress||0)+'"><textarea class="full" id="cafGoal" placeholder="Objetivo da campanha">'+esc(c.goal)+'</textarea><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Salvar</button></div></form>';
+  document.getElementById('campaignForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),clientId:cafClient.value,name:cafName.value.trim(),channel:cafChannel.value.trim(),status:cafStatus.value,progress:Number(cafProgress.value),goal:cafGoal.value.trim(),createdAt:c.createdAt||new Date().toISOString()};const i=state.campaigns.findIndex(x=>x.id===item.id);if(i>=0)state.campaigns[i]=item;else state.campaigns.push(item);addActivity('🚀',id?'Campanha atualizada':'Nova campanha',item.name);closeModal('formModal');await saveState()};
+  openModal('formModal');
+}
+function openTaskModal(){
+  document.getElementById('modalTitle').textContent='Nova tarefa';
+  document.getElementById('modalBody').innerHTML='<form id="taskForm" class="form-grid"><select id="tfClient">'+clientOptions(state.clients[0]?.id||'')+'</select><select id="tfPriority"><option>Alta</option><option selected>Média</option><option>Baixa</option></select><input class="full" id="tfTitle" required placeholder="O que precisa ser feito?"><input class="full" id="tfDue" type="date"><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Adicionar</button></div></form>';
+  document.getElementById('taskForm').onsubmit=async e=>{e.preventDefault();const item={id:uid(),clientId:tfClient.value,title:tfTitle.value.trim(),due:tfDue.value,priority:tfPriority.value,done:false,createdAt:new Date().toISOString()};state.tasks.push(item);addActivity('✅','Tarefa criada',item.title);closeModal('formModal');await saveState()};
+  openModal('formModal');
+}
+async function toggleTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;addActivity(t.done?'✅':'↩️',t.done?'Tarefa concluída':'Tarefa reaberta',t.title);await saveState()}
+async function deleteTask(id){const t=state.tasks.find(x=>x.id===id);if(!t||!confirm('Excluir esta tarefa?'))return;state.tasks=state.tasks.filter(x=>x.id!==id);await saveState()}
+
+function runAgent(agentId,clientId){
+  const a=AGENTS.find(x=>x.id===agentId);if(!a)return;
+  const cid=clientId||state.clients[0]?.id;if(!cid)return alert('Cadastre um cliente primeiro.');
+  const c=state.clients.find(x=>x.id===cid)||state.clients[0];
+  document.getElementById('agentModalTitle').textContent=a.icon+' '+a.name+' · '+a.role;
+  const context='CLIENTE: '+c.name+'\nSEGMENTO: '+(c.segment||'não informado')+'\nREGIÃO: '+(c.city||'não informada')+'\nSITE: '+(c.site||'não informado')+'\nWHATSAPP: '+(c.whatsapp||'não informado')+'\nOBSERVAÇÕES: '+(c.notes||'nenhuma');
+  document.getElementById('agentPrompt').value='Você é o agente '+a.name+' da WDM Squad, especializado em '+a.role+'.\n\n'+context+'\n\nMISSÃO:\n'+a.prompt+'\n\nEntregue uma resposta prática, priorizada e pronta para execução pela WDM Apps. Não invente dados do cliente; quando precisar de informação pública atual, pesquise e cite as fontes.';
+  addActivity(a.icon,'Missão preparada: '+a.name,c.name);
+  saveState();
+  openModal('agentModal');
+}
+async function copyPrompt(){const el=document.getElementById('agentPrompt');try{await navigator.clipboard.writeText(el.value);alert('Briefing copiado!')}catch(e){el.select();document.execCommand('copy');alert('Briefing copiado!')}}
+function openQuickAction(){
+  document.getElementById('modalTitle').textContent='Ação rápida';
+  document.getElementById('modalBody').innerHTML='<div class="section-grid"><button class="btn primary" onclick="closeModal(\'formModal\');openClientModal()">🏢 Novo cliente</button><button class="btn primary" onclick="closeModal(\'formModal\');openLeadModal()">🎯 Novo lead</button><button class="btn primary" onclick="closeModal(\'formModal\');openCampaignModal()">🚀 Nova campanha</button><button class="btn primary" onclick="closeModal(\'formModal\');openTaskModal()">✅ Nova tarefa</button><button class="btn primary" onclick="closeModal(\'formModal\');runAgent(\'scout\')">🔎 Diagnóstico</button><button class="btn primary" onclick="closeModal(\'formModal\');runAgent(\'growth\')">⚡ Divulgação</button></div>';
+  openModal('formModal');
+}
+
+(async function init(){
+  try{
+    await requireAuth();
+    const sdk=await window.WDM_FIREBASE_READY;
+    db=sdk.firestore();
+    await loadState();
+    const hash=location.hash.replace('#','');if(pageNames[hash])showView(hash);
+  }catch(e){console.error(e);cloudStatus('Erro de acesso','err')}
+})();
+</script>
+</body>
+</html>
