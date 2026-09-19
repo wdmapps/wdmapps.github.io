@@ -288,6 +288,10 @@ const SQUAD_AGENTS: Record<string, { name: string; role: string; web: boolean; p
     name: "Analyst", role: "Resultados", web: false,
     prompt: "Consolide toda a missão em um resumo executivo. Liste diagnóstico, oportunidades, materiais produzidos, próximos passos, métricas a acompanhar e uma ordem prática de execução. Separe fatos de hipóteses.",
   },
+  planner: {
+    name: "Planner", role: "Plano de execução", web: false,
+    prompt: "Transforme os resultados da missão em um plano operacional curto e acionável. Retorne SOMENTE um objeto JSON válido neste formato: {\"summary\":\"resumo do plano em até 500 caracteres\",\"tasks\":[{\"title\":\"tarefa objetiva\",\"priority\":\"Alta|Média|Baixa\",\"daysFromNow\":0,\"why\":\"motivo em até 180 caracteres\"}],\"nextMove\":\"próxima ação mais importante\"}. Gere entre 4 e 8 tarefas, sem duplicar ações, priorizando impacto comercial e execução pela WDM Apps. daysFromNow deve ser inteiro entre 0 e 30. Não use markdown, comentários ou texto fora do JSON.",
+  },
 };
 
 function cleanText(value: unknown, max = 5000): string {
@@ -369,13 +373,15 @@ async function runSquadAgentWithOpenAI(
     "- Não invente informações sobre o cliente.",
     "- Quando houver incerteza, sinalize como hipótese.",
     "- Não envie mensagens, não publique, não compre mídia e não execute ações externas. Prepare tudo para aprovação do administrador.",
-    "- Termine com uma seção \"Próxima passagem\" explicando o que o próximo agente deve aproveitar.",
+    agentId === "planner"
+      ? "- Retorne exclusivamente JSON válido, sem markdown e sem qualquer texto fora do objeto."
+      : "- Termine com uma seção \"Próxima passagem\" explicando o que o próximo agente deve aproveitar.",
   ].filter(Boolean).join("\n");
 
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
     input,
-    max_output_tokens: 1800,
+    max_output_tokens: agentId === "planner" ? 1200 : 1800,
   };
   if (agent.web) body.tools = [{ type: "web_search" }];
 
