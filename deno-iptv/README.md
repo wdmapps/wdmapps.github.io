@@ -69,3 +69,22 @@ Backup anterior a esta alteração:
 `3aeea6ad119cf3c885594f910f96f5c005de2bbd`.
 Para restaurar somente este trabalho, reverta o commit da funcionalidade;
 evite substituir alterações posteriores de outros módulos do site.
+
+
+## WDM Squad — IA no mesmo backend Deno
+
+O endpoint `POST /squad/agent` atende o painel `/admin/squad/`.
+
+Segurança:
+- exige token válido do Firebase Authentication;
+- aceita somente o e-mail administrativo configurado no backend;
+- a chave da OpenAI fica apenas no Deno Deploy;
+- o navegador nunca recebe a `OPENAI_API_KEY`.
+
+Variáveis do Deno Deploy:
+- `OPENAI_API_KEY` — obrigatória para executar os agentes;
+- `OPENAI_MODEL` — opcional; padrão: `gpt-5.6-luna`;
+- `FIREBASE_WEB_API_KEY` — opcional; há fallback para a chave pública do projeto `wdm-admin`.
+
+Depois de configurar `OPENAI_API_KEY`, publique/deploy novamente o projeto Deno. O painel chama:
+`https://wdmappsgithubio.wdmapps.deno.net/squad/agent`
