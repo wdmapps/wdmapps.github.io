@@ -76,8 +76,8 @@
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}
     .campaign{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}.campaign h3{font-size:15px}.campaign p{color:var(--muted);font-size:12px;line-height:1.5}
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
-    .task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
-    .task input{width:17px;height:17px}.task .grow{flex:1}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}
+    .task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
+    .task input[type="checkbox"]{width:17px;height:17px;margin-top:3px}.task .grow{flex:1;min-width:0}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}.task-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.task-actions select{padding:6px 8px;font-size:10px;min-width:118px}.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.task-column{min-width:0}.task-source{display:inline-flex;margin-top:5px;padding:3px 6px;border-radius:999px;border:1px solid var(--border);font-size:9px!important;color:#a9b8cf!important}.task-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.task-detail-box{padding:12px;border:1px solid var(--border);border-radius:12px;background:#091124}.task-detail-box small{display:block;color:var(--muted);margin-bottom:4px}.task-detail-box strong{font-size:13px}.task-note{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);color:#c8d2e4;font-size:12px;line-height:1.55}
     .mission-card{border:1px solid var(--border);border-radius:16px;padding:16px;background:rgba(255,255,255,.025);margin-bottom:12px}.mission-card:last-child{margin-bottom:0}.mission-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mission-meta{color:var(--muted);font-size:11px;margin-top:5px}.mission-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}.mission-step{padding:7px 4px;border:1px solid var(--border);border-radius:9px;text-align:center;font-size:10px;color:var(--muted);background:#091124}.mission-step.done{border-color:rgba(45,212,160,.38);color:#9bf2d8;background:rgba(45,212,160,.08)}.mission-step.current{border-color:rgba(79,140,255,.55);color:#bdd1ff;background:rgba(79,140,255,.12)}.mission-result{margin-top:9px;border:1px solid var(--border);border-radius:11px;background:#091124;overflow:hidden}.mission-result summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700}.mission-result-body{padding:0 12px 12px;color:#c8d2e4;font-size:12px;line-height:1.6;white-space:normal}.mission-error{color:#ffb1ba;font-size:12px;margin-top:8px}.mission-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.execution-plan{margin-top:12px;padding:13px;border:1px solid rgba(45,212,160,.28);border-radius:12px;background:rgba(45,212,160,.055)}.execution-plan strong{font-size:13px}.execution-plan p{margin:6px 0;color:#cbd8e8;font-size:12px;line-height:1.55}.execution-plan small{color:var(--muted)}
     .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}
@@ -85,7 +85,7 @@
     .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.close{border:0;background:transparent;color:var(--muted);font-size:24px}
     .prompt-box{width:100%;min-height:260px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.5}
     .mobile-menu{display:none}
-    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.agents-grid,.section-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.agents-grid,.section-grid{grid-template-columns:repeat(2,1fr)}.task-board{grid-template-columns:1fr}}
     @media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:-270px;width:250px;transition:.25s;box-shadow:20px 0 50px rgba(0,0,0,.45)}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.content{padding:18px}.topbar{padding:0 16px}.top-title span{display:none}.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.agents-grid,.section-grid,.agents-mini,.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.top-actions .hide-mobile{display:none}}
     @media(max-width:430px){.stats{grid-template-columns:1fr}.hero h1{font-size:28px}}
   </style>
@@ -179,8 +179,23 @@
       </section>
 
       <section class="view" id="view-tasks">
-        <div class="hero"><div><div class="eyebrow">Execução</div><h1>Tarefas</h1><p>Próximas ações da agência para não perder nenhum cliente ou oportunidade.</p></div><button class="btn primary" onclick="openTaskModal()">+ Nova tarefa</button></div>
-        <div class="grid2"><div class="card"><div class="card-head"><h2>Em aberto</h2><span class="tiny muted" id="openTaskCount"></span></div><div id="openTasks"></div></div><div class="card"><div class="card-head"><h2>Concluídas</h2></div><div id="doneTasks"></div></div></div>
+        <div class="hero"><div><div class="eyebrow">Execução</div><h1>Tarefas</h1><p>Organize o trabalho da agência por cliente, prioridade e origem. Tarefas da Squad ficam ligadas à missão que as gerou.</p></div><button class="btn primary" onclick="openTaskModal()">+ Nova tarefa</button></div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="toolbar" style="margin-bottom:0">
+            <div class="filters">
+              <input id="taskSearch" placeholder="Buscar tarefa..." oninput="renderTasks()">
+              <select id="taskClientFilter" onchange="renderTasks()"><option value="all">Todos os clientes</option></select>
+              <select id="taskPriorityFilter" onchange="renderTasks()"><option value="all">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
+              <select id="taskSourceFilter" onchange="renderTasks()"><option value="all">Todas as origens</option><option value="squad">🤖 Squad</option><option value="manual">Manual</option></select>
+            </div>
+            <span class="muted tiny" id="taskFilterSummary"></span>
+          </div>
+        </div>
+        <div class="task-board">
+          <div class="card task-column"><div class="card-head"><h2>📥 Em aberto</h2><span class="tiny muted" id="openTaskCount"></span></div><div id="openTasks"></div></div>
+          <div class="card task-column"><div class="card-head"><h2>⚙️ Em andamento</h2><span class="tiny muted" id="doingTaskCount"></span></div><div id="doingTasks"></div></div>
+          <div class="card task-column"><div class="card-head"><h2>✅ Concluídas</h2><span class="tiny muted" id="doneTaskCount"></span></div><div id="doneTasks"></div></div>
+        </div>
       </section>
     </div>
   </main>
@@ -225,6 +240,10 @@ function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
 function normalizeState(){
   if(!state || typeof state!=='object')state=defaultState();
   ['clients','leads','campaigns','tasks','activity','missions'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[]});
+  state.tasks.forEach(t=>{
+    if(!['Aberta','Em andamento','Concluída'].includes(t.status))t.status=t.done?'Concluída':'Aberta';
+    t.done=t.status==='Concluída';
+  });
 }
 function clientName(id){const c=state.clients.find(x=>x.id===id);return c?c.name:'Sem cliente'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -277,7 +296,7 @@ function renderOverview(){
   document.getElementById('stClients').textContent=state.clients.filter(x=>x.status!=='Inativo').length;
   document.getElementById('stLeads').textContent=state.leads.filter(x=>!['Ganho','Perdido'].includes(x.status)).length;
   document.getElementById('stCampaigns').textContent=state.campaigns.filter(x=>x.status!=='Concluída').length;
-  document.getElementById('stTasks').textContent=state.tasks.filter(x=>!x.done).length;
+  document.getElementById('stTasks').textContent=state.tasks.filter(x=>x.status!=='Concluída').length;
   document.getElementById('agentsMini').innerHTML=AGENTS.slice(0,4).map(a=>'<div class="agent-mini"><strong>'+a.icon+' '+esc(a.name)+' · '+esc(a.role)+'</strong><span>'+esc(a.desc)+'</span></div>').join('');
   const acts=state.activity.slice(0,7);
   document.getElementById('activityList').innerHTML=acts.length?acts.map(a=>'<div class="activity"><i>'+esc(a.icon)+'</i><div><strong>'+esc(a.title)+'</strong><span>'+esc(a.detail)+' · '+new Date(a.at).toLocaleString('pt-BR')+'</span></div></div>').join(''):'<div class="empty">Nenhuma atividade ainda.</div>';
@@ -384,7 +403,7 @@ async function createExecutionPlan(missionId,silent=false,existingToken=''){
         id:uid(),clientId:client.id,title,
         due:dueAfterDays(item?.daysFromNow),
         priority:priorityValue(item?.priority),
-        done:false,createdAt:new Date().toISOString(),
+        status:'Aberta',done:false,createdAt:new Date().toISOString(),
         sourceMissionId:mission.id,source:'WDM Squad',
         why:String(item?.why||'').trim().slice(0,250)
       };
@@ -435,7 +454,7 @@ function renderMissions(){
     const planHtml=plan?'<div class="execution-plan"><strong>📋 Plano de execução</strong><p>'+esc(plan.summary||'')+'</p>'+(plan.nextMove?'<p><b>Próxima ação:</b> '+esc(plan.nextMove)+'</p>':'')+'<small>'+Number((plan.taskIds||[]).length)+' tarefa(s) vinculada(s) à missão.</small></div>':(m.planStatus?'<div class="execution-plan"><strong>📋 Planner</strong><p>'+esc(m.planStatus)+'</p>'+(m.planError?'<small style="color:#ffb1ba">'+esc(m.planError)+'</small>':'')+'</div>':'');
     const planButton=(m.status==='Concluída'||completed.has('analyst'))?'<button class="btn primary" onclick="createExecutionPlan(\''+m.id+'\')">'+(plan?'♻ Refazer plano':'✅ Gerar plano e tarefas')+'</button>':'';
     const taskButton=plan?'<button class="btn" onclick="showView(\'tasks\')">📋 Ver tarefas</button>':'';
-    return '<div class="mission-card"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
+    return '<div class="mission-card" id="mission-'+esc(m.id)+'"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
   }).join('');
 }
 function openMissionModal(){
@@ -532,13 +551,79 @@ async function deleteMission(id){
 function renderCampaigns(){
   if(!state)return;document.getElementById('campaignGrid').innerHTML=state.campaigns.length?state.campaigns.map(c=>campaignCard(c,true)).join(''):'<div class="empty">Nenhuma campanha ainda.</div>';
 }
-function renderTasks(){
-  if(!state)return;const open=state.tasks.filter(t=>!t.done),done=state.tasks.filter(t=>t.done);
-  document.getElementById('openTaskCount').textContent=open.length+' tarefa(s)';
-  document.getElementById('openTasks').innerHTML=open.length?open.map(taskRow).join(''):'<div class="empty">Tudo em dia.</div>';
-  document.getElementById('doneTasks').innerHTML=done.length?done.map(taskRow).join(''):'<div class="empty">Nenhuma concluída ainda.</div>';
+function taskPriorityRank(p){return p==='Alta'?0:p==='Média'?1:2}
+function taskSort(a,b){
+  const pa=taskPriorityRank(a.priority),pb=taskPriorityRank(b.priority);
+  if(pa!==pb)return pa-pb;
+  const da=a.due?new Date(a.due+'T12:00:00').getTime():Number.MAX_SAFE_INTEGER;
+  const dbb=b.due?new Date(b.due+'T12:00:00').getTime():Number.MAX_SAFE_INTEGER;
+  if(da!==dbb)return da-dbb;
+  return new Date(a.createdAt||0)-new Date(b.createdAt||0);
 }
-function taskRow(t){return '<div class="task '+(t.done?'done':'')+'"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')"><div class="grow"><strong>'+esc(t.title)+'</strong><span style="display:block">'+esc(clientName(t.clientId))+' · '+esc(t.priority||'Média')+(t.due?' · '+fmtDate(t.due):'')+(t.sourceMissionId?' · 🤖 Squad':'')+'</span>'+(t.why?'<span style="display:block;margin-top:3px">'+esc(t.why)+'</span>':'')+'</div><button class="btn danger" onclick="deleteTask(\''+t.id+'\')">Excluir</button></div>'}
+function renderTasks(){
+  if(!state)return;
+  const clientFilter=document.getElementById('taskClientFilter');
+  if(clientFilter){
+    const keep=clientFilter.value||'all';
+    clientFilter.innerHTML='<option value="all">Todos os clientes</option>'+state.clients.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');
+    clientFilter.value=[...clientFilter.options].some(o=>o.value===keep)?keep:'all';
+  }
+  const q=(document.getElementById('taskSearch')?.value||'').trim().toLowerCase();
+  const clientId=document.getElementById('taskClientFilter')?.value||'all';
+  const priority=document.getElementById('taskPriorityFilter')?.value||'all';
+  const source=document.getElementById('taskSourceFilter')?.value||'all';
+
+  const list=state.tasks.filter(t=>{
+    const sourceType=t.sourceMissionId?'squad':'manual';
+    const matchesText=!q||[t.title,t.why,clientName(t.clientId),t.priority,t.source].join(' ').toLowerCase().includes(q);
+    return matchesText&&(clientId==='all'||t.clientId===clientId)&&(priority==='all'||t.priority===priority)&&(source==='all'||source===sourceType);
+  }).sort(taskSort);
+
+  const open=list.filter(t=>t.status==='Aberta');
+  const doing=list.filter(t=>t.status==='Em andamento');
+  const done=list.filter(t=>t.status==='Concluída');
+
+  document.getElementById('openTaskCount').textContent=open.length+' tarefa(s)';
+  document.getElementById('doingTaskCount').textContent=doing.length+' tarefa(s)';
+  document.getElementById('doneTaskCount').textContent=done.length+' tarefa(s)';
+  document.getElementById('taskFilterSummary').textContent=list.length+' de '+state.tasks.length+' tarefa(s)';
+
+  document.getElementById('openTasks').innerHTML=open.length?open.map(taskRow).join(''):'<div class="empty">Nenhuma tarefa aberta.</div>';
+  document.getElementById('doingTasks').innerHTML=doing.length?doing.map(taskRow).join(''):'<div class="empty">Nada em andamento.</div>';
+  document.getElementById('doneTasks').innerHTML=done.length?done.map(taskRow).join(''):'<div class="empty">Nenhuma concluída.</div>';
+}
+function taskRow(t){
+  const source=t.sourceMissionId?'🤖 Squad':'✍️ Manual';
+  const status=t.status||'Aberta';
+  return '<div class="task '+(status==='Concluída'?'done':'')+'"><input type="checkbox" '+(status==='Concluída'?'checked':'')+' title="Marcar como concluída" onchange="toggleTask(\''+t.id+'\')"><div class="grow"><strong>'+esc(t.title)+'</strong><span style="display:block">'+esc(clientName(t.clientId))+' · '+esc(t.priority||'Média')+(t.due?' · '+fmtDate(t.due):'')+'</span>'+(t.why?'<span style="display:block;margin-top:3px">'+esc(t.why)+'</span>':'')+'<span class="task-source">'+source+'</span></div><div class="task-actions"><select title="Status" onchange="setTaskStatus(\''+t.id+'\',this.value)">'+['Aberta','Em andamento','Concluída'].map(s=>'<option '+(s===status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="btn" onclick="openTaskDetail(\''+t.id+'\')">Detalhes</button></div></div>';
+}
+function openTaskDetail(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  const mission=t.sourceMissionId?state.missions.find(m=>m.id===t.sourceMissionId):null;
+  document.getElementById('modalTitle').textContent='Detalhes da tarefa';
+  document.getElementById('modalBody').innerHTML=
+    '<h3 style="margin-bottom:6px">'+esc(t.title)+'</h3>'+
+    '<div class="tiny muted">'+(t.sourceMissionId?'🤖 Criada automaticamente pela WDM Squad':'✍️ Criada manualmente')+'</div>'+
+    '<div class="task-detail-grid">'+
+      '<div class="task-detail-box"><small>Cliente</small><strong>'+esc(clientName(t.clientId))+'</strong></div>'+
+      '<div class="task-detail-box"><small>Status</small><strong>'+esc(t.status||'Aberta')+'</strong></div>'+
+      '<div class="task-detail-box"><small>Prioridade</small><strong>'+esc(t.priority||'Média')+'</strong></div>'+
+      '<div class="task-detail-box"><small>Prazo</small><strong>'+(t.due?fmtDate(t.due):'Sem prazo')+'</strong></div>'+
+    '</div>'+
+    (t.why?'<div class="task-note"><b>Por que fazer:</b><br>'+esc(t.why)+'</div>':'')+
+    (mission?'<div class="task-note" style="margin-top:10px"><b>Missão de origem:</b><br>'+esc(mission.objective||'Missão automática')+'<br><span class="tiny muted">'+(mission.createdAt?new Date(mission.createdAt).toLocaleString('pt-BR'):'')+'</span></div>':'')+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px">'+
+      (mission?'<button class="btn" onclick="openMissionFromTask(\''+mission.id+'\')">⚡ Abrir missão</button>':'')+
+      '<button class="btn" onclick="closeModal(\'formModal\');openTaskModal(\''+t.id+'\')">Editar</button>'+
+      '<button class="btn danger" onclick="deleteTaskFromDetail(\''+t.id+'\')">Excluir</button>'+
+      '<button class="btn primary" onclick="closeModal(\'formModal\')">Fechar</button>'+
+    '</div>';
+  openModal('formModal');
+}
+function openMissionFromTask(missionId){
+  closeModal('formModal');showView('missions');
+  setTimeout(()=>document.getElementById('mission-'+missionId)?.scrollIntoView({behavior:'smooth',block:'center'}),80);
+}
 
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
@@ -569,14 +654,53 @@ function openCampaignModal(id){
   document.getElementById('campaignForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),clientId:cafClient.value,name:cafName.value.trim(),channel:cafChannel.value.trim(),status:cafStatus.value,progress:Number(cafProgress.value),goal:cafGoal.value.trim(),createdAt:c.createdAt||new Date().toISOString()};const i=state.campaigns.findIndex(x=>x.id===item.id);if(i>=0)state.campaigns[i]=item;else state.campaigns.push(item);addActivity('🚀',id?'Campanha atualizada':'Nova campanha',item.name);closeModal('formModal');await saveState()};
   openModal('formModal');
 }
-function openTaskModal(){
-  document.getElementById('modalTitle').textContent='Nova tarefa';
-  document.getElementById('modalBody').innerHTML='<form id="taskForm" class="form-grid"><select id="tfClient">'+clientOptions(state.clients[0]?.id||'')+'</select><select id="tfPriority"><option>Alta</option><option selected>Média</option><option>Baixa</option></select><input class="full" id="tfTitle" required placeholder="O que precisa ser feito?"><input class="full" id="tfDue" type="date"><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Adicionar</button></div></form>';
-  document.getElementById('taskForm').onsubmit=async e=>{e.preventDefault();const item={id:uid(),clientId:tfClient.value,title:tfTitle.value.trim(),due:tfDue.value,priority:tfPriority.value,done:false,createdAt:new Date().toISOString()};state.tasks.push(item);addActivity('✅','Tarefa criada',item.title);closeModal('formModal');await saveState()};
+function openTaskModal(id){
+  const current=id?state.tasks.find(x=>x.id===id):null;
+  const t=current||{clientId:state.clients[0]?.id||'',title:'',due:'',priority:'Média',status:'Aberta'};
+  document.getElementById('modalTitle').textContent=current?'Editar tarefa':'Nova tarefa';
+  document.getElementById('modalBody').innerHTML='<form id="taskForm" class="form-grid"><select id="tfClient">'+clientOptions(t.clientId)+'</select><select id="tfPriority">'+['Alta','Média','Baixa'].map(p=>'<option '+(p===t.priority?'selected':'')+'>'+p+'</option>').join('')+'</select><input class="full" id="tfTitle" required placeholder="O que precisa ser feito?" value="'+esc(t.title)+'"><input id="tfDue" type="date" value="'+esc(t.due||'')+'"><select id="tfStatus">'+['Aberta','Em andamento','Concluída'].map(s=>'<option '+(s===(t.status||'Aberta')?'selected':'')+'>'+s+'</option>').join('')+'</select><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">'+(current?'Salvar alterações':'Adicionar')+'</button></div></form>';
+  document.getElementById('taskForm').onsubmit=async e=>{
+    e.preventDefault();
+    const status=tfStatus.value;
+    const item={
+      ...(current||{}),id:current?.id||uid(),clientId:tfClient.value,title:tfTitle.value.trim(),
+      due:tfDue.value,priority:tfPriority.value,status,done:status==='Concluída',
+      createdAt:current?.createdAt||new Date().toISOString()
+    };
+    if(current)Object.assign(current,item);else state.tasks.push(item);
+    addActivity(current?'✏️':'✅',current?'Tarefa atualizada':'Tarefa criada',item.title);
+    closeModal('formModal');await saveState();
+  };
   openModal('formModal');
 }
-async function toggleTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;addActivity(t.done?'✅':'↩️',t.done?'Tarefa concluída':'Tarefa reaberta',t.title);await saveState()}
-async function deleteTask(id){const t=state.tasks.find(x=>x.id===id);if(!t||!confirm('Excluir esta tarefa?'))return;state.tasks=state.tasks.filter(x=>x.id!==id);await saveState()}
+async function setTaskStatus(id,status){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  if(!['Aberta','Em andamento','Concluída'].includes(status))return;
+  const before=t.status||'Aberta';
+  t.status=status;t.done=status==='Concluída';
+  if(before!==status)addActivity(status==='Concluída'?'✅':status==='Em andamento'?'⚙️':'↩️','Status da tarefa',t.title+' → '+status);
+  await saveState();
+}
+async function toggleTask(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  await setTaskStatus(id,(t.status||'Aberta')==='Concluída'?'Aberta':'Concluída');
+}
+async function deleteTask(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t||!confirm('Excluir esta tarefa?'))return;
+  state.tasks=state.tasks.filter(x=>x.id!==id);
+  addActivity('🗑️','Tarefa excluída',t.title);
+  await saveState();
+}
+async function deleteTaskFromDetail(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t||!confirm('Excluir esta tarefa?'))return;
+  closeModal('formModal');
+  await deleteTaskDirect(id,t);
+}
+async function deleteTaskDirect(id,t){
+  state.tasks=state.tasks.filter(x=>x.id!==id);
+  addActivity('🗑️','Tarefa excluída',t.title);
+  await saveState();
+}
 
 function runAgent(agentId,clientId){
   const a=AGENTS.find(x=>x.id===agentId);if(!a)return;
