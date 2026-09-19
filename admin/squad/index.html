@@ -78,7 +78,7 @@
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
     .task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
     .task input{width:17px;height:17px}.task .grow{flex:1}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}
-    .mission-card{border:1px solid var(--border);border-radius:16px;padding:16px;background:rgba(255,255,255,.025);margin-bottom:12px}.mission-card:last-child{margin-bottom:0}.mission-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mission-meta{color:var(--muted);font-size:11px;margin-top:5px}.mission-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}.mission-step{padding:7px 4px;border:1px solid var(--border);border-radius:9px;text-align:center;font-size:10px;color:var(--muted);background:#091124}.mission-step.done{border-color:rgba(45,212,160,.38);color:#9bf2d8;background:rgba(45,212,160,.08)}.mission-step.current{border-color:rgba(79,140,255,.55);color:#bdd1ff;background:rgba(79,140,255,.12)}.mission-result{margin-top:9px;border:1px solid var(--border);border-radius:11px;background:#091124;overflow:hidden}.mission-result summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700}.mission-result-body{padding:0 12px 12px;color:#c8d2e4;font-size:12px;line-height:1.6;white-space:normal}.mission-error{color:#ffb1ba;font-size:12px;margin-top:8px}.mission-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .mission-card{border:1px solid var(--border);border-radius:16px;padding:16px;background:rgba(255,255,255,.025);margin-bottom:12px}.mission-card:last-child{margin-bottom:0}.mission-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mission-meta{color:var(--muted);font-size:11px;margin-top:5px}.mission-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}.mission-step{padding:7px 4px;border:1px solid var(--border);border-radius:9px;text-align:center;font-size:10px;color:var(--muted);background:#091124}.mission-step.done{border-color:rgba(45,212,160,.38);color:#9bf2d8;background:rgba(45,212,160,.08)}.mission-step.current{border-color:rgba(79,140,255,.55);color:#bdd1ff;background:rgba(79,140,255,.12)}.mission-result{margin-top:9px;border:1px solid var(--border);border-radius:11px;background:#091124;overflow:hidden}.mission-result summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700}.mission-result-body{padding:0 12px 12px;color:#c8d2e4;font-size:12px;line-height:1.6;white-space:normal}.mission-error{color:#ffb1ba;font-size:12px;margin-top:8px}.mission-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.execution-plan{margin-top:12px;padding:13px;border:1px solid rgba(45,212,160,.28);border-radius:12px;background:rgba(45,212,160,.055)}.execution-plan strong{font-size:13px}.execution-plan p{margin:6px 0;color:#cbd8e8;font-size:12px;line-height:1.55}.execution-plan small{color:var(--muted)}
     .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}
     .modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;background:#0d1427;border:1px solid #2d4167;border-radius:20px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
@@ -310,6 +310,109 @@ function missionStatusClass(status){
   if(status==='Executando')return 'blue';
   return 'yellow';
 }
+
+function missionResultsMap(mission){
+  const map={};
+  (mission.results||[]).forEach(r=>{if(r?.agentId&&r?.text)map[r.agentId]=r.text});
+  return map;
+}
+function parsePlannerJson(text){
+  let raw=String(text||'').trim();
+  raw=raw.replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`$/,'').trim();
+  try{return JSON.parse(raw)}catch(_){}
+  const a=raw.indexOf('{'),b=raw.lastIndexOf('}');
+  if(a>=0&&b>a){try{return JSON.parse(raw.slice(a,b+1))}catch(_){}}
+  throw new Error('O Planner não retornou um plano estruturado válido.');
+}
+function priorityValue(v){
+  return ['Alta','Média','Baixa'].includes(v)?v:'Média';
+}
+function dueAfterDays(value){
+  const days=Math.max(0,Math.min(30,Math.round(Number(value)||0)));
+  const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+days);
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+async function squadApiCall(idToken,payload){
+  const response=await fetch(SQUAD_API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+    body:JSON.stringify(payload)
+  });
+  let data={};try{data=await response.json()}catch(_){}
+  if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
+  return data;
+}
+async function createExecutionPlan(missionId,silent=false,existingToken=''){
+  const mission=state.missions.find(x=>x.id===missionId);
+  if(!mission)return false;
+  const client=state.clients.find(c=>c.id===mission.clientId);
+  if(!client)return false;
+  if(!(mission.results||[]).length){if(!silent)alert('Esta missão ainda não tem resultados.');return false}
+
+  mission.planStatus='Gerando plano e tarefas...';
+  mission.planError='';
+  await saveState();
+
+  try{
+    let idToken=existingToken;
+    if(!idToken){
+      const user=await firebaseUser();
+      if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+      idToken=await user.getIdToken(true);
+    }
+    const previousResults=missionResultsMap(mission);
+    const data=await squadApiCall(idToken,{
+      agentId:'planner',
+      client:{
+        name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
+        instagram:client.instagram||'',notes:client.notes||''
+      },
+      objective:mission.objective||'Transformar a missão em plano operacional.',
+      previousResults
+    });
+    const plan=parsePlannerJson(data.text);
+    const plannedTasks=Array.isArray(plan.tasks)?plan.tasks.slice(0,8):[];
+    const createdIds=[];
+
+    for(const item of plannedTasks){
+      const title=String(item?.title||'').trim().slice(0,220);
+      if(!title)continue;
+      const duplicate=state.tasks.some(t=>t.sourceMissionId===mission.id&&String(t.title||'').trim().toLowerCase()===title.toLowerCase());
+      if(duplicate)continue;
+      const task={
+        id:uid(),clientId:client.id,title,
+        due:dueAfterDays(item?.daysFromNow),
+        priority:priorityValue(item?.priority),
+        done:false,createdAt:new Date().toISOString(),
+        sourceMissionId:mission.id,source:'WDM Squad',
+        why:String(item?.why||'').trim().slice(0,250)
+      };
+      state.tasks.push(task);
+      createdIds.push(task.id);
+    }
+
+    mission.executionPlan={
+      summary:String(plan.summary||'Plano de execução gerado pela Squad.').trim().slice(0,700),
+      nextMove:String(plan.nextMove||'').trim().slice(0,400),
+      taskIds:[...(mission.executionPlan?.taskIds||[]),...createdIds],
+      generatedAt:new Date().toISOString()
+    };
+    mission.planStatus=createdIds.length?createdIds.length+' nova(s) tarefa(s) criada(s)':'Plano atualizado; nenhuma tarefa nova necessária.';
+    mission.planError='';
+    addActivity('📋','Plano de execução criado',client.name+' · '+createdIds.length+' tarefa(s) nova(s)');
+    await saveState();
+    if(!silent)showView('tasks');
+    return true;
+  }catch(e){
+    console.error('WDM Squad planner failed',e);
+    mission.planStatus='Não foi possível gerar o plano.';
+    mission.planError=(e?.message||'Falha no Planner.').slice(0,500);
+    await saveState();
+    if(!silent)alert(mission.planError);
+    return false;
+  }
+}
 function renderMissions(){
   if(!state)return;
   const host=document.getElementById('missionsList');
@@ -328,7 +431,11 @@ function renderMissions(){
       return '<details class="mission-result"><summary>'+(a?a.icon:'🤖')+' '+esc(r.agentName||a?.name||r.agentId)+' · '+esc(r.role||a?.role||'')+'</summary><div class="mission-result-body">'+esc(r.text||'').replace(/\n/g,'<br>')+'</div></details>';
     }).join('');
     const pct=Number(m.progress||0);
-    return '<div class="mission-card"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+results+'<div class="mission-actions"><button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
+    const plan=m.executionPlan;
+    const planHtml=plan?'<div class="execution-plan"><strong>📋 Plano de execução</strong><p>'+esc(plan.summary||'')+'</p>'+(plan.nextMove?'<p><b>Próxima ação:</b> '+esc(plan.nextMove)+'</p>':'')+'<small>'+Number((plan.taskIds||[]).length)+' tarefa(s) vinculada(s) à missão.</small></div>':(m.planStatus?'<div class="execution-plan"><strong>📋 Planner</strong><p>'+esc(m.planStatus)+'</p>'+(m.planError?'<small style="color:#ffb1ba">'+esc(m.planError)+'</small>':'')+'</div>':'');
+    const planButton=(m.status==='Concluída'||completed.has('analyst'))?'<button class="btn primary" onclick="createExecutionPlan(\''+m.id+'\')">'+(plan?'♻ Refazer plano':'✅ Gerar plano e tarefas')+'</button>':'';
+    const taskButton=plan?'<button class="btn" onclick="showView(\'tasks\')">📋 Ver tarefas</button>':'';
+    return '<div class="mission-card"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
   }).join('');
 }
 function openMissionModal(){
@@ -367,25 +474,15 @@ async function runFullMission(clientId,objective){
       mission.progress=Math.round((i/AGENTS.length)*100);
       await saveState();
 
-      const response=await fetch(SQUAD_API_URL,{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+idToken
+      const data=await squadApiCall(idToken,{
+        agentId:a.id,
+        client:{
+          name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
+          instagram:client.instagram||'',notes:client.notes||''
         },
-        body:JSON.stringify({
-          agentId:a.id,
-          client:{
-            name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
-            instagram:client.instagram||'',notes:client.notes||''
-          },
-          objective,
-          previousResults
-        })
+        objective,
+        previousResults
       });
-      let data={};
-      try{data=await response.json()}catch(_){}
-      if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
 
       const result={
         agentId:a.id,agentName:data.agentName||a.name,role:data.role||a.role,
@@ -398,6 +495,12 @@ async function runFullMission(clientId,objective){
       addActivity(a.icon,'Agente concluído: '+a.name,client.name);
       await saveState();
     }
+
+    mission.currentAgentId='';
+    mission.currentLabel='Montando plano de execução...';
+    mission.progress=100;
+    await saveState();
+    await createExecutionPlan(mission.id,true,idToken);
 
     mission.status='Concluída';
     mission.progress=100;
@@ -435,7 +538,7 @@ function renderTasks(){
   document.getElementById('openTasks').innerHTML=open.length?open.map(taskRow).join(''):'<div class="empty">Tudo em dia.</div>';
   document.getElementById('doneTasks').innerHTML=done.length?done.map(taskRow).join(''):'<div class="empty">Nenhuma concluída ainda.</div>';
 }
-function taskRow(t){return '<div class="task '+(t.done?'done':'')+'"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')"><div class="grow"><strong>'+esc(t.title)+'</strong><span>'+esc(clientName(t.clientId))+' · '+esc(t.priority||'Média')+(t.due?' · '+fmtDate(t.due):'')+'</span></div><button class="btn danger" onclick="deleteTask(\''+t.id+'\')">Excluir</button></div>'}
+function taskRow(t){return '<div class="task '+(t.done?'done':'')+'"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')"><div class="grow"><strong>'+esc(t.title)+'</strong><span style="display:block">'+esc(clientName(t.clientId))+' · '+esc(t.priority||'Média')+(t.due?' · '+fmtDate(t.due):'')+(t.sourceMissionId?' · 🤖 Squad':'')+'</span>'+(t.why?'<span style="display:block;margin-top:3px">'+esc(t.why)+'</span>':'')+'</div><button class="btn danger" onclick="deleteTask(\''+t.id+'\')">Excluir</button></div>'}
 
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
