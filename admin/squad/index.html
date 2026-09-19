@@ -193,8 +193,8 @@
 <script>
 const DB_DOC = 'squad';
 let db = null;
-let functionsClient = null;
 let state = null;
+const SQUAD_API_URL = 'https://wdmappsgithubio.wdmapps.deno.net/squad/agent';
 
 const AGENTS = [
   {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas e oportunidades para alimentar o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios com presença digital fraca e potencial claro de site, automação ou marketing.'},
@@ -354,8 +354,9 @@ async function runFullMission(clientId,objective){
   showView('missions');
 
   try{
-    if(!functionsClient)throw new Error('Backend de IA ainda não está disponível.');
-    const callAgent=functionsClient.httpsCallable('runSquadAgent');
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
     const previousResults={};
 
     for(let i=0;i<AGENTS.length;i++){
@@ -366,16 +367,26 @@ async function runFullMission(clientId,objective){
       mission.progress=Math.round((i/AGENTS.length)*100);
       await saveState();
 
-      const response=await callAgent({
-        agentId:a.id,
-        client:{
-          name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
-          instagram:client.instagram||'',notes:client.notes||''
+      const response=await fetch(SQUAD_API_URL,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+idToken
         },
-        objective,
-        previousResults
+        body:JSON.stringify({
+          agentId:a.id,
+          client:{
+            name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',
+            instagram:client.instagram||'',notes:client.notes||''
+          },
+          objective,
+          previousResults
+        })
       });
-      const data=response?.data||{};
+      let data={};
+      try{data=await response.json()}catch(_){}
+      if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
+
       const result={
         agentId:a.id,agentName:data.agentName||a.name,role:data.role||a.role,
         text:data.text||'',model:data.model||'',usedWeb:Boolean(data.usedWeb),completedAt:new Date().toISOString()
@@ -399,7 +410,7 @@ async function runFullMission(clientId,objective){
     console.error('WDM Squad mission failed',e);
     mission.status='Erro';
     mission.currentLabel='Missão interrompida';
-    mission.error=(e?.message||'Falha ao executar a missão.').replace(/^Firebase:\s*/,'').slice(0,600);
+    mission.error=(e?.message||'Falha ao executar a missão.').slice(0,600);
     mission.finishedAt=new Date().toISOString();
     addActivity('⚠️','Missão automática interrompida',client.name);
     await saveState();
@@ -487,8 +498,6 @@ function openQuickAction(){
     await requireAuth();
     const sdk=await window.WDM_FIREBASE_READY;
     db=sdk.firestore();
-    await loadFirebaseScript('https://www.gstatic.com/firebasejs/12.11.0/firebase-functions-compat.js');
-    functionsClient=sdk.app().functions('us-central1');
     await loadState();
     const hash=location.hash.replace('#','');if(pageNames[hash])showView(hash);
   }catch(e){console.error(e);cloudStatus('Erro de acesso','err')}
