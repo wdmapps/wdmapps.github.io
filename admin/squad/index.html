@@ -75,6 +75,7 @@
     .agent-card .btn{margin-top:auto;align-self:flex-start}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}
     .campaign{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}.campaign h3{font-size:15px}.campaign p{color:var(--muted);font-size:12px;line-height:1.5}
+    .radar-box{margin-bottom:14px;border-color:rgba(51,215,255,.28);background:linear-gradient(180deg,rgba(51,215,255,.055),rgba(13,20,39,.92))}.radar-status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.radar-candidates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.radar-candidate{padding:13px;border:1px solid var(--border);border-radius:13px;background:#091124}.radar-candidate h3{font-size:14px;margin:0 0 4px}.radar-candidate p{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 0}.radar-candidate .row-actions{margin-top:10px}.radar-source{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.radar-source a{font-size:10px}
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
     .task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
     .task input[type="checkbox"]{width:17px;height:17px;margin-top:3px}.task .grow{flex:1;min-width:0}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}.task-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.task-actions select{padding:6px 8px;font-size:10px;min-width:118px}.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.task-column{min-width:0}.task-source{display:inline-flex;margin-top:5px;padding:3px 6px;border-radius:999px;border:1px solid var(--border);font-size:9px!important;color:#a9b8cf!important}.task-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.task-detail-box{padding:12px;border:1px solid var(--border);border-radius:12px;background:#091124}.task-detail-box small{display:block;color:var(--muted);margin-bottom:4px}.task-detail-box strong{font-size:13px}.task-note{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);color:#c8d2e4;font-size:12px;line-height:1.55}
@@ -85,7 +86,8 @@
     .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.close{border:0;background:transparent;color:var(--muted);font-size:24px}
     .prompt-box{width:100%;min-height:260px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.5}
     .mobile-menu{display:none}
-    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.agents-grid,.section-grid{grid-template-columns:repeat(2,1fr)}.task-board{grid-template-columns:1fr}}
+    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.agents-grid,.section-grid,.radar-candidates{grid-template-columns:repeat(2,1fr)}.task-board{grid-template-columns:1fr}}
+    @media(max-width:760px){.radar-candidates{grid-template-columns:1fr}}
     @media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:-270px;width:250px;transition:.25s;box-shadow:20px 0 50px rgba(0,0,0,.45)}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.content{padding:18px}.topbar{padding:0 16px}.top-title span{display:none}.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.agents-grid,.section-grid,.agents-mini,.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.top-actions .hide-mobile{display:none}}
     @media(max-width:430px){.stats{grid-template-columns:1fr}.hero h1{font-size:28px}}
   </style>
@@ -153,7 +155,11 @@
       </section>
 
       <section class="view" id="view-leads">
-        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>Empresas que podem virar clientes da WDM Apps.</p></div><button class="btn primary" onclick="openLeadModal()">+ Novo lead</button></div>
+        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>O Radar encontra empresas públicas com sinais de oportunidade. Você aprova quem entra no funil comercial.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="openRadarLeadModal()">📡 Buscar com Radar</button><button class="btn" onclick="openLeadModal()">+ Novo lead</button></div></div>
+        <div class="card radar-box">
+          <div class="card-head"><div><h2>📡 Sugestões do Radar</h2><div class="radar-status" id="radarLeadStatus">Nenhuma pesquisa executada.</div></div><div class="row-actions"><button class="btn" id="approveAllRadarBtn" onclick="approveAllLeadCandidates()" style="display:none">Adicionar todos ao funil</button><button class="btn danger" id="clearRadarBtn" onclick="clearLeadCandidates()" style="display:none">Limpar sugestões</button></div></div>
+          <div id="radarLeadCandidates"></div>
+        </div>
         <div class="card"><div class="toolbar"><div class="filters"><input id="leadSearch" placeholder="Buscar lead..." oninput="renderLeads()"><select id="leadFilter" onchange="renderLeads()"><option value="all">Todos</option><option>Novo</option><option>Contato</option><option>Proposta</option><option>Ganho</option><option>Perdido</option></select></div><span class="muted tiny" id="leadCount"></span></div><div id="leadsTable"></div></div>
       </section>
 
@@ -239,7 +245,8 @@ function defaultState(){
 function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
 function normalizeState(){
   if(!state || typeof state!=='object')state=defaultState();
-  ['clients','leads','campaigns','tasks','activity','missions'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[]});
+  ['clients','leads','leadCandidates','campaigns','tasks','activity','missions'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[]});
+  if(!state.radarLeadSearch || typeof state.radarLeadSearch!=='object')state.radarLeadSearch={status:'idle',message:'Nenhuma pesquisa executada.'};
   state.tasks.forEach(t=>{
     if(!['Aberta','Em andamento','Concluída'].includes(t.status))t.status=t.done?'Concluída':'Aberta';
     t.done=t.status==='Concluída';
@@ -309,11 +316,43 @@ function renderClients(){
   document.getElementById('clientCount').textContent=list.length+' cliente(s)';
   document.getElementById('clientsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Segmento</th><th>Região</th><th>Status</th><th>Canais</th><th>Ações</th></tr></thead><tbody>'+list.map(c=>'<tr><td><strong>'+esc(c.name)+'</strong><div class="tiny muted">'+esc(c.notes||'')+'</div></td><td>'+esc(c.segment||'—')+'</td><td>'+esc(c.city||'—')+'</td><td><span class="badge">'+esc(c.status||'Ativo')+'</span></td><td>'+(c.site?'<a class="link" target="_blank" href="'+esc(c.site)+'">Site</a> ':'')+(c.whatsapp?'<a class="link" target="_blank" href="'+waLink(c.whatsapp)+'">WhatsApp</a>':'')+'</td><td><div class="row-actions"><button class="btn" onclick="openClientModal(\''+c.id+'\')">Editar</button><button class="btn" onclick="runAgent(\'scout\',\''+c.id+'\')">Diagnóstico</button></div></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum cliente encontrado.</div>';
 }
+function safePublicUrl(value){
+  const raw=String(value||'').trim();
+  if(!raw||/^(não|nenhum|n\/a|—|-)/i.test(raw))return '';
+  try{const u=new URL(raw);return ['http:','https:'].includes(u.protocol)?u.href:''}catch(_){return ''}
+}
+function renderLeadCandidates(){
+  const host=document.getElementById('radarLeadCandidates');
+  if(!host)return;
+  const candidates=state.leadCandidates||[];
+  const search=state.radarLeadSearch||{};
+  const status=document.getElementById('radarLeadStatus');
+  if(status)status.textContent=search.message||'Nenhuma pesquisa executada.';
+  const approveAll=document.getElementById('approveAllRadarBtn');
+  const clear=document.getElementById('clearRadarBtn');
+  if(approveAll)approveAll.style.display=candidates.length?'inline-flex':'none';
+  if(clear)clear.style.display=candidates.length?'inline-flex':'none';
+  if(!candidates.length){host.innerHTML='<div class="empty">'+(search.status==='running'?'Radar pesquisando empresas públicas...':'Nenhuma sugestão pendente de aprovação.')+'</div>';return}
+  host.innerHTML='<div class="radar-candidates">'+candidates.map(c=>{
+    const site=safePublicUrl(c.site),source=safePublicUrl(c.sourceUrl);
+    return '<article class="radar-candidate"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.company)+'</h3><span class="tiny muted">'+esc(c.city||'Região não confirmada')+'</span></div><span class="badge blue">Sugestão</span></div>'+
+      '<p><b>Oportunidade:</b> '+esc(c.need||'Avaliar presença digital')+'</p>'+
+      (c.reason?'<p>'+esc(c.reason)+'</p>':'')+
+      (c.contact?'<p><b>Contato público:</b> '+esc(c.contact)+'</p>':'')+
+      '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(source&&source!==site?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
+      '<div class="row-actions"><button class="btn primary" onclick="approveLeadCandidate(\''+c.id+'\')">✓ Adicionar ao funil</button><button class="btn danger" onclick="rejectLeadCandidate(\''+c.id+'\')">Descartar</button></div></article>';
+  }).join('')+'</div>';
+}
 function renderLeads(){
-  if(!state)return;const q=(document.getElementById('leadSearch')?.value||'').toLowerCase(),f=document.getElementById('leadFilter')?.value||'all';
-  const list=state.leads.filter(l=>(f==='all'||l.status===f)&&[l.company,l.contact,l.city,l.need].join(' ').toLowerCase().includes(q));
+  if(!state)return;
+  renderLeadCandidates();
+  const q=(document.getElementById('leadSearch')?.value||'').toLowerCase(),f=document.getElementById('leadFilter')?.value||'all';
+  const list=state.leads.filter(l=>(f==='all'||l.status===f)&&[l.company,l.contact,l.city,l.need,l.website,l.reason].join(' ').toLowerCase().includes(q));
   document.getElementById('leadCount').textContent=list.length+' lead(s)';
-  document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Necessidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>'<tr><td><strong>'+esc(l.company)+'</strong></td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions"><button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
+  document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Oportunidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>{
+    const site=safePublicUrl(l.website);
+    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions"><button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
+  }).join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
 }
 function renderAgents(){
   if(!state)return;document.getElementById('agentsGrid').innerHTML=AGENTS.map(a=>'<article class="agent-card"><div class="agent-top"><div><div class="agent-icon">'+a.icon+'</div><strong>'+esc(a.name)+' · '+esc(a.role)+'</strong></div><span class="badge blue">Assistido</span></div><p>'+esc(a.desc)+'</p><button class="btn primary" onclick="runAgent(\''+a.id+'\')">Executar missão</button></article>').join('');
@@ -637,15 +676,138 @@ function openClientModal(id){
   document.getElementById('clientForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),name:cfName.value.trim(),segment:cfSegment.value.trim(),city:cfCity.value.trim(),site:cfSite.value.trim(),whatsapp:cfWhatsapp.value.trim(),instagram:cfInstagram.value.trim(),notes:cfNotes.value.trim(),status:cfStatus.value,createdAt:c.createdAt||new Date().toISOString()};const i=state.clients.findIndex(x=>x.id===item.id);if(i>=0)state.clients[i]=item;else state.clients.push(item);addActivity('🏢',id?'Cliente atualizado':'Novo cliente',item.name);closeModal('formModal');await saveState()};
   openModal('formModal');
 }
+function parseRadarLeadBlocks(text,query){
+  const raw=String(text||'');
+  const list=[];
+  const re=/LEAD_START([\s\S]*?)LEAD_END/gi;
+  let match;
+  while((match=re.exec(raw))){
+    const data={};
+    String(match[1]||'').split(/\r?\n/).forEach(line=>{
+      const m=line.match(/^([A-Z_]+):\s*(.*)$/);
+      if(m)data[m[1]]=m[2].trim();
+    });
+    const company=String(data.EMPRESA||'').trim();
+    if(!company)continue;
+    const item={
+      id:uid(),company:company.slice(0,180),city:String(data.CIDADE||'').slice(0,120),
+      site:safePublicUrl(data.SITE),contact:String(data.CONTATO||'').replace(/^(não encontrado|não informado|—|-)$/i,'').slice(0,180),
+      need:String(data.NECESSIDADE||'Avaliar presença digital').slice(0,260),
+      reason:String(data.MOTIVO||'').slice(0,420),sourceUrl:safePublicUrl(data.FONTE),
+      query:query||'',createdAt:new Date().toISOString()
+    };
+    list.push(item);
+  }
+  const seen=new Set();
+  return list.filter(x=>{const k=(x.company+'|'+x.city).toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
+}
+function openRadarLeadModal(){
+  document.getElementById('modalTitle').textContent='📡 Radar · Buscar novos leads';
+  document.getElementById('modalBody').innerHTML='<form id="radarLeadForm" class="form-grid">'+
+    '<input id="rlRegion" required placeholder="Região" value="Salto, Itu e Indaiatuba - SP">'+
+    '<input id="rlSegment" placeholder="Segmento (opcional)" value="">'+
+    '<select id="rlQty"><option value="5">5 empresas</option><option value="8" selected>8 empresas</option><option value="10">10 empresas</option></select>'+
+    '<div class="tiny muted" style="align-self:center">O Radar pesquisa apenas informações públicas. Nenhum contato é feito automaticamente.</div>'+
+    '<textarea class="full" id="rlNotes" placeholder="Algum foco? Ex.: empresas sem site, site antigo, comércio local, clínicas, indústrias...">Priorize empresas com oportunidade clara para site, sistema web, aplicativo, automação ou melhoria de presença digital.</textarea>'+
+    '<div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">📡 Pesquisar empresas</button></div></form>';
+  document.getElementById('radarLeadForm').onsubmit=e=>{
+    e.preventDefault();
+    const region=rlRegion.value.trim(),segment=rlSegment.value.trim(),qty=Number(rlQty.value)||8,notes=rlNotes.value.trim();
+    closeModal('formModal');runRadarLeadSearch(region,segment,qty,notes);
+  };
+  openModal('formModal');
+}
+async function runRadarLeadSearch(region,segment,qty,notes){
+  state.radarLeadSearch={status:'running',message:'Radar pesquisando '+region+'...',region,segment,startedAt:new Date().toISOString()};
+  await saveState();showView('leads');
+  try{
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
+    const objective=[
+      'Encontre '+qty+' empresas reais e atualmente ativas que possam ser potenciais clientes da WDM Apps.',
+      'REGIÃO: '+region+'.',
+      segment?'SEGMENTO PREFERENCIAL: '+segment+'.':'Pode variar os segmentos se houver oportunidade clara.',
+      notes||'Priorize sinais públicos de oportunidade digital.',
+      'Pesquise a web e use somente informações públicas verificáveis.',
+      'NÃO entre em contato com ninguém.',
+      'Para CADA empresa, retorne exatamente este bloco, com todos os campos em uma única linha:',
+      'LEAD_START',
+      'EMPRESA: nome real da empresa',
+      'CIDADE: cidade/UF',
+      'SITE: URL pública ou -',
+      'CONTATO: telefone/WhatsApp comercial público ou -',
+      'NECESSIDADE: serviço que a WDM poderia oferecer',
+      'MOTIVO: evidência curta e específica da oportunidade; não invente problemas',
+      'FONTE: URL pública que comprova a empresa ou oportunidade',
+      'LEAD_END',
+      'Não use esse formato para empresas fictícias. Depois dos blocos, não escreva mais nada.'
+    ].join('\n');
+    const data=await squadApiCall(idToken,{
+      agentId:'radar',
+      client:{name:'WDM Apps',segment:'Desenvolvimento de aplicativos, sistemas web, automações e soluções digitais',city:region,site:'https://wdmapps.com.br',instagram:'',notes:'A pesquisa é para prospecção comercial da própria WDM Apps.'},
+      objective,
+      previousResults:{}
+    });
+    const candidates=parseRadarLeadBlocks(data.text,[region,segment].filter(Boolean).join(' · '));
+    if(!candidates.length)throw new Error('O Radar não retornou empresas no formato esperado. Tente novamente com uma região ou segmento mais específico.');
+    const existingKeys=new Set([
+      ...state.leads.map(x=>(x.company+'|'+x.city).toLowerCase()),
+      ...state.leadCandidates.map(x=>(x.company+'|'+x.city).toLowerCase())
+    ]);
+    const fresh=candidates.filter(x=>!existingKeys.has((x.company+'|'+x.city).toLowerCase()));
+    state.leadCandidates=[...fresh,...state.leadCandidates].slice(0,30);
+    state.radarLeadSearch={status:'done',message:'Radar encontrou '+candidates.length+' empresa(s); '+fresh.length+' nova(s) aguardando sua aprovação.',region,segment,finishedAt:new Date().toISOString()};
+    addActivity('📡','Radar pesquisou novos leads',region+' · '+fresh.length+' nova(s) sugestão(ões)');
+    await saveState();
+  }catch(e){
+    state.radarLeadSearch={status:'error',message:'Falha na pesquisa: '+String(e?.message||e).slice(0,300),region,segment,finishedAt:new Date().toISOString()};
+    await saveState();
+  }
+}
+async function approveLeadCandidate(id){
+  const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
+  const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
+  if(!duplicate){
+    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
+    addActivity('🎯','Lead aprovado pelo Radar',c.company);
+  }
+  state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
+  await saveState();
+}
+async function approveAllLeadCandidates(){
+  if(!state.leadCandidates.length||!confirm('Adicionar todas as sugestões atuais ao funil como leads Novos?'))return;
+  const items=[...state.leadCandidates];
+  let added=0;
+  for(const c of items){
+    const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
+    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
+  }
+  state.leadCandidates=[];
+  addActivity('🎯','Sugestões do Radar aprovadas',added+' lead(s) adicionados ao funil');
+  await saveState();
+}
+async function rejectLeadCandidate(id){
+  const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
+  state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
+  addActivity('🗑️','Sugestão do Radar descartada',c.company);
+  await saveState();
+}
+async function clearLeadCandidates(){
+  if(!state.leadCandidates.length||!confirm('Limpar todas as sugestões pendentes do Radar?'))return;
+  state.leadCandidates=[];
+  await saveState();
+}
+
 function openLeadModal(id){
-  const l=state.leads.find(x=>x.id===id)||{company:'',contact:'',city:'',need:'Site / presença digital',status:'Novo'};
+  const l=state.leads.find(x=>x.id===id)||{company:'',contact:'',city:'',website:'',need:'Site / presença digital',reason:'',status:'Novo'};
   document.getElementById('modalTitle').textContent=id?'Editar lead':'Novo lead';
-  document.getElementById('modalBody').innerHTML='<form id="leadForm" class="form-grid"><input id="lfCompany" required placeholder="Empresa" value="'+esc(l.company)+'"><input id="lfContact" placeholder="Contato / WhatsApp" value="'+esc(l.contact)+'"><input id="lfCity" placeholder="Cidade" value="'+esc(l.city)+'"><select id="lfStatus">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select><textarea class="full" id="lfNeed" placeholder="O que essa empresa precisa?">'+esc(l.need)+'</textarea><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Salvar</button></div></form>';
-  document.getElementById('leadForm').onsubmit=async e=>{e.preventDefault();const item={id:id||uid(),company:lfCompany.value.trim(),contact:lfContact.value.trim(),city:lfCity.value.trim(),need:lfNeed.value.trim(),status:lfStatus.value,createdAt:l.createdAt||new Date().toISOString()};const i=state.leads.findIndex(x=>x.id===item.id);if(i>=0)state.leads[i]=item;else state.leads.push(item);addActivity('🎯',id?'Lead atualizado':'Novo lead',item.company);closeModal('formModal');await saveState()};
+  document.getElementById('modalBody').innerHTML='<form id="leadForm" class="form-grid"><input id="lfCompany" required placeholder="Empresa" value="'+esc(l.company)+'"><input id="lfContact" placeholder="Contato / WhatsApp" value="'+esc(l.contact||'')+'"><input id="lfCity" placeholder="Cidade" value="'+esc(l.city||'')+'"><select id="lfStatus">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select><input class="full" id="lfWebsite" placeholder="Site da empresa" value="'+esc(l.website||'')+'"><textarea class="full" id="lfNeed" placeholder="O que essa empresa precisa?">'+esc(l.need||'')+'</textarea><textarea class="full" id="lfReason" placeholder="Por que é uma oportunidade?">'+esc(l.reason||'')+'</textarea><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">Salvar</button></div></form>';
+  document.getElementById('leadForm').onsubmit=async e=>{e.preventDefault();const item={...l,id:id||uid(),company:lfCompany.value.trim(),contact:lfContact.value.trim(),city:lfCity.value.trim(),website:safePublicUrl(lfWebsite.value.trim()),need:lfNeed.value.trim(),reason:lfReason.value.trim(),status:lfStatus.value,createdAt:l.createdAt||new Date().toISOString()};const i=state.leads.findIndex(x=>x.id===item.id);if(i>=0)state.leads[i]=item;else state.leads.push(item);addActivity('🎯',id?'Lead atualizado':'Novo lead',item.company);closeModal('formModal');await saveState()};
   openModal('formModal');
 }
 async function changeLeadStatus(id,status){const l=state.leads.find(x=>x.id===id);if(!l)return;l.status=status;addActivity('🔁','Funil atualizado',l.company+' → '+status);await saveState()}
-async function convertLead(id){const l=state.leads.find(x=>x.id===id);if(!l)return;if(state.clients.some(c=>c.name.toLowerCase()===l.company.toLowerCase()))return alert('Esse cliente já existe.');state.clients.push({id:uid(),name:l.company,segment:l.need,city:l.city,site:'',whatsapp:l.contact,instagram:'',notes:'Convertido do funil de leads.',status:'Ativo',createdAt:new Date().toISOString()});l.status='Ganho';addActivity('🏆','Lead convertido em cliente',l.company);await saveState();showView('clients')}
+async function convertLead(id){const l=state.leads.find(x=>x.id===id);if(!l)return;if(state.clients.some(c=>c.name.toLowerCase()===l.company.toLowerCase()))return alert('Esse cliente já existe.');state.clients.push({id:uid(),name:l.company,segment:l.need,city:l.city,site:l.website||'',whatsapp:l.contact,instagram:'',notes:['Convertido do funil de leads.',l.reason||'',l.sourceUrl?'Fonte: '+l.sourceUrl:''].filter(Boolean).join(' '),status:'Ativo',createdAt:new Date().toISOString()});l.status='Ganho';addActivity('🏆','Lead convertido em cliente',l.company);await saveState();showView('clients')}
 
 function openCampaignModal(id){
   const c=state.campaigns.find(x=>x.id===id)||{clientId:state.clients[0]?.id||'',name:'',channel:'WhatsApp + Instagram',status:'Planejamento',progress:0,goal:''};
