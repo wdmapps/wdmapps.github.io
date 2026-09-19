@@ -75,7 +75,7 @@
     .agent-card .btn{margin-top:auto;align-self:flex-start}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}
     .campaign{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}.campaign h3{font-size:15px}.campaign p{color:var(--muted);font-size:12px;line-height:1.5}
-    .radar-box{margin-bottom:14px;border-color:rgba(51,215,255,.28);background:linear-gradient(180deg,rgba(51,215,255,.055),rgba(13,20,39,.92))}.radar-status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.radar-candidates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.radar-candidate{padding:13px;border:1px solid var(--border);border-radius:13px;background:#091124}.radar-candidate h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:16px;line-height:1.35;margin:0 0 5px}.radar-candidate p{font-family:Inter,system-ui,sans-serif;font-size:13px;color:#c8d2e4;line-height:1.65;margin:8px 0}.radar-candidate .row-actions{margin-top:10px}.radar-source{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.radar-source a{font-size:12px;font-weight:600;line-height:1.4}.scout-analysis{margin-top:12px;padding:12px;border:1px solid rgba(79,140,255,.28);border-radius:11px;background:rgba(79,140,255,.065)}.scout-analysis strong{display:block;font-size:12px;margin-bottom:6px;color:#bdd1ff}.scout-analysis div{font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:1.65;color:#d7e0ec}.scout-analysis small{display:block;margin-top:7px;color:var(--muted);font-size:10px}.scout-loading{margin-top:10px;padding:9px 11px;border-radius:10px;background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.2);color:#ffe39a;font-size:11px}
+    .radar-box{margin-bottom:14px;border-color:rgba(51,215,255,.28);background:linear-gradient(180deg,rgba(51,215,255,.055),rgba(13,20,39,.92))}.radar-status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.radar-candidates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.radar-candidate{padding:13px;border:1px solid var(--border);border-radius:13px;background:#091124}.radar-candidate h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:16px;line-height:1.35;margin:0 0 5px}.radar-candidate p{font-family:Inter,system-ui,sans-serif;font-size:13px;color:#c8d2e4;line-height:1.65;margin:8px 0}.radar-candidate .row-actions{margin-top:10px}.radar-source{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.radar-source a{font-size:12px;font-weight:600;line-height:1.4}.scout-analysis{margin-top:12px;padding:12px;border:1px solid rgba(79,140,255,.28);border-radius:11px;background:rgba(79,140,255,.065)}.scout-analysis strong{display:block;font-size:12px;margin-bottom:6px;color:#bdd1ff}.scout-analysis div{font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:1.65;color:#d7e0ec}.scout-analysis small{display:block;margin-top:7px;color:var(--muted);font-size:10px}.scout-loading{margin-top:10px;padding:9px 11px;border-radius:10px;background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.2);color:#ffe39a;font-size:11px}.copy-approach{margin-top:12px;padding:12px;border:1px solid rgba(139,92,246,.3);border-radius:11px;background:rgba(139,92,246,.07)}.copy-approach strong{display:block;font-size:12px;margin-bottom:6px;color:#d6c6ff}.copy-approach div{font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:1.68;color:#e0e4ed}.copy-approach small{display:block;margin-top:7px;color:var(--muted);font-size:10px}.copy-loading{margin-top:10px;padding:9px 11px;border-radius:10px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.22);color:#d9cbff;font-size:11px}
     .progress{height:7px;border-radius:999px;background:#091124;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
     .task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.task:last-child{border-bottom:0}.task.done strong{text-decoration:line-through;color:var(--muted)}
     .task input[type="checkbox"]{width:17px;height:17px;margin-top:3px}.task .grow{flex:1;min-width:0}.task strong{font-size:13px}.task span{font-size:11px;color:var(--muted)}.task-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.task-actions select{padding:6px 8px;font-size:10px;min-width:118px}.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.task-column{min-width:0}.task-source{display:inline-flex;margin-top:5px;padding:3px 6px;border-radius:999px;border:1px solid var(--border);font-size:9px!important;color:#a9b8cf!important}.task-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.task-detail-box{padding:12px;border:1px solid var(--border);border-radius:12px;background:#091124}.task-detail-box small{display:block;color:var(--muted);margin-bottom:4px}.task-detail-box strong{font-size:13px}.task-note{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);color:#c8d2e4;font-size:12px;line-height:1.55}
@@ -343,8 +343,13 @@ function renderLeadCandidates(){
       (c.scoutStatus==='running'?'<div class="scout-loading">🔎 Scout analisando a empresa e a presença digital...</div>':'')+
       (c.scoutAnalysis?'<div class="scout-analysis"><strong>🔎 Diagnóstico do Scout</strong><div>'+esc(c.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+(c.scoutAt?'<small>Analisado em '+new Date(c.scoutAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
       (c.scoutError?'<div class="mission-error">⚠ '+esc(c.scoutError)+'</div>':'')+
+      (c.copyStatus==='running'?'<div class="copy-loading">✍️ Copy preparando uma abordagem personalizada...</div>':'')+
+      (c.approachText?'<div class="copy-approach"><strong>✍️ Abordagem preparada pelo Copy</strong><div>'+esc(c.approachText).replace(/\n/g,'<br>')+'</div>'+(c.approachAt?'<small>Preparada em '+new Date(c.approachAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
+      (c.copyError?'<div class="mission-error">⚠ '+esc(c.copyError)+'</div>':'')+
       '<div class="row-actions">'+
         (c.scoutStatus==='running'?'<button class="btn" disabled>🔎 Analisando...</button>':'<button class="btn" onclick="analyzeLeadCandidate(\''+c.id+'\')">'+(c.scoutAnalysis?'↻ Refazer análise':'🔎 Analisar empresa')+'</button>')+
+        (c.scoutAnalysis?(c.copyStatus==='running'?'<button class="btn" disabled>✍️ Preparando...</button>':'<button class="btn" onclick="prepareCandidateApproach(\''+c.id+'\')">'+(c.approachText?'↻ Refazer abordagem':'✍️ Preparar abordagem')+'</button>'):'')+
+        (c.approachText?'<button class="btn" onclick="copyCandidateApproach(\''+c.id+'\')">📋 Copiar abordagem</button>':'')+
         '<button class="btn primary" onclick="approveLeadCandidate(\''+c.id+'\')">✓ Adicionar ao funil</button><button class="btn danger" onclick="rejectLeadCandidate(\''+c.id+'\')">Descartar</button></div></article>';
   }).join('')+'</div>';
 }
@@ -356,7 +361,10 @@ function renderLeads(){
   document.getElementById('leadCount').textContent=list.length+' lead(s)';
   document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Oportunidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>{
     const site=safePublicUrl(l.website);
-    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions">'+(l.scoutAnalysis?'<button class="btn" onclick="openLeadScoutAnalysis(\''+l.id+'\')">🔎 Scout</button>':'')+'<button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
+    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions">'+
+      (l.scoutAnalysis?'<button class="btn" onclick="openLeadScoutAnalysis(\''+l.id+'\')">🔎 Scout</button>':'')+
+      (l.approachText?'<button class="btn" onclick="openLeadApproach(\''+l.id+'\')">✍️ Abordagem</button>':(l.scoutAnalysis?'<button class="btn" onclick="prepareApprovedLeadApproach(\''+l.id+'\')">✍️ Preparar</button>':''))+
+      '<button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
   }).join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
 }
 function renderAgents(){
@@ -830,11 +838,102 @@ function openLeadScoutAnalysis(id){
     '<div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn primary" onclick="closeModal(\'formModal\')">Fechar</button></div>';
   openModal('formModal');
 }
+async function generateLeadApproach(record,kind){
+  if(!record||record.copyStatus==='running')return;
+  if(!record.scoutAnalysis){alert('Analise a empresa com o Scout antes de preparar a abordagem.');return}
+  record.copyStatus='running';record.copyError='';
+  await saveState();
+  try{
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
+    const site=record.site||record.website||'';
+    const objective=[
+      'Prepare uma primeira abordagem comercial personalizada da WDM Apps para esta empresa.',
+      'Use o diagnóstico do Scout e os dados públicos como contexto, mas não invente problemas nem afirme que a empresa precisa de algo que não foi confirmado.',
+      'A mensagem deve parecer humana, curta e consultiva, sem exagero de marketing.',
+      'Não diga que uma IA pesquisou a empresa.',
+      'Crie: 1) WHATSAPP INICIAL em até 550 caracteres; 2) FOLLOW-UP curto para usar alguns dias depois; 3) ASSUNTO DE E-MAIL; 4) E-MAIL curto em até 900 caracteres; 5) 3 pontos para conversar se a empresa responder.',
+      'Apresente a WDM Apps como empresa de soluções digitais. Foque no benefício plausível indicado pelo diagnóstico.',
+      'Não prometa resultado, não invente case e não ofereça preço.',
+      'NÃO envie a mensagem. Apenas prepare o texto para aprovação humana.'
+    ].join('\n');
+    const data=await squadApiCall(idToken,{
+      agentId:'copy',
+      client:{
+        name:record.company,
+        segment:record.need||'Potencial cliente da WDM Apps',
+        city:record.city||'',
+        site,
+        instagram:'',
+        notes:[
+          record.contact?'Contato comercial público: '+record.contact:'',
+          record.reason?'Oportunidade do Radar: '+record.reason:'',
+          record.sourceUrl?'Fonte pública: '+record.sourceUrl:''
+        ].filter(Boolean).join(' | ')
+      },
+      objective,
+      previousResults:{
+        radar:(record.reason||'')+'\n'+(record.need||''),
+        scout:record.scoutAnalysis||''
+      }
+    });
+    record.approachText=String(data.text||'').trim().slice(0,6000);
+    if(!record.approachText)throw new Error('O Copy não retornou uma abordagem.');
+    record.approachAt=new Date().toISOString();
+    record.copyStatus='done';record.copyError='';
+    addActivity('✍️','Copy preparou abordagem',record.company);
+    await saveState();
+  }catch(e){
+    record.copyStatus='error';
+    record.copyError=String(e?.message||e).slice(0,400);
+    await saveState();
+  }
+}
+async function prepareCandidateApproach(id){
+  const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
+  await generateLeadApproach(c,'candidate');
+}
+async function prepareApprovedLeadApproach(id){
+  const l=state.leads.find(x=>x.id===id);if(!l)return;
+  await generateLeadApproach(l,'lead');
+  if(l.approachText)openLeadApproach(id);
+}
+async function copyTextValue(textValue){
+  const value=String(textValue||'');
+  if(!value)return;
+  try{await navigator.clipboard.writeText(value);alert('Abordagem copiada!')}
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=value;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('Abordagem copiada!');
+  }
+}
+async function copyCandidateApproach(id){
+  const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
+  await copyTextValue(c.approachText);
+}
+function openLeadApproach(id){
+  const l=state.leads.find(x=>x.id===id);if(!l||!l.approachText)return;
+  document.getElementById('modalTitle').textContent='✍️ Abordagem · '+l.company;
+  document.getElementById('modalBody').innerHTML=
+    '<div class="tiny muted" style="margin-bottom:10px">Texto preparado pelo Copy com base no Radar e no Scout. Revise antes de enviar.</div>'+
+    '<div class="mission-result-body" style="padding:14px;border:1px solid var(--border);border-radius:12px;background:#091124">'+esc(l.approachText).replace(/\n/g,'<br>')+'</div>'+
+    (l.approachAt?'<div class="tiny muted" style="margin-top:8px">Preparada em '+new Date(l.approachAt).toLocaleString('pt-BR')+'</div>':'')+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px">'+
+      '<button class="btn" onclick="copyApprovedLeadApproach(\''+l.id+'\')">📋 Copiar</button>'+
+      '<button class="btn" onclick="closeModal(\'formModal\');prepareApprovedLeadApproach(\''+l.id+'\')">↻ Refazer</button>'+
+      '<button class="btn primary" onclick="closeModal(\'formModal\')">Fechar</button>'+
+    '</div>';
+  openModal('formModal');
+}
+async function copyApprovedLeadApproach(id){
+  const l=state.leads.find(x=>x.id===id);if(!l)return;
+  await copyTextValue(l.approachText);
+}
 async function approveLeadCandidate(id){
   const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
   const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
   if(!duplicate){
-    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
+    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
     addActivity('🎯','Lead aprovado pelo Radar',c.company);
   }
   state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
@@ -846,7 +945,7 @@ async function approveAllLeadCandidates(){
   let added=0;
   for(const c of items){
     const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
-    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
+    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
   }
   state.leadCandidates=[];
   addActivity('🎯','Sugestões do Radar aprovadas',added+' lead(s) adicionados ao funil');
