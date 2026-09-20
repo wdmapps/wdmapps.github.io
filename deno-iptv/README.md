@@ -88,3 +88,25 @@ Variáveis do Deno Deploy:
 
 Depois de configurar `OPENAI_API_KEY`, publique/deploy novamente o projeto Deno. O painel chama:
 `https://wdmappsgithubio.wdmapps.deno.net/squad/agent`
+
+
+## WDM Criativos IA — Copy + Studio + imagem
+
+O painel `/admin/criativos/` reutiliza o mesmo backend e a mesma autenticação da WDM Squad.
+
+Endpoints:
+- `POST /squad/agent` — agentes individuais da Squad;
+- `POST /squad/creative` — cria headline, CTA, legenda, hashtags, direção visual e imagem de fundo original.
+
+A rota de criativos:
+1. usa `OPENAI_MODEL` para o trabalho conjunto de Copy + Studio;
+2. usa a mesma `OPENAI_API_KEY` para gerar a imagem;
+3. devolve a imagem em JPEG/base64 ao editor;
+4. o navegador aplica marca, headline e CTA sobre a imagem, evitando texto gerado dentro da arte.
+
+Variáveis:
+- `OPENAI_API_KEY` — compartilhada com a WDM Squad;
+- `OPENAI_MODEL` — modelo de texto da Squad;
+- `OPENAI_IMAGE_MODEL` — opcional; padrão: `gpt-image-2.5-sunburst`.
+
+Não coloque a chave OpenAI no frontend.
