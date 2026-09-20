@@ -110,3 +110,6 @@ exports.sendIptvRenewalReminders = onSchedule({
     }
   }
 });
+
+// WDM Criativos IA: conexão e publicação no Instagram.
+Object.assign(exports, require('./creatives'));
