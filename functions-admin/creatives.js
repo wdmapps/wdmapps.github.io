@@ -132,12 +132,21 @@ exports.instagramOAuthCallback = onRequest(async (req, res) => {
     const accessToken = longData.access_token || shortToken;
     const expiresIn = Number(longData.expires_in || 5184000);
 
-    const profileUrl = new URL('https://graph.instagram.com/' + GRAPH_VERSION + '/me');
-    profileUrl.searchParams.set('fields', 'id,username,account_type,profile_picture_url');
-    profileUrl.searchParams.set('access_token', accessToken);
-    const profileResponse = await fetch(profileUrl);
-    const profile = await jsonOrThrow(profileResponse, 'Perfil do Instagram');
-    const igUserId = String(profile.id || shortData.user_id || '').trim();
+    async function fetchInstagramProfile(fields) {
+      const profileUrl = new URL('https://graph.instagram.com/' + GRAPH_VERSION + '/me');
+      profileUrl.searchParams.set('fields', fields);
+      profileUrl.searchParams.set('access_token', accessToken);
+      const response = await fetch(profileUrl);
+      return jsonOrThrow(response, 'Perfil do Instagram');
+    }
+
+    let profile;
+    try {
+      profile = await fetchInstagramProfile('id,username,account_type,profile_picture_url');
+    } catch (firstError) {
+      profile = await fetchInstagramProfile('user_id,username,account_type,profile_picture_url');
+    }
+    const igUserId = String(profile.id || profile.user_id || shortData.user_id || '').trim();
     if (!igUserId) throw new Error('Não foi possível identificar a conta profissional do Instagram.');
 
     await CONFIG_REF.set({
