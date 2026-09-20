@@ -232,6 +232,24 @@ exports.creativeInstagramUpload = onCall({ timeoutSeconds: 60, memory: '512MiB' 
   return { imageUrl: signed[0], expiresAt: new Date(expires).toISOString() };
 });
 
+async function waitForInstagramContainer(containerId, accessToken) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const statusUrl = new URL('https://graph.instagram.com/' + GRAPH_VERSION + '/' + containerId);
+    statusUrl.searchParams.set('fields', 'status_code,status');
+    statusUrl.searchParams.set('access_token', accessToken);
+    const response = await fetch(statusUrl);
+    if (response.ok) {
+      const data = await response.json();
+      const statusCode = String(data.status_code || '').toUpperCase();
+      if (!statusCode || statusCode === 'FINISHED' || statusCode === 'PUBLISHED') return;
+      if (statusCode === 'ERROR' || statusCode === 'EXPIRED') {
+        throw new Error('A Meta não conseguiu processar a imagem: ' + (data.status || statusCode));
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 900));
+  }
+}
+
 exports.creativeInstagramPublish = onCall({ timeoutSeconds: 60 }, async (request) => {
   requireAdmin(request);
   const imageUrl = String(request.data && request.data.imageUrl || '').trim();
@@ -259,6 +277,8 @@ exports.creativeInstagramPublish = onCall({ timeoutSeconds: 60 }, async (request
     });
     const mediaData = await jsonOrThrow(mediaResponse, 'Criação do post');
     if (!mediaData.id) throw new Error('A Meta não retornou o container da publicação.');
+
+    await waitForInstagramContainer(mediaData.id, config.accessToken);
 
     const publishBody = new URLSearchParams();
     publishBody.set('creation_id', mediaData.id);
