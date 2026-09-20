@@ -114,10 +114,12 @@
           </div>
 
           <div class="actionBar">
-            <button class="btn primary" id="generate" type="button">✨ Gerar campanha</button>
+            <button class="btn primary" id="generateAI" type="button">🤖 Gerar com IA do Squad</button>
+            <button class="btn" id="generate" type="button">⚡ Gerador rápido</button>
             <button class="btn" id="download" type="button">⬇ Baixar arte</button>
           </div>
-          <p class="small">Nesta primeira versão o gerador monta a campanha automaticamente no navegador. O motor generativo de IA pode ser ligado depois a um modelo por API sem mudar esta tela.</p>
+          <div class="inlineStatus" id="aiStatus">A IA do Squad usa Copy + Studio para criar texto, direção visual e uma imagem original para a campanha.</div>
+          <p class="small">O gerador rápido continua disponível para montar uma arte sem gastar geração de IA. O botão da Squad usa a mesma integração OpenAI segura que já atende os agentes da agência.</p>
         </div>
       </article>
 
