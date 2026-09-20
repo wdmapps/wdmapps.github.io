@@ -9,6 +9,7 @@ const FORMATS = {
   feed:{w:1080,h:1350,label:'Feed'},
   story:{w:1080,h:1920,label:'Story'}
 };
+const SQUAD_CREATIVE_URL='https://wdmappsgithubio.wdmapps.deno.net/squad/creative';
 
 let format='feed';
 let sourceImage=null;
@@ -55,6 +56,67 @@ function generateCopy(){
   $('#captionPreview').textContent=$('#caption').value;
   renderCanvas();
 }
+async function generateWithSquadAI(){
+  const brief=escText($('#brief').value);
+  if(!brief){toast('Escreva o briefing primeiro.','err');$('#brief').focus();return;}
+  const btn=$('#generateAI');
+  const status=$('#aiStatus');
+  btn.disabled=true;
+  btn.textContent='🤖 Squad trabalhando...';
+  status.textContent='Copy criando a campanha e Studio preparando a imagem...';
+  status.className='inlineStatus';
+  try{
+    const user=await firebaseUser();
+    if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
+    const idToken=await user.getIdToken(true);
+    const brand=BRANDS[$('#brand').value];
+    const response=await fetch(SQUAD_CREATIVE_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+      body:JSON.stringify({
+        brandName:brand.name,
+        site:brand.site,
+        brief,
+        purpose:$('#purpose').value,
+        tone:$('#tone').value,
+        format
+      })
+    });
+    let data={};try{data=await response.json()}catch(_){}
+    if(!response.ok||data.ok===false)throw new Error(data.error||('Squad respondeu '+response.status));
+
+    $('#headline').value=escText(data.headline)||$('#headline').value;
+    $('#cta').value=escText(data.cta)||brand.cta;
+    let caption=escText(data.caption);
+    const aiTags=Array.isArray(data.hashtags)?data.hashtags.filter(Boolean).join(' '):'';
+    if(aiTags && !caption.includes(aiTags)) caption=(caption+'\n\n'+aiTags).trim();
+    $('#caption').value=caption;
+    $('#captionPreview').textContent=caption;
+
+    if(data.imageDataUrl){
+      await new Promise((resolve,reject)=>{
+        const img=new Image();
+        img.onload=()=>{sourceImage=img;resolve();};
+        img.onerror=()=>reject(new Error('A imagem foi gerada, mas o navegador não conseguiu carregá-la.'));
+        img.src=data.imageDataUrl;
+      });
+    }
+    renderCanvas();
+    const models=[data.textModel,data.imageModel].filter(Boolean).join(' + ');
+    status.textContent='✅ Squad gerou texto + imagem'+(models?' · '+models:'')+(data.visualDirection?' · '+data.visualDirection:'');
+    status.className='inlineStatus ok';
+    toast('Criativo gerado pela WDM Squad! 🤖✨');
+  }catch(e){
+    console.error('WDM Criativos Squad:',e);
+    status.textContent=e?.message||'Não foi possível gerar com a Squad.';
+    status.className='inlineStatus err';
+    toast('A Squad não conseguiu gerar o criativo.','err');
+  }finally{
+    btn.disabled=false;
+    btn.textContent='🤖 Gerar com IA do Squad';
+  }
+}
+
 function hexToRgb(hex){
   const v=hex.replace('#',''); return {r:parseInt(v.slice(0,2),16),g:parseInt(v.slice(2,4),16),b:parseInt(v.slice(4,6),16)};
 }
@@ -162,7 +224,7 @@ function loadImage(file){
 function bind(){
   document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>setFormat(b.dataset.format));
   ['brand','headline','cta'].forEach(id=>$('#'+id).addEventListener('input',renderCanvas));
-  $('#generate').onclick=generateCopy;$('#download').onclick=downloadCreative;$('#imageFile').onchange=e=>loadImage(e.target.files?.[0]);
+  $('#generate').onclick=generateCopy;$('#generateAI').onclick=generateWithSquadAI;$('#download').onclick=downloadCreative;$('#imageFile').onchange=e=>loadImage(e.target.files?.[0]);
   $('#clearImage').onclick=()=>{sourceImage=null;$('#imageFile').value='';renderCanvas();};
   $('#caption').addEventListener('input',()=>$('#captionPreview').textContent=$('#caption').value);
   $('#saveMeta').onclick=saveMetaConfig;$('#connectIg').onclick=connectInstagram;$('#disconnectIg').onclick=disconnectInstagram;$('#publishIg').onclick=publishInstagram;
