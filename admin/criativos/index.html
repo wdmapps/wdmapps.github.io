@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>WDM Criativos IA - WDM Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brandTop">
+      <div class="mark">✨</div>
+      <div>
+        <strong>WDM Criativos IA</strong>
+        <small>Central de campanhas da WDM Apps</small>
+      </div>
+    </div>
+    <div class="topActions">
+      <a class="btn ghost" href="/admin/squad/">⚡ WDM Squad</a>
+      <a class="btn ghost" href="/admin/dashboard.html">← Dashboard</a>
+      <button class="btn red" type="button" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <div class="ey">WDM APPS • CRIAÇÃO E PUBLICAÇÃO</div>
+        <h1>Crie a campanha e publique.</h1>
+        <p>Monte artes para Feed, Stories e WhatsApp, gere headline, CTA e legenda e publique o criativo diretamente em uma conta profissional do Instagram.</p>
+      </div>
+      <div class="badge"><span class="dot ok"></span> Editor v1 ativo</div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panelHead">
+          <div><h2>🎯 Briefing</h2><span>O que vamos divulgar?</span></div>
+        </div>
+        <div class="panelBody">
+          <div class="field">
+            <label for="brand">Marca</label>
+            <select id="brand">
+              <option value="wdmapps">WDM Apps</option>
+              <option value="wdmiptv">WDM IPTV</option>
+              <option value="ferrari">Ferrari Gesso</option>
+              <option value="telhas">Telhas Porto</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="brief">Descreva a campanha</label>
+            <textarea id="brief" placeholder="Ex.: divulgar criação de sites profissionais para empresas de Salto e região, com atendimento rápido e orçamento pelo WhatsApp.">Criação de sites profissionais, modernos e responsivos para empresas que querem aparecer melhor na internet.</textarea>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="purpose">Objetivo</label>
+              <select id="purpose">
+                <option value="service">Divulgar serviço</option>
+                <option value="sale">Gerar vendas</option>
+                <option value="launch">Lançamento</option>
+                <option value="promo">Promoção</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="tone">Estilo</label>
+              <select id="tone">
+                <option value="direto">Direto</option>
+                <option value="premium">Premium</option>
+                <option value="criativo">Criativo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Formato</label>
+            <div class="segment">
+              <button type="button" data-format="square">1:1<br>Quadrado</button>
+              <button type="button" data-format="feed" class="active">4:5<br>Feed</button>
+              <button type="button" data-format="story">9:16<br>Story</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Foto do criativo</label>
+            <div class="fileDrop">
+              <strong>📷 Clique ou arraste uma foto</strong>
+              JPG/PNG da empresa, produto ou serviço
+              <input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <div class="actionBar">
+              <button class="btn ghost" id="clearImage" type="button">Remover foto</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="headline">Headline</label>
+            <input id="headline" maxlength="90" placeholder="Título principal">
+          </div>
+
+          <div class="field">
+            <label for="cta">Chamada para ação</label>
+            <input id="cta" maxlength="50" placeholder="Ex.: Peça seu orçamento">
+          </div>
+
+          <div class="field">
+            <label for="caption">Legenda do Instagram</label>
+            <textarea id="caption" maxlength="2200" placeholder="Legenda da publicação"></textarea>
+          </div>
+
+          <div class="actionBar">
+            <button class="btn primary" id="generate" type="button">✨ Gerar campanha</button>
+            <button class="btn" id="download" type="button">⬇ Baixar arte</button>
+          </div>
+          <p class="small">Nesta primeira versão o gerador monta a campanha automaticamente no navegador. O motor generativo de IA pode ser ligado depois a um modelo por API sem mudar esta tela.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panelHead">
+          <div><h2>🖼️ Criativo</h2><span>Prévia da arte final</span></div>
+        </div>
+        <div class="canvasWrap">
+          <div class="previewShell">
+            <canvas id="creativeCanvas" width="1080" height="1350"></canvas>
+          </div>
+        </div>
+        <div class="previewTools">
+          <button class="btn primary" id="download" type="button" onclick="downloadCreative()">⬇ Baixar JPEG</button>
+        </div>
+      </article>
+
+      <article class="panel instagramPanel">
+        <div class="panelHead">
+          <div><h2>📸 Instagram</h2><span>Conectar e publicar</span></div>
+        </div>
+        <div class="panelBody">
+          <div class="igStatus" id="igStatusBox">
+            <div class="igAvatar" id="igAvatar">IG</div>
+            <div class="igInfo">
+              <strong id="igTitle">Verificando Instagram...</strong>
+              <small id="igSub">Aguarde</small>
+            </div>
+          </div>
+
+          <div class="actionBar">
+            <button class="btn primary hidden" id="connectIg" type="button">🔗 Entrar com Instagram</button>
+            <button class="btn red hidden" id="disconnectIg" type="button">Desconectar</button>
+          </div>
+
+          <div class="metaConfig">
+            <div class="ey">CONFIGURAÇÃO META</div>
+            <p class="small">Na primeira vez, informe os dados do aplicativo criado no Meta for Developers. O App Secret é enviado ao backend e não fica salvo no navegador.</p>
+
+            <div class="field">
+              <label for="metaAppId">Instagram App ID</label>
+              <input id="metaAppId" autocomplete="off" placeholder="Cole o App ID">
+            </div>
+            <div class="field">
+              <label for="metaAppSecret">Instagram App Secret</label>
+              <input id="metaAppSecret" type="password" autocomplete="new-password" placeholder="Cole o App Secret">
+            </div>
+            <button class="btn" id="saveMeta" type="button">💾 Salvar configuração Meta</button>
+            <div class="inlineStatus" id="igInline"></div>
+
+            <div class="field" style="margin-top:14px">
+              <label for="callbackUrl">URL de callback para a Meta</label>
+              <input id="callbackUrl" readonly>
+            </div>
+            <button class="btn ghost" id="copyCallback" type="button">Copiar callback</button>
+          </div>
+
+          <div class="note warn" style="margin-top:14px">
+            <strong>Importante:</strong> a publicação direta exige uma conta profissional do Instagram (Empresa ou Criador). No painel da Meta, adicione a URL de callback acima em <em>Valid OAuth Redirect URIs</em>.
+          </div>
+
+          <div class="publishBox">
+            <h3>Legenda que será publicada</h3>
+            <p>Você pode editar a legenda no briefing antes de enviar.</p>
+            <div class="captionPreview" id="captionPreview"></div>
+            <div class="actionBar">
+              <button class="btn green" id="publishIg" type="button" disabled>📸 Publicar no Instagram</button>
+            </div>
+            <div class="inlineStatus" id="publishResult"></div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
