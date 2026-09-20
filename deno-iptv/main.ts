@@ -258,6 +258,7 @@ function rewriteImages(obj: unknown, dnsList: string[], origin: string): void {
 const SQUAD_ADMIN_EMAIL = "williamwdm@gmail.com";
 const FIREBASE_WEB_API_KEY = Deno.env.get("FIREBASE_WEB_API_KEY") || "AIzaSyBtE4QpAxbatvPvwFxtXwJ7KgNoZiHFpKY";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5.6-luna";
+const OPENAI_IMAGE_MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2.5-sunburst";
 
 const SQUAD_AGENTS: Record<string, { name: string; role: string; web: boolean; prompt: string }> = {
   radar: {
@@ -417,6 +418,202 @@ async function runSquadAgentWithOpenAI(
   };
 }
 
+
+function parseCreativeJson(text: string): Record<string, any> {
+  let raw = String(text || "").trim();
+  raw = raw.replace(/^~~~(?:json)?\s*/i, "").replace(/\s*~~~$/i, "").trim();
+  raw = raw.replace(/^`{3}(?:json)?\s*/i, "").replace(/\s*`{3}$/i, "").trim();
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") return parsed;
+  } catch { /* tenta extrair abaixo */ }
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    const parsed = JSON.parse(raw.slice(start, end + 1));
+    if (parsed && typeof parsed === "object") return parsed;
+  }
+  throw new Error("CREATIVE_JSON_INVALID");
+}
+
+function creativeImageSize(format: string): string {
+  if (format === "square") return "1024x1024";
+  return "1024x1536";
+}
+
+async function runSquadCreativeWithOpenAI(data: any) {
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("OPENAI_KEY_MISSING");
+
+  const brandName = cleanText(data?.brandName, 160) || "WDM Apps";
+  const site = cleanText(data?.site, 300);
+  const brief = cleanText(data?.brief, 1800);
+  const purpose = cleanText(data?.purpose, 80) || "divulgar serviço";
+  const tone = cleanText(data?.tone, 80) || "direto";
+  const format = ["square", "feed", "story"].includes(String(data?.format)) ? String(data.format) : "feed";
+
+  if (!brief) throw new Error("CREATIVE_BRIEF_REQUIRED");
+
+  const creativePrompt = [
+    "Você é a dupla Copy + Studio da WDM Squad, agência de IA da WDM Apps.",
+    "Crie UMA campanha publicitária pronta para um editor visual.",
+    "",
+    "MARCA: " + brandName,
+    site ? "SITE: " + site : "",
+    "OBJETIVO: " + purpose,
+    "TOM: " + tone,
+    "FORMATO: " + format,
+    "BRIEFING: " + brief,
+    "",
+    "Retorne SOMENTE JSON válido, sem markdown, exatamente com estas chaves:",
+    '{"headline":"até 70 caracteres","cta":"até 36 caracteres","caption":"legenda pronta para Instagram, em português do Brasil","hashtags":["#tag1","#tag2"],"visualDirection":"descrição curta da direção visual","imagePrompt":"prompt detalhado para gerar APENAS a imagem de fundo publicitária"}',
+    "",
+    "REGRAS:",
+    "- A headline deve ser específica ao briefing, não uma frase genérica.",
+    "- O CTA deve ser curto e acionável.",
+    "- A legenda deve soar humana e comercial, sem promessas falsas.",
+    "- Use de 4 a 8 hashtags relevantes.",
+    "- O imagePrompt deve pedir uma imagem publicitária premium e coerente com a marca e o briefing.",
+    "- O imagePrompt NÃO deve pedir textos, letras, logotipos, marcas d'água, botões ou UI legível dentro da imagem.",
+    "- Deixe área visual mais limpa no terço inferior/esquerdo para o editor sobrepor headline e CTA.",
+    "- Não invente fatos sobre a empresa.",
+  ].filter(Boolean).join("\n");
+
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      input: creativePrompt,
+      max_output_tokens: 1200,
+    }),
+    signal: AbortSignal.timeout(180000),
+  });
+
+  const responseRaw = await response.text();
+  let responsePayload: any = null;
+  try { responsePayload = JSON.parse(responseRaw); } catch { /* usa texto cru abaixo */ }
+  if (!response.ok) {
+    const apiMessage = cleanText(responsePayload?.error?.message || responseRaw || ("HTTP " + response.status), 900);
+    throw new Error("OPENAI_ERROR:" + response.status + ":" + apiMessage);
+  }
+
+  const text = extractOpenAIText(responsePayload);
+  if (!text) throw new Error("OPENAI_EMPTY");
+  const spec = parseCreativeJson(text);
+
+  const headline = cleanText(spec.headline, 90);
+  const cta = cleanText(spec.cta, 50);
+  const caption = cleanText(spec.caption, 2200);
+  const visualDirection = cleanText(spec.visualDirection, 900);
+  const hashtags = Array.isArray(spec.hashtags)
+    ? spec.hashtags.map((item: unknown) => cleanText(item, 80)).filter(Boolean).slice(0, 10)
+    : [];
+  const rawImagePrompt = cleanText(spec.imagePrompt, 2500);
+
+  if (!headline || !cta || !caption || !rawImagePrompt) {
+    throw new Error("CREATIVE_JSON_INCOMPLETE");
+  }
+
+  const imagePrompt = [
+    rawImagePrompt,
+    "Create only the background artwork for an advertising creative.",
+    "No readable text, no letters, no logos, no watermarks, no interface screenshots with readable copy.",
+    "Professional commercial art direction, strong focal subject, realistic lighting and premium finish.",
+    format === "story"
+      ? "Vertical composition with generous negative space for overlay copy, optimized for a 9:16 social story."
+      : format === "feed"
+        ? "Portrait social-media composition with generous negative space for overlay copy, optimized for a 4:5 feed post."
+        : "Square social-media composition with generous negative space for overlay copy.",
+  ].join("\n");
+
+  const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_IMAGE_MODEL,
+      prompt: imagePrompt,
+      size: creativeImageSize(format),
+      quality: "medium",
+      output_format: "jpeg",
+    }),
+    signal: AbortSignal.timeout(240000),
+  });
+
+  const imageRaw = await imageResponse.text();
+  let imagePayload: any = null;
+  try { imagePayload = JSON.parse(imageRaw); } catch { /* usa mensagem crua abaixo */ }
+  if (!imageResponse.ok) {
+    const apiMessage = cleanText(imagePayload?.error?.message || imageRaw || ("HTTP " + imageResponse.status), 900);
+    throw new Error("OPENAI_IMAGE_ERROR:" + imageResponse.status + ":" + apiMessage);
+  }
+
+  const b64 = cleanText(imagePayload?.data?.[0]?.b64_json, 20_000_000);
+  if (!b64) throw new Error("OPENAI_IMAGE_EMPTY");
+
+  return {
+    headline,
+    cta,
+    caption,
+    hashtags,
+    visualDirection,
+    imagePrompt: rawImagePrompt,
+    textModel: OPENAI_MODEL,
+    imageModel: OPENAI_IMAGE_MODEL,
+    imageDataUrl: "data:image/jpeg;base64," + b64,
+  };
+}
+
+async function handleSquadCreativeRequest(request: Request): Promise<Response> {
+  if (request.method !== "POST") return json({ ok: false, error: "Método não permitido." }, 405);
+
+  try {
+    await verifySquadAdmin(request);
+  } catch (error) {
+    const code = String((error as Error).message || error);
+    if (code === "AUTH_REQUIRED") return json({ ok: false, error: "Faça login no painel da WDM Apps." }, 401);
+    if (code === "AUTH_FORBIDDEN") return json({ ok: false, error: "Usuário sem permissão para a WDM Squad." }, 403);
+    return json({ ok: false, error: "Sessão inválida ou expirada." }, 401);
+  }
+
+  let data: any;
+  try {
+    data = await request.json();
+  } catch {
+    return json({ ok: false, error: "JSON inválido." }, 400);
+  }
+
+  try {
+    const result = await runSquadCreativeWithOpenAI(data);
+    return json({ ok: true, ...result });
+  } catch (error) {
+    const message = cleanText((error as Error)?.message || error, 1200);
+    console.error("WDM Squad Creative:", message);
+    if (message === "OPENAI_KEY_MISSING") {
+      return json({ ok: false, error: "A OPENAI_API_KEY do WDM Squad não está configurada no Deno Deploy." }, 503);
+    }
+    if (message === "CREATIVE_BRIEF_REQUIRED") {
+      return json({ ok: false, error: "Escreva o briefing antes de gerar com IA." }, 400);
+    }
+    if (message.startsWith("OPENAI_IMAGE_ERROR:")) {
+      return json({ ok: false, error: "Texto criado, mas a geração da imagem falhou: " + message.replace(/^OPENAI_IMAGE_ERROR:\d+:/, "") }, 502);
+    }
+    return json({
+      ok: false,
+      error: message
+        .replace(/^OPENAI_ERROR:\d+:/, "")
+        .replace(/^OPENAI_IMAGE_ERROR:\d+:/, "")
+        || "Falha ao gerar o criativo com a WDM Squad.",
+    }, 502);
+  }
+}
+
 async function handleSquadRequest(request: Request): Promise<Response> {
   if (request.method !== "POST") return json({ ok: false, error: "Método não permitido." }, 405);
 
@@ -471,6 +668,7 @@ async function handleRequest(request: Request): Promise<Response> {
 
   const path = url.pathname;
   if (path === "/squad/agent") return handleSquadRequest(request);
+  if (path === "/squad/creative") return handleSquadCreativeRequest(request);
 
   if (request.method !== "GET") return json({ error: "Método não permitido." }, 405);
   if (dnsList.length === 0) return json({ error: "Servidor não configurado." }, 500);
