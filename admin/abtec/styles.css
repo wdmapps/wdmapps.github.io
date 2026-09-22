@@ -381,3 +381,20 @@ input:focus, select:focus, textarea:focus { border-color: #1588ef; box-shadow: 0
   color: #238254;
   background: #e7f7ee;
 }
+
+
+/* Linhas alternadas em azul claro — Chamada e Histórico */
+#student-list .student-row:nth-child(odd),
+#history-list .history-item:nth-child(odd) {
+  background: #ffffff;
+}
+
+#student-list .student-row:nth-child(even),
+#history-list .history-item:nth-child(even) {
+  background: #eef7ff;
+}
+
+#student-list .student-row,
+#history-list .history-item {
+  transition: background-color .15s ease;
+}
