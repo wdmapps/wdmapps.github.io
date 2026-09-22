@@ -1,0 +1,40 @@
+
+.problem-section{background:#08111f;color:#f7fbff}
+.problem-section .section-heading>p{color:#91a0b7}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.problem-card{min-height:170px;padding:24px;border:1px solid rgba(151,185,227,.15);border-radius:20px;background:rgba(255,255,255,.035)}
+.problem-card span{display:inline-grid;width:38px;height:38px;place-items:center;border-radius:12px;background:rgba(8,124,255,.12);color:#5ce5ff;font-size:.78rem;font-weight:800}
+.problem-card h3{margin:22px 0 8px;font-size:1.05rem}
+.problem-card p{margin:0;color:#91a0b7;line-height:1.65;font-size:.88rem}
+.section-cta{margin-top:34px;display:flex;justify-content:center}
+.local-band{background:#eaf5ff;color:#081221}
+.local-shell{display:grid;grid-template-columns:1.1fr .9fr;gap:42px;align-items:center;padding:34px;border:1px solid #d3e8f8;border-radius:28px;background:#fff;box-shadow:0 24px 70px rgba(25,51,79,.08)}
+.local-copy h2{margin:12px 0 14px;font-size:clamp(2.2rem,4vw,3.7rem);letter-spacing:-.05em;line-height:1.02}
+.local-copy p{margin:0;color:#617086;line-height:1.75}
+.local-points{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.local-point{padding:18px;border-radius:16px;background:#f3f8fd;border:1px solid #dfebf5}
+.local-point strong{display:block;margin-bottom:7px}
+.local-point span{color:#6d7c90;font-size:.82rem;line-height:1.5}
+.faq{background:#f2f7fc;color:#081221}
+.faq-list{display:grid;gap:12px;max-width:900px;margin:0 auto}
+.faq-list details{background:#fff;border:1px solid #dce7f1;border-radius:16px;padding:0 20px;box-shadow:0 10px 35px rgba(25,51,79,.05)}
+.faq-list summary{cursor:pointer;list-style:none;padding:20px 32px 20px 0;font-weight:750;position:relative}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary:after{content:"+";position:absolute;right:0;top:17px;font-size:1.35rem;color:#087cff}
+.faq-list details[open] summary:after{content:"–"}
+.faq-list p{margin:0;padding:0 0 20px;color:#65758a;line-height:1.7}
+.project-badge{display:inline-flex;margin-top:18px;padding:7px 10px;border-radius:999px;background:rgba(57,185,255,.09);border:1px solid rgba(57,185,255,.18);color:#79d7ff;font-size:.65rem;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.page-hero{padding:170px 0 86px;background:radial-gradient(circle at 70% 25%,rgba(8,124,255,.16),transparent 30%),#030816;color:#fff}
+.page-hero h1{max-width:900px;margin:16px 0 20px;font-size:clamp(3rem,6vw,5.4rem);line-height:.98;letter-spacing:-.06em}
+.page-hero p{max-width:760px;color:#a7b4c8;font-size:1.05rem;line-height:1.75}
+.page-content{padding:90px 0;background:#f2f7fc;color:#081221}
+.content-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.content-card{padding:26px;border-radius:20px;background:#fff;border:1px solid #dce7f1;box-shadow:0 15px 45px rgba(25,51,79,.06)}
+.content-card h2,.content-card h3{margin-top:0}
+.content-card p{color:#65758a;line-height:1.7}
+.content-card ul{padding-left:18px;color:#65758a;line-height:1.8}
+.contact-card{padding:32px;border-radius:24px;background:#07101f;color:#fff}
+.contact-card p{color:#91a0b7}
+.muted-note{color:#718197;font-size:.82rem;line-height:1.6}
+@media(max-width:900px){.problem-grid,.content-grid{grid-template-columns:1fr 1fr}.local-shell{grid-template-columns:1fr}}
+@media(max-width:640px){.problem-grid,.content-grid,.local-points{grid-template-columns:1fr}.page-hero{padding-top:130px}.local-shell{padding:22px}}
