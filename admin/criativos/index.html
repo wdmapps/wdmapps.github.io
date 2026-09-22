@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <title>WDM Criativos IA - WDM Admin</title>
+  <title>WDM Criativo - Agente de Marketing IA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,10 +13,10 @@
 <body>
   <header class="topbar">
     <div class="brandTop">
-      <div class="mark">✨</div>
+      <div class="mark">🧠</div>
       <div>
-        <strong>WDM Criativos IA</strong>
-        <small>Central de campanhas da WDM Apps</small>
+        <strong>WDM Criativo</strong>
+        <small>Agente de Marketing IA</small>
       </div>
     </div>
     <div class="topActions">
@@ -29,56 +29,114 @@
   <main class="wrap">
     <section class="hero">
       <div>
-        <div class="ey">WDM APPS • CRIAÇÃO E PUBLICAÇÃO</div>
-        <h1>Crie a campanha e publique.</h1>
-        <p>Monte artes para Feed, Stories e WhatsApp, gere headline, CTA e legenda e publique o criativo diretamente em uma conta profissional do Instagram.</p>
+        <div class="ey">WDM APPS • AGENTE DE MARKETING</div>
+        <h1>Diga o negócio. A IA pensa a campanha.</h1>
+        <p>Informe a empresa e o ramo. O WDM Criativo cria a ideia, a frase, a arte, a legenda e um texto com emojis pronto para divulgar no WhatsApp.</p>
       </div>
-      <div class="badge"><span class="dot ok"></span> Editor v1 ativo</div>
+      <div class="badge"><span class="dot ok"></span> Marketing Agent v2</div>
+    </section>
+
+    <section class="agentSteps">
+      <div><b>1</b><span>Empresa + ramo</span></div>
+      <div><b>2</b><span>Objetivo</span></div>
+      <div><b>3</b><span>IA cria campanha</span></div>
+      <div><b>4</b><span>Arte + WhatsApp + Instagram</span></div>
     </section>
 
     <section class="grid">
       <article class="panel">
         <div class="panelHead">
-          <div><h2>🎯 Briefing</h2><span>O que vamos divulgar?</span></div>
+          <div><h2>🎯 Negócio & campanha</h2><span>O agente entende o negócio antes de criar</span></div>
         </div>
         <div class="panelBody">
-          <div class="field">
-            <label for="brand">Marca</label>
-            <select id="brand">
-              <option value="wdmapps">WDM Apps</option>
-              <option value="wdmiptv">WDM IPTV</option>
-              <option value="ferrari">Ferrari Gesso</option>
-              <option value="telhas">Telhas Porto</option>
-            </select>
+          <div class="row">
+            <div class="field">
+              <label for="companyName">Nome da empresa</label>
+              <input id="companyName" maxlength="70" placeholder="Ex.: Auto Center do João">
+            </div>
+            <div class="field">
+              <label for="businessType">Ramo</label>
+              <select id="businessType">
+                <option value="servicos">Prestação de serviços</option>
+                <option value="alimentacao">Alimentação / Restaurante / Pizzaria</option>
+                <option value="moda">Moda / Roupas / Calçados</option>
+                <option value="beleza">Beleza / Salão / Barbearia</option>
+                <option value="automotivo">Automotivo / Oficina / Auto Center</option>
+                <option value="construcao">Construção / Gesso / Reformas</option>
+                <option value="tecnologia">Informática / Tecnologia</option>
+                <option value="saude">Saúde / Clínica / Odonto</option>
+                <option value="educacao">Educação / Cursos / Escola</option>
+                <option value="imoveis">Imóveis / Corretor / Construtora</option>
+                <option value="pet">Pet Shop / Veterinária</option>
+                <option value="fitness">Academia / Fitness</option>
+                <option value="casa">Casa / Móveis / Decoração</option>
+                <option value="comercio">Loja / Comércio em geral</option>
+                <option value="eventos">Eventos / Festas / Fotografia</option>
+                <option value="outro">Outro ramo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field hidden" id="customRamoField">
+            <label for="customRamo">Qual é o ramo?</label>
+            <input id="customRamo" maxlength="80" placeholder="Ex.: Energia solar">
           </div>
 
           <div class="field">
-            <label for="brief">Descreva a campanha</label>
-            <textarea id="brief" placeholder="Ex.: divulgar criação de sites profissionais para empresas de Salto e região, com atendimento rápido e orçamento pelo WhatsApp.">Criação de sites profissionais, modernos e responsivos para empresas que querem aparecer melhor na internet.</textarea>
+            <label for="offer">O que vende ou oferece?</label>
+            <textarea id="offer" placeholder="Ex.: troca de óleo, revisão, freios, suspensão e diagnóstico eletrônico."></textarea>
           </div>
 
           <div class="row">
             <div class="field">
-              <label for="purpose">Objetivo</label>
-              <select id="purpose">
-                <option value="service">Divulgar serviço</option>
-                <option value="sale">Gerar vendas</option>
-                <option value="launch">Lançamento</option>
-                <option value="promo">Promoção</option>
-              </select>
+              <label for="location">Cidade / região</label>
+              <input id="location" maxlength="90" placeholder="Ex.: Salto, Itu e região">
             </div>
             <div class="field">
-              <label for="tone">Estilo</label>
-              <select id="tone">
-                <option value="direto">Direto</option>
-                <option value="premium">Premium</option>
-                <option value="criativo">Criativo</option>
+              <label for="contact">WhatsApp / contato</label>
+              <input id="contact" maxlength="80" placeholder="Ex.: (11) 99999-9999">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="website">Site / Instagram (opcional)</label>
+              <input id="website" maxlength="120" placeholder="Ex.: minhaempresa.com.br">
+            </div>
+            <div class="field">
+              <label for="purpose">Objetivo</label>
+              <select id="purpose">
+                <option value="sale">Gerar vendas</option>
+                <option value="lead">Conseguir orçamentos / leads</option>
+                <option value="service">Divulgar serviço</option>
+                <option value="promo">Promoção</option>
+                <option value="launch">Lançamento</option>
+                <option value="engagement">Gerar engajamento</option>
+                <option value="followers">Ganhar seguidores</option>
               </select>
             </div>
           </div>
 
+          <div class="row">
+            <div class="field">
+              <label for="tone">Estilo da comunicação</label>
+              <select id="tone">
+                <option value="vendedor">Vendedor</option>
+                <option value="direto">Direto</option>
+                <option value="criativo">Criativo</option>
+                <option value="descontraido">Descontraído</option>
+                <option value="elegante">Elegante</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="campaignTheme">Tema da campanha</label>
+              <input id="campaignTheme" maxlength="160" placeholder="Opcional — a IA pode escolher por você">
+            </div>
+          </div>
+
           <div class="field">
-            <label>Formato</label>
+            <label>Formato da arte</label>
             <div class="segment">
               <button type="button" data-format="square">1:1<br>Quadrado</button>
               <button type="button" data-format="feed" class="active">4:5<br>Feed</button>
@@ -86,46 +144,43 @@
             </div>
           </div>
 
-          <div class="field">
-            <label>Foto do criativo</label>
-            <div class="fileDrop">
-              <strong>📷 Clique ou arraste uma foto</strong>
-              JPG/PNG da empresa, produto ou serviço
-              <input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp">
+          <div class="row">
+            <div class="field">
+              <label>Foto / produto / serviço</label>
+              <div class="fileDrop">
+                <strong>📷 Enviar foto</strong>
+                JPG/PNG/WebP
+                <input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp">
+              </div>
+              <button class="btn ghost miniBtn" id="clearImage" type="button">Remover foto</button>
             </div>
-            <div class="actionBar">
-              <button class="btn ghost" id="clearImage" type="button">Remover foto</button>
+            <div class="field">
+              <label>Logo da empresa</label>
+              <div class="fileDrop">
+                <strong>🏷️ Enviar logo</strong>
+                PNG com fundo transparente fica melhor
+                <input id="logoFile" type="file" accept="image/jpeg,image/png,image/webp">
+              </div>
+              <button class="btn ghost miniBtn" id="clearLogo" type="button">Remover logo</button>
             </div>
           </div>
 
-          <div class="field">
-            <label for="headline">Headline</label>
-            <input id="headline" maxlength="90" placeholder="Título principal">
+          <div class="agentActions">
+            <button class="btn primary big" id="generateAI" type="button">🧠 Criar campanha completa</button>
+            <button class="btn surprise big" id="surpriseAI" type="button">🎲 Surpreenda-me</button>
           </div>
-
-          <div class="field">
-            <label for="cta">Chamada para ação</label>
-            <input id="cta" maxlength="50" placeholder="Ex.: Peça seu orçamento">
-          </div>
-
-          <div class="field">
-            <label for="caption">Legenda do Instagram</label>
-            <textarea id="caption" maxlength="2200" placeholder="Legenda da publicação"></textarea>
-          </div>
-
           <div class="actionBar">
-            <button class="btn primary" id="generateAI" type="button">🤖 Gerar com IA do Squad</button>
-            <button class="btn" id="generate" type="button">⚡ Gerador rápido</button>
+            <button class="btn" id="generate" type="button">⚡ Criar rápido</button>
             <button class="btn" id="download" type="button">⬇ Baixar arte</button>
           </div>
-          <div class="inlineStatus" id="aiStatus">A IA do Squad usa Copy + Studio para criar texto, direção visual e uma imagem original para a campanha.</div>
-          <p class="small">O gerador rápido continua disponível para montar uma arte sem gastar geração de IA. O botão da Squad usa a mesma integração OpenAI segura que já atende os agentes da agência.</p>
+
+          <div class="inlineStatus" id="aiStatus">A IA do WDM Squad usa Copy + Studio para pensar a campanha e produzir uma imagem original de acordo com o ramo.</div>
         </div>
       </article>
 
       <article class="panel">
         <div class="panelHead">
-          <div><h2>🖼️ Criativo</h2><span>Prévia da arte final</span></div>
+          <div><h2>🖼️ Criativo</h2><span>Arte final da campanha</span></div>
         </div>
         <div class="canvasWrap">
           <div class="previewShell">
@@ -135,11 +190,40 @@
         <div class="previewTools">
           <button class="btn primary" type="button" onclick="downloadCreative()">⬇ Baixar JPEG</button>
         </div>
+
+        <div class="panelBody copyArea">
+          <div class="field">
+            <label for="headline">Frase principal</label>
+            <input id="headline" maxlength="90" placeholder="Headline da campanha">
+          </div>
+          <div class="field">
+            <label for="cta">Chamada para ação</label>
+            <input id="cta" maxlength="70" placeholder="Ex.: Peça seu orçamento">
+          </div>
+          <div class="field">
+            <label for="caption">Legenda para Instagram / Facebook</label>
+            <textarea id="caption" maxlength="2200" placeholder="Legenda da publicação"></textarea>
+          </div>
+
+          <div class="whatsappBox">
+            <div class="whatsappHead">
+              <div>
+                <h3>💬 Texto para WhatsApp</h3>
+                <p>Pronto para copiar e mandar em grupos, clientes ou Status.</p>
+              </div>
+              <button class="btn green" id="copyWhatsapp" type="button">📋 Copiar</button>
+            </div>
+            <textarea id="whatsappCopy" maxlength="3000" placeholder="O texto de WhatsApp aparecerá aqui."></textarea>
+            <div class="actionBar">
+              <button class="btn" id="regenWhatsapp" type="button">✨ Refazer texto</button>
+            </div>
+          </div>
+        </div>
       </article>
 
       <article class="panel instagramPanel">
         <div class="panelHead">
-          <div><h2>📸 Instagram</h2><span>Conectar e publicar</span></div>
+          <div><h2>📸 Publicação</h2><span>Instagram profissional</span></div>
         </div>
         <div class="panelBody">
           <div class="igStatus" id="igStatusBox">
@@ -177,13 +261,9 @@
             <button class="btn ghost" id="copyCallback" type="button">Copiar callback</button>
           </div>
 
-          <div class="note warn" style="margin-top:14px">
-            <strong>Importante:</strong> a publicação direta exige uma conta profissional do Instagram (Empresa ou Criador). No painel da Meta, adicione a URL de callback acima em <em>Valid OAuth Redirect URIs</em>.
-          </div>
-
           <div class="publishBox">
             <h3>Legenda que será publicada</h3>
-            <p>Você pode editar a legenda no briefing antes de enviar.</p>
+            <p>Revise a campanha antes de enviar.</p>
             <div class="captionPreview" id="captionPreview"></div>
             <div class="actionBar">
               <button class="btn green" id="publishIg" type="button" disabled>📸 Publicar no Instagram</button>
