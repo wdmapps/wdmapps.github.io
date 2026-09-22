@@ -139,3 +139,17 @@
   .schedule-holidays { margin: 0 16px 14px; }
   .schedule-card .section-heading { align-items: flex-start; }
 }
+
+
+/* Linhas alternadas em azul claro — Cronograma */
+.schedule-table tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+.schedule-table tbody tr:nth-child(even) {
+  background: #eef7ff;
+}
+
+.schedule-table tbody tr:hover {
+  background: #e5f2ff;
+}
