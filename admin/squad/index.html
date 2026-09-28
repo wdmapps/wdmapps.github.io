@@ -218,7 +218,7 @@ let state = null;
 const SQUAD_API_URL = 'https://wdmappsgithubio.wdmapps.deno.net/squad/agent';
 
 const AGENTS = [
-  {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas e oportunidades para alimentar o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios com presença digital fraca e potencial claro de site, automação ou marketing.'},
+  {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas, identifica quem não tem site e alimenta o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios reais sem site oficial; depois, negócios com site fraco ou presença digital limitada. Use apenas informações públicas verificáveis e não invente ausência de site.'},
   {id:'scout',icon:'🔎',name:'Scout',role:'Diagnóstico',desc:'Audita site, Google e redes sociais e encontra gargalos.',prompt:'Faça uma auditoria da presença digital do cliente. Analise site, posicionamento local, Google, redes sociais, clareza da oferta, confiança, conversão e oportunidades de melhoria. Entregue achados priorizados.'},
   {id:'copy',icon:'✍️',name:'Copy',role:'Conteúdo',desc:'Cria textos, anúncios, posts e mensagens comerciais.',prompt:'Crie conteúdo comercial para o cliente com foco em gerar contatos. Produza opções de texto para WhatsApp, Instagram/Facebook e chamada curta para anúncio, respeitando a identidade e os serviços do negócio.'},
   {id:'studio',icon:'🎨',name:'Studio',role:'Criativo',desc:'Transforma a oferta em conceitos visuais e roteiros.',prompt:'Crie uma direção criativa para campanha do cliente: conceito visual, headline, elementos da arte, roteiro curto de vídeo e ideias de antes/depois. O material deve parecer profissional e local, não genérico.'},
@@ -335,8 +335,11 @@ function renderLeadCandidates(){
   if(!candidates.length){host.innerHTML='<div class="empty">'+(search.status==='running'?'Radar pesquisando empresas públicas...':'Nenhuma sugestão pendente de aprovação.')+'</div>';return}
   host.innerHTML='<div class="radar-candidates">'+candidates.map(c=>{
     const site=safePublicUrl(c.site),source=safePublicUrl(c.sourceUrl);
-    return '<article class="radar-candidate"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.company)+'</h3><span class="tiny muted">'+esc(c.city||'Região não confirmada')+'</span></div><span class="badge blue">Sugestão</span></div>'+
+    const siteStatus=String(c.siteStatus||(!site?'SEM_SITE':'COM_SITE')).toUpperCase();
+    const siteBadge=siteStatus==='SEM_SITE'?'<span class="badge red">🔥 Sem site</span>':siteStatus==='SITE_FRACO'?'<span class="badge yellow">⚠ Site fraco</span>':'<span class="badge">🌐 Com site</span>';
+    return '<article class="radar-candidate"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.company)+'</h3><span class="tiny muted">'+esc(c.city||'Região não confirmada')+'</span></div><div class="row-actions"><span class="badge blue">Sugestão</span>'+siteBadge+'</div></div>'+
       '<p><b>Oportunidade:</b> '+esc(c.need||'Avaliar presença digital')+'</p>'+
+      (c.siteEvidence?'<p><b>Verificação do site:</b> '+esc(c.siteEvidence)+'</p>':'')+
       (c.reason?'<p>'+esc(c.reason)+'</p>':'')+
       (c.contact?'<p><b>Contato público:</b> '+esc(c.contact)+'</p>':'')+
       '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(source&&source!==site?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
@@ -705,6 +708,8 @@ function parseRadarLeadBlocks(text,query){
     const item={
       id:uid(),company:company.slice(0,180),city:String(data.CIDADE||'').slice(0,120),
       site:safePublicUrl(data.SITE),contact:String(data.CONTATO||'').replace(/^(não encontrado|não informado|—|-)$/i,'').slice(0,180),
+      siteStatus:String(data.STATUS_SITE||(!safePublicUrl(data.SITE)?'SEM_SITE':'COM_SITE')).trim().toUpperCase().slice(0,40),
+      siteEvidence:String(data.EVIDENCIA_SITE||'').trim().slice(0,420),
       need:String(data.NECESSIDADE||'Avaliar presença digital').slice(0,260),
       reason:String(data.MOTIVO||'').slice(0,420),sourceUrl:safePublicUrl(data.FONTE),
       query:query||'',createdAt:new Date().toISOString()
@@ -720,18 +725,24 @@ function openRadarLeadModal(){
     '<input id="rlRegion" required placeholder="Região" value="Salto, Itu e Indaiatuba - SP">'+
     '<input id="rlSegment" placeholder="Segmento (opcional)" value="">'+
     '<select id="rlQty"><option value="5">5 empresas</option><option value="8" selected>8 empresas</option><option value="10">10 empresas</option></select>'+
-    '<div class="tiny muted" style="align-self:center">O Radar pesquisa apenas informações públicas. Nenhum contato é feito automaticamente.</div>'+
-    '<textarea class="full" id="rlNotes" placeholder="Algum foco? Ex.: empresas sem site, site antigo, comércio local, clínicas, indústrias...">Priorize empresas com oportunidade clara para site, sistema web, aplicativo, automação ou melhoria de presença digital.</textarea>'+
+    '<select id="rlSiteMode"><option value="no-site" selected>🔥 Somente empresas sem site</option><option value="weak">⚠ Sem site ou com site fraco</option><option value="any">🌐 Qualquer oportunidade digital</option></select>'+
+    '<div class="full tiny muted">O Radar pesquisa apenas informações públicas. Instagram, Facebook, Linktree e páginas de marketplace não contam como site próprio. Nenhum contato é feito automaticamente.</div>'+
+    '<textarea class="full" id="rlNotes" placeholder="Algum foco? Ex.: comércio local, clínicas, oficinas, indústrias...">Priorize empresas locais ativas com potencial claro para contratar criação de site e presença digital.</textarea>'+
     '<div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">📡 Pesquisar empresas</button></div></form>';
   document.getElementById('radarLeadForm').onsubmit=e=>{
     e.preventDefault();
-    const region=rlRegion.value.trim(),segment=rlSegment.value.trim(),qty=Number(rlQty.value)||8,notes=rlNotes.value.trim();
-    closeModal('formModal');runRadarLeadSearch(region,segment,qty,notes);
+    const region=rlRegion.value.trim(),segment=rlSegment.value.trim(),qty=Number(rlQty.value)||8,siteMode=rlSiteMode.value,notes=rlNotes.value.trim();
+    closeModal('formModal');runRadarLeadSearch(region,segment,qty,notes,siteMode);
   };
   openModal('formModal');
 }
-async function runRadarLeadSearch(region,segment,qty,notes){
-  state.radarLeadSearch={status:'running',message:'Radar pesquisando '+region+'...',region,segment,startedAt:new Date().toISOString()};
+async function runRadarLeadSearch(region,segment,qty,notes,siteMode='no-site'){
+  const siteRule=siteMode==='no-site'
+    ?'RETORNE SOMENTE empresas para as quais você verificou que NÃO existe site oficial próprio. Instagram, Facebook, Linktree, catálogo, marketplace e perfil do Google NÃO contam como site.'
+    :siteMode==='weak'
+      ?'Priorize primeiro empresas SEM SITE oficial próprio; depois aceite empresas com SITE_FRACO, desde que exista evidência pública específica do problema.'
+      :'Aceite qualquer oportunidade digital real, mas classifique claramente a situação do site.';
+  state.radarLeadSearch={status:'running',message:'Radar pesquisando '+region+'...',region,segment,siteMode,startedAt:new Date().toISOString()};
   await saveState();showView('leads');
   try{
     const user=await firebaseUser();
@@ -742,13 +753,18 @@ async function runRadarLeadSearch(region,segment,qty,notes){
       'REGIÃO: '+region+'.',
       segment?'SEGMENTO PREFERENCIAL: '+segment+'.':'Pode variar os segmentos se houver oportunidade clara.',
       notes||'Priorize sinais públicos de oportunidade digital.',
+      siteRule,
       'Pesquise a web e use somente informações públicas verificáveis.',
+      'Antes de marcar SEM_SITE, procure pelo nome da empresa + cidade e confira se há domínio oficial. Se houver dúvida, NÃO classifique como SEM_SITE.',
+      'STATUS_SITE deve ser exatamente SEM_SITE, SITE_FRACO ou COM_SITE.',
       'NÃO entre em contato com ninguém.',
       'Para CADA empresa, retorne exatamente este bloco, com todos os campos em uma única linha:',
       'LEAD_START',
       'EMPRESA: nome real da empresa',
       'CIDADE: cidade/UF',
-      'SITE: URL pública ou -',
+      'SITE: URL do site oficial próprio ou -',
+      'STATUS_SITE: SEM_SITE, SITE_FRACO ou COM_SITE',
+      'EVIDENCIA_SITE: evidência curta de como a situação do site foi verificada',
       'CONTATO: telefone/WhatsApp comercial público ou -',
       'NECESSIDADE: serviço que a WDM poderia oferecer',
       'MOTIVO: evidência curta e específica da oportunidade; não invente problemas',
@@ -762,19 +778,21 @@ async function runRadarLeadSearch(region,segment,qty,notes){
       objective,
       previousResults:{}
     });
-    const candidates=parseRadarLeadBlocks(data.text,[region,segment].filter(Boolean).join(' · '));
-    if(!candidates.length)throw new Error('O Radar não retornou empresas no formato esperado. Tente novamente com uma região ou segmento mais específico.');
+    let candidates=parseRadarLeadBlocks(data.text,[region,segment].filter(Boolean).join(' · '));
+    if(siteMode==='no-site')candidates=candidates.filter(x=>x.siteStatus==='SEM_SITE'&&!safePublicUrl(x.site));
+    if(siteMode==='weak')candidates=candidates.filter(x=>['SEM_SITE','SITE_FRACO'].includes(x.siteStatus));
+    if(!candidates.length)throw new Error(siteMode==='no-site'?'O Radar não encontrou empresas sem site com evidência suficiente. Tente outro segmento ou região.':'O Radar não retornou empresas no formato esperado. Tente novamente com uma região ou segmento mais específico.');
     const existingKeys=new Set([
       ...state.leads.map(x=>(x.company+'|'+x.city).toLowerCase()),
       ...state.leadCandidates.map(x=>(x.company+'|'+x.city).toLowerCase())
     ]);
     const fresh=candidates.filter(x=>!existingKeys.has((x.company+'|'+x.city).toLowerCase()));
     state.leadCandidates=[...fresh,...state.leadCandidates].slice(0,30);
-    state.radarLeadSearch={status:'done',message:'Radar encontrou '+candidates.length+' empresa(s); '+fresh.length+' nova(s) aguardando sua aprovação.',region,segment,finishedAt:new Date().toISOString()};
+    state.radarLeadSearch={status:'done',message:'Radar encontrou '+candidates.length+' empresa(s); '+fresh.length+' nova(s) aguardando sua aprovação.',region,segment,siteMode,finishedAt:new Date().toISOString()};
     addActivity('📡','Radar pesquisou novos leads',region+' · '+fresh.length+' nova(s) sugestão(ões)');
     await saveState();
   }catch(e){
-    state.radarLeadSearch={status:'error',message:'Falha na pesquisa: '+String(e?.message||e).slice(0,300),region,segment,finishedAt:new Date().toISOString()};
+    state.radarLeadSearch={status:'error',message:'Falha na pesquisa: '+String(e?.message||e).slice(0,300),region,segment,siteMode,finishedAt:new Date().toISOString()};
     await saveState();
   }
 }
@@ -935,7 +953,7 @@ async function approveLeadCandidate(id){
   const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
   const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
   if(!duplicate){
-    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
+    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
     addActivity('🎯','Lead aprovado pelo Radar',c.company);
   }
   state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
@@ -947,7 +965,7 @@ async function approveAllLeadCandidates(){
   let added=0;
   for(const c of items){
     const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
-    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
+    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
   }
   state.leadCandidates=[];
   addActivity('🎯','Sugestões do Radar aprovadas',added+' lead(s) adicionados ao funil');
