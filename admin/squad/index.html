@@ -321,10 +321,40 @@ function safePublicUrl(value){
   if(!raw||/^(não|nenhum|n\/a|—|-)/i.test(raw))return '';
   try{const u=new URL(raw);return ['http:','https:'].includes(u.protocol)?u.href:''}catch(_){return ''}
 }
+function numberFromRadar(value){
+  const raw=String(value==null?'':value).trim().replace(',','.');
+  const n=parseFloat(raw.replace(/[^0-9.]/g,''));
+  return Number.isFinite(n)?n:0;
+}
+function calculateLeadScore(lead){
+  let score=0;
+  const siteStatus=String(lead?.siteStatus||(!safePublicUrl(lead?.site||lead?.website)?'SEM_SITE':'COM_SITE')).toUpperCase();
+  if(siteStatus==='SEM_SITE')score+=40;
+  else if(siteStatus==='SITE_FRACO')score+=25;
+  if(String(lead?.contact||'').trim())score+=15;
+  if(safePublicUrl(lead?.sourceUrl))score+=5;
+  if(String(lead?.siteEvidence||'').trim())score+=5;
+  const rating=numberFromRadar(lead?.googleRating);
+  const reviews=Math.round(numberFromRadar(lead?.googleReviews));
+  if(rating>=4.5)score+=10;
+  else if(rating>=4)score+=8;
+  else if(rating>=3.5)score+=5;
+  if(reviews>=100)score+=10;
+  else if(reviews>=30)score+=7;
+  else if(reviews>=10)score+=4;
+  if(String(lead?.socialActive||'').toUpperCase()==='SIM')score+=10;
+  if(String(lead?.reason||'').trim())score+=5;
+  return Math.max(0,Math.min(100,score));
+}
+function leadScoreLabel(score){
+  if(score>=80)return {text:'🔥 Quente',cls:'red'};
+  if(score>=60)return {text:'⭐ Bom lead',cls:'yellow'};
+  return {text:'🔎 Avaliar',cls:'blue'};
+}
 function renderLeadCandidates(){
   const host=document.getElementById('radarLeadCandidates');
   if(!host)return;
-  const candidates=state.leadCandidates||[];
+  const candidates=[...(state.leadCandidates||[])].sort((a,b)=>calculateLeadScore(b)-calculateLeadScore(a));
   const search=state.radarLeadSearch||{};
   const status=document.getElementById('radarLeadStatus');
   if(status)status.textContent=search.message||'Nenhuma pesquisa executada.';
@@ -334,15 +364,19 @@ function renderLeadCandidates(){
   if(clear)clear.style.display=candidates.length?'inline-flex':'none';
   if(!candidates.length){host.innerHTML='<div class="empty">'+(search.status==='running'?'Radar pesquisando empresas públicas...':'Nenhuma sugestão pendente de aprovação.')+'</div>';return}
   host.innerHTML='<div class="radar-candidates">'+candidates.map(c=>{
-    const site=safePublicUrl(c.site),source=safePublicUrl(c.sourceUrl);
+    const site=safePublicUrl(c.site),source=safePublicUrl(c.sourceUrl),social=safePublicUrl(c.socialUrl);
     const siteStatus=String(c.siteStatus||(!site?'SEM_SITE':'COM_SITE')).toUpperCase();
     const siteBadge=siteStatus==='SEM_SITE'?'<span class="badge red">🔥 Sem site</span>':siteStatus==='SITE_FRACO'?'<span class="badge yellow">⚠ Site fraco</span>':'<span class="badge">🌐 Com site</span>';
-    return '<article class="radar-candidate"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.company)+'</h3><span class="tiny muted">'+esc(c.city||'Região não confirmada')+'</span></div><div class="row-actions"><span class="badge blue">Sugestão</span>'+siteBadge+'</div></div>'+
+    const score=calculateLeadScore(c),scoreLabel=leadScoreLabel(score);
+    const rating=numberFromRadar(c.googleRating),reviews=Math.round(numberFromRadar(c.googleReviews));
+    return '<article class="radar-candidate"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3>'+esc(c.company)+'</h3><span class="tiny muted">'+esc(c.city||'Região não confirmada')+'</span></div><div class="row-actions"><span class="badge '+scoreLabel.cls+'">'+score+'/100 · '+scoreLabel.text+'</span>'+siteBadge+'</div></div>'+
       '<p><b>Oportunidade:</b> '+esc(c.need||'Avaliar presença digital')+'</p>'+
+      (rating?'<p><b>Google:</b> '+rating.toFixed(1)+' ★'+(reviews?' · '+reviews+' avaliações':'')+'</p>':'')+
+      (String(c.socialActive||'').toUpperCase()==='SIM'?'<p><b>Redes sociais:</b> atividade pública confirmada</p>':'')+
       (c.siteEvidence?'<p><b>Verificação do site:</b> '+esc(c.siteEvidence)+'</p>':'')+
       (c.reason?'<p>'+esc(c.reason)+'</p>':'')+
       (c.contact?'<p><b>Contato público:</b> '+esc(c.contact)+'</p>':'')+
-      '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(source&&source!==site?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
+      '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(social?'<a class="link" target="_blank" rel="noopener" href="'+esc(social)+'">Rede social</a>':'')+(source&&source!==site&&source!==social?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
       (c.scoutStatus==='running'?'<div class="scout-loading">🔎 Scout analisando a empresa e a presença digital...</div>':'')+
       (c.scoutAnalysis?'<div class="scout-analysis"><strong>🔎 Diagnóstico do Scout</strong><div>'+esc(c.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+(c.scoutAt?'<small>Analisado em '+new Date(c.scoutAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
       (c.scoutError?'<div class="mission-error">⚠ '+esc(c.scoutError)+'</div>':'')+
@@ -360,11 +394,13 @@ function renderLeads(){
   if(!state)return;
   renderLeadCandidates();
   const q=(document.getElementById('leadSearch')?.value||'').toLowerCase(),f=document.getElementById('leadFilter')?.value||'all';
-  const list=state.leads.filter(l=>(f==='all'||l.status===f)&&[l.company,l.contact,l.city,l.need,l.website,l.reason].join(' ').toLowerCase().includes(q));
+  const list=state.leads.filter(l=>(f==='all'||l.status===f)&&[l.company,l.contact,l.city,l.need,l.website,l.reason].join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>(Number(b.leadScore)||calculateLeadScore(b))-(Number(a.leadScore)||calculateLeadScore(a)));
   document.getElementById('leadCount').textContent=list.length+' lead(s)';
-  document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Cidade</th><th>Oportunidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>{
+  document.getElementById('leadsTable').innerHTML=list.length?'<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Score</th><th>Contato</th><th>Cidade</th><th>Oportunidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+list.map(l=>{
     const site=safePublicUrl(l.website);
-    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions">'+
+    const score=Number(l.leadScore)||calculateLeadScore(l),scoreLabel=leadScoreLabel(score);
+    return '<tr><td><strong>'+esc(l.company)+'</strong>'+(site?'<div class="tiny"><a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Site</a></div>':'')+(l.reason?'<div class="tiny muted">'+esc(l.reason)+'</div>':'')+'</td><td><span class="badge '+scoreLabel.cls+'">'+score+'/100</span></td><td>'+esc(l.contact||'—')+'</td><td>'+esc(l.city||'—')+'</td><td>'+esc(l.need||'—')+'</td><td><select onchange="changeLeadStatus(\''+l.id+'\',this.value)">'+['Novo','Contato','Proposta','Ganho','Perdido'].map(s=>'<option '+(s===l.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td><div class="row-actions">'+
       (l.scoutAnalysis?'<button class="btn" onclick="openLeadScoutAnalysis(\''+l.id+'\')">🔎 Scout</button>':'')+
       (l.approachText?'<button class="btn" onclick="openLeadApproach(\''+l.id+'\')">✍️ Abordagem</button>':(l.scoutAnalysis?'<button class="btn" onclick="prepareApprovedLeadApproach(\''+l.id+'\')">✍️ Preparar</button>':''))+
       '<button class="btn" onclick="openLeadModal(\''+l.id+'\')">Editar</button><button class="btn" onclick="convertLead(\''+l.id+'\')">Virar cliente</button></div></td></tr>';
@@ -710,6 +746,10 @@ function parseRadarLeadBlocks(text,query){
       site:safePublicUrl(data.SITE),contact:String(data.CONTATO||'').replace(/^(não encontrado|não informado|—|-)$/i,'').slice(0,180),
       siteStatus:String(data.STATUS_SITE||(!safePublicUrl(data.SITE)?'SEM_SITE':'COM_SITE')).trim().toUpperCase().slice(0,40),
       siteEvidence:String(data.EVIDENCIA_SITE||'').trim().slice(0,420),
+      googleRating:String(data.GOOGLE_NOTA||'').trim().slice(0,20),
+      googleReviews:String(data.GOOGLE_AVALIACOES||'').trim().slice(0,30),
+      socialActive:String(data.REDES_ATIVAS||'NAO_CONFIRMADO').trim().toUpperCase().slice(0,30),
+      socialUrl:safePublicUrl(data.REDE_SOCIAL),
       need:String(data.NECESSIDADE||'Avaliar presença digital').slice(0,260),
       reason:String(data.MOTIVO||'').slice(0,420),sourceUrl:safePublicUrl(data.FONTE),
       query:query||'',createdAt:new Date().toISOString()
@@ -765,6 +805,10 @@ async function runRadarLeadSearch(region,segment,qty,notes,siteMode='no-site'){
       'SITE: URL do site oficial próprio ou -',
       'STATUS_SITE: SEM_SITE, SITE_FRACO ou COM_SITE',
       'EVIDENCIA_SITE: evidência curta de como a situação do site foi verificada',
+      'GOOGLE_NOTA: nota pública atual do Perfil da Empresa no Google, como 4.7, ou - se não confirmar',
+      'GOOGLE_AVALIACOES: quantidade pública de avaliações no Google, apenas número, ou - se não confirmar',
+      'REDES_ATIVAS: SIM, NAO ou NAO_CONFIRMADO; use SIM somente se houver publicação ou atividade pública recente verificável',
+      'REDE_SOCIAL: URL pública de Instagram/Facebook/TikTok da empresa ou -',
       'CONTATO: telefone/WhatsApp comercial público ou -',
       'NECESSIDADE: serviço que a WDM poderia oferecer',
       'MOTIVO: evidência curta e específica da oportunidade; não invente problemas',
@@ -787,7 +831,7 @@ async function runRadarLeadSearch(region,segment,qty,notes,siteMode='no-site'){
       ...state.leadCandidates.map(x=>(x.company+'|'+x.city).toLowerCase())
     ]);
     const fresh=candidates.filter(x=>!existingKeys.has((x.company+'|'+x.city).toLowerCase()));
-    state.leadCandidates=[...fresh,...state.leadCandidates].slice(0,30);
+    state.leadCandidates=[...fresh,...state.leadCandidates].sort((a,b)=>calculateLeadScore(b)-calculateLeadScore(a)).slice(0,30);
     state.radarLeadSearch={status:'done',message:'Radar encontrou '+candidates.length+' empresa(s); '+fresh.length+' nova(s) aguardando sua aprovação.',region,segment,siteMode,finishedAt:new Date().toISOString()};
     addActivity('📡','Radar pesquisou novos leads',region+' · '+fresh.length+' nova(s) sugestão(ões)');
     await saveState();
@@ -953,7 +997,7 @@ async function approveLeadCandidate(id){
   const c=state.leadCandidates.find(x=>x.id===id);if(!c)return;
   const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
   if(!duplicate){
-    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
+    state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',googleRating:c.googleRating||'',googleReviews:c.googleReviews||'',socialActive:c.socialActive||'',socialUrl:c.socialUrl||'',leadScore:calculateLeadScore(c),reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});
     addActivity('🎯','Lead aprovado pelo Radar',c.company);
   }
   state.leadCandidates=state.leadCandidates.filter(x=>x.id!==id);
@@ -965,7 +1009,7 @@ async function approveAllLeadCandidates(){
   let added=0;
   for(const c of items){
     const duplicate=state.leads.some(l=>(l.company+'|'+l.city).toLowerCase()===(c.company+'|'+c.city).toLowerCase());
-    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
+    if(!duplicate){state.leads.unshift({id:uid(),company:c.company,contact:c.contact||'',city:c.city||'',need:c.need||'',website:c.site||'',siteStatus:c.siteStatus||'',siteEvidence:c.siteEvidence||'',googleRating:c.googleRating||'',googleReviews:c.googleReviews||'',socialActive:c.socialActive||'',socialUrl:c.socialUrl||'',leadScore:calculateLeadScore(c),reason:c.reason||'',sourceUrl:c.sourceUrl||'',scoutAnalysis:c.scoutAnalysis||'',scoutAt:c.scoutAt||'',approachText:c.approachText||'',approachAt:c.approachAt||'',status:'Novo',origin:'Radar',createdAt:new Date().toISOString()});added++}
   }
   state.leadCandidates=[];
   addActivity('🎯','Sugestões do Radar aprovadas',added+' lead(s) adicionados ao funil');
