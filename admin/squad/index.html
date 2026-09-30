@@ -107,6 +107,10 @@
     .morgan-head strong{font-family:"Space Grotesk";font-size:18px}.morgan-head span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
     .command-form{display:grid;gap:10px;position:relative}.command-form textarea{min-height:130px;font-size:14px;line-height:1.55}
     .command-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.voice-status{font-size:11px;color:var(--muted);margin-left:auto}
+    .voice-picker{display:flex;align-items:center;gap:7px;flex:1 1 100%;margin-top:2px;padding-top:9px;border-top:1px solid rgba(34,50,82,.65)}
+    .voice-picker label{font-size:10px;color:#9fb0c9;font-weight:800;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+    .voice-picker select{min-width:0;flex:1;padding:7px 9px;font-size:11px}
+    .voice-picker small{font-size:9px;color:#70819e}
     .voice-listening{animation:voicePulse 1.15s ease-in-out infinite;color:#ffcad0!important}@keyframes voicePulse{50%{opacity:.45}}
     .live-network{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     .live-agent{border:1px solid var(--border);border-radius:13px;padding:11px;background:rgba(255,255,255,.025);position:relative;overflow:hidden;min-height:88px}
@@ -213,8 +217,9 @@
               <div class="command-actions">
                 <button class="btn" id="commandMicBtn" onclick="startSquadVoice()">🎙️ Falar com Morgan</button>
                 <button class="btn primary" id="commandStartBtn" onclick="startMorganMission()">⚡ Iniciar missão</button>
-                <button class="btn" onclick="squadSpeak('Estou online, William. Diga a missão e eu mobilizo a Squad.')">🔊 Testar voz</button>
+                <button class="btn" onclick="squadSpeak('Estou online, William. Pode falar comigo. Estou pronto para coordenar a Squad.')">🔊 Testar voz</button>
                 <span class="voice-status" id="voiceStatus">Microfone pronto</span>
+                <div class="voice-picker"><label for="commandVoice">Voz do Morgan</label><select id="commandVoice" onchange="saveMorganVoice(this.value)"><option value="">Escolhendo a melhor voz brasileira...</option></select><small id="commandVoiceHint">prioridade para vozes naturais pt-BR</small></div>
               </div>
             </div>
           </div>
@@ -500,6 +505,7 @@ function renderCommand(){
     if(startBtn){startBtn.disabled=false;startBtn.textContent='⚡ Iniciar missão'}
   }
   renderCommandResult();
+  populateMorganVoices();
 }
 function renderCommandResult(){
   const panel=document.getElementById('commandResult'),body=document.getElementById('commandResultBody'),status=document.getElementById('commandResultStatus');
@@ -543,14 +549,78 @@ function showMissionResult(id,auto=false){
   });
 }
 let squadRecognition=null;
+const MORGAN_VOICE_KEY='wdm_squad_morgan_voice';
+let morganVoices=[];
+function scoreMorganVoice(v){
+  const name=String(v?.name||'').toLowerCase(),lang=String(v?.lang||'').toLowerCase();
+  let score=0;
+  if(lang==='pt-br')score+=120;
+  else if(lang.startsWith('pt'))score+=75;
+  if(/natural/.test(name))score+=90;
+  if(/google/.test(name))score+=65;
+  if(/antonio|antônio/.test(name))score+=62;
+  if(/francisca/.test(name))score+=58;
+  if(/online/.test(name))score+=45;
+  if(/microsoft/.test(name))score+=35;
+  if(/desktop/.test(name))score-=70;
+  if(/espeak|festival|mbrola/.test(name))score-=90;
+  if(v?.localService===false)score+=8;
+  return score;
+}
+function getPreferredMorganVoice(){
+  const voices=morganVoices.length?morganVoices:(window.speechSynthesis?.getVoices?.()||[]);
+  if(!voices.length)return null;
+  const saved=localStorage.getItem(MORGAN_VOICE_KEY)||'';
+  if(saved){
+    const exact=voices.find(v=>(v.voiceURI||v.name)===saved);
+    if(exact)return exact;
+  }
+  return [...voices].sort((a,b)=>scoreMorganVoice(b)-scoreMorganVoice(a))[0]||null;
+}
+function populateMorganVoices(){
+  if(!('speechSynthesis' in window))return;
+  const select=document.getElementById('commandVoice'),hint=document.getElementById('commandVoiceHint');
+  morganVoices=window.speechSynthesis.getVoices()||[];
+  if(!select)return;
+  if(!morganVoices.length){
+    select.innerHTML='<option value="">Carregando vozes do sistema...</option>';
+    if(hint)hint.textContent='o navegador ainda está carregando as vozes';
+    return;
+  }
+  const sorted=[...morganVoices].sort((a,b)=>scoreMorganVoice(b)-scoreMorganVoice(a));
+  const preferred=getPreferredMorganVoice();
+  select.innerHTML=sorted.map(v=>{
+    const id=v.voiceURI||v.name;
+    const natural=/natural|google|online/i.test(v.name||'')?' · natural':'';
+    return '<option value="'+esc(id)+'">'+esc(v.name)+' · '+esc(v.lang||'')+natural+'</option>';
+  }).join('');
+  if(preferred)select.value=preferred.voiceURI||preferred.name;
+  if(hint)hint.textContent=preferred?'Atual: '+preferred.name:'Escolha uma voz';
+}
+function saveMorganVoice(value){
+  if(value)localStorage.setItem(MORGAN_VOICE_KEY,value);else localStorage.removeItem(MORGAN_VOICE_KEY);
+  const voice=getPreferredMorganVoice(),hint=document.getElementById('commandVoiceHint');
+  if(hint)hint.textContent=voice?'Atual: '+voice.name:'Escolha uma voz';
+  squadSpeak('Olá, William. Esta é a nova voz do Morgan.');
+}
 function squadSpeak(text){
   if(!('speechSynthesis' in window))return;
   try{
     window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(String(text||''));u.lang='pt-BR';u.rate=.98;u.pitch=1;
-    const voices=window.speechSynthesis.getVoices(),pt=voices.find(v=>/^pt-BR/i.test(v.lang))||voices.find(v=>/^pt/i.test(v.lang));if(pt)u.voice=pt;
+    const u=new SpeechSynthesisUtterance(String(text||''));
+    u.lang='pt-BR';
+    u.rate=1.03;
+    u.pitch=1.04;
+    u.volume=1;
+    const voice=getPreferredMorganVoice();
+    if(voice)u.voice=voice;
     window.speechSynthesis.speak(u);
   }catch(e){console.warn('Squad voice:',e)}
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=populateMorganVoices;
+  setTimeout(populateMorganVoices,120);
+  setTimeout(populateMorganVoices,900);
 }
 function startSquadVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition,status=document.getElementById('voiceStatus'),btn=document.getElementById('commandMicBtn');
