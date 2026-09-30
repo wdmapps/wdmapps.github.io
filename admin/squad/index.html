@@ -212,8 +212,8 @@
           <div class="card command-console">
             <div class="morgan-head"><div class="morgan-avatar">🧠</div><div><div class="agent-call">Squad Commander</div><strong>Agente Morgan</strong><span>Orquestração · estratégia · coordenação da equipe</span></div></div>
             <div class="command-form">
-              <select id="commandClient"></select>
-              <textarea id="commandObjective" placeholder="Diga o que você precisa. Ex.: Morgan, preciso encontrar novos clientes de sites no Brasil e preparar uma estratégia de abordagem.">Analisar a presença digital, encontrar oportunidades comerciais e preparar um plano para gerar mais clientes.</textarea>
+              <div class="mission-now"><strong>🎯 Missão do Morgan: conquistar novos clientes</strong><p>O Squad Command trabalha para a WDM Apps. Ray procura empresas novas, Scott valida e a Squad prepara a abordagem comercial.</p></div>
+              <textarea id="commandObjective" placeholder="Diga o que você precisa. Ex.: Morgan, procure empresas no Brasil que precisem de site ou tenham uma presença digital fraca.">Procurar novos clientes no Brasil para a WDM Apps, priorizando empresas sem site ou com presença digital fraca.</textarea>
               <div class="command-actions">
                 <button class="btn" id="commandMicBtn" onclick="startSquadVoice()">🎙️ Falar com Morgan</button>
                 <button class="btn primary" id="commandStartBtn" onclick="startMorganMission()">⚡ Iniciar missão</button>
@@ -474,11 +474,6 @@ function renderOverview(){
   document.getElementById('campaignFocus').innerHTML=camps.length?camps.map(c=>campaignCard(c,false)).join(''):'<div class="empty">Crie a primeira campanha.</div>';
 }
 function renderCommand(){
-  const clientSelect=document.getElementById('commandClient');
-  if(!clientSelect)return;
-  const keep=clientSelect.value||state.clients[0]?.id||'';
-  clientSelect.innerHTML=state.clients.length?state.clients.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+' · '+esc(c.city||'sem região')+'</option>').join(''):'<option value="">Cadastre um cliente primeiro</option>';
-  if([...clientSelect.options].some(o=>o.value===keep))clientSelect.value=keep;
   const active=(state.missions||[]).find(m=>['Preparando','Executando'].includes(m.status));
   const latest=active||(state.missions||[])[0];
   const completed=new Set((latest?.results||[]).map(r=>r.agentId));
@@ -633,29 +628,13 @@ function startSquadVoice(){
   r.onend=()=>{if(status){status.classList.remove('voice-listening');status.textContent='Missão capturada · revise ou inicie'}if(btn)btn.textContent='🎙️ Falar com Morgan';squadRecognition=null};
   r.start();
 }
-function detectMorganMissionMode(objective){
-  const text=String(objective||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const prospectingSignals=[
-    /novos? clientes?/,/buscar clientes?/,/procurar clientes?/,/encontrar clientes?/,
-    /prospect(ar|e|ando|acao)?/,/\bleads?\b/,/empresas? sem site/,/empresas? que (nao|não) (tem|tenham|possuem|possuam) site/,
-    /empresas? que precisam? de (site|sistema|app|automacao)/,/clientes? para (site|sites|wdm|wdm apps)/,
-    /vender (site|sites|sistema|sistemas|app|apps)/,/conseguir clientes?/
-  ];
-  return prospectingSignals.some(rx=>rx.test(text))?'prospecting':'client';
-}
 function startMorganMission(){
-  const selectedClientId=document.getElementById('commandClient')?.value,objective=document.getElementById('commandObjective')?.value.trim();
-  if(!objective)return alert('Diga ao Morgan qual é a missão.');
-  const mode=detectMorganMissionMode(objective);
-  if(mode==='client'&&!selectedClientId)return alert('Cadastre ou selecione um cliente primeiro.');
+  const objective=document.getElementById('commandObjective')?.value.trim();
+  if(!objective)return alert('Diga ao Morgan qual é a missão de prospecção.');
   if((state.missions||[]).some(m=>['Preparando','Executando'].includes(m.status)))return alert('A Squad já está executando uma missão.');
-  addActivity('🧠','Morgan recebeu uma nova missão',objective.slice(0,120));
-  if(mode==='prospecting'){
-    squadSpeak('Entendido, William. Detectei uma missão de prospecção. A Ferrari Gesso e os outros clientes cadastrados não serão usados como alvo. Ray vai procurar empresas novas para a WDM Apps.');
-  }else{
-    squadSpeak('Entendido, William. Missão do cliente recebida. Vou mobilizar a Squad agora.');
-  }
-  runFullMission(mode==='prospecting'?'':selectedClientId,objective,{keepView:true,voice:true,commander:'Morgan',mode});
+  addActivity('🧠','Morgan recebeu uma missão de prospecção',objective.slice(0,120));
+  squadSpeak('Entendido, William. Vou iniciar a prospecção da WDM Apps. Ray vai procurar empresas novas e Scott vai validar as melhores oportunidades.');
+  runFullMission('',objective,{keepView:true,voice:true,commander:'Morgan',mode:'prospecting'});
 }
 
 function renderClients(){
