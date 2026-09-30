@@ -87,7 +87,7 @@
       <h2>Baixar o aplicativo</h2>
       <p class="sub">Link permanente da WDM: baixa sempre a versão mais recente do APK, sem expiração.</p>
       <div class="btn-col">
-        <a class="download-btn" href="https://wdmapps.com.br/download/wdmplayer">⬇ BAIXAR APK<small>wdmplayer.apk — versão mais recente</small></a>
+        <a class="download-btn" href="https://wdmapps.com.br/download/wdmplayer/">⬇ BAIXAR APK<small>wdmplayer.apk — versão mais recente</small></a>
         <a class="btn-secondary" href="#instalar">Ver como instalar pelo Downloader</a>
       </div>
       <div class="info">
@@ -104,7 +104,7 @@
       <h2>Baixar pelo QR Code</h2>
       <p class="sub">Aponte a câmera do celular para baixar o APK.</p>
       <img src="../img/qr-download-wdmplayer.png" alt="QR Code para baixar o WDM Player" width="290" height="290">
-      <div class="hint">https://wdmapps.com.br/download/wdmplayer</div>
+      <div class="hint">https://wdmapps.com.br/download/wdmplayer/</div>
       <p>O código leva ao mesmo link permanente do botão de download.</p>
     </div>
   </section>
@@ -115,19 +115,19 @@
     <div class="step"><strong>Abra e permita o acesso</strong><p>Ao abrir o Downloader pela primeira vez, permita o acesso ao armazenamento e aos arquivos, se o aparelho pedir.</p></div>
     <div class="step"><strong>Digite o endereço</strong><p>Na tela inicial do Downloader, digite o endereço abaixo e confirme. O download do wdmplayer.apk inicia sozinho.</p></div>
     <div class="step"><strong>Instale e abra</strong><p>Quando o download terminar, escolha <strong>Instalar</strong> e depois <strong>Abrir</strong>. Faça login com sua conta WDM IPTV e comece a assistir.</p></div>
-    <div class="urlbox"><input id="urlBox" type="text" value="https://wdmapps.com.br/download/wdmplayer" readonly aria-label="Endereço de download do WDM Player"><button id="copyUrl" type="button">Copiar</button></div>
+    <div class="urlbox"><input id="urlBox" type="text" value="https://wdmapps.com.br/download/wdmplayer/" readonly aria-label="Endereço de download do WDM Player"><button id="copyUrl" type="button">Copiar</button></div>
   </section>
   <div class="note">
     <strong>⚠️ Aplicativos desconhecidos:</strong> dependendo do aparelho, o sistema pede para permitir a instalação de apps de fontes desconhecidas antes de instalar o APK. Na <strong>Fire TV</strong>, vá em <code>Configurações → Meu Fire TV → Opções de desenvolvedor → Apps de fontes desconhecidas</code> e permita para o <strong>Downloader</strong>. Em <strong>Android TV / TV Box</strong>, permita em <code>Configurações → Segurança e restrições → Fontes desconhecidas</code> (ou "Instalar apps desconhecidos"). É um aviso padrão do Android para qualquer APK fora da loja oficial.
   </div>
   <div class="note" style="border-color:rgba(0,183,255,.22);background:rgba(0,126,255,.07);color:#c5d5e5">
-    <strong>🔗 Link permanente:</strong> o endereço <code>https://wdmapps.com.br/download/wdmplayer</code> é fixo e sempre baixa a versão mais recente — pode ser salvo no Downloader, cadastrado no encurtador da AFTVNews ou compartilhado com clientes. Trocamos o APK por uma versão nova e o link continua o mesmo.
+    <strong>🔗 Link permanente:</strong> o endereço <code>https://wdmapps.com.br/download/wdmplayer/</code> é fixo e sempre baixa a versão mais recente — pode ser salvo no Downloader, cadastrado no encurtador da AFTVNews ou compartilhado com clientes. Trocamos o APK por uma versão nova e o link continua o mesmo.
   </div>
   <div class="help"><strong>Precisa de ajuda para instalar?</strong> Fale com a WDM IPTV pelo <a href="https://wa.me/5511969188837?text=Olá!%20Preciso%20de%20ajuda%20para%20instalar%20o%20WDM%20Player." target="_blank" rel="noopener">WhatsApp</a>.</div>
 </main>
 <footer><div class="container footer"><span>© 2026 WDM IPTV. Todos os direitos reservados.</span><span><a href="../iptv/index.html">Início</a> · <a href="../iptv/player.html">Assistir</a></span></div></footer>
 <script>
-document.getElementById("copyUrl").addEventListener("click",function(){var b=this,u="https://wdmapps.com.br/download/wdmplayer";function ok(){b.textContent="Copiado!";setTimeout(function(){b.textContent="Copiar"},1600)}try{navigator.clipboard.writeText(u).then(ok,ok)}catch(e){var i=document.getElementById("urlBox");i.select();document.execCommand("copy");ok()}});
+document.getElementById("copyUrl").addEventListener("click",function(){var b=this,u="https://wdmapps.com.br/download/wdmplayer/";function ok(){b.textContent="Copiado!";setTimeout(function(){b.textContent="Copiar"},1600)}try{navigator.clipboard.writeText(u).then(ok,ok)}catch(e){var i=document.getElementById("urlBox");i.select();document.execCommand("copy");ok()}});
 fetch("https://api.github.com/repos/wdmapps/wdmapps.github.io/releases/tags/wdmplayer-latest").then(function(r){return r.ok?r.json():null}).then(function(d){if(!d)return;var m=/(\d+\.\d+\.\d+)/.exec(d.name||"");if(m)document.getElementById("app-version").textContent=m[1];if(d.published_at){var t=new Date(d.published_at);if(!isNaN(t))document.getElementById("app-date").textContent=t.toLocaleDateString("pt-BR")}var a=(d.assets||[]).filter(function(x){return/\.apk$/i.test(x.name)})[0];if(a)document.getElementById("app-size").textContent="~"+(a.size/1e6).toFixed(1).replace(".",",")+" MB"}).catch(function(){});
 </script>
 </body>
