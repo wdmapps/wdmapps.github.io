@@ -90,6 +90,26 @@
     @media(max-width:760px){.radar-candidates{grid-template-columns:1fr}}
     @media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:-270px;width:250px;transition:.25s;box-shadow:20px 0 50px rgba(0,0,0,.45)}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.content{padding:18px}.topbar{padding:0 16px}.top-title span{display:none}.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.agents-grid,.section-grid,.agents-mini,.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.top-actions .hide-mobile{display:none}}
     @media(max-width:430px){.stats{grid-template-columns:1fr}.hero h1{font-size:28px}}
+
+    .command-shell{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:14px;margin-bottom:14px}
+    .command-console{position:relative;overflow:hidden;border-color:rgba(51,215,255,.28);background:linear-gradient(145deg,rgba(8,18,37,.96),rgba(17,22,48,.95))}
+    .command-console:before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-120px;top:-150px;background:radial-gradient(circle,rgba(51,215,255,.18),transparent 68%);pointer-events:none}
+    .morgan-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative}
+    .morgan-avatar{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-size:27px;background:linear-gradient(135deg,rgba(79,140,255,.28),rgba(139,92,246,.3));border:1px solid rgba(120,169,255,.35);box-shadow:0 0 35px rgba(79,140,255,.14)}
+    .morgan-head strong{font-family:"Space Grotesk";font-size:18px}.morgan-head span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    .command-form{display:grid;gap:10px;position:relative}.command-form textarea{min-height:130px;font-size:14px;line-height:1.55}
+    .command-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.voice-status{font-size:11px;color:var(--muted);margin-left:auto}
+    .voice-listening{animation:voicePulse 1.15s ease-in-out infinite;color:#ffcad0!important}@keyframes voicePulse{50%{opacity:.45}}
+    .live-network{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .live-agent{border:1px solid var(--border);border-radius:13px;padding:11px;background:rgba(255,255,255,.025);position:relative;overflow:hidden;min-height:88px}
+    .live-agent.current{border-color:rgba(51,215,255,.65);background:linear-gradient(135deg,rgba(51,215,255,.1),rgba(79,140,255,.06));box-shadow:0 0 28px rgba(51,215,255,.08)}
+    .live-agent.done{border-color:rgba(45,212,160,.28)}.live-agent .live-name{font-weight:800;font-size:12px}.live-agent .live-role{color:var(--muted);font-size:10px;margin-top:3px;line-height:1.4}
+    .live-agent .live-state{font-size:9px;margin-top:8px;text-transform:uppercase;letter-spacing:.08em;color:#8fa2bd}.live-agent.current .live-state{color:#93edff}.live-agent.done .live-state{color:#86efd0}
+    .live-agent.current:after{content:"";position:absolute;left:-40%;bottom:0;width:40%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:commandSweep 1.2s linear infinite}@keyframes commandSweep{to{left:110%}}
+    .mission-now{margin-top:12px;padding:11px;border-radius:12px;background:#091124;border:1px solid var(--border)}.mission-now strong{font-size:12px}.mission-now p{font-size:11px;line-height:1.5;color:var(--muted);margin:5px 0 0}
+    .agent-call{font-size:10px;color:#9cc2ff;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.agent-persona{font-size:10px!important;color:#a9b8cf!important;margin-top:8px!important;padding-top:8px;border-top:1px solid rgba(34,50,82,.6)}
+    @media(max-width:900px){.command-shell{grid-template-columns:1fr}.live-network{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.live-network{grid-template-columns:1fr}.voice-status{width:100%;margin-left:0}}
   </style>
 </head>
 <body>
@@ -98,6 +118,7 @@
     <div class="brand"><div class="brand-mark">⚡</div><div><strong>WDM Squad</strong><small>Agência de IA</small></div></div>
     <nav class="nav">
       <button class="active" data-view="overview">◈ Visão geral</button>
+      <button data-view="command">🧠 Squad Command</button>
       <button data-view="clients">🏢 Clientes</button>
       <button data-view="leads">🎯 Leads</button>
       <button data-view="agents">🤖 Agentes</button>
@@ -149,6 +170,37 @@
         </div>
       </section>
 
+      <section class="view" id="view-command">
+        <div class="hero">
+          <div><div class="eyebrow">WDM Squad · Command Unit</div><h1>Fale com a sua Squad.</h1><p>Morgan recebe sua missão, mobiliza os agentes e acompanha a operação. Você pode digitar ou usar sua voz.</p></div>
+          <span class="badge blue">🎙️ Voice Alpha</span>
+        </div>
+        <div class="command-shell">
+          <div class="card command-console">
+            <div class="morgan-head"><div class="morgan-avatar">🧠</div><div><div class="agent-call">Squad Commander</div><strong>Agente Morgan</strong><span>Orquestração · estratégia · coordenação da equipe</span></div></div>
+            <div class="command-form">
+              <select id="commandClient"></select>
+              <textarea id="commandObjective" placeholder="Diga o que você precisa. Ex.: Morgan, preciso encontrar novos clientes de sites no Brasil e preparar uma estratégia de abordagem.">Analisar a presença digital, encontrar oportunidades comerciais e preparar um plano para gerar mais clientes.</textarea>
+              <div class="command-actions">
+                <button class="btn" id="commandMicBtn" onclick="startSquadVoice()">🎙️ Falar com Morgan</button>
+                <button class="btn primary" id="commandStartBtn" onclick="startMorganMission()">⚡ Iniciar missão</button>
+                <button class="btn" onclick="squadSpeak('Estou online, William. Diga a missão e eu mobilizo a Squad.')">🔊 Testar voz</button>
+                <span class="voice-status" id="voiceStatus">Microfone pronto</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>🛰️ Operação ao vivo</h2><span class="tiny muted" id="commandOperationState">Squad disponível</span></div>
+            <div class="live-network" id="commandAgents"></div>
+            <div class="mission-now" id="commandMissionNow"><strong>Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>🎯 Estrutura da unidade</h2><span class="tiny muted">cada agente tem uma especialidade</span></div>
+          <div class="tiny muted">Morgan coordena. Ray encontra. Scott verifica. Claire comunica. Vega cria. Dex constrói. Mark divulga. Alex mede e questiona os resultados.</div>
+        </div>
+      </section>
+
       <section class="view" id="view-clients">
         <div class="hero"><div><div class="eyebrow">Carteira</div><h1>Clientes</h1><p>Negócios atendidos pela WDM Squad e seus canais principais.</p></div><button class="btn primary" onclick="openClientModal()">+ Novo cliente</button></div>
         <div class="card"><div class="toolbar"><input id="clientSearch" placeholder="Buscar cliente..." oninput="renderClients()"><span class="muted tiny" id="clientCount"></span></div><div id="clientsTable"></div></div>
@@ -164,13 +216,13 @@
       </section>
 
       <section class="view" id="view-agents">
-        <div class="hero"><div><div class="eyebrow">Equipe digital</div><h1>Agentes da Squad</h1><p>Você ainda pode executar um agente isolado em modo assistido. Para o fluxo completo, use Missões IA: a Squad executa os sete agentes em sequência e salva cada resultado automaticamente.</p></div></div>
+        <div class="hero"><div><div class="eyebrow">Unidade especializada</div><h1>Conheça a Squad</h1><p>Morgan coordena sete agentes especializados. Cada um mantém uma função, identidade e forma de pensar, enquanto os IDs técnicos existentes continuam compatíveis com o backend.</p></div><button class="btn primary" onclick="showView('command')">🧠 Falar com Morgan</button></div>
         <div class="agents-grid" id="agentsGrid"></div>
       </section>
 
       <section class="view" id="view-missions">
         <div class="hero">
-          <div><div class="eyebrow">Automação</div><h1>Missões IA</h1><p>Escolha um cliente, diga o objetivo e deixe Radar, Scout, Copy, Studio, Web, Growth e Analyst trabalharem em sequência. Nenhuma mensagem ou publicação externa é feita sem sua aprovação.</p></div>
+          <div><div class="eyebrow">Operações</div><h1>Missões da Squad</h1><p>Morgan coordena Ray, Scott, Claire, Vega, Dex, Mark e Alex em sequência. Nenhuma mensagem ou publicação externa é feita sem sua aprovação.</p></div>
           <button class="btn primary" onclick="openMissionModal()">+ Nova missão</button>
         </div>
         <div class="card">
@@ -217,15 +269,21 @@ let db = null;
 let state = null;
 const SQUAD_API_URL = 'https://wdmappsgithubio.wdmapps.deno.net/squad/agent';
 
+const MORGAN = {
+  id:'morgan',icon:'🧠',name:'Morgan',role:'Squad Commander',
+  desc:'Recebe a missão, coordena especialistas, acompanha conflitos e mantém o objetivo da operação.',
+  persona:'Calmo, estratégico e objetivo. Faz a Squad trabalhar como uma unidade.'
+};
 const AGENTS = [
-  {id:'radar',icon:'📡',name:'Radar',role:'Prospecção',desc:'Pesquisa empresas, identifica quem não tem site e alimenta o funil.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios reais sem site oficial; depois, negócios com site fraco ou presença digital limitada. Use apenas informações públicas verificáveis e não invente ausência de site.'},
-  {id:'scout',icon:'🔎',name:'Scout',role:'Diagnóstico',desc:'Audita site, Google e redes sociais e encontra gargalos.',prompt:'Faça uma auditoria da presença digital do cliente. Analise site, posicionamento local, Google, redes sociais, clareza da oferta, confiança, conversão e oportunidades de melhoria. Entregue achados priorizados.'},
-  {id:'copy',icon:'✍️',name:'Copy',role:'Conteúdo',desc:'Cria textos, anúncios, posts e mensagens comerciais.',prompt:'Crie conteúdo comercial para o cliente com foco em gerar contatos. Produza opções de texto para WhatsApp, Instagram/Facebook e chamada curta para anúncio, respeitando a identidade e os serviços do negócio.'},
-  {id:'studio',icon:'🎨',name:'Studio',role:'Criativo',desc:'Transforma a oferta em conceitos visuais e roteiros.',prompt:'Crie uma direção criativa para campanha do cliente: conceito visual, headline, elementos da arte, roteiro curto de vídeo e ideias de antes/depois. O material deve parecer profissional e local, não genérico.'},
-  {id:'web',icon:'💻',name:'Web',role:'Sites',desc:'Planeja landing pages e melhorias de conversão.',prompt:'Analise o site do cliente e proponha melhorias de conversão e SEO local. Sugira estrutura, seções, CTAs, provas sociais, palavras-chave locais e ações técnicas com maior impacto.'},
-  {id:'growth',icon:'🚀',name:'Growth',role:'Divulgação',desc:'Monta plano de distribuição, canais e campanhas.',prompt:'Monte um plano de divulgação para o cliente usando Google, WhatsApp, Instagram, Facebook e canais locais relevantes. Priorize ações de baixo custo e mensuráveis, com calendário de execução.'},
-  {id:'analyst',icon:'📊',name:'Analyst',role:'Resultados',desc:'Organiza métricas, testes e próximos passos.',prompt:'Defina um painel simples de resultados para o cliente. Inclua métricas de tráfego, cliques, contatos, origem dos leads, campanhas e ações recomendadas a partir dos números.'}
+  {id:'radar',icon:'📡',name:'Ray',role:'Radar · Prospecção',desc:'Pesquisa empresas e encontra oportunidades reais para a WDM Apps.',persona:'Caçador de oportunidades, rápido e guiado por evidências.',prompt:'Pesquise empresas e oportunidades comerciais relevantes para a WDM Apps na região do cliente. Priorize negócios reais sem site oficial; depois, negócios com site fraco ou presença digital limitada. Use apenas informações públicas verificáveis e não invente ausência de site.'},
+  {id:'scout',icon:'🔎',name:'Scott',role:'Scout · Inteligência',desc:'Valida descobertas, audita presença digital e elimina falsos positivos.',persona:'Cético, minucioso e independente. Não aprova um lead sem evidência.',prompt:'Faça uma auditoria da presença digital do cliente. Analise site, posicionamento local, Google, redes sociais, clareza da oferta, confiança, conversão e oportunidades de melhoria. Entregue achados priorizados.'},
+  {id:'copy',icon:'✍️',name:'Claire',role:'Copy · Comunicação',desc:'Transforma estratégia em mensagens, ofertas, anúncios e abordagens humanas.',persona:'Clara, empática e persuasiva sem parecer robótica.',prompt:'Crie conteúdo comercial para o cliente com foco em gerar contatos. Produza opções de texto para WhatsApp, Instagram/Facebook e chamada curta para anúncio, respeitando a identidade e os serviços do negócio.'},
+  {id:'studio',icon:'🎨',name:'Vega',role:'Studio · Criativo',desc:'Cria conceitos visuais, campanhas e roteiros que dão identidade à missão.',persona:'Visual, inventiva e exigente com consistência de marca.',prompt:'Crie uma direção criativa para campanha do cliente: conceito visual, headline, elementos da arte, roteiro curto de vídeo e ideias de antes/depois. O material deve parecer profissional e local, não genérico.'},
+  {id:'web',icon:'💻',name:'Dex',role:'Web · Desenvolvimento',desc:'Planeja sites, landing pages, automações e melhorias de conversão.',persona:'Prático, técnico e orientado a construir soluções utilizáveis.',prompt:'Analise o site do cliente e proponha melhorias de conversão e SEO local. Sugira estrutura, seções, CTAs, provas sociais, palavras-chave locais e ações técnicas com maior impacto.'},
+  {id:'growth',icon:'🚀',name:'Mark',role:'Marketing · Growth',desc:'Define canais, campanhas, distribuição e formas de fazer a oferta ganhar alcance.',persona:'Criativo, comercial e obcecado por testar o que gera resultado.',prompt:'Monte um plano de divulgação para o cliente usando Google, WhatsApp, Instagram, Facebook e canais locais relevantes. Priorize ações de baixo custo e mensuráveis, com calendário de execução.'},
+  {id:'analyst',icon:'📊',name:'Alex',role:'Analyst · Performance',desc:'Mede resultados, confronta hipóteses e aponta o próximo movimento.',persona:'Analítico, franco e orientado a números e aprendizado.',prompt:'Defina um painel simples de resultados para o cliente. Inclua métricas de tráfego, cliques, contatos, origem dos leads, campanhas e ações recomendadas a partir dos números.'}
 ];
+const SQUAD_TEAM=[MORGAN,...AGENTS];
 
 function uid(){return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(16).slice(2)}
 function defaultState(){
@@ -286,7 +344,7 @@ async function saveState(){
 }
 function cloudStatus(text,kind){document.getElementById('sideStatus').textContent=text;const d=document.getElementById('sideDot');d.className='dot '+(kind||'')}
 
-const pageNames={overview:'Central de Operações',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',missions:'Missões IA',campaigns:'Campanhas',tasks:'Tarefas'};
+const pageNames={overview:'Central de Operações',command:'Squad Command',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',missions:'Missões IA',campaigns:'Campanhas',tasks:'Tarefas'};
 function showView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
@@ -298,18 +356,75 @@ function showView(v){
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
 
-function renderAll(){if(!state)return;renderOverview();renderClients();renderLeads();renderAgents();renderMissions();renderCampaigns();renderTasks()}
+function renderAll(){if(!state)return;renderOverview();renderCommand();renderClients();renderLeads();renderAgents();renderMissions();renderCampaigns();renderTasks()}
 function renderOverview(){
   document.getElementById('stClients').textContent=state.clients.filter(x=>x.status!=='Inativo').length;
   document.getElementById('stLeads').textContent=state.leads.filter(x=>!['Ganho','Perdido'].includes(x.status)).length;
   document.getElementById('stCampaigns').textContent=state.campaigns.filter(x=>x.status!=='Concluída').length;
   document.getElementById('stTasks').textContent=state.tasks.filter(x=>x.status!=='Concluída').length;
-  document.getElementById('agentsMini').innerHTML=AGENTS.slice(0,4).map(a=>'<div class="agent-mini"><strong>'+a.icon+' '+esc(a.name)+' · '+esc(a.role)+'</strong><span>'+esc(a.desc)+'</span></div>').join('');
+  document.getElementById('agentsMini').innerHTML=SQUAD_TEAM.slice(0,4).map(a=>'<div class="agent-mini"><strong>'+a.icon+' Agente '+esc(a.name)+' · '+esc(a.role)+'</strong><span>'+esc(a.desc)+'</span></div>').join('');
   const acts=state.activity.slice(0,7);
   document.getElementById('activityList').innerHTML=acts.length?acts.map(a=>'<div class="activity"><i>'+esc(a.icon)+'</i><div><strong>'+esc(a.title)+'</strong><span>'+esc(a.detail)+' · '+new Date(a.at).toLocaleString('pt-BR')+'</span></div></div>').join(''):'<div class="empty">Nenhuma atividade ainda.</div>';
   const camps=state.campaigns.slice(0,3);
   document.getElementById('campaignFocus').innerHTML=camps.length?camps.map(c=>campaignCard(c,false)).join(''):'<div class="empty">Crie a primeira campanha.</div>';
 }
+function renderCommand(){
+  const clientSelect=document.getElementById('commandClient');
+  if(!clientSelect)return;
+  const keep=clientSelect.value||state.clients[0]?.id||'';
+  clientSelect.innerHTML=state.clients.length?state.clients.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+' · '+esc(c.city||'sem região')+'</option>').join(''):'<option value="">Cadastre um cliente primeiro</option>';
+  if([...clientSelect.options].some(o=>o.value===keep))clientSelect.value=keep;
+  const active=(state.missions||[]).find(m=>['Preparando','Executando'].includes(m.status));
+  const latest=active||(state.missions||[])[0];
+  const completed=new Set((latest?.results||[]).map(r=>r.agentId));
+  document.getElementById('commandAgents').innerHTML=AGENTS.map(a=>{
+    const current=active?.currentAgentId===a.id,done=completed.has(a.id);
+    const cls=current?'current':done?'done':'';
+    const status=current?'EM OPERAÇÃO':done?'CONCLUÍDO':active?'AGUARDANDO':'DISPONÍVEL';
+    return '<div class="live-agent '+cls+'"><div class="live-name">'+a.icon+' Agente '+esc(a.name)+'</div><div class="live-role">'+esc(a.role)+'</div><div class="live-state">'+status+'</div></div>';
+  }).join('');
+  const stateEl=document.getElementById('commandOperationState'),now=document.getElementById('commandMissionNow'),startBtn=document.getElementById('commandStartBtn');
+  if(active){
+    if(stateEl)stateEl.textContent='Missão em andamento · '+Math.round(Number(active.progress)||0)+'%';
+    if(now)now.innerHTML='<strong>🧠 Morgan coordenando: '+esc(active.currentLabel||'Operação em andamento')+'</strong><p>'+esc(active.objective||'')+'</p><div class="progress"><span style="width:'+Math.round(Number(active.progress)||0)+'%"></span></div>';
+    if(startBtn){startBtn.disabled=true;startBtn.textContent='⏳ Squad em operação'}
+  }else{
+    if(stateEl)stateEl.textContent=latest?.status==='Concluída'?'Última missão concluída':'Squad disponível';
+    if(now)now.innerHTML=latest?'<strong>'+(latest.status==='Concluída'?'✅ Última missão concluída':'🧠 Morgan aguardando')+'</strong><p>'+esc(latest.objective||'Dê uma nova missão por texto ou voz.')+'</p>':'<strong>🧠 Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p>';
+    if(startBtn){startBtn.disabled=false;startBtn.textContent='⚡ Iniciar missão'}
+  }
+}
+let squadRecognition=null;
+function squadSpeak(text){
+  if(!('speechSynthesis' in window))return;
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text||''));u.lang='pt-BR';u.rate=.98;u.pitch=1;
+    const voices=window.speechSynthesis.getVoices(),pt=voices.find(v=>/^pt-BR/i.test(v.lang))||voices.find(v=>/^pt/i.test(v.lang));if(pt)u.voice=pt;
+    window.speechSynthesis.speak(u);
+  }catch(e){console.warn('Squad voice:',e)}
+}
+function startSquadVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition,status=document.getElementById('voiceStatus'),btn=document.getElementById('commandMicBtn');
+  if(!SR){if(status)status.textContent='Voz não suportada neste navegador';return alert('Este navegador não oferece reconhecimento de voz. No Chrome/Edge, permita o microfone e tente novamente.')}
+  if(squadRecognition){try{squadRecognition.stop()}catch(_){}squadRecognition=null}
+  const r=new SR();squadRecognition=r;r.lang='pt-BR';r.interimResults=true;r.continuous=false;
+  r.onstart=()=>{if(status){status.textContent='Ouvindo você...';status.classList.add('voice-listening')}if(btn)btn.textContent='🔴 Ouvindo...'};
+  r.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;const box=document.getElementById('commandObjective');if(box&&t.trim())box.value=t.trim()};
+  r.onerror=e=>{if(status)status.textContent='Microfone: '+(e.error||'erro')};
+  r.onend=()=>{if(status){status.classList.remove('voice-listening');status.textContent='Missão capturada · revise ou inicie'}if(btn)btn.textContent='🎙️ Falar com Morgan';squadRecognition=null};
+  r.start();
+}
+function startMorganMission(){
+  const clientId=document.getElementById('commandClient')?.value,objective=document.getElementById('commandObjective')?.value.trim();
+  if(!clientId)return alert('Cadastre ou selecione um cliente primeiro.');
+  if(!objective)return alert('Diga ao Morgan qual é a missão.');
+  if((state.missions||[]).some(m=>['Preparando','Executando'].includes(m.status)))return alert('A Squad já está executando uma missão.');
+  addActivity('🧠','Morgan recebeu uma nova missão',objective.slice(0,120));
+  squadSpeak('Entendido, William. Missão recebida. Vou mobilizar a Squad agora.');
+  runFullMission(clientId,objective,{keepView:true,voice:true,commander:'Morgan'});
+}
+
 function renderClients(){
   if(!state)return;const q=(document.getElementById('clientSearch')?.value||'').toLowerCase();
   const list=state.clients.filter(c=>[c.name,c.segment,c.city,c.site].join(' ').toLowerCase().includes(q));
@@ -416,11 +531,11 @@ function renderLeadCandidates(){
       (c.reason?'<p>'+esc(c.reason)+'</p>':'')+
       (c.contact?'<p><b>Contato público:</b> '+esc(c.contact)+'</p>':'')+
       '<div class="radar-source">'+(site?'<a class="link" target="_blank" rel="noopener" href="'+esc(site)+'">Abrir site</a>':'')+(social?'<a class="link" target="_blank" rel="noopener" href="'+esc(social)+'">Rede social</a>':'')+(source&&source!==site&&source!==social?'<a class="link" target="_blank" rel="noopener" href="'+esc(source)+'">Fonte</a>':'')+'</div>'+
-      (c.scoutStatus==='running'?'<div class="scout-loading">🔎 Scout analisando a empresa e a presença digital...</div>':'')+
-      (c.scoutAnalysis?'<div class="scout-analysis"><strong>🔎 Diagnóstico do Scout</strong><div>'+esc(c.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+(c.scoutAt?'<small>Analisado em '+new Date(c.scoutAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
+      (c.scoutStatus==='running'?'<div class="scout-loading">🔎 Scott analisando a empresa e a presença digital...</div>':'')+
+      (c.scoutAnalysis?'<div class="scout-analysis"><strong>🔎 Diagnóstico do Scott</strong><div>'+esc(c.scoutAnalysis).replace(/\n/g,'<br>')+'</div>'+(c.scoutAt?'<small>Analisado em '+new Date(c.scoutAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
       (c.scoutError?'<div class="mission-error">⚠ '+esc(c.scoutError)+'</div>':'')+
-      (c.copyStatus==='running'?'<div class="copy-loading">✍️ Copy preparando uma abordagem personalizada...</div>':'')+
-      (c.approachText?'<div class="copy-approach"><strong>✍️ Abordagem preparada pelo Copy</strong><div>'+esc(c.approachText).replace(/\n/g,'<br>')+'</div>'+(c.approachAt?'<small>Preparada em '+new Date(c.approachAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
+      (c.copyStatus==='running'?'<div class="copy-loading">✍️ Claire preparando uma abordagem personalizada...</div>':'')+
+      (c.approachText?'<div class="copy-approach"><strong>✍️ Abordagem preparada pela Claire</strong><div>'+esc(c.approachText).replace(/\n/g,'<br>')+'</div>'+(c.approachAt?'<small>Preparada em '+new Date(c.approachAt).toLocaleString('pt-BR')+'</small>':'')+'</div>':'')+
       (c.copyError?'<div class="mission-error">⚠ '+esc(c.copyError)+'</div>':'')+
       '<div class="row-actions">'+
         (c.scoutStatus==='running'?'<button class="btn" disabled>🔎 Analisando...</button>':'<button class="btn" onclick="analyzeLeadCandidate(\''+c.id+'\')">'+(c.scoutAnalysis?'↻ Refazer análise':'🔎 Analisar empresa')+'</button>')+
@@ -447,7 +562,11 @@ function renderLeads(){
   }).join('')+'</tbody></table></div>':'<div class="empty">Nenhum lead cadastrado.</div>';
 }
 function renderAgents(){
-  if(!state)return;document.getElementById('agentsGrid').innerHTML=AGENTS.map(a=>'<article class="agent-card"><div class="agent-top"><div><div class="agent-icon">'+a.icon+'</div><strong>'+esc(a.name)+' · '+esc(a.role)+'</strong></div><span class="badge blue">Assistido</span></div><p>'+esc(a.desc)+'</p><button class="btn primary" onclick="runAgent(\''+a.id+'\')">Executar missão</button></article>').join('');
+  if(!state)return;
+  document.getElementById('agentsGrid').innerHTML=SQUAD_TEAM.map(a=>{
+    const commander=a.id==='morgan';
+    return '<article class="agent-card"><div class="agent-top"><div><div class="agent-icon">'+a.icon+'</div><div class="agent-call">'+(commander?'Comando da unidade':'Agente especializado')+'</div><strong>Agente '+esc(a.name)+' · '+esc(a.role)+'</strong></div><span class="badge '+(commander?'yellow':'blue')+'">'+(commander?'Commander':'Operacional')+'</span></div><p>'+esc(a.desc)+'</p><p class="agent-persona">'+esc(a.persona||'')+'</p><button class="btn primary" onclick="'+(commander?"showView('command')":"runAgent('"+a.id+"')")+'">'+(commander?'🧠 Abrir Command':'Executar missão')+'</button></article>';
+  }).join('');
 }
 function campaignCard(c,actions=true){
   const pct=Math.max(0,Math.min(100,Number(c.progress||0)));
@@ -614,13 +733,13 @@ function renderMissions(){
 }
 function openMissionModal(){
   if(!state.clients.length)return alert('Cadastre um cliente primeiro.');
-  document.getElementById('modalTitle').textContent='Nova missão automática';
+  document.getElementById('modalTitle').textContent='🧠 Morgan · Nova missão';
   const defaultObjective='Analisar a presença digital, encontrar oportunidades comerciais e preparar um plano completo de conteúdo, site e divulgação para gerar mais contatos.';
-  document.getElementById('modalBody').innerHTML='<form id="missionForm" class="form-grid"><select id="mfClient">'+clientOptions(state.clients[0]?.id||'')+'</select><div></div><textarea class="full" id="mfObjective" required placeholder="Qual é o objetivo desta missão?">'+esc(defaultObjective)+'</textarea><div class="full tiny muted">A Squad executará os 7 agentes em sequência. Radar e Scout podem pesquisar informações públicas atuais. Nada será enviado ou publicado automaticamente.</div><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">⚡ Iniciar Squad</button></div></form>';
+  document.getElementById('modalBody').innerHTML='<form id="missionForm" class="form-grid"><select id="mfClient">'+clientOptions(state.clients[0]?.id||'')+'</select><div></div><textarea class="full" id="mfObjective" required placeholder="Qual é o objetivo desta missão?">'+esc(defaultObjective)+'</textarea><div class="full tiny muted">Morgan coordenará Ray, Scott, Claire, Vega, Dex, Mark e Alex. Ray e Scott podem pesquisar informações públicas atuais. Nada será enviado ou publicado automaticamente.</div><div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn primary">⚡ Iniciar Squad</button></div></form>';
   document.getElementById('missionForm').onsubmit=e=>{e.preventDefault();const clientId=mfClient.value;const objective=mfObjective.value.trim();closeModal('formModal');runFullMission(clientId,objective)};
   openModal('formModal');
 }
-async function runFullMission(clientId,objective){
+async function runFullMission(clientId,objective,options={}){
   const client=state.clients.find(c=>c.id===clientId);
   if(!client)return alert('Cliente não encontrado.');
   const mission={
@@ -632,7 +751,7 @@ async function runFullMission(clientId,objective){
   state.missions=state.missions.slice(0,8);
   addActivity('⚡','Missão automática iniciada',client.name);
   await saveState();
-  showView('missions');
+  if(options.keepView)showView('command');else showView('missions');
 
   try{
     const user=await firebaseUser();
@@ -644,7 +763,7 @@ async function runFullMission(clientId,objective){
       const a=AGENTS[i];
       mission.status='Executando';
       mission.currentAgentId=a.id;
-      mission.currentLabel=a.name+' trabalhando...';
+      mission.currentLabel='Agente '+a.name+' trabalhando...';
       mission.progress=Math.round((i/AGENTS.length)*100);
       await saveState();
 
@@ -659,14 +778,14 @@ async function runFullMission(clientId,objective){
       });
 
       const result={
-        agentId:a.id,agentName:data.agentName||a.name,role:data.role||a.role,
+        agentId:a.id,agentName:a.name,role:a.role,backendAgentName:data.agentName||'',
         text:data.text||'',model:data.model||'',usedWeb:Boolean(data.usedWeb),completedAt:new Date().toISOString()
       };
       mission.results.push(result);
       previousResults[a.id]=result.text;
       mission.progress=Math.round(((i+1)/AGENTS.length)*100);
-      mission.currentLabel=a.name+' concluído';
-      addActivity(a.icon,'Agente concluído: '+a.name,client.name);
+      mission.currentLabel='Agente '+a.name+' concluído';
+      addActivity(a.icon,'Agente '+a.name+' concluiu',client.name);
       await saveState();
     }
 
@@ -679,10 +798,11 @@ async function runFullMission(clientId,objective){
     mission.status='Concluída';
     mission.progress=100;
     mission.currentAgentId='';
-    mission.currentLabel='Missão concluída';
+    mission.currentLabel='Morgan encerrou a missão';
     mission.finishedAt=new Date().toISOString();
-    addActivity('🏁','Missão automática concluída',client.name);
+    addActivity('🏁','Morgan concluiu a missão',client.name);
     await saveState();
+    if(options.voice)squadSpeak('Missão concluída, William. A Squad finalizou a operação e o plano de execução está pronto.');
   }catch(e){
     console.error('WDM Squad mission failed',e);
     mission.status='Erro';
@@ -1256,9 +1376,9 @@ function runAgent(agentId,clientId){
   const a=AGENTS.find(x=>x.id===agentId);if(!a)return;
   const cid=clientId||state.clients[0]?.id;if(!cid)return alert('Cadastre um cliente primeiro.');
   const c=state.clients.find(x=>x.id===cid)||state.clients[0];
-  document.getElementById('agentModalTitle').textContent=a.icon+' '+a.name+' · '+a.role;
+  document.getElementById('agentModalTitle').textContent=a.icon+' Agente '+a.name+' · '+a.role;
   const context='CLIENTE: '+c.name+'\nSEGMENTO: '+(c.segment||'não informado')+'\nREGIÃO: '+(c.city||'não informada')+'\nSITE: '+(c.site||'não informado')+'\nWHATSAPP: '+(c.whatsapp||'não informado')+'\nOBSERVAÇÕES: '+(c.notes||'nenhuma');
-  document.getElementById('agentPrompt').value='Você é o agente '+a.name+' da WDM Squad, especializado em '+a.role+'.\n\n'+context+'\n\nMISSÃO:\n'+a.prompt+'\n\nEntregue uma resposta prática, priorizada e pronta para execução pela WDM Apps. Não invente dados do cliente; quando precisar de informação pública atual, pesquise e cite as fontes.';
+  document.getElementById('agentPrompt').value='Você é o Agente '+a.name+' da WDM Squad, especializado em '+a.role+'. Sua personalidade operacional é: '+(a.persona||'objetivo e profissional')+'.\n\n'+context+'\n\nMISSÃO:\n'+a.prompt+'\n\nEntregue uma resposta prática, priorizada e pronta para execução pela WDM Apps. Não invente dados do cliente; quando precisar de informação pública atual, pesquise e cite as fontes.';
   addActivity(a.icon,'Missão preparada: '+a.name,c.name);
   saveState();
   openModal('agentModal');
