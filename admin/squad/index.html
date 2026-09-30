@@ -31,7 +31,15 @@
       text-align:left;padding:11px 12px;border-radius:11px;font-weight:600;display:flex;align-items:center;gap:10px}
     .nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(79,140,255,.15),rgba(139,92,246,.08));color:white}
     .nav button.active{box-shadow:inset 3px 0 0 var(--blue)}
-    .sidebar-bottom{position:absolute;left:16px;right:16px;bottom:18px}
+    .sidebar{display:flex;flex-direction:column;overflow-y:auto}
+    .sidebar-agents{margin-top:14px;padding-top:12px;border-top:1px solid rgba(34,50,82,.75)}
+    .sidebar-agents-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 5px 7px;color:#70819e;font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    .agent-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+    .sidebar-agent-btn{min-width:0;border:1px solid transparent;background:rgba(255,255,255,.018);color:#98a8c1;border-radius:9px;padding:7px 8px;display:flex;align-items:center;gap:6px;text-align:left;font-size:10px;font-weight:700}
+    .sidebar-agent-btn:hover,.sidebar-agent-btn.active{color:#fff;border-color:rgba(79,140,255,.28);background:rgba(79,140,255,.1)}
+    .sidebar-agent-btn span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sidebar-agent-count{margin-left:auto;color:#6f84a5;font-size:8px}
+    .sidebar-bottom{position:static;margin-top:auto;padding-top:14px}
     .mini-status{padding:12px;border:1px solid var(--border);border-radius:13px;background:var(--panel);font-size:12px;color:var(--muted)}
     .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--yellow);margin-right:6px;box-shadow:0 0 10px currentColor}
     .dot.ok{background:var(--green)}.dot.err{background:var(--red)}
@@ -119,7 +127,13 @@
     .result-block{border:1px solid var(--border);border-radius:13px;padding:13px;background:rgba(255,255,255,.025)}.result-block strong{font-size:12px}.result-block p{font-size:12px;line-height:1.65;color:#b9c8dc;margin:7px 0 0}
     .result-agents{display:grid;gap:8px}.result-agents details{border:1px solid var(--border);border-radius:12px;background:rgba(5,12,27,.58);overflow:hidden}.result-agents summary{cursor:pointer;padding:11px 13px;font-weight:800;font-size:12px}.result-agents .mission-result-body{padding:0 13px 13px}
     .result-tasks{display:grid;gap:7px;margin-top:8px}.result-task{font-size:11px;color:#b9c8dc;padding:8px 9px;border-radius:9px;background:rgba(255,255,255,.025);border:1px solid rgba(34,50,82,.7)}
-    @media(max-width:760px){.result-summary{grid-template-columns:1fr}.result-hero{flex-direction:column}.result-actions{justify-content:flex-start}}
+    .agent-history-head{display:flex;align-items:center;gap:14px}.agent-history-avatar{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:29px;background:linear-gradient(135deg,rgba(79,140,255,.2),rgba(139,92,246,.2));border:1px solid rgba(120,169,255,.3)}
+    .agent-history-feed{display:grid;gap:11px}.agent-history-item{border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.022);overflow:hidden}
+    .agent-history-item summary{cursor:pointer;list-style:none;padding:13px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.agent-history-item summary::-webkit-details-marker{display:none}
+    .agent-history-item h3{font-size:14px}.agent-history-item .mission-meta{margin-top:4px}.agent-history-item .history-status{font-size:9px;color:#86efd0;border:1px solid rgba(45,212,160,.22);background:rgba(45,212,160,.08);padding:5px 7px;border-radius:999px;font-weight:800;white-space:nowrap}
+    .agent-history-body{padding:0 14px 14px;color:#d9e2ef;font-size:13px;line-height:1.7}.agent-history-body .history-objective{margin:0 0 10px;padding:9px 10px;border-radius:10px;background:#091124;color:#aebdd2;font-size:11px}.agent-history-body .history-text{white-space:normal}
+    .agent-history-empty{padding:34px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
+    @media(max-width:760px){.result-summary{grid-template-columns:1fr}.result-hero{flex-direction:column}.result-actions{justify-content:flex-start}.agent-history-item summary{grid-template-columns:1fr}.agent-history-item .history-status{justify-self:start}}
     @media(max-width:520px){.live-network{grid-template-columns:1fr}.voice-status{width:100%;margin-left:0}}
   </style>
 </head>
@@ -137,6 +151,10 @@
       <button data-view="campaigns">🚀 Campanhas</button>
       <button data-view="tasks">✅ Tarefas</button>
     </nav>
+    <div class="sidebar-agents">
+      <div class="sidebar-agents-label"><span>Unidade</span><span>histórico</span></div>
+      <div class="agent-shortcuts" id="sidebarAgents"></div>
+    </div>
     <div class="sidebar-bottom"><div class="mini-status"><span id="sideDot" class="dot"></span><span id="sideStatus">Conectando à nuvem...</span></div></div>
   </aside>
 
@@ -235,6 +253,20 @@
         <div class="agents-grid" id="agentsGrid"></div>
       </section>
 
+      <section class="view" id="view-agent-history">
+        <div class="hero">
+          <div class="agent-history-head">
+            <div class="agent-history-avatar" id="agentHistoryAvatar">🤖</div>
+            <div><div class="eyebrow" id="agentHistoryRole">Histórico operacional</div><h1 id="agentHistoryTitle">Agente</h1><p id="agentHistoryDescription">Entregas realizadas nas missões da Squad.</p></div>
+          </div>
+          <button class="btn" onclick="showView('agents')">← Ver equipe</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>📚 Missões e entregas</h2><span class="tiny muted" id="agentHistoryCount"></span></div>
+          <div class="agent-history-feed" id="agentHistoryList"></div>
+        </div>
+      </section>
+
       <section class="view" id="view-missions">
         <div class="hero">
           <div><div class="eyebrow">Operações</div><h1>Missões da Squad</h1><p>Morgan coordena Ray, Scott, Claire, Vega, Dex, Mark e Alex em sequência. Nenhuma mensagem ou publicação externa é feita sem sua aprovação.</p></div>
@@ -300,6 +332,7 @@ const AGENTS = [
 ];
 const SQUAD_TEAM=[MORGAN,...AGENTS];
 let commandResultMissionId='';
+let selectedAgentHistoryId='morgan';
 
 function uid(){return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(16).slice(2)}
 function defaultState(){
@@ -360,19 +393,70 @@ async function saveState(){
 }
 function cloudStatus(text,kind){document.getElementById('sideStatus').textContent=text;const d=document.getElementById('sideDot');d.className='dot '+(kind||'')}
 
-const pageNames={overview:'Central de Operações',command:'Squad Command',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad',missions:'Missões IA',campaigns:'Campanhas',tasks:'Tarefas'};
+const pageNames={overview:'Central de Operações',command:'Squad Command',clients:'Clientes',leads:'Leads',agents:'Agentes da Squad','agent-history':'Histórico do agente',missions:'Missões IA',campaigns:'Campanhas',tasks:'Tarefas'};
 function showView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
-  document.getElementById('view-'+v).classList.add('active');
-  document.getElementById('pageTitle').textContent=pageNames[v];
+  const target=document.getElementById('view-'+v);
+  if(!target)return;
+  target.classList.add('active');
+  document.getElementById('pageTitle').textContent=v==='agent-history'?'Agente '+(SQUAD_TEAM.find(a=>a.id===selectedAgentHistoryId)?.name||'Squad'):(pageNames[v]||'WDM Squad');
   document.getElementById('sidebar').classList.remove('open');
+  renderSidebarAgents();
   if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);
 }
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
 
-function renderAll(){if(!state)return;renderOverview();renderCommand();renderClients();renderLeads();renderAgents();renderMissions();renderCampaigns();renderTasks()}
+function renderAll(){if(!state)return;renderOverview();renderCommand();renderSidebarAgents();renderAgentHistory();renderClients();renderLeads();renderAgents();renderMissions();renderCampaigns();renderTasks()}
+function agentMissionCount(agentId){
+  if(!state)return 0;
+  if(agentId==='morgan')return (state.missions||[]).filter(m=>m.status==='Concluída').length;
+  return (state.missions||[]).filter(m=>(m.results||[]).some(r=>r.agentId===agentId&&String(r.text||'').trim())).length;
+}
+function renderSidebarAgents(){
+  const host=document.getElementById('sidebarAgents');
+  if(!host)return;
+  host.innerHTML=SQUAD_TEAM.map(a=>'<button type="button" class="sidebar-agent-btn '+(selectedAgentHistoryId===a.id&&document.getElementById('view-agent-history')?.classList.contains('active')?'active':'')+'" onclick="openAgentHistory(\''+a.id+'\')"><span>'+a.icon+'</span><span>'+esc(a.name)+'</span><span class="sidebar-agent-count">'+agentMissionCount(a.id)+'</span></button>').join('');
+}
+function openAgentHistory(agentId){
+  if(!SQUAD_TEAM.some(a=>a.id===agentId))return;
+  selectedAgentHistoryId=agentId;
+  renderAgentHistory();
+  showView('agent-history');
+  renderSidebarAgents();
+}
+function renderAgentHistory(){
+  const host=document.getElementById('agentHistoryList');
+  if(!host||!state)return;
+  const agent=SQUAD_TEAM.find(a=>a.id===selectedAgentHistoryId)||MORGAN;
+  const avatar=document.getElementById('agentHistoryAvatar'),role=document.getElementById('agentHistoryRole'),title=document.getElementById('agentHistoryTitle'),desc=document.getElementById('agentHistoryDescription'),count=document.getElementById('agentHistoryCount');
+  if(avatar)avatar.textContent=agent.icon;
+  if(role)role.textContent=agent.role;
+  if(title)title.textContent='Agente '+agent.name;
+  if(desc)desc.textContent=agent.desc;
+  const rows=[];
+  (state.missions||[]).forEach(m=>{
+    const client=state.clients.find(c=>c.id===m.clientId);
+    if(agent.id==='morgan'){
+      if(m.status!=='Concluída')return;
+      const plan=m.executionPlan||{};
+      const fallback='Morgan coordenou a missão e consolidou as entregas da Squad.';
+      rows.push({mission:m,client,text:plan.summary||fallback,nextMove:plan.nextMove||'',completedAt:m.finishedAt||m.createdAt,label:'Coordenação concluída'});
+      return;
+    }
+    const result=(m.results||[]).find(r=>r.agentId===agent.id&&String(r.text||'').trim());
+    if(!result)return;
+    rows.push({mission:m,client,text:result.text,nextMove:'',completedAt:result.completedAt||m.finishedAt||m.createdAt,label:'Entrega concluída'});
+  });
+  rows.sort((a,b)=>new Date(b.completedAt||0)-new Date(a.completedAt||0));
+  if(count)count.textContent=rows.length+' missão(ões)';
+  host.innerHTML=rows.length?rows.map((row,i)=>{
+    const m=row.mission;
+    const when=row.completedAt?new Date(row.completedAt).toLocaleString('pt-BR'):'';
+    return '<details class="agent-history-item" '+(i===0?'open':'')+'><summary><div><h3>'+esc(row.client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão da Squad')+(when?' · '+esc(when):'')+'</div></div><span class="history-status">'+esc(row.label)+'</span></summary><div class="agent-history-body"><div class="history-objective"><b>Missão:</b> '+esc(m.objective||'')+'</div><div class="history-text">'+esc(row.text||'').replace(/\n/g,'<br>')+'</div>'+(row.nextMove?'<div class="execution-plan"><strong>Próxima ação do Morgan</strong><p>'+esc(row.nextMove)+'</p></div>':'')+'<div class="row-actions" style="margin-top:12px"><button class="btn" onclick="event.preventDefault();event.stopPropagation();showMissionResult(\''+m.id+'\')">👁 Ver missão completa</button></div></div></details>';
+  }).join(''):'<div class="agent-history-empty">'+agent.icon+' O Agente '+esc(agent.name)+' ainda não tem entregas salvas. Quando ele participar de uma missão, o trabalho aparecerá aqui.</div>';
+}
 function renderOverview(){
   document.getElementById('stClients').textContent=state.clients.filter(x=>x.status!=='Inativo').length;
   document.getElementById('stLeads').textContent=state.leads.filter(x=>!['Ganho','Perdido'].includes(x.status)).length;
