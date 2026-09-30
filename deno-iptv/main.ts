@@ -295,6 +295,17 @@ const SQUAD_AGENTS: Record<string, { name: string; role: string; web: boolean; p
   },
 };
 
+const PROSPECTING_AGENT_PROMPTS: Record<string, string> = {
+  radar: "Esta é uma missão interna de prospecção da WDM Apps. Pesquise EMPRESAS NOVAS no Brasil que possam contratar criação ou melhoria de site, app, sistema, automação ou presença digital. Não audite a WDM Apps e não use clientes já cadastrados como alvo. Priorize pequenas e médias empresas e prestadores, traga nomes reais, cidade/UF, segmento, evidências públicas, site quando existir, sinais de ausência/site fraco e fontes verificáveis.",
+  scout: "Valide de forma independente os candidatos encontrados pelo Radar. O alvo são as EMPRESAS NOVAS listadas no resultado anterior, não a WDM Apps. Confirme presença digital, site oficial, qualidade/fragilidade do site, redes, contato público e sinais de oportunidade. Elimine falsos positivos e destaque os melhores leads com evidências.",
+  copy: "Com base apenas nos leads novos validados pelo Scout, prepare abordagens comerciais personalizadas para a WDM Apps contatar os melhores prospects. Não escreva como se a WDM Apps fosse o cliente auditado. Gere mensagens humanas e específicas por tipo de oportunidade, prontas para revisão antes de qualquer envio.",
+  studio: "Crie conceitos rápidos de apresentação/visual ou demonstração que a WDM Apps poderia usar para abordar os leads novos encontrados. Foque em mostrar valor potencial para os prospects, sem fingir que já são clientes e sem inventar dados.",
+  web: "Para os melhores leads novos encontrados, proponha ideias objetivas de solução web que a WDM Apps poderia oferecer: estrutura de site/landing page, melhorias de conversão, SEO local e diferenciais. Não trate a WDM Apps como alvo da auditoria.",
+  growth: "Monte um plano de prospecção e follow-up para transformar os novos leads validados em conversas comerciais da WDM Apps. Defina prioridade, canais, cadência e métricas, sem enviar mensagens automaticamente.",
+  analyst: "Consolide a missão de prospecção: liste os melhores leads novos, por que são oportunidades, evidências, riscos/falsos positivos, abordagem sugerida e ordem de contato. A WDM Apps é a contratante da análise, não o alvo.",
+  planner: "Transforme os resultados da prospecção em um plano operacional da WDM Apps. Retorne SOMENTE JSON válido no formato solicitado, com tarefas para revisar, priorizar e abordar os leads novos. Não crie tarefas para auditar a WDM Apps ou clientes já cadastrados.",
+};
+
 function cleanText(value: unknown, max = 5000): string {
   return String(value == null ? "" : value).slice(0, max);
 }
@@ -338,6 +349,7 @@ async function runSquadAgentWithOpenAI(
   client: Record<string, unknown>,
   objective: string,
   previousResults: Record<string, unknown>,
+  missionMode = "client",
 ) {
   const agent = SQUAD_AGENTS[agentId];
   if (!agent) throw new Error("AGENT_INVALID");
@@ -350,10 +362,16 @@ async function runSquadAgentWithOpenAI(
     .map(([key, value]) => key.toUpperCase() + ":\n" + cleanText(value, 3500))
     .join("\n\n");
 
-  const input = [
-    "Você faz parte da WDM Squad, agência de IA da WDM Apps.",
-    "AGENTE: " + agent.name + " · " + agent.role,
-    "",
+  const prospecting = missionMode === "prospecting";
+  const contextLines = prospecting ? [
+    "TIPO DE MISSÃO: PROSPECÇÃO INTERNA DA WDM APPS",
+    "CONTRATANTE: WDM Apps",
+    "ÁREA DE BUSCA: " + (cleanText(client?.city, 220) || "Brasil"),
+    "SERVIÇOS OFERECIDOS: " + (cleanText(client?.segment, 300) || "sites, apps, sistemas, automações e presença digital"),
+    "REGRA CRÍTICA: a WDM Apps NÃO é o alvo da pesquisa. Não audite wdmapps.com.br.",
+    "REGRA CRÍTICA: clientes já cadastrados, como Ferrari Gesso, NÃO devem ser tratados como novos leads.",
+    "OBJETIVO: descobrir e trabalhar EMPRESAS NOVAS que possam contratar a WDM Apps.",
+  ] : [
     "CLIENTE:",
     "Nome: " + (cleanText(client?.name, 220) || "não informado"),
     "Segmento: " + (cleanText(client?.segment, 300) || "não informado"),
@@ -361,12 +379,20 @@ async function runSquadAgentWithOpenAI(
     "Site: " + (cleanText(client?.site, 500) || "não informado"),
     "Instagram: " + (cleanText(client?.instagram, 220) || "não informado"),
     "Observações: " + (cleanText(client?.notes, 1500) || "nenhuma"),
+  ];
+  const agentInstruction = prospecting ? (PROSPECTING_AGENT_PROMPTS[agentId] || agent.prompt) : agent.prompt;
+
+  const input = [
+    "Você faz parte da WDM Squad, agência de IA da WDM Apps.",
+    "AGENTE: " + agent.name + " · " + agent.role,
+    "",
+    ...contextLines,
     "",
     "OBJETIVO DA MISSÃO: " + (cleanText(objective, 1800) || "Encontrar oportunidades e preparar um plano comercial e digital acionável."),
     prior ? "\nRESULTADOS DOS AGENTES ANTERIORES:\n" + prior : "",
     "",
     "MISSÃO DESTE AGENTE:",
-    agent.prompt,
+    agentInstruction,
     "",
     "REGRAS:",
     "- Responda em português do Brasil.",
@@ -636,6 +662,7 @@ async function handleSquadRequest(request: Request): Promise<Response> {
   const agentId = cleanText(data?.agentId, 40).toLowerCase();
   const client = data?.client && typeof data.client === "object" ? data.client : {};
   const objective = cleanText(data?.objective, 1800);
+  const missionMode = cleanText(data?.missionMode, 40).toLowerCase() === "prospecting" ? "prospecting" : "client";
   const previousResults = data?.previousResults && typeof data.previousResults === "object"
     ? data.previousResults
     : {};
@@ -644,7 +671,7 @@ async function handleSquadRequest(request: Request): Promise<Response> {
   if (!cleanText(client?.name, 220)) return json({ ok: false, error: "O cliente precisa ter um nome." }, 400);
 
   try {
-    const result = await runSquadAgentWithOpenAI(agentId, client, objective, previousResults);
+    const result = await runSquadAgentWithOpenAI(agentId, client, objective, previousResults, missionMode);
     return json({ ok: true, ...result });
   } catch (error) {
     const message = cleanText((error as Error)?.message || error, 1000);

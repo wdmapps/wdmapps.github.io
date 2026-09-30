@@ -563,14 +563,29 @@ function startSquadVoice(){
   r.onend=()=>{if(status){status.classList.remove('voice-listening');status.textContent='Missão capturada · revise ou inicie'}if(btn)btn.textContent='🎙️ Falar com Morgan';squadRecognition=null};
   r.start();
 }
+function detectMorganMissionMode(objective){
+  const text=String(objective||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const prospectingSignals=[
+    /novos? clientes?/,/buscar clientes?/,/procurar clientes?/,/encontrar clientes?/,
+    /prospect(ar|e|ando|acao)?/,/\bleads?\b/,/empresas? sem site/,/empresas? que (nao|não) (tem|tenham|possuem|possuam) site/,
+    /empresas? que precisam? de (site|sistema|app|automacao)/,/clientes? para (site|sites|wdm|wdm apps)/,
+    /vender (site|sites|sistema|sistemas|app|apps)/,/conseguir clientes?/
+  ];
+  return prospectingSignals.some(rx=>rx.test(text))?'prospecting':'client';
+}
 function startMorganMission(){
-  const clientId=document.getElementById('commandClient')?.value,objective=document.getElementById('commandObjective')?.value.trim();
-  if(!clientId)return alert('Cadastre ou selecione um cliente primeiro.');
+  const selectedClientId=document.getElementById('commandClient')?.value,objective=document.getElementById('commandObjective')?.value.trim();
   if(!objective)return alert('Diga ao Morgan qual é a missão.');
+  const mode=detectMorganMissionMode(objective);
+  if(mode==='client'&&!selectedClientId)return alert('Cadastre ou selecione um cliente primeiro.');
   if((state.missions||[]).some(m=>['Preparando','Executando'].includes(m.status)))return alert('A Squad já está executando uma missão.');
   addActivity('🧠','Morgan recebeu uma nova missão',objective.slice(0,120));
-  squadSpeak('Entendido, William. Missão recebida. Vou mobilizar a Squad agora.');
-  runFullMission(clientId,objective,{keepView:true,voice:true,commander:'Morgan'});
+  if(mode==='prospecting'){
+    squadSpeak('Entendido, William. Detectei uma missão de prospecção. A Ferrari Gesso e os outros clientes cadastrados não serão usados como alvo. Ray vai procurar empresas novas para a WDM Apps.');
+  }else{
+    squadSpeak('Entendido, William. Missão do cliente recebida. Vou mobilizar a Squad agora.');
+  }
+  runFullMission(mode==='prospecting'?'':selectedClientId,objective,{keepView:true,voice:true,commander:'Morgan',mode});
 }
 
 function renderClients(){
@@ -787,7 +802,7 @@ async function radarApiCallWithRetry(idToken,payload,label='Radar pesquisando em
 async function createExecutionPlan(missionId,silent=false,existingToken=''){
   const mission=state.missions.find(x=>x.id===missionId);
   if(!mission)return false;
-  const client=state.clients.find(c=>c.id===mission.clientId);
+  const client=state.clients.find(c=>c.id===mission.clientId)||mission.clientSnapshot;
   if(!client)return false;
   if(!(mission.results||[]).length){if(!silent)alert('Esta missão ainda não tem resultados.');return false}
 
@@ -810,7 +825,8 @@ async function createExecutionPlan(missionId,silent=false,existingToken=''){
         instagram:client.instagram||'',notes:client.notes||''
       },
       objective:mission.objective||'Transformar a missão em plano operacional.',
-      previousResults
+      previousResults,
+      missionMode:mission.mode||'client'
     });
     const plan=parsePlannerJson(data.text);
     const plannedTasks=Array.isArray(plan.tasks)?plan.tasks.slice(0,8):[];
@@ -822,7 +838,7 @@ async function createExecutionPlan(missionId,silent=false,existingToken=''){
       const duplicate=state.tasks.some(t=>t.sourceMissionId===mission.id&&String(t.title||'').trim().toLowerCase()===title.toLowerCase());
       if(duplicate)continue;
       const task={
-        id:uid(),clientId:client.id,title,
+        id:uid(),clientId:mission.mode==='prospecting'?'':client.id,title,
         due:dueAfterDays(item?.daysFromNow),
         priority:priorityValue(item?.priority),
         status:'Aberta',done:false,createdAt:new Date().toISOString(),
@@ -889,16 +905,27 @@ function openMissionModal(){
   openModal('formModal');
 }
 async function runFullMission(clientId,objective,options={}){
-  const client=state.clients.find(c=>c.id===clientId);
+  const mode=options.mode==='prospecting'?'prospecting':'client';
+  const client=mode==='prospecting'?{
+    id:'wdm-apps-prospecting',
+    name:'WDM Apps',
+    segment:'Criação de sites, aplicativos, sistemas, automações e soluções digitais',
+    city:'Brasil',
+    site:'https://wdmapps.com.br',
+    instagram:'',
+    notes:'MISSÃO INTERNA DE PROSPECÇÃO. A WDM Apps é a contratante da missão, não o alvo da pesquisa. Procurar empresas novas que ainda não estão na carteira de clientes.'
+  }:state.clients.find(c=>c.id===clientId);
   if(!client)return alert('Cliente não encontrado.');
   const mission={
-    id:uid(),clientId:client.id,clientName:client.name,objective,status:'Preparando',
-    progress:0,currentAgentId:'',currentLabel:'Preparando a Squad...',results:[],
+    id:uid(),clientId:mode==='prospecting'?'':client.id,clientName:mode==='prospecting'?'WDM Apps · Prospecção':client.name,
+    clientSnapshot:{name:client.name,segment:client.segment||'',city:client.city||'',site:client.site||'',instagram:client.instagram||'',notes:client.notes||''},
+    mode,objective,status:'Preparando',
+    progress:0,currentAgentId:'',currentLabel:mode==='prospecting'?'Preparando prospecção da WDM Apps...':'Preparando a Squad...',results:[],
     error:'',createdAt:new Date().toISOString(),finishedAt:''
   };
   state.missions.unshift(mission);
   state.missions=state.missions.slice(0,8);
-  addActivity('⚡','Missão automática iniciada',client.name);
+  addActivity('⚡',mode==='prospecting'?'Missão de prospecção iniciada':'Missão automática iniciada',mode==='prospecting'?'WDM Apps · novos clientes':client.name);
   await saveState();
   if(options.keepView)showView('command');else showView('missions');
 
@@ -923,7 +950,8 @@ async function runFullMission(clientId,objective,options={}){
           instagram:client.instagram||'',notes:client.notes||''
         },
         objective,
-        previousResults
+        previousResults,
+        missionMode:mode
       });
 
       const result={
@@ -934,7 +962,7 @@ async function runFullMission(clientId,objective,options={}){
       previousResults[a.id]=result.text;
       mission.progress=Math.round(((i+1)/AGENTS.length)*100);
       mission.currentLabel='Agente '+a.name+' concluído';
-      addActivity(a.icon,'Agente '+a.name+' concluiu',client.name);
+      addActivity(a.icon,'Agente '+a.name+' concluiu',mode==='prospecting'?'WDM Apps · prospecção':client.name);
       await saveState();
     }
 
@@ -949,7 +977,7 @@ async function runFullMission(clientId,objective,options={}){
     mission.currentAgentId='';
     mission.currentLabel='Morgan encerrou a missão';
     mission.finishedAt=new Date().toISOString();
-    addActivity('🏁','Morgan concluiu a missão',client.name);
+    addActivity('🏁','Morgan concluiu a missão',mode==='prospecting'?'WDM Apps · prospecção':client.name);
     await saveState();
     showMissionResult(mission.id,true);
     if(options.voice)squadSpeak('Missão concluída, William. O resultado final está aberto na tela, com o resumo, as entregas da Squad e o plano de execução.');
@@ -959,13 +987,13 @@ async function runFullMission(clientId,objective,options={}){
     mission.currentLabel='Missão interrompida';
     mission.error=(e?.message||'Falha ao executar a missão.').slice(0,600);
     mission.finishedAt=new Date().toISOString();
-    addActivity('⚠️','Missão automática interrompida',client.name);
+    addActivity('⚠️','Missão automática interrompida',mode==='prospecting'?'WDM Apps · prospecção':client.name);
     await saveState();
   }
 }
 function repeatMission(id){
   const m=state.missions.find(x=>x.id===id);if(!m)return;
-  runFullMission(m.clientId,m.objective);
+  runFullMission(m.clientId,m.objective,{mode:m.mode||'client'});
 }
 async function deleteMission(id){
   const m=state.missions.find(x=>x.id===id);if(!m||!confirm('Excluir esta missão e seus resultados?'))return;
