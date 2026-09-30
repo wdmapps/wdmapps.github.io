@@ -109,6 +109,17 @@
     .mission-now{margin-top:12px;padding:11px;border-radius:12px;background:#091124;border:1px solid var(--border)}.mission-now strong{font-size:12px}.mission-now p{font-size:11px;line-height:1.5;color:var(--muted);margin:5px 0 0}
     .agent-call{font-size:10px;color:#9cc2ff;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.agent-persona{font-size:10px!important;color:#a9b8cf!important;margin-top:8px!important;padding-top:8px;border-top:1px solid rgba(34,50,82,.6)}
     @media(max-width:900px){.command-shell{grid-template-columns:1fr}.live-network{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .command-result{display:none;margin:0 0 14px;border-color:rgba(45,212,160,.3);background:linear-gradient(145deg,rgba(8,27,29,.97),rgba(10,20,39,.97))}
+    .command-result.show{display:block}.command-result.just-finished{animation:resultGlow 1.3s ease 2}
+    @keyframes resultGlow{50%{box-shadow:0 0 42px rgba(45,212,160,.22);border-color:rgba(45,212,160,.75)}}
+    .result-hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding:14px;border-radius:14px;background:rgba(45,212,160,.06);border:1px solid rgba(45,212,160,.16);margin-bottom:12px}
+    .result-hero h3{margin:3px 0 6px;font-family:"Space Grotesk";font-size:20px}.result-hero p{margin:0;color:#b9c8dc;font-size:12px;line-height:1.6}
+    .result-meta{font-size:10px;color:#7f93af;text-transform:uppercase;letter-spacing:.08em}.result-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .result-summary{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr);gap:12px;margin-bottom:12px}
+    .result-block{border:1px solid var(--border);border-radius:13px;padding:13px;background:rgba(255,255,255,.025)}.result-block strong{font-size:12px}.result-block p{font-size:12px;line-height:1.65;color:#b9c8dc;margin:7px 0 0}
+    .result-agents{display:grid;gap:8px}.result-agents details{border:1px solid var(--border);border-radius:12px;background:rgba(5,12,27,.58);overflow:hidden}.result-agents summary{cursor:pointer;padding:11px 13px;font-weight:800;font-size:12px}.result-agents .mission-result-body{padding:0 13px 13px}
+    .result-tasks{display:grid;gap:7px;margin-top:8px}.result-task{font-size:11px;color:#b9c8dc;padding:8px 9px;border-radius:9px;background:rgba(255,255,255,.025);border:1px solid rgba(34,50,82,.7)}
+    @media(max-width:760px){.result-summary{grid-template-columns:1fr}.result-hero{flex-direction:column}.result-actions{justify-content:flex-start}}
     @media(max-width:520px){.live-network{grid-template-columns:1fr}.voice-status{width:100%;margin-left:0}}
   </style>
 </head>
@@ -194,6 +205,10 @@
             <div class="live-network" id="commandAgents"></div>
             <div class="mission-now" id="commandMissionNow"><strong>Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p></div>
           </div>
+        </div>
+        <div class="card command-result" id="commandResult">
+          <div class="card-head"><h2>✅ Resultado da missão</h2><span class="tiny muted" id="commandResultStatus">entrega final da Squad</span></div>
+          <div id="commandResultBody"></div>
         </div>
         <div class="card">
           <div class="card-head"><h2>🎯 Estrutura da unidade</h2><span class="tiny muted">cada agente tem uma especialidade</span></div>
@@ -284,6 +299,7 @@ const AGENTS = [
   {id:'analyst',icon:'📊',name:'Alex',role:'Analyst · Performance',desc:'Mede resultados, confronta hipóteses e aponta o próximo movimento.',persona:'Analítico, franco e orientado a números e aprendizado.',prompt:'Defina um painel simples de resultados para o cliente. Inclua métricas de tráfego, cliques, contatos, origem dos leads, campanhas e ações recomendadas a partir dos números.'}
 ];
 const SQUAD_TEAM=[MORGAN,...AGENTS];
+let commandResultMissionId='';
 
 function uid(){return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(16).slice(2)}
 function defaultState(){
@@ -390,9 +406,57 @@ function renderCommand(){
     if(startBtn){startBtn.disabled=true;startBtn.textContent='⏳ Squad em operação'}
   }else{
     if(stateEl)stateEl.textContent=latest?.status==='Concluída'?'Última missão concluída':'Squad disponível';
-    if(now)now.innerHTML=latest?'<strong>'+(latest.status==='Concluída'?'✅ Última missão concluída':'🧠 Morgan aguardando')+'</strong><p>'+esc(latest.objective||'Dê uma nova missão por texto ou voz.')+'</p>':'<strong>🧠 Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p>';
+    if(now){
+      if(latest?.status==='Concluída'){
+        now.innerHTML='<strong>✅ Missão concluída — resultado pronto</strong><p>'+esc(latest.objective||'')+'</p><div class="row-actions" style="margin-top:10px"><button class="btn primary" onclick="showMissionResult(\''+latest.id+'\')">👁 Ver resultado da missão</button></div>';
+      }else{
+        now.innerHTML=latest?'<strong>🧠 Morgan aguardando</strong><p>'+esc(latest.objective||'Dê uma nova missão por texto ou voz.')+'</p>':'<strong>🧠 Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p>';
+      }
+    }
     if(startBtn){startBtn.disabled=false;startBtn.textContent='⚡ Iniciar missão'}
   }
+  renderCommandResult();
+}
+function renderCommandResult(){
+  const panel=document.getElementById('commandResult'),body=document.getElementById('commandResultBody'),status=document.getElementById('commandResultStatus');
+  if(!panel||!body)return;
+  const active=(state.missions||[]).some(m=>['Preparando','Executando'].includes(m.status));
+  if(active){panel.classList.remove('show');return}
+  const mission=(commandResultMissionId&&state.missions.find(m=>m.id===commandResultMissionId))||(state.missions||[]).find(m=>m.status==='Concluída');
+  if(!mission||mission.status!=='Concluída'||!(mission.results||[]).length){panel.classList.remove('show');body.innerHTML='';return}
+  commandResultMissionId=mission.id;
+  const client=state.clients.find(c=>c.id===mission.clientId);
+  const plan=mission.executionPlan||{};
+  const linkedTasks=(state.tasks||[]).filter(t=>t.sourceMissionId===mission.id);
+  const results=(mission.results||[]).map(r=>{
+    const a=AGENTS.find(x=>x.id===r.agentId);
+    return '<details><summary>'+(a?a.icon:'🤖')+' Agente '+esc(r.agentName||a?.name||r.agentId)+' · '+esc(r.role||a?.role||'')+'</summary><div class="mission-result-body">'+esc(r.text||'').replace(/\n/g,'<br>')+'</div></details>';
+  }).join('');
+  const tasks=linkedTasks.length?'<div class="result-tasks">'+linkedTasks.map(t=>'<div class="result-task"><b>'+esc(t.priority||'Média')+'</b> · '+esc(t.title||'')+(t.due?' · '+new Date(t.due+'T12:00:00').toLocaleDateString('pt-BR'):'')+'</div>').join('')+'</div>':'<p>Nenhuma tarefa automática foi criada nesta missão.</p>';
+  panel.classList.add('show');
+  if(status)status.textContent=(mission.finishedAt?'concluída em '+new Date(mission.finishedAt).toLocaleString('pt-BR'):'resultado salvo');
+  body.innerHTML=
+    '<div class="result-hero"><div><div class="result-meta">Morgan · relatório final</div><h3>'+esc(client?.name||mission.clientName||'Missão da Squad')+'</h3><p>'+esc(mission.objective||'')+'</p></div><div class="result-actions"><button class="btn" onclick="showView(\'missions\')">🗂 Histórico</button>'+(linkedTasks.length?'<button class="btn" onclick="showView(\'tasks\')">📋 Ver tarefas</button>':'')+'<button class="btn primary" onclick="repeatMission(\''+mission.id+'\')">↻ Repetir missão</button></div></div>'+
+    '<div class="result-summary"><div class="result-block"><strong>🧠 Resumo executivo do Morgan</strong><p>'+esc(plan.summary||'A Squad concluiu a análise. Abra as entregas dos agentes abaixo para ver os detalhes de cada especialidade.')+'</p>'+(plan.nextMove?'<p><b>Próxima ação:</b> '+esc(plan.nextMove)+'</p>':'')+'</div><div class="result-block"><strong>📋 Plano de ação</strong>'+tasks+'</div></div>'+
+    '<div class="result-agents"><div class="tiny muted" style="margin-bottom:2px">ENTREGAS DA SQUAD — clique em cada agente para expandir</div>'+results+'</div>';
+}
+function showMissionResult(id,auto=false){
+  const mission=(state.missions||[]).find(m=>m.id===id);
+  if(!mission)return;
+  commandResultMissionId=id;
+  showView('command');
+  renderCommand();
+  requestAnimationFrame(()=>{
+    const panel=document.getElementById('commandResult');
+    if(!panel)return;
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+    if(auto){
+      panel.classList.remove('just-finished');
+      void panel.offsetWidth;
+      panel.classList.add('just-finished');
+      setTimeout(()=>panel.classList.remove('just-finished'),2800);
+    }
+  });
 }
 let squadRecognition=null;
 function squadSpeak(text){
@@ -726,9 +790,10 @@ function renderMissions(){
     const pct=Number(m.progress||0);
     const plan=m.executionPlan;
     const planHtml=plan?'<div class="execution-plan"><strong>📋 Plano de execução</strong><p>'+esc(plan.summary||'')+'</p>'+(plan.nextMove?'<p><b>Próxima ação:</b> '+esc(plan.nextMove)+'</p>':'')+'<small>'+Number((plan.taskIds||[]).length)+' tarefa(s) vinculada(s) à missão.</small></div>':(m.planStatus?'<div class="execution-plan"><strong>📋 Planner</strong><p>'+esc(m.planStatus)+'</p>'+(m.planError?'<small style="color:#ffb1ba">'+esc(m.planError)+'</small>':'')+'</div>':'');
-    const planButton=(m.status==='Concluída'||completed.has('analyst'))?'<button class="btn primary" onclick="createExecutionPlan(\''+m.id+'\')">'+(plan?'♻ Refazer plano':'✅ Gerar plano e tarefas')+'</button>':'';
+    const resultButton=m.status==='Concluída'?'<button class="btn primary" onclick="showMissionResult(\''+m.id+'\')">👁 Abrir resultado no Command</button>':'';
+    const planButton=(m.status==='Concluída'||completed.has('analyst'))?'<button class="btn" onclick="createExecutionPlan(\''+m.id+'\')">'+(plan?'♻ Refazer plano':'✅ Gerar plano e tarefas')+'</button>':'';
     const taskButton=plan?'<button class="btn" onclick="showView(\'tasks\')">📋 Ver tarefas</button>':'';
-    return '<div class="mission-card" id="mission-'+esc(m.id)+'"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
+    return '<div class="mission-card" id="mission-'+esc(m.id)+'"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+resultButton+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
   }).join('');
 }
 function openMissionModal(){
@@ -802,7 +867,8 @@ async function runFullMission(clientId,objective,options={}){
     mission.finishedAt=new Date().toISOString();
     addActivity('🏁','Morgan concluiu a missão',client.name);
     await saveState();
-    if(options.voice)squadSpeak('Missão concluída, William. A Squad finalizou a operação e o plano de execução está pronto.');
+    showMissionResult(mission.id,true);
+    if(options.voice)squadSpeak('Missão concluída, William. O resultado final está aberto na tela, com o resumo, as entregas da Squad e o plano de execução.');
   }catch(e){
     console.error('WDM Squad mission failed',e);
     mission.status='Erro';
