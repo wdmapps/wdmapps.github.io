@@ -217,6 +217,8 @@
               <div class="command-actions">
                 <button class="btn" id="commandMicBtn" onclick="startSquadVoice()">🎙️ Falar com Morgan</button>
                 <button class="btn primary" id="commandStartBtn" onclick="startMorganMission()">⚡ Iniciar missão</button>
+                <button class="btn danger" id="commandStopBtn" onclick="stopMorganMission()" style="display:none">⏹ Parar</button>
+                <button class="btn" id="commandRestartBtn" onclick="restartMorganMission()">↻ Reiniciar</button>
                 <button class="btn" onclick="squadSpeak('Estou online, William. Pode falar comigo. Estou pronto para coordenar a Squad.')">🔊 Testar voz</button>
                 <span class="voice-status" id="voiceStatus">Microfone pronto</span>
                 <div class="voice-picker"><label for="commandVoice">Voz do Morgan</label><select id="commandVoice" onchange="saveMorganVoice(this.value)"><option value="">Escolhendo a melhor voz brasileira...</option></select><small id="commandVoiceHint">prioridade para vozes naturais pt-BR</small></div>
@@ -338,6 +340,8 @@ const AGENTS = [
 const SQUAD_TEAM=[MORGAN,...AGENTS];
 let commandResultMissionId='';
 let selectedAgentHistoryId='morgan';
+let activeMissionAbortController=null;
+let activeMissionId='';
 
 function uid(){return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(16).slice(2)}
 function defaultState(){
@@ -483,7 +487,9 @@ function renderCommand(){
     const status=current?'EM OPERAÇÃO':done?'CONCLUÍDO':active?'AGUARDANDO':'DISPONÍVEL';
     return '<div class="live-agent '+cls+'"><div class="live-name">'+a.icon+' Agente '+esc(a.name)+'</div><div class="live-role">'+esc(a.role)+'</div><div class="live-state">'+status+'</div></div>';
   }).join('');
-  const stateEl=document.getElementById('commandOperationState'),now=document.getElementById('commandMissionNow'),startBtn=document.getElementById('commandStartBtn');
+  const stateEl=document.getElementById('commandOperationState'),now=document.getElementById('commandMissionNow'),startBtn=document.getElementById('commandStartBtn'),stopBtn=document.getElementById('commandStopBtn'),restartBtn=document.getElementById('commandRestartBtn');
+  if(stopBtn)stopBtn.style.display=active?'inline-flex':'none';
+  if(restartBtn){restartBtn.disabled=false;restartBtn.textContent=active?'↻ Reiniciar agora':'↻ Reiniciar';}
   if(active){
     if(stateEl)stateEl.textContent='Missão em andamento · '+Math.round(Number(active.progress)||0)+'%';
     if(now)now.innerHTML='<strong>🧠 Morgan coordenando: '+esc(active.currentLabel||'Operação em andamento')+'</strong><p>'+esc(active.objective||'')+'</p><div class="progress"><span style="width:'+Math.round(Number(active.progress)||0)+'%"></span></div>';
@@ -634,6 +640,36 @@ function startMorganMission(){
   if((state.missions||[]).some(m=>['Preparando','Executando'].includes(m.status)))return alert('A Squad já está executando uma missão.');
   addActivity('🧠','Morgan recebeu uma missão de prospecção',objective.slice(0,120));
   squadSpeak('Entendido, William. Vou iniciar a prospecção da WDM Apps. Ray vai procurar empresas novas e Scott vai validar as melhores oportunidades.');
+  runFullMission('',objective,{keepView:true,voice:true,commander:'Morgan',mode:'prospecting'});
+}
+async function stopMorganMission(options={}){
+  const active=(state.missions||[]).find(m=>['Preparando','Executando'].includes(m.status));
+  if(!active){
+    if(!options.silent)alert('Não há missão em andamento para parar.');
+    return null;
+  }
+  if(activeMissionAbortController&&activeMissionId===active.id){
+    try{activeMissionAbortController.abort()}catch(_){}
+  }
+  active.status='Interrompida';
+  active.currentAgentId='';
+  active.currentLabel='Missão interrompida por William';
+  active.error='';
+  active.finishedAt=new Date().toISOString();
+  addActivity('⏹','Missão interrompida',active.objective||'Prospecção WDM Apps');
+  await saveState();
+  if(!options.silent)squadSpeak('Missão interrompida, William. A Squad está disponível novamente.');
+  return active;
+}
+async function restartMorganMission(){
+  const active=(state.missions||[]).find(m=>['Preparando','Executando'].includes(m.status));
+  const latestProspecting=(state.missions||[]).find(m=>m.mode==='prospecting');
+  const objective=(active?.objective||document.getElementById('commandObjective')?.value.trim()||latestProspecting?.objective||'Procurar novos clientes no Brasil para a WDM Apps, priorizando empresas sem site ou com presença digital fraca.').trim();
+  if(active)await stopMorganMission({silent:true});
+  const box=document.getElementById('commandObjective');
+  if(box)box.value=objective;
+  addActivity('↻','Missão reiniciada',objective.slice(0,120));
+  squadSpeak('Certo, William. Vou reiniciar a missão do zero e liberar a Squad novamente.');
   runFullMission('',objective,{keepView:true,voice:true,commander:'Morgan',mode:'prospecting'});
 }
 
@@ -814,11 +850,12 @@ function dueAfterDays(value){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
 }
-async function squadApiCall(idToken,payload){
+async function squadApiCall(idToken,payload,signal=null){
   const response=await fetch(SQUAD_API_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
-    body:JSON.stringify(payload)
+    body:JSON.stringify(payload),
+    signal:signal||undefined
   });
   let data={};try{data=await response.json()}catch(_){}
   if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
@@ -848,7 +885,7 @@ async function radarApiCallWithRetry(idToken,payload,label='Radar pesquisando em
   }
   throw lastError||new Error('Não foi possível concluir a pesquisa.');
 }
-async function createExecutionPlan(missionId,silent=false,existingToken=''){
+async function createExecutionPlan(missionId,silent=false,existingToken='',signal=null){
   const mission=state.missions.find(x=>x.id===missionId);
   if(!mission)return false;
   const client=state.clients.find(c=>c.id===mission.clientId)||mission.clientSnapshot;
@@ -876,7 +913,7 @@ async function createExecutionPlan(missionId,silent=false,existingToken=''){
       objective:mission.objective||'Transformar a missão em plano operacional.',
       previousResults,
       missionMode:mission.mode||'client'
-    });
+    },signal);
     const plan=parsePlannerJson(data.text);
     const plannedTasks=Array.isArray(plan.tasks)?plan.tasks.slice(0,8):[];
     const createdIds=[];
@@ -911,6 +948,12 @@ async function createExecutionPlan(missionId,silent=false,existingToken=''){
     if(!silent)showView('tasks');
     return true;
   }catch(e){
+    if(e?.name==='AbortError'||signal?.aborted){
+      mission.planStatus='Plano interrompido.';
+      mission.planError='';
+      await saveState();
+      return false;
+    }
     console.error('WDM Squad planner failed',e);
     mission.planStatus='Não foi possível gerar o plano.';
     mission.planError=(e?.message||'Falha no Planner.').slice(0,500);
@@ -955,6 +998,8 @@ function openMissionModal(){
 }
 async function runFullMission(clientId,objective,options={}){
   const mode=options.mode==='prospecting'?'prospecting':'client';
+  const controller=new AbortController();
+  activeMissionAbortController=controller;
   const client=mode==='prospecting'?{
     id:'wdm-apps-prospecting',
     name:'WDM Apps',
@@ -972,6 +1017,7 @@ async function runFullMission(clientId,objective,options={}){
     progress:0,currentAgentId:'',currentLabel:mode==='prospecting'?'Preparando prospecção da WDM Apps...':'Preparando a Squad...',results:[],
     error:'',createdAt:new Date().toISOString(),finishedAt:''
   };
+  activeMissionId=mission.id;
   state.missions.unshift(mission);
   state.missions=state.missions.slice(0,8);
   addActivity('⚡',mode==='prospecting'?'Missão de prospecção iniciada':'Missão automática iniciada',mode==='prospecting'?'WDM Apps · novos clientes':client.name);
@@ -1001,7 +1047,7 @@ async function runFullMission(clientId,objective,options={}){
         objective,
         previousResults,
         missionMode:mode
-      });
+      },controller.signal);
 
       const result={
         agentId:a.id,agentName:a.name,role:a.role,backendAgentName:data.agentName||'',
@@ -1019,7 +1065,8 @@ async function runFullMission(clientId,objective,options={}){
     mission.currentLabel='Montando plano de execução...';
     mission.progress=100;
     await saveState();
-    await createExecutionPlan(mission.id,true,idToken);
+    await createExecutionPlan(mission.id,true,idToken,controller.signal);
+    if(controller.signal.aborted||mission.status==='Interrompida')return;
 
     mission.status='Concluída';
     mission.progress=100;
@@ -1031,6 +1078,18 @@ async function runFullMission(clientId,objective,options={}){
     showMissionResult(mission.id,true);
     if(options.voice)squadSpeak('Missão concluída, William. O resultado final está aberto na tela, com o resumo, as entregas da Squad e o plano de execução.');
   }catch(e){
+    const aborted=e?.name==='AbortError'||controller.signal.aborted||mission.status==='Interrompida';
+    if(aborted){
+      if(mission.status!=='Interrompida'){
+        mission.status='Interrompida';
+        mission.currentAgentId='';
+        mission.currentLabel='Missão interrompida por William';
+        mission.error='';
+        mission.finishedAt=new Date().toISOString();
+        await saveState();
+      }
+      return;
+    }
     console.error('WDM Squad mission failed',e);
     mission.status='Erro';
     mission.currentLabel='Missão interrompida';
@@ -1038,6 +1097,11 @@ async function runFullMission(clientId,objective,options={}){
     mission.finishedAt=new Date().toISOString();
     addActivity('⚠️','Missão automática interrompida',mode==='prospecting'?'WDM Apps · prospecção':client.name);
     await saveState();
+  }finally{
+    if(activeMissionId===mission.id){
+      activeMissionAbortController=null;
+      activeMissionId='';
+    }
   }
 }
 function repeatMission(id){
