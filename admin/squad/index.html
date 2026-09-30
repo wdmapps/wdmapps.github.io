@@ -319,7 +319,8 @@ function renderClients(){
 function safePublicUrl(value){
   const raw=String(value||'').trim();
   if(!raw||/^(não|nenhum|n\/a|—|-)/i.test(raw))return '';
-  try{const u=new URL(raw);return ['http:','https:'].includes(u.protocol)?u.href:''}catch(_){return ''}
+  const candidate=/^www\./i.test(raw)||/^[\w.-]+\.[a-z]{2,}(?:\/|$)/i.test(raw)?'https://'+raw:raw;
+  try{const u=new URL(candidate);return ['http:','https:'].includes(u.protocol)?u.href:''}catch(_){return ''}
 }
 function numberFromRadar(value){
   const raw=String(value==null?'':value).trim().replace(',','.');
@@ -492,13 +493,13 @@ async function squadApiCall(idToken,payload){
   if(!response.ok||data.ok===false)throw new Error(data.error||('Backend respondeu '+response.status));
   return data;
 }
-async function radarApiCallWithRetry(idToken,payload){
+async function radarApiCallWithRetry(idToken,payload,label='Radar pesquisando empresas...'){
   let lastError=null;
   for(let attempt=1;attempt<=3;attempt++){
     state.radarLeadSearch.attempt=attempt;
     state.radarLeadSearch.message=attempt===1
-      ?'Radar pesquisando empresas...'
-      :'A IA retornou vazia. Tentando novamente automaticamente ('+attempt+'/3)...';
+      ?label
+      :label+' · resposta vazia, nova tentativa ('+attempt+'/3)...';
     await saveState();
     try{
       const data=await squadApiCall(idToken,payload);
@@ -807,7 +808,7 @@ function parseRadarLeadBlocks(text,query){
     const item={
       id:uid(),company:company.slice(0,180),city:String(data.CIDADE||'').slice(0,120),
       site:safePublicUrl(data.SITE),contact:String(data.CONTATO||'').replace(/^(não encontrado|não informado|—|-)$/i,'').slice(0,180),
-      siteStatus:String(data.STATUS_SITE||(!safePublicUrl(data.SITE)?'SEM_SITE':'COM_SITE')).trim().toUpperCase().slice(0,40),
+      siteStatus:String(data.STATUS_SITE||(!safePublicUrl(data.SITE)?'NAO_CONFIRMADO':'COM_SITE')).trim().toUpperCase().slice(0,40),
       siteEvidence:String(data.EVIDENCIA_SITE||'').trim().slice(0,420),
       googleRating:String(data.GOOGLE_NOTA||'').trim().slice(0,20),
       googleReviews:String(data.GOOGLE_AVALIACOES||'').trim().slice(0,30),
@@ -839,64 +840,168 @@ function openRadarLeadModal(){
   };
   openModal('formModal');
 }
+function radarLeadKey(x){
+  return [x?.company||'',x?.city||''].join('|').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function mergeRadarCandidates(base,items){
+  const map=new Map((base||[]).map(x=>[radarLeadKey(x),x]));
+  for(const item of (items||[])){
+    const key=radarLeadKey(item);
+    if(!key)continue;
+    const prev=map.get(key);
+    map.set(key,prev?{...prev,...item,id:prev.id||item.id,createdAt:prev.createdAt||item.createdAt}:item);
+  }
+  return [...map.values()];
+}
+function radarDiscoveryRounds(region,segment){
+  return [
+    {
+      label:'varredura principal',
+      focus:segment
+        ?'Explore profundamente o segmento '+segment+' em toda a região informada.'
+        :'Explore pequenos e médios negócios locais independentes de vários segmentos, evitando grandes redes e franquias.'
+    },
+    {
+      label:'Google e redes sociais',
+      focus:'Procure negócios ativos que apareçam no Google, Instagram ou Facebook e possam estar usando apenas perfil/rede social, sem domínio próprio. Não confunda perfil social, Linktree, catálogo ou marketplace com site oficial.'
+    },
+    {
+      label:'serviços locais',
+      focus:'Procure prestadores e empresas locais de serviços, oficinas, auto centers, construção e reformas, estética, alimentação, lojas especializadas, manutenção, clínicas independentes e pequenas empresas B2B. Varie os termos de busca e não repita empresas já encontradas.'
+    }
+  ];
+}
+function radarOutputFormat(){
+  return [
+    'Para CADA empresa, retorne exatamente este bloco, com todos os campos em uma única linha:',
+    'LEAD_START',
+    'EMPRESA: nome real da empresa',
+    'CIDADE: cidade/UF',
+    'SITE: URL do site oficial próprio ou -',
+    'STATUS_SITE: SEM_SITE, SITE_FRACO, COM_SITE ou NAO_CONFIRMADO',
+    'EVIDENCIA_SITE: evidência curta de como a situação do site foi verificada',
+    'GOOGLE_NOTA: nota pública atual do Perfil da Empresa no Google, como 4.7, ou - se não confirmar',
+    'GOOGLE_AVALIACOES: quantidade pública de avaliações no Google, apenas número, ou - se não confirmar',
+    'REDES_ATIVAS: SIM, NAO ou NAO_CONFIRMADO',
+    'REDE_SOCIAL: URL pública de Instagram/Facebook/TikTok da empresa ou -',
+    'CONTATO: telefone/WhatsApp comercial público ou -',
+    'NECESSIDADE: serviço que a WDM poderia oferecer',
+    'MOTIVO: evidência curta e específica da oportunidade; não invente problemas',
+    'FONTE: URL pública que comprova a empresa ou oportunidade',
+    'LEAD_END',
+    'Não use esse formato para empresas fictícias. Depois dos blocos, não escreva mais nada.'
+  ];
+}
+function filterRadarByMode(items,siteMode){
+  return (items||[]).filter(x=>{
+    const status=String(x.siteStatus||'NAO_CONFIRMADO').toUpperCase();
+    const site=safePublicUrl(x.site);
+    if(siteMode==='no-site')return status==='SEM_SITE'&&!site&&String(x.siteEvidence||'').trim()&&safePublicUrl(x.sourceUrl);
+    if(siteMode==='weak')return ['SEM_SITE','SITE_FRACO'].includes(status)&&String(x.siteEvidence||'').trim()&&safePublicUrl(x.sourceUrl);
+    return ['SEM_SITE','SITE_FRACO','COM_SITE'].includes(status)&&safePublicUrl(x.sourceUrl);
+  });
+}
+async function verifyRadarCandidates(idToken,pool,siteMode,region,segment,qty){
+  if(siteMode==='any')return filterRadarByMode(pool,siteMode).slice(0,qty);
+  const verified=[];
+  const chunks=[];
+  for(let i=0;i<pool.length;i+=12)chunks.push(pool.slice(i,i+12));
+  for(let i=0;i<chunks.length&&verified.length<qty;i++){
+    const chunk=chunks[i];
+    const candidateLines=chunk.map((x,n)=>
+      (n+1)+'. '+x.company+' | '+(x.city||region)+' | site informado: '+(x.site||'-')+' | fonte inicial: '+(x.sourceUrl||x.socialUrl||'-')
+    ).join('\n');
+    const rule=siteMode==='no-site'
+      ?'DEVOLVA SOMENTE empresas em que você confirmou, após nova busca, que NÃO existe site oficial próprio. Se encontrar site oficial, descarte a empresa.'
+      :'DEVOLVA SOMENTE empresas SEM_SITE ou SITE_FRACO. Para SITE_FRACO, cite um problema público concreto e verificável. Se o site for bom/atual e não houver lacuna clara, descarte.';
+    const objective=[
+      'ETAPA DE VALIDAÇÃO FINAL. Reavalie apenas as empresas da lista abaixo; não introduza novas empresas.',
+      'REGIÃO: '+region+'.',
+      segment?'SEGMENTO: '+segment+'.':'',
+      rule,
+      'Pesquise novamente cada nome + cidade e também nome + "site", "website" e "www". Confira resultados de busca, perfil do Google e bio/link das redes sociais.',
+      'Instagram, Facebook, Linktree, catálogo, marketplace e Perfil da Empresa no Google NÃO contam como site oficial próprio.',
+      'Se houver dúvida sobre ausência de site, descarte em vez de marcar SEM_SITE.',
+      'Não marque como SITE_FRACO apenas por opinião estética. Exija problema observável, como site quebrado, sem HTTPS, não responsivo, páginas essenciais com erro, conteúdo claramente abandonado ou ausência clara de conversão/contato.',
+      'EMPRESAS PARA VALIDAR:\n'+candidateLines,
+      ...radarOutputFormat()
+    ].filter(Boolean).join('\n');
+    const data=await radarApiCallWithRetry(idToken,{
+      agentId:'radar',
+      client:{name:'WDM Apps',segment:'Desenvolvimento de aplicativos, sistemas web, automações e soluções digitais',city:region,site:'https://wdmapps.com.br',instagram:'',notes:'Validação de leads para prospecção comercial.'},
+      objective,
+      previousResults:{}
+    },'Radar validando sites · lote '+(i+1)+'/'+chunks.length);
+    const parsed=parseRadarLeadBlocks(data.text,'Validação · '+region);
+    const allowedKeys=new Set(chunk.map(radarLeadKey));
+    const onlyRequested=parsed.filter(x=>allowedKeys.has(radarLeadKey(x)));
+    const accepted=filterRadarByMode(onlyRequested,siteMode);
+    const merged=mergeRadarCandidates(verified,accepted);
+    verified.splice(0,verified.length,...merged.slice(0,qty));
+  }
+  return verified.slice(0,qty);
+}
 async function runRadarLeadSearch(region,segment,qty,notes,siteMode='no-site'){
-  const siteRule=siteMode==='no-site'
-    ?'RETORNE SOMENTE empresas para as quais você verificou que NÃO existe site oficial próprio. Instagram, Facebook, Linktree, catálogo, marketplace e perfil do Google NÃO contam como site.'
-    :siteMode==='weak'
-      ?'Priorize primeiro empresas SEM SITE oficial próprio; depois aceite empresas com SITE_FRACO, desde que exista evidência pública específica do problema.'
-      :'Aceite qualquer oportunidade digital real, mas classifique claramente a situação do site.';
-  state.radarLeadSearch={status:'running',message:'Radar pesquisando '+region+'...',region,segment,siteMode,attempt:1,startedAt:new Date().toISOString()};
+  state.radarLeadSearch={status:'running',message:'Radar iniciando busca em múltiplas rodadas...',region,segment,siteMode,attempt:1,startedAt:new Date().toISOString()};
   await saveState();showView('leads');
   try{
     const user=await firebaseUser();
     if(!user)throw new Error('Sua sessão expirou. Entre novamente no painel.');
     const idToken=await user.getIdToken(true);
-    const objective=[
-      'Encontre '+qty+' empresas reais e atualmente ativas que possam ser potenciais clientes da WDM Apps.',
-      'REGIÃO: '+region+'.',
-      segment?'SEGMENTO PREFERENCIAL: '+segment+'.':'Pode variar os segmentos se houver oportunidade clara.',
-      notes||'Priorize sinais públicos de oportunidade digital.',
-      siteRule,
-      'Pesquise a web e use somente informações públicas verificáveis.',
-      'Antes de marcar SEM_SITE, procure pelo nome da empresa + cidade e confira se há domínio oficial. Se houver dúvida, NÃO classifique como SEM_SITE.',
-      'STATUS_SITE deve ser exatamente SEM_SITE, SITE_FRACO ou COM_SITE.',
-      'NÃO entre em contato com ninguém.',
-      'Para CADA empresa, retorne exatamente este bloco, com todos os campos em uma única linha:',
-      'LEAD_START',
-      'EMPRESA: nome real da empresa',
-      'CIDADE: cidade/UF',
-      'SITE: URL do site oficial próprio ou -',
-      'STATUS_SITE: SEM_SITE, SITE_FRACO ou COM_SITE',
-      'EVIDENCIA_SITE: evidência curta de como a situação do site foi verificada',
-      'GOOGLE_NOTA: nota pública atual do Perfil da Empresa no Google, como 4.7, ou - se não confirmar',
-      'GOOGLE_AVALIACOES: quantidade pública de avaliações no Google, apenas número, ou - se não confirmar',
-      'REDES_ATIVAS: SIM, NAO ou NAO_CONFIRMADO; use SIM somente se houver publicação ou atividade pública recente verificável',
-      'REDE_SOCIAL: URL pública de Instagram/Facebook/TikTok da empresa ou -',
-      'CONTATO: telefone/WhatsApp comercial público ou -',
-      'NECESSIDADE: serviço que a WDM poderia oferecer',
-      'MOTIVO: evidência curta e específica da oportunidade; não invente problemas',
-      'FONTE: URL pública que comprova a empresa ou oportunidade',
-      'LEAD_END',
-      'Não use esse formato para empresas fictícias. Depois dos blocos, não escreva mais nada.'
-    ].join('\n');
-    const data=await radarApiCallWithRetry(idToken,{
-      agentId:'radar',
-      client:{name:'WDM Apps',segment:'Desenvolvimento de aplicativos, sistemas web, automações e soluções digitais',city:region,site:'https://wdmapps.com.br',instagram:'',notes:'A pesquisa é para prospecção comercial da própria WDM Apps.'},
-      objective,
-      previousResults:{}
-    });
-    let candidates=parseRadarLeadBlocks(data.text,[region,segment].filter(Boolean).join(' · '));
-    if(siteMode==='no-site')candidates=candidates.filter(x=>x.siteStatus==='SEM_SITE'&&!safePublicUrl(x.site));
-    if(siteMode==='weak')candidates=candidates.filter(x=>['SEM_SITE','SITE_FRACO'].includes(x.siteStatus));
-    if(!candidates.length)throw new Error(siteMode==='no-site'?'O Radar não encontrou empresas sem site com evidência suficiente. Tente outro segmento ou região.':'O Radar não retornou empresas no formato esperado. Tente novamente com uma região ou segmento mais específico.');
+    const rounds=radarDiscoveryRounds(region,segment);
+    let pool=[];
+    for(let i=0;i<rounds.length;i++){
+      const round=rounds[i];
+      const target=Math.max(10,Math.min(12,qty+4));
+      const objective=[
+        'FASE DE DESCOBERTA. Encontre até '+target+' empresas reais e atualmente ativas que possam ser potenciais clientes da WDM Apps.',
+        'REGIÃO: '+region+'.',
+        segment?'SEGMENTO PREFERENCIAL: '+segment+'.':'Varie os segmentos para aumentar a cobertura.',
+        notes||'Priorize sinais públicos de oportunidade digital.',
+        round.focus,
+        siteMode==='no-site'
+          ?'Priorize fortemente negócios que aparentem não ter site próprio. Nesta fase, se a ausência ainda não puder ser comprovada, use NAO_CONFIRMADO em vez de inventar SEM_SITE.'
+          :siteMode==='weak'
+            ?'Priorize negócios sem site e depois sites com problemas públicos concretos. Se não conseguir confirmar a situação, use NAO_CONFIRMADO.'
+            :'Busque oportunidades digitais reais e classifique a situação do site sem forçar um problema.',
+        'Pesquise a web e use somente informações públicas verificáveis.',
+        'Não escolha uma empresa só porque ela existe: precisa haver alguma evidência de oportunidade comercial para a WDM Apps.',
+        'NÃO entre em contato com ninguém.',
+        ...radarOutputFormat()
+      ].join('\n');
+      const data=await radarApiCallWithRetry(idToken,{
+        agentId:'radar',
+        client:{name:'WDM Apps',segment:'Desenvolvimento de aplicativos, sistemas web, automações e soluções digitais',city:region,site:'https://wdmapps.com.br',instagram:'',notes:'A pesquisa é para prospecção comercial da própria WDM Apps.'},
+        objective,
+        previousResults:{}
+      },'Radar · busca '+(i+1)+'/'+rounds.length+' · '+round.label);
+      const found=parseRadarLeadBlocks(data.text,[region,segment,round.label].filter(Boolean).join(' · '));
+      pool=mergeRadarCandidates(pool,found).slice(0,36);
+      state.radarLeadSearch.message='Radar encontrou '+pool.length+' candidata(s) únicas. '+(i<rounds.length-1?'Ampliando a busca...':'Iniciando validação final...');
+      await saveState();
+    }
+    if(!pool.length)throw new Error('O Radar não encontrou empresas candidatas. Tente outro segmento ou amplie a região.');
+
+    pool=pool.sort((a,b)=>calculateLeadScore(b)-calculateLeadScore(a));
+    const candidates=await verifyRadarCandidates(idToken,pool,siteMode,region,segment,qty);
+    if(!candidates.length){
+      throw new Error(siteMode==='no-site'
+        ?'Nenhuma empresa passou pela validação final de ausência de site. A busca encontrou candidatas, mas descartou as que tinham site ou evidência insuficiente.'
+        :'Nenhuma empresa passou pela validação final de oportunidade digital.');
+    }
+
     const existingKeys=new Set([
-      ...state.leads.map(x=>(x.company+'|'+x.city).toLowerCase()),
-      ...state.leadCandidates.map(x=>(x.company+'|'+x.city).toLowerCase())
+      ...state.leads.map(radarLeadKey),
+      ...state.leadCandidates.map(radarLeadKey)
     ]);
-    const fresh=candidates.filter(x=>!existingKeys.has((x.company+'|'+x.city).toLowerCase()));
+    const fresh=candidates.filter(x=>!existingKeys.has(radarLeadKey(x)));
     state.leadCandidates=[...fresh,...state.leadCandidates].sort((a,b)=>calculateLeadScore(b)-calculateLeadScore(a)).slice(0,30);
-    state.radarLeadSearch={status:'done',message:'Radar encontrou '+candidates.length+' empresa(s); '+fresh.length+' nova(s) aguardando sua aprovação.',region,segment,siteMode,attempt:state.radarLeadSearch.attempt||1,finishedAt:new Date().toISOString()};
-    addActivity('📡','Radar pesquisou novos leads',region+' · '+fresh.length+' nova(s) sugestão(ões)');
+    state.radarLeadSearch={
+      status:'done',
+      message:'Radar analisou '+pool.length+' candidata(s), validou '+candidates.length+' e encontrou '+fresh.length+' nova(s) oportunidade(s).',
+      region,segment,siteMode,attempt:state.radarLeadSearch.attempt||1,finishedAt:new Date().toISOString()
+    };
+    addActivity('📡','Radar pesquisou e validou novos leads',region+' · '+fresh.length+' nova(s) de '+pool.length+' candidata(s)');
     await saveState();
   }catch(e){
     state.radarLeadSearch={status:'error',message:'Falha na pesquisa: '+String(e?.message||e).slice(0,300),region,segment,siteMode,attempt:state.radarLeadSearch.attempt||1,finishedAt:new Date().toISOString()};
