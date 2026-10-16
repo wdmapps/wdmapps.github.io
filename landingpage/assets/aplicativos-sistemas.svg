@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="475" viewBox="0 0 760 475" role="img" aria-labelledby="title desc">
+<title id="title">Aplicativos e sistemas</title>
+<desc id="desc">Smartphone com aplicativos conectado a painéis digitais sobre um fundo tecnológico azul.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#08162e"/><stop offset=".5" stop-color="#12395c"/><stop offset="1" stop-color="#080f25"/></linearGradient>
+ <linearGradient id="screen" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#172f59"/><stop offset="1" stop-color="#0d1833"/></linearGradient>
+ <linearGradient id="phone" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#74dafe"/><stop offset=".4" stop-color="#3175cb"/><stop offset="1" stop-color="#7f5cdd"/></linearGradient>
+ <linearGradient id="tile" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#174a87"/><stop offset="1" stop-color="#242b65"/></linearGradient>
+ <linearGradient id="accent" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#57e8da"/><stop offset="1" stop-color="#4a93ff"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#167aca" stop-opacity=".63"/><stop offset="1" stop-color="#167aca" stop-opacity="0"/></radialGradient>
+ <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#63aefa" stroke-opacity=".11" stroke-width="1"/></pattern>
+ <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
+ <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="16" stdDeviation="17" flood-color="#000818" flood-opacity=".75"/></filter>
+</defs>
+<rect width="760" height="475" fill="url(#bg)"/>
+<rect width="760" height="475" fill="url(#grid)"/>
+<ellipse cx="370" cy="246" rx="290" ry="225" fill="url(#halo)"/>
+<g opacity=".6" stroke="#32b8ea" stroke-width="2" fill="none">
+ <path d="M70 137h140l45 42M600 110h-95l-35 38M60 349h170l37-45M695 342H515l-34-40"/>
+ <circle cx="70" cy="137" r="5" fill="#42d8eb"/><circle cx="600" cy="110" r="5" fill="#42d8eb"/>
+ <circle cx="60" cy="349" r="5" fill="#42d8eb"/><circle cx="695" cy="342" r="5" fill="#42d8eb"/>
+</g>
+<g filter="url(#shadow)">
+ <rect x="264" y="37" width="232" height="399" rx="35" fill="#050f23" stroke="url(#phone)" stroke-width="8"/>
+ <rect x="277" y="54" width="206" height="365" rx="24" fill="url(#screen)"/>
+ <rect x="343" y="61" width="74" height="13" rx="7" fill="#050d1f"/>
+ <circle cx="426" cy="67" r="3" fill="#2cb9d7"/>
+ <text x="300" y="110" fill="#8fe8fa" font-size="13" font-family="Arial,sans-serif" font-weight="700" letter-spacing="2">WDM APPS</text>
+ <text x="300" y="141" fill="#fff" font-size="22" font-family="Arial,sans-serif" font-weight="bold">Tudo conectado.</text>
+ <text x="300" y="163" fill="#b7cde6" font-size="11" font-family="Arial,sans-serif">Soluções digitais inteligentes</text>
+ <g transform="translate(299 191)">
+ <rect width="72" height="72" rx="15" fill="url(#tile)" stroke="#4c8fdf" stroke-opacity=".6"/>
+ <rect x="22" y="14" width="28" height="44" rx="6" fill="none" stroke="#7fe9f0" stroke-width="4"/><circle cx="36" cy="51" r="2" fill="#7fe9f0"/>
+ <rect x="90" width="72" height="72" rx="15" fill="url(#tile)" stroke="#4c8fdf" stroke-opacity=".6"/>
+ <path d="M107 26l13 12-13 12M145 26l-13 12 13 12" fill="none" stroke="#a4b4ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+ <rect x="0" y="87" width="72" height="72" rx="15" fill="url(#tile)" stroke="#4c8fdf" stroke-opacity=".6"/>
+ <circle cx="36" cy="123" r="18" fill="none" stroke="#66eadc" stroke-width="3"/><path d="M24 123h24M36 111v24" stroke="#66eadc" stroke-width="3" stroke-linecap="round"/>
+ <rect x="90" y="87" width="72" height="72" rx="15" fill="url(#tile)" stroke="#4c8fdf" stroke-opacity=".6"/>
+ <rect x="107" y="106" width="38" height="22" rx="4" fill="none" stroke="#7eb1ff" stroke-width="3"/><path d="M110 137h32M126 129v8" stroke="#7eb1ff" stroke-width="3"/>
+ </g>
+ <rect x="300" y="371" width="160" height="25" rx="12" fill="url(#accent)"/>
+ <text x="380" y="388" text-anchor="middle" fill="#082340" font-size="12" font-family="Arial,sans-serif" font-weight="bold">SUA IDEIA, NOSSO APP</text>
+</g>
+<g transform="translate(50 194)" filter="url(#shadow)">
+ <rect width="194" height="111" rx="13" fill="#0a2139" stroke="#3591c6" stroke-width="2"/>
+ <circle cx="20" cy="20" r="4" fill="#57e8da"/><circle cx="33" cy="20" r="4" fill="#4a93ff"/><circle cx="46" cy="20" r="4" fill="#987deb"/>
+ <rect x="18" y="37" width="88" height="9" rx="4" fill="#72cbea" opacity=".9"/>
+ <rect x="18" y="55" width="157" height="4" rx="2" fill="#315477"/>
+ <rect x="18" y="68" width="127" height="4" rx="2" fill="#315477"/>
+ <path d="M20 97l32-16 29 8 34-20 27 10 35-26" stroke="#58e6d1" fill="none" stroke-width="3"/>
+ </g>
+<g transform="translate(515 178)" filter="url(#shadow)">
+ <rect width="194" height="140" rx="15" fill="#0a2139" stroke="#4565ac" stroke-width="2"/>
+ <text x="18" y="27" fill="#c6e5ff" font-size="13" font-family="Arial,sans-serif" font-weight="bold">PAINEL DO SISTEMA</text>
+ <rect x="18" y="43" width="70" height="70" rx="9" fill="#163952"/>
+ <circle cx="53" cy="78" r="22" fill="none" stroke="#4c769c" stroke-width="8"/><path d="M53 56a22 22 0 0 1 21 29" fill="none" stroke="#58e6d1" stroke-width="8" stroke-linecap="round"/>
+ <rect x="105" y="53" width="61" height="8" rx="4" fill="#65c7e5"/><rect x="105" y="71" width="40" height="7" rx="3" fill="#405f8c"/><rect x="105" y="88" width="53" height="7" rx="3" fill="#405f8c"/>
+ <rect x="18" y="123" width="158" height="4" rx="2" fill="#42678c"/>
+ </g>
+<circle cx="217" cy="106" r="6" fill="#57e8da"/><circle cx="537" cy="380" r="7" fill="#4a93ff"/>
+<circle cx="217" cy="106" r="16" fill="#57e8da" opacity=".23" filter="url(#glow)"/>
+</svg>
