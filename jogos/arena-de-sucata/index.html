@@ -4,10 +4,10 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1116"><meta name="description" content="Entre no ferro-velho. Destrua robôs, recolha sucata e monte uma máquina de sobrevivência.">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Sucata">
-  <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest?v=1.3.0"><link rel="apple-touch-icon" href="assets/icon-192.png">
   <title>Arena de Sucata | WDM Jogos</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='16' width='64' height='64' fill='%230b1116'/%3E%3Cpath d='M17 19h30v29H17z' fill='%2379edda'/%3E%3Cpath d='M22 29h7v7h-7zm13 0h7v7h-7z' fill='%230b1116'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="pwa.css">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="pwa.css?v=1.3.0">
 </head>
 <body>
   <canvas id="arena" aria-label="Arena de combate vista de cima"></canvas>
@@ -24,7 +24,7 @@
       <h1>ARENA DE<br><span>SUCATA</span></h1>
       <p class="description">O mundo virou sucata.<br>Faça alguma coisa boa com ela.</p>
       <button id="start" class="primary">ENTRAR NA ARENA <span>↗</span></button>
-      <button id="install" class="install-button">↓ <span>INSTALAR JOGO</span><small>JOGUE TAMBÉM OFFLINE</small></button>
+      <button id="install" class="install-button">↓ <span>INSTALAR JOGO</span><small id="installHint">JOGUE TAMBÉM OFFLINE</small></button>
       <div class="play-note"><span class="led"></span> GRÁTIS PARA JOGAR <b>·</b> SEM INSTALAÇÃO</div>
       <div class="control-strip"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVER</span><span><kbd>ESPAÇO</kbd> IMPULSO</span><span class="auto-fire">⌖ TIRO AUTOMÁTICO</span></div>
     </div>
@@ -46,7 +46,7 @@
   <section id="pauseScreen" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="compact-panel"><div class="eyebrow">SISTEMAS EM ESPERA</div><h2 id="pauseTitle">RESPIRA.<br>RECARREGA.</h2><p>A sucata pode esperar um pouco.</p><button id="resume" class="primary">VOLTAR AO COMBATE <span>↗</span></button><button id="quit" class="text-button">ENCERRAR PARTIDA</button></div></section>
   <section id="endScreen" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle"><div class="compact-panel"><div class="eyebrow" id="endEyebrow">CONEXÃO COM A UNIDADE PERDIDA</div><h2 id="endTitle">ATÉ A ÚLTIMA<br>PEÇA.</h2><p id="endDescription">Todo fim é matéria-prima para um novo começo.</p><div class="end-stats"><div><span>SUCATA</span><b id="endScore">0</b></div><div><span>ONDA</span><b id="endWave">1</b></div><div><span>TEMPO</span><b id="endTime">0:00</b></div></div><button id="restart" class="primary">RECONSTRUIR E VOLTAR <span>↗</span></button><button id="backMenu" class="text-button">VOLTAR AO INÍCIO</button></div></section>
   <section id="helpScreen" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><div class="compact-panel help-panel"><div class="eyebrow">MANUAL DO SUCATEIRO</div><h2 id="helpTitle">SOBREVIVER<br>É O PLANO.</h2><p>Mova-se sem parar. Sua arma encontra e dispara no inimigo mais próximo automaticamente.</p><ul><li><b>WASD ou setas</b><span>Mover a unidade</span></li><li><b>Espaço / botão ↯</b><span>Impulso com invulnerabilidade breve</span></li><li><b>Peças luminosas</b><span>Aproxime-se para recolher sucata</span></li><li><b>Entre ondas</b><span>Escolha melhorias e recupere blindagem</span></li><li><b>No celular</b><span>Use o controle à esquerda para mover</span></li></ul><button id="closeHelp" class="primary">ENTENDIDO <span>↗</span></button></div></section>
-  <section id="installScreen" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="installTitle"><div class="compact-panel"><div class="eyebrow">SUA ARENA. NO SEU CELULAR.</div><h2 id="installTitle">LEVE A SUCATA<br>COM VOCÊ.</h2><p id="installInstructions"></p><p id="offlineStatus">Carregue o jogo uma vez com internet para preparar o modo offline.</p><button id="closeInstall" class="primary">ENTENDIDO <span>↗</span></button></div></section>
-  <script src="game.js"></script><script src="pwa.js"></script>
+  <section id="installScreen" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="installTitle"><div class="compact-panel"><div class="eyebrow" id="installBrowser">INSTALAÇÃO NO CELULAR</div><h2 id="installTitle">LEVE A SUCATA<br>COM VOCÊ.</h2><p id="installMessage" role="status" aria-live="polite"></p><button id="installNow" class="primary hidden">INSTALAR AGORA <span>↓</span></button><p id="installInstructions"></p><ol id="installSteps" class="install-steps"></ol><a id="openChrome" class="install-browser-link hidden" href="#">ABRIR NO CHROME ↗</a><button id="checkInstall" class="install-browser-link">VERIFICAR INSTALAÇÃO</button><a id="installDirectLink" class="install-direct-link" target="_blank" rel="noopener" href="./">Abrir endereço do jogo</a><p id="offlineStatus">Carregue o jogo uma vez com internet para preparar o modo offline.</p><button id="closeInstall" class="text-button">VOLTAR AO JOGO</button></div></section>
+  <script src="game.js"></script><script src="pwa.js?v=1.3.0"></script>
 </body>
 </html>
