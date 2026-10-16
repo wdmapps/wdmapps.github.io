@@ -10,14 +10,14 @@
   ];
   let sectorIndex = 0;
   const mint = '#9cffe0', orange = '#ff7546';
-  let width, height, dpr, scale, ox, oy, state = 'menu', previousState, clock = 0, last = 0;
+  let width, height, dpr, scale, ox, oy, mobileView=false, landscapeView=false, state = 'menu', previousState, clock = 0, last = 0;
   let enemies = [], bullets = [], particles = [], pickups = [], marks = [], rings = [], queue = [];
   let wave = 0, waveTotal = 0, kills = 0, score = 0, elapsed = 0, spawnTimer = 0, waveDelay = -1, shake = 0;
   let announcementTimer = 0, toastTimer = 0, soundOn = true, audio, best = 0, upgradeChoices = [], runToken = 0;
   let masterBus, sfxBus, musicBus, noiseBuffer, musicStep = 0, nextBeat = 0;
   let player = makePlayer();
   const keys = new Set(), touch = { x: 0, y: 0, id: null }, pointer = { x: 0, y: 0 };
-  const coarse = () => matchMedia('(pointer:coarse)').matches || innerWidth < 700;
+  const coarse = () => matchMedia('(pointer:coarse)').matches || (typeof navigator!=='undefined' && navigator.maxTouchPoints>0) || (width||innerWidth)<700 || ((height||innerHeight)<600 && (width||innerWidth)<1200);
   try { best = +localStorage.getItem('sucata-best') || 0; } catch {}
   $('best').textContent = String(best).padStart(5, '0');
   const rand = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -34,13 +34,32 @@
   ];
   function makePlayer() { return { x: 900, y: 620, r: 22, hp: 100, maxHp: 100, speed: 235, damage: 22, fireRate: .26, fireTimer: 0, angle: -.7, moveAngle: 0, dash: 0, dashCooldown: 0, dashMax: 3, invincible: 0, multi: 1, regen: 0, magnet: 140, kills: 0 }; }
   function resize() {
-    width = innerWidth; height = innerHeight; dpr = Math.min(devicePixelRatio || 1, 1.75);
+    width = window.visualViewport?.width || innerWidth; height = window.visualViewport?.height || innerHeight; dpr = Math.min(devicePixelRatio || 1, 1.75);
+    mobileView=coarse();landscapeView=mobileView && width>height;
+    document.body.classList.toggle('touch-layout',mobileView);
+    document.body.classList.toggle('landscape-layout',landscapeView);
+    document.body.classList.toggle('in-combat',state!=='menu');
     canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
     scale = Math.max(width / W, height / H);
-    if (state !== 'menu') scale = width < 700 ? Math.max(width / 1000, height / 1550) : Math.min((width - 30) / W, (height - 155) / H);
+    if (state !== 'menu') scale = mobileView
+      ? landscapeView ? Math.max(width/1600,height/800,.55) : Math.max(width/900,height/1200,.55)
+      : Math.min((width - 30) / W, (height - 155) / H);
     ox = (width - W * scale) / 2; oy = state === 'menu' ? (height - H * scale) / 2 : 165 + (height - 180 - H * scale) / 2;
+    controls(state==='playing');resetInputs();
   }
-  addEventListener('resize', resize); resize();
+  function camera() {
+    if(!mobileView || state==='menu')return {x:ox,y:oy};
+    const top=landscapeView?116:206,bottom=landscapeView?16:25;
+    const axis=(target,min,max)=>min>max?(min+max)/2:clamp(target,min,max);
+    return {
+      x:axis(width/2-player.x*scale,width-8-(W-105)*scale,8-105*scale),
+      y:axis((top+height-bottom)/2-player.y*scale,height-bottom-(H-120)*scale,top-135*scale)
+    };
+  }
+  addEventListener('resize', resize);
+  addEventListener('orientationchange',()=>requestAnimationFrame(resize));
+  window.visualViewport?.addEventListener('resize',resize);
+  resize();
 
   // The static floor is cached once; dynamic lights and particles stay inexpensive.
   const floor = document.createElement('canvas'); floor.width = W; floor.height = H;
@@ -325,8 +344,7 @@
   function render() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#080e13'; ctx.fillRect(0, 0, width, height);
     ctx.save();
-    let cx = ox, cy = oy;
-    if (width < 700 && state !== 'menu') { cx = clamp(width / 2 - player.x * scale, width - W * scale - 10, 10); cy = clamp(height * .5 - player.y * scale, height - H * scale - 60, 180); }
+    const {x:cx,y:cy}=camera();
     const sx = shake ? rand(-shake, shake) : 0, sy = shake ? rand(-shake, shake) : 0;
     ctx.translate(cx + sx, cy + sy); ctx.scale(scale, scale); ctx.drawImage(floor, 0, 0);
     for (const m of marks) { ctx.fillStyle = '#03080b65'; ctx.beginPath(); ctx.ellipse(m.x, m.y, m.r, m.r * .6, m.angle, 0, TAU); ctx.fill(); ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.angle); ctx.fillStyle = '#544b3c'; ctx.fillRect(-8, -4, 9, 6); ctx.fillStyle = '#263a41'; ctx.fillRect(9, 6, 10, 7); ctx.restore(); }
@@ -387,7 +405,7 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { resetInputs(); pause(); } });
   $('dashButton').addEventListener('pointerdown', e => { e.preventDefault(); dash(); });
   const joy = $('joystick');
-  function moveStick(e) { const r = joy.getBoundingClientRect(), dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2, d = Math.hypot(dx, dy), limit = 35; touch.x = dx / Math.max(limit, d); touch.y = dy / Math.max(limit, d); $('stick').style.transform = `translate(${touch.x * limit}px,${touch.y * limit}px)`; }
+  function moveStick(e) { const r = joy.getBoundingClientRect(), dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2, d = Math.hypot(dx, dy), limit = Math.max(1,(r.width-$('stick').offsetWidth)/2-4); touch.x = dx / Math.max(limit, d); touch.y = dy / Math.max(limit, d); $('stick').style.transform = `translate(${touch.x * limit}px,${touch.y * limit}px)`; }
   joy.addEventListener('pointerdown', e => { if (touch.id !== null) return; e.preventDefault(); touch.id = e.pointerId; joy.setPointerCapture(e.pointerId); moveStick(e); });
   joy.addEventListener('pointermove', e => { if (touch.id === e.pointerId) { e.preventDefault(); moveStick(e); } });
   function releaseStick(e) { if (touch.id === e.pointerId) { touch.id = null; touch.x = touch.y = 0; $('stick').style.transform = ''; } }

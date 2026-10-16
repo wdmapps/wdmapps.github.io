@@ -60,6 +60,6 @@
   $('closeInstall').addEventListener('click',close);
   window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!modal.classList.contains('hidden'))close();});
   if('serviceWorker'in navigator&&location.protocol!=='file:'){
-    navigator.serviceWorker.register('./sw.js?v=1.3.0',{updateViaCache:'none'}).then(reg=>{registration=reg;return navigator.serviceWorker.ready;}).then(()=>{offlineReady=true;offlineStatus();}).catch(()=>{$('offlineStatus').textContent='Não foi possível preparar o modo offline. A instalação e o jogo online continuam disponíveis conforme o navegador.';});
+    navigator.serviceWorker.register('./sw.js?v=1.4.0',{updateViaCache:'none'}).then(reg=>{registration=reg;return navigator.serviceWorker.ready;}).then(()=>{offlineReady=true;offlineStatus();}).catch(()=>{$('offlineStatus').textContent='Não foi possível preparar o modo offline. A instalação e o jogo online continuam disponíveis conforme o navegador.';});
   }
 })();

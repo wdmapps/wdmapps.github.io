@@ -1,0 +1,59 @@
+/* Touch layouts follow the device in either orientation, including installed PWAs. */
+html,body{height:100dvh;overscroll-behavior:none}
+#arena{width:100vw;height:100dvh}
+.touch-layout .game-hint,.touch-layout .control-strip{display:none!important}
+.touch-layout .topbar{left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right))}
+.touch-layout .touch-controls{left:max(20px,env(safe-area-inset-left));right:max(20px,env(safe-area-inset-right));bottom:max(15px,env(safe-area-inset-bottom))}
+#stick{left:calc(50% - 21px);top:calc(50% - 21px)}
+.touch-layout.landscape-layout .topbar{top:max(8px,env(safe-area-inset-top));gap:12px}
+.touch-layout.landscape-layout .brand{font-size:12px;gap:7px}
+.touch-layout.landscape-layout .brand-icon{font-size:23px}
+.touch-layout.landscape-layout .brand small,.touch-layout.landscape-layout .sector{display:none}
+.touch-layout.landscape-layout .top-actions{gap:6px}
+.touch-layout.landscape-layout .icon-button{height:30px;min-width:30px;padding:0 9px;font-size:14px}
+.touch-layout.landscape-layout .hud{inset:48px max(14px,env(safe-area-inset-right)) auto max(14px,env(safe-area-inset-left));gap:16px;flex-wrap:nowrap;align-items:flex-start}
+.touch-layout.landscape-layout .health-panel{width:190px;max-width:31%}
+.touch-layout.landscape-layout .health-panel>div:first-child{font-size:7px}
+.touch-layout.landscape-layout .bar{height:4px;margin-top:7px}
+.touch-layout.landscape-layout .health-panel small{font-size:7px;margin-top:5px}
+.touch-layout.landscape-layout .wave-panel{position:static;text-align:center;width:170px}
+.touch-layout.landscape-layout .wave-panel>span{font-size:8px;letter-spacing:1.5px}
+.touch-layout.landscape-layout .wave-panel>b{font-size:9px;margin-top:5px}
+.touch-layout.landscape-layout .wave-track{margin-top:6px}
+.touch-layout.landscape-layout .score-panel{width:auto;min-width:110px;margin-left:0}
+.touch-layout.landscape-layout .score-panel>span{font-size:7px}
+.touch-layout.landscape-layout .score-panel>b{font-size:18px;margin-top:2px}
+.touch-layout.landscape-layout .score-panel small{font-size:8px}
+.touch-layout.landscape-layout .touch-controls{bottom:max(10px,env(safe-area-inset-bottom));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right))}
+.touch-layout.landscape-layout #joystick{width:90px;height:90px}
+.touch-layout.landscape-layout #stick{width:36px;height:36px;left:calc(50% - 18px);top:calc(50% - 18px)}
+.touch-layout.landscape-layout #dashButton{width:68px;height:68px;font-size:25px}
+.touch-layout.landscape-layout .announcement{top:39%}
+.touch-layout.landscape-layout .announcement b{font-size:38px;margin-top:8px;letter-spacing:-1.5px}
+.touch-layout.landscape-layout .announcement span{font-size:8px;letter-spacing:2px}
+.touch-layout.landscape-layout .toast{top:102px;font-size:9px;padding:10px 16px}
+.touch-layout.landscape-layout .intro{top:61px;left:max(6%,env(safe-area-inset-left));right:48%}
+.touch-layout.landscape-layout .intro .eyebrow{font-size:7px;letter-spacing:1.5px}
+.touch-layout.landscape-layout h1{font-size:clamp(38px,12dvh,60px);letter-spacing:-3px;margin:13px 0 10px}
+.touch-layout.landscape-layout .description{font-size:12px;line-height:1.4;margin:0 0 12px}
+.touch-layout.landscape-layout .intro .primary{min-height:42px;padding:11px 17px;font-size:9px;width:100%;max-width:300px}
+.touch-layout.landscape-layout .install-button{min-height:32px;margin-top:8px;padding:9px 12px;font-size:8px;max-width:300px}
+.touch-layout.landscape-layout .install-button>small{font-size:6px}
+.touch-layout.landscape-layout .spec-card,.touch-layout.landscape-layout .play-note{display:none}
+.touch-layout.landscape-layout .menu-bottom{bottom:max(10px,env(safe-area-inset-bottom));padding-top:10px;font-size:7px}
+.touch-layout.landscape-layout .menu-bottom>span:nth-child(2){display:none}
+.touch-layout.landscape-layout .modal{padding:max(12px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));align-items:flex-start}
+.touch-layout.landscape-layout .compact-panel{margin:auto;padding:18px 24px;max-height:calc(100dvh - 24px);overflow:auto}
+.touch-layout.landscape-layout .modal h2{font-size:28px;margin:12px 0;letter-spacing:-1px}
+.touch-layout.landscape-layout .modal p{font-size:11px;line-height:1.5}
+.touch-layout.landscape-layout .compact-panel .primary{min-height:42px;margin-top:15px;padding:11px 17px}
+.touch-layout.landscape-layout .upgrade-content{margin:auto}
+.touch-layout.landscape-layout .upgrade-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.touch-layout.landscape-layout .upgrade-card{min-height:150px;padding:13px;position:relative}
+.touch-layout.landscape-layout .upgrade-card .upgrade-icon{position:static;font-size:25px;height:32px}
+.touch-layout.landscape-layout .upgrade-card .upgrade-type{font-size:7px;letter-spacing:1px}
+.touch-layout.landscape-layout .upgrade-card h3{font-size:15px;margin:10px 0 5px}
+.touch-layout.landscape-layout .upgrade-card p{font-size:10px;margin-bottom:12px}
+.touch-layout.landscape-layout .upgrade-card .choose{font-size:7px}
+.touch-layout.landscape-layout .modal-note{font-size:7px;margin-top:12px}
+@media(max-height:360px){.touch-layout.landscape-layout .intro{top:54px}.touch-layout.landscape-layout .description{display:none}.touch-layout.landscape-layout h1{margin:10px 0 12px}.touch-layout.landscape-layout .menu-bottom{padding-top:7px}}
