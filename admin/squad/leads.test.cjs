@@ -41,3 +41,7 @@ test('falha ao salvar o início impede novas chamadas de análise e abordagem',a
   const f=fixture();f.run("state.leads=[{id:'a',company:'Empresa'}];saveState=async()=>false");await f.run("prepareLeadKit('a','lead')");assert.equal(f.calls.length,0);assert.equal(f.run('state.leads[0].scoutStatus'),'error');
   f.run("state.leads[0].scoutAnalysis='Diagnóstico salvo anteriormente'");await f.run("generateLeadApproach(state.leads[0],'lead')");assert.equal(f.calls.length,0);assert.equal(f.run('state.leads[0].copyStatus'),'error');
 });
+test('fontes agregadas da pesquisa ficam recolhidas, sem duplicatas ou links inseguros',()=>{
+  const f=fixture();const html=f.run("leadEvidenceHtml({sources:[{url:'https://example.org',title:'Página A'},{url:'https://example.org',title:'Repetida'},{url:'javascript:alert(1)',title:'Inválida'}]})");
+  assert.match(html,/<details class="lead-extra">/);assert.doesNotMatch(html,/<details[^>]*open/);assert.match(html,/fontes da pesquisa \(1\)/);assert.doesNotMatch(html,/javascript:|Repetida/);
+});
