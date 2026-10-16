@@ -1,3 +1,4 @@
+import { PLAN_SCHEMA, LEAD_SCHEMA, validateStructured, responseEvidence } from "./squad-contract.ts";
 // =====================================================================
 // WDM TV - Proxy para Deno Deploy
 // Porta o worker.js original da Cloudflare com duas melhorias:
@@ -350,7 +351,11 @@ async function runSquadAgentWithOpenAI(
   objective: string,
   previousResults: Record<string, unknown>,
   missionMode = "client",
+  outputFormat = "",
+  excludedCompanies: string[] = [],
+  signal?: AbortSignal,
 ) {
+  const startedAt=Date.now();
   const agent = SQUAD_AGENTS[agentId];
   if (!agent) throw new Error("AGENT_INVALID");
 
@@ -388,7 +393,7 @@ async function runSquadAgentWithOpenAI(
     "",
     ...contextLines,
     "",
-    "OBJETIVO DA MISSÃO: " + (cleanText(objective, 1800) || "Encontrar oportunidades e preparar um plano comercial e digital acionável."),
+    "OBJETIVO DA MISSÃO: " + (cleanText(objective, 12000) || "Encontrar oportunidades e preparar um plano comercial e digital acionável."),
     prior ? "\nRESULTADOS DOS AGENTES ANTERIORES:\n" + prior : "",
     "",
     "MISSÃO DESTE AGENTE:",
@@ -397,7 +402,9 @@ async function runSquadAgentWithOpenAI(
     "REGRAS:",
     "- Responda em português do Brasil.",
     "- Seja prático, organizado e específico.",
-    "- Não invente informações sobre o cliente.",
+    "- Não invente informações sobre o cliente. Separe fatos com evidência, hipóteses e recomendações.",
+    excludedCompanies.length ? "- Não prospecte empresas já cadastradas: " + excludedCompanies.map(x=>cleanText(x,180)).join("; ") : "",
+    outputFormat === "leads" ? "- Retorne SOMENTE o JSON do schema leads. Ignore o formato LEAD_START/LEAD_END solicitado no briefing; use os mesmos campos no objeto JSON. Se não verificar uma informação, use NAO_CONFIRMADO ou string vazia. Ausência de um resultado de busca não comprova ausência de site. Cada empresa precisa de uma fonte pública." : "",
     "- Quando houver incerteza, sinalize como hipótese.",
     "- Não envie mensagens, não publique, não compre mídia e não execute ações externas. Prepare tudo para aprovação do administrador.",
     agentId === "planner"
@@ -408,9 +415,11 @@ async function runSquadAgentWithOpenAI(
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
     input,
-    max_output_tokens: agentId === "planner" ? 1200 : 1800,
+    max_output_tokens: outputFormat === "leads" ? 6500 : agentId === "planner" ? 2400 : 2400,
   };
-  if (agent.web) body.tools = [{ type: "web_search" }];
+  const structuredKind=agentId==='planner'?'planner':outputFormat==='leads'?'leads':'';
+  if(structuredKind)body.text={format:{type:'json_schema',name:structuredKind==='planner'?'execution_plan':'lead_candidates',strict:true,schema:structuredKind==='planner'?PLAN_SCHEMA:LEAD_SCHEMA}};
+  if (agent.web){body.tools = [{ type: "web_search" }];body.include=['web_search_call.action.sources'];}
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -419,7 +428,7 @@ async function runSquadAgentWithOpenAI(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(180000),
+    signal: signal ? AbortSignal.any([signal,AbortSignal.timeout(180000)]) : AbortSignal.timeout(180000),
   });
 
   const raw = await response.text();
@@ -431,15 +440,29 @@ async function runSquadAgentWithOpenAI(
     throw new Error("OPENAI_ERROR:" + response.status + ":" + apiMessage);
   }
 
+  const evidence=responseEvidence(payload);
+  const usage=payload.usage?{inputTokens:Number(payload.usage.input_tokens)||0,outputTokens:Number(payload.usage.output_tokens)||0,cachedTokens:Number(payload.usage.input_tokens_details?.cached_tokens)||0,totalTokens:Number(payload.usage.total_tokens)||0}:null;
+  // Prices are optional deployment settings. Never present a guessed tariff as actual spend.
+  const inputRate=Number(Deno.env.get('SQUAD_INPUT_USD_PER_MILLION')),outputRate=Number(Deno.env.get('SQUAD_OUTPUT_USD_PER_MILLION')),cachedRate=Number(Deno.env.get('SQUAD_CACHED_USD_PER_MILLION')),webRate=Number(Deno.env.get('SQUAD_WEB_USD_PER_CALL'));
+  const priced=usage&&[inputRate,outputRate,cachedRate,webRate].every(x=>Number.isFinite(x)&&x>=0);
+  const estimatedCostUsd=priced?((usage!.inputTokens-usage!.cachedTokens)*inputRate+usage!.cachedTokens*cachedRate+usage!.outputTokens*outputRate)/1e6+evidence.webSearchCalls*webRate:null;
+
+  function fail(message:string):never{throw Object.assign(new Error(message),{telemetry:{...evidence,responseId:payload?.id||'',model:OPENAI_MODEL,usage,durationMs:Date.now()-startedAt,estimatedCostUsd}});}
+  if(payload?.status&&payload.status!=='completed')fail('OPENAI_INCOMPLETE:'+cleanText(payload?.incomplete_details?.reason||payload.status,180));
+  if((payload?.output||[]).some((item:any)=>(item.content||[]).some((part:any)=>part.type==='refusal')))fail('OPENAI_REFUSAL');
   const text = extractOpenAIText(payload);
-  if (!text) throw new Error("OPENAI_EMPTY");
+  if (!text) fail("OPENAI_EMPTY");
+  let structured=null;
+  try{structured=structuredKind?validateStructured(JSON.parse(text),structuredKind):null;}catch(error){fail(cleanText((error as Error).message,250));}
+  if(outputFormat==='leads'&&!evidence.usedWeb)fail('OPENAI_WEB_NOT_USED:Não houve pesquisa web nesta validação. Tente novamente.');
 
   return {
     agentId,
     agentName: agent.name,
     role: agent.role,
     model: OPENAI_MODEL,
-    usedWeb: agent.web,
+    ...evidence,
+    responseId:payload.id||"",usage,durationMs:Date.now()-startedAt,estimatedCostUsd,structured,
     text,
   };
 }
@@ -661,7 +684,7 @@ async function handleSquadRequest(request: Request): Promise<Response> {
 
   const agentId = cleanText(data?.agentId, 40).toLowerCase();
   const client = data?.client && typeof data.client === "object" ? data.client : {};
-  const objective = cleanText(data?.objective, 1800);
+  const objective = cleanText(data?.objective, 12000);
   const missionMode = cleanText(data?.missionMode, 40).toLowerCase() === "prospecting" ? "prospecting" : "client";
   const previousResults = data?.previousResults && typeof data.previousResults === "object"
     ? data.previousResults
@@ -671,7 +694,7 @@ async function handleSquadRequest(request: Request): Promise<Response> {
   if (!cleanText(client?.name, 220)) return json({ ok: false, error: "O cliente precisa ter um nome." }, 400);
 
   try {
-    const result = await runSquadAgentWithOpenAI(agentId, client, objective, previousResults, missionMode);
+    const result = await runSquadAgentWithOpenAI(agentId, client, objective, previousResults, missionMode, data?.outputFormat==='leads'?'leads':'',Array.isArray(data?.excludedCompanies)?data.excludedCompanies.slice(0,100):[],request.signal);
     return json({ ok: true, ...result });
   } catch (error) {
     const message = cleanText((error as Error)?.message || error, 1000);
@@ -679,7 +702,7 @@ async function handleSquadRequest(request: Request): Promise<Response> {
     if (message === "OPENAI_KEY_MISSING") {
       return json({ ok: false, error: "A OPENAI_API_KEY ainda não foi configurada no Deno Deploy." }, 503);
     }
-    return json({ ok: false, error: message.replace(/^OPENAI_ERROR:\d+:/, "") || "Falha ao executar o agente." }, 502);
+    return json({ ok: false, error: message.replace(/^OPENAI_ERROR:\d+:/, "") || "Falha ao executar o agente.",telemetry:(error as any)?.telemetry||null }, 502);
   }
 }
 
@@ -694,6 +717,7 @@ async function handleRequest(request: Request): Promise<Response> {
   }
 
   const path = url.pathname;
+  if (path === "/squad/health") return request.method === "GET" ? json({ok:true,version:"2026-10-16.2",structuredOutputs:true}) : json({ok:false,error:"Método não permitido."},405);
   if (path === "/squad/agent") return handleSquadRequest(request);
   if (path === "/squad/creative") return handleSquadCreativeRequest(request);
 
