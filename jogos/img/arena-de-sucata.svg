@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" role="img" aria-labelledby="title desc">
+<title id="title">Arena de Sucata</title><desc id="desc">Robô de combate iluminado em verde, disparando contra máquinas num ferro-velho industrial.</desc>
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0c171d"/><stop offset="1" stop-color="#172b31"/></linearGradient>
+ <linearGradient id="steel" x2=".8" y2="1"><stop stop-color="#abc1a7"/><stop offset=".5" stop-color="#64887d"/><stop offset="1" stop-color="#344f4b"/></linearGradient>
+ <radialGradient id="a"><stop stop-color="#6affd1" stop-opacity=".2"/><stop offset="1" stop-color="#6affd1" stop-opacity="0"/></radialGradient>
+ <radialGradient id="fire"><stop stop-color="#ffd0a3"/><stop offset=".25" stop-color="#ff9b55"/><stop offset="1" stop-color="#ff5836" stop-opacity="0"/></radialGradient>
+ <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M0 0H64V64H0Z" fill="none" stroke="#678c88" stroke-opacity=".13"/><path d="M5 5H59V59H5Z" fill="none" stroke="#678c88" stroke-opacity=".07"/><circle cx="8" cy="8" r="1" fill="#647b7b"/></pattern>
+ <pattern id="stripe" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="13" height="26" fill="#8c7b43"/><rect x="13" width="13" height="26" fill="#101a1e"/></pattern>
+ <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <g id="enemy"><ellipse cy="13" rx="26" ry="18" fill="#000" opacity=".5"/><rect x="-26" y="-22" width="11" height="44" rx="3" fill="#10181d" stroke="#5e6b65"/><rect x="15" y="-22" width="11" height="44" rx="3" fill="#10181d" stroke="#5e6b65"/><path d="M-15-25H14L20-10 16 22H-15L-20 8Z" fill="#865c4c" stroke="#b28e71"/><rect x="-6" y="-37" width="12" height="23" rx="2" fill="#303b3b" stroke="#a48f74"/><rect x="-10" y="-12" width="20" height="18" rx="3" fill="#30282a"/><path d="M-7-6H7" stroke="#ff794b" stroke-width="4" filter="url(#glow)"/></g>
+</defs>
+<rect width="640" height="400" fill="url(#bg)"/><rect width="640" height="400" fill="url(#grid)"/>
+<ellipse cx="315" cy="205" rx="245" ry="190" fill="url(#a)"/>
+<path d="M20 36H620M20 365H620" stroke="url(#stripe)" stroke-width="13" opacity=".65"/>
+<path d="M35 62V132M606 275V337" stroke="#9cffe0" stroke-width="3" filter="url(#glow)"/>
+<g fill="none" stroke="#9cffe0" opacity=".16"><circle cx="305" cy="220" r="125"/><circle cx="305" cy="220" r="137" stroke-dasharray="18 12"/></g>
+<g transform="translate(80 260) rotate(-12)"><rect x="5" y="8" width="106" height="57" rx="3" fill="#000" opacity=".4"/><rect width="106" height="57" rx="3" fill="#465957" stroke="#80918b"/><path d="M12 8V43M25 8V43M38 8V43M51 8V43M64 8V43M77 8V43M90 8V43" stroke="#1b292d" stroke-width="7"/><path d="M10 50H35" stroke="#ac9a72" stroke-width="4"/></g>
+<use href="#enemy" transform="translate(505 105) rotate(-52) scale(.95)"/><use href="#enemy" transform="translate(534 277) rotate(-121) scale(1.25)"/>
+<g transform="translate(301 222) rotate(42)"><ellipse cx="8" cy="25" rx="65" ry="45" fill="#000" opacity=".5"/>
+ <rect x="-62" y="-44" width="25" height="91" rx="7" fill="#0b171c" stroke="#739287" stroke-width="3"/><rect x="37" y="-44" width="25" height="91" rx="7" fill="#0b171c" stroke="#739287" stroke-width="3"/>
+ <path d="M-57-31H-42M-57-15H-42M-57 1H-42M-57 17H-42M-57 33H-42M42-31H57M42-15H57M42 1H57M42 17H57M42 33H57" stroke="#3f5a57" stroke-width="6"/>
+ <path d="M-34-48 26-51 46-25 38 45-28 51-46 24Z" fill="url(#steel)" stroke="#b7c9ad" stroke-width="3"/>
+ <path d="M-24-34 21-39 32-20 26 31-20 37-33 20Z" fill="#27433f" stroke="#4e7465" stroke-width="2"/>
+ <rect x="-17" y="-86" width="34" height="56" rx="5" fill="#203337" stroke="#92afa0" stroke-width="3"/><rect x="-12" y="-88" width="24" height="8" fill="#a5ffe0" filter="url(#glow)"/>
+ <rect x="-25" y="-26" width="50" height="40" rx="7" fill="#102b2e" stroke="#a6c7ac" stroke-width="2"/><path d="M-17-11H17" stroke="#a4ffdc" stroke-width="9" filter="url(#glow)"/>
+ <path d="M-19 24H19M-18 32H18" stroke="#6c9180" stroke-width="4"/>
+ <path d="M-6-94 5-126 13-97 7-101 0-84Z" fill="#e5ffdc" filter="url(#glow)"/>
+</g>
+<path d="M390 135 441 84M414 154 464 104M445 234 478 248" stroke="#b9ffe3" stroke-width="3" filter="url(#glow)"/>
+<circle cx="484" cy="258" r="38" fill="url(#fire)"/>
+<g fill="#ffbb7b"><path d="M456 240 443 228 459 235Z"/><path d="M498 240 509 224 503 244Z"/><path d="M497 275 512 292 493 280Z"/></g>
+<text x="57" y="84" fill="#9cffe0" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="4">WDM // ARENA DE SUCATA</text>
+<text x="58" y="342" fill="#9fb8b3" font-family="Arial,sans-serif" font-size="10" letter-spacing="3">15 FASES · 3 CHEFES · SOBREVIVA</text>
+</svg>
