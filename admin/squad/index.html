@@ -140,7 +140,8 @@
     @media(max-width:760px){.result-summary{grid-template-columns:1fr}.result-hero{flex-direction:column}.result-actions{justify-content:flex-start}.agent-history-item summary{grid-template-columns:1fr}.agent-history-item .history-status{justify-self:start}}
     @media(max-width:520px){.live-network{grid-template-columns:1fr}.voice-status{width:100%;margin-left:0}}
   </style>
-<link rel="stylesheet" href="improvements.css?v=20261016.5">
+<link rel="stylesheet" href="improvements.css?v=20261016.6">
+<link rel="stylesheet" href="leads.css?v=20261016.6">
 </head>
 <body>
 <div class="app">
@@ -251,14 +252,25 @@
       </section>
 
       <section class="view" id="view-leads">
-        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>O Radar encontra empresas públicas com sinais de oportunidade. Você aprova quem entra no funil comercial.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="radarSearchBtn" onclick="openRadarLeadModal()">📡 Buscar com Radar</button><button class="btn" onclick="openLeadModal()">+ Novo lead</button><button class="btn danger" id="clearAllLeadsBtn" onclick="openClearLeadsModal()">🗑 Limpar todos</button></div></div>
+        <div class="hero"><div><div class="eyebrow">Prospecção sob seu controle</div><h1>Leads</h1><p>Encontre a empresa, confira o site e revise a proposta de melhoria antes de conversar.</p></div><div class="row-actions"><button class="btn primary" id="radarSearchBtn" onclick="openRadarLeadModal()">📡 Buscar empresas</button><button class="btn" onclick="openLeadModal()">+ Novo lead</button><button class="btn danger" id="clearAllLeadsBtn" onclick="openClearLeadsModal()">🗑 Limpar todos</button></div></div>
         <div class="card lead-cleanup-undo" id="leadCleanupUndo" role="status" aria-live="polite" hidden></div>
-        <div class="card"><div class="card-head"><h2>📞 Fila de contatos e retornos</h2><span class="tiny muted" id="contactQueueCount"></span></div><div id="contactQueue"></div></div>
-        <div class="card radar-box">
-          <div class="card-head"><div><h2>📡 Sugestões do Radar</h2><div class="radar-status" id="radarLeadStatus">Nenhuma pesquisa executada.</div></div><div class="row-actions"><button class="btn" id="approveAllRadarBtn" onclick="approveAllLeadCandidates()" style="display:none">Adicionar todos ao funil</button><button class="btn danger" id="clearRadarBtn" onclick="clearLeadCandidates()" style="display:none">Limpar sugestões</button></div></div>
-          <div id="radarLeadCandidates"></div>
+        <div class="lead-overview" id="leadOverview"></div>
+        <div class="card lead-workspace-card">
+          <div class="lead-tabs" role="group" aria-label="Etapas dos leads">
+            <button class="btn" data-lead-tab="found" aria-pressed="true" onclick="setLeadTab('found')">Encontradas <span>0</span></button>
+            <button class="btn" data-lead-tab="funnel" aria-pressed="false" onclick="setLeadTab('funnel')">Meu funil <span>0</span></button>
+            <button class="btn" data-lead-tab="returns" aria-pressed="false" onclick="setLeadTab('returns')">Retornos <span>0</span></button>
+          </div>
+          <p class="radar-status" id="radarLeadStatus" role="status"></p>
+          <div class="lead-filters">
+            <label>Buscar empresa ou cidade<input id="leadSearch" type="search" placeholder="Nome, cidade, contato..." oninput="renderLeads()"></label>
+            <label>Situação do site<select id="leadSiteFilter" onchange="renderLeads()"><option value="all">Todos os sites</option><option value="SEM_SITE">Site não encontrado</option><option value="SITE_FRACO">Com sinais de melhoria</option><option value="COM_SITE">Com site</option><option value="NAO_CONFIRMADO">A confirmar</option></select></label>
+            <label>Status no funil<select id="leadFilter" onchange="renderLeads()"><option value="all">Todos os status</option><option>Novo</option><option>Contato</option><option>Proposta</option><option>Ganho</option><option>Perdido</option></select></label>
+            <label>Ordenar por<select id="leadSort" onchange="renderLeads()"><option value="score">Maior oportunidade</option><option value="recent">Mais recentes</option><option value="company">Nome da empresa</option></select></label>
+          </div>
+          <p class="tiny muted" id="leadCount" role="status" aria-live="polite"></p>
+          <div id="leadWorkspace"></div>
         </div>
-        <div class="card"><div class="toolbar"><div class="filters"><input id="leadSearch" placeholder="Buscar lead..." oninput="renderLeads()"><select id="leadFilter" onchange="renderLeads()"><option value="all">Todos</option><option>Novo</option><option>Contato</option><option>Proposta</option><option>Ganho</option><option>Perdido</option></select></div><span class="muted tiny" id="leadCount"></span></div><div id="leadsTable"></div></div>
       </section>
 
       <section class="view" id="view-agents">
@@ -323,10 +335,11 @@
 <div class="modal" id="agentModal"><div class="modal-card"><div class="modal-head"><h2 id="agentModalTitle">Missão do agente</h2><button class="close" onclick="closeModal('agentModal')">×</button></div><p class="muted tiny" style="margin-top:0">Briefing pronto para usar no ChatGPT/Work.</p><textarea id="agentPrompt" class="prompt-box"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal('agentModal')">Fechar</button><button class="btn primary" onclick="copyPrompt()">Copiar briefing</button></div></div></div>
 
 <script src="../auth.js"></script>
-<script src="core.js?v=20261016.5"></script>
-<script src="sync.js?v=20261016.5"></script>
-<script src="crm.js?v=20261016.5"></script>
-<script src="squad.js?v=20261016.5"></script>
+<script src="core.js?v=20261016.6"></script>
+<script src="sync.js?v=20261016.6"></script>
+<script src="crm.js?v=20261016.6"></script>
+<script src="leads.js?v=20261016.6"></script>
+<script src="squad.js?v=20261016.6"></script>
 
 </body>
 </html>
