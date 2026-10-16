@@ -74,3 +74,67 @@ function telemetryHtml(record){
   const sources=(record.sources||[]).map(s=>{const url=safePublicUrl(s.url);return url?'<li><a class="link" target="_blank" rel="noopener" href="'+esc(url)+'">'+esc(s.title||url)+'</a></li>':'';}).join('');
   return '<div class="tiny muted telemetry">'+esc(record.model||'Modelo não registrado')+' · '+(record.usedWeb?'Pesquisa web realizada':'Sem pesquisa web registrada')+(record.usage?' · '+Number(record.usage.totalTokens||0).toLocaleString('pt-BR')+' tokens':'')+(record.durationMs?' · '+Math.round(record.durationMs/1000)+'s':'')+(record.estimatedCostUsd!=null?' · estimativa US$ '+Number(record.estimatedCostUsd).toFixed(4):'')+(sources?'<ul>'+sources+'</ul>':'')+'</div>';
 }
+
+const LEAD_CLEANUP_KEY='wdm_squad_last_lead_cleanup';
+let leadCleanupBusy=false;
+function leadOperationsRunning(){
+  return radarSearchInFlight||state.radarLeadSearch?.status==='running'&&remoteRun?.id?.startsWith('radar-')&&remoteRun.expiresAt>Date.now()||[...state.leads,...state.leadCandidates].some(record=>['scout','copy'].some(kind=>record[kind+'Status']==='running'&&Date.now()-(record[kind+'StartedAt']||0)<240000));
+}
+function readLeadCleanup(){
+  const backup=safeParse(localStorage.getItem(LEAD_CLEANUP_KEY));
+  return backup?.version===1&&Array.isArray(backup.leads)&&Array.isArray(backup.leadCandidates)?backup:null;
+}
+function renderLeadCleanup(){
+  const button=document.getElementById('clearAllLeadsBtn'),busy=leadCleanupBusy||leadOperationsRunning();
+  if(button){button.disabled=busy||!state.leads.length&&!state.leadCandidates.length;button.title=busy?'Aguarde a pesquisa ou análise terminar.':'Limpar todos os leads e sugestões, incluindo os que estão fora do filtro.';}
+  const panel=document.getElementById('leadCleanupUndo'),backup=readLeadCleanup();
+  if(!panel)return;
+  panel.hidden=!backup;
+  if(backup)panel.innerHTML='<div><strong>Última limpeza: '+backup.leads.length+' lead(s) e '+backup.leadCandidates.length+' sugestão(ões).</strong><p class="tiny muted">Você pode desfazer esta limpeza neste navegador, inclusive após recarregar a página.</p></div><button class="btn" onclick="undoLeadCleanup()" '+(busy?'disabled':'')+'>↶ Desfazer última limpeza</button>';
+}
+function openClearLeadsModal(){
+  if(leadCleanupBusy)return;
+  if(leadOperationsRunning())return alert('Aguarde a pesquisa ou análise terminar antes de limpar os leads.');
+  const selection={leads:state.leads.map(x=>x.id),leadCandidates:state.leadCandidates.map(x=>x.id)};
+  if(!selection.leads.length&&!selection.leadCandidates.length)return;
+  document.getElementById('modalTitle').textContent='Limpar todos os leads';
+  document.getElementById('modalBody').innerHTML='<p>Remover <strong>'+selection.leads.length+' lead(s) do funil</strong> e <strong>'+selection.leadCandidates.length+' sugestão(ões) do Radar</strong>?</p><p class="tiny muted">Inclui todos os status, mesmo com filtros ativos. A última limpeza poderá ser desfeita neste navegador. Uma nova limpeza substituirá essa cópia.</p><div class="row-actions" style="justify-content:flex-end"><button class="btn" onclick="closeModal(\'formModal\')">Cancelar</button><button class="btn danger" id="confirmClearAllLeads">Remover todos</button></div>';
+  document.getElementById('confirmClearAllLeads').onclick=()=>clearAllLeads(selection);
+  openModal('formModal');
+}
+async function clearAllLeads(selection){
+  if(leadCleanupBusy)return;
+  if(leadOperationsRunning())return alert('Aguarde a pesquisa ou análise terminar antes de limpar os leads.');
+  const leadIds=new Set(selection.leads),candidateIds=new Set(selection.leadCandidates);
+  const backup={version:1,id:uid(),removedAt:new Date().toISOString(),leads:SquadCore.clone(state.leads.filter(x=>leadIds.has(x.id))),leadCandidates:SquadCore.clone(state.leadCandidates.filter(x=>candidateIds.has(x.id)))};
+  if(!backup.leads.length&&!backup.leadCandidates.length){closeModal('formModal');return;}
+  // Write the recovery copy before changing either the cache or the cloud.
+  try{localStorage.setItem(LEAD_CLEANUP_KEY,JSON.stringify(backup));}
+  catch(e){alert('Não foi possível guardar a cópia para desfazer. Libere espaço neste navegador e tente novamente. Nenhum lead foi removido.');return;}
+  leadCleanupBusy=true;
+  try{
+    state.leads=state.leads.filter(x=>!leadIds.has(x.id));
+    state.leadCandidates=state.leadCandidates.filter(x=>!candidateIds.has(x.id));
+    addActivity('🗑️','Leads e sugestões removidos',backup.leads.length+' lead(s) e '+backup.leadCandidates.length+' sugestão(ões). Cópia para desfazer neste navegador.');
+    closeModal('formModal');await saveState();
+  }finally{leadCleanupBusy=false;renderLeads();}
+}
+async function undoLeadCleanup(){
+  if(leadCleanupBusy)return;
+  if(leadOperationsRunning())return alert('Aguarde a pesquisa ou análise terminar antes de restaurar os leads.');
+  const backup=readLeadCleanup();if(!backup)return;
+  leadCleanupBusy=true;
+  try{
+    let restored=0;
+    for(const key of ['leads','leadCandidates']){
+      const ids=new Set(state[key].map(x=>x.id)),companies=new Set(state[key].map(SquadCore.leadKey));
+      for(const item of backup[key]){
+        const company=SquadCore.leadKey(item);
+        if(ids.has(item.id)||companies.has(company))continue;
+        state[key].push(SquadCore.clone(item));ids.add(item.id);companies.add(company);restored++;
+      }
+    }
+    addActivity('↶','Limpeza de leads desfeita',restored+' registro(s) restaurado(s).');
+    if(await saveState()&&readLeadCleanup()?.id===backup.id)localStorage.removeItem(LEAD_CLEANUP_KEY);
+  }finally{leadCleanupBusy=false;renderLeads();}
+}

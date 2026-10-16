@@ -140,7 +140,7 @@
     @media(max-width:760px){.result-summary{grid-template-columns:1fr}.result-hero{flex-direction:column}.result-actions{justify-content:flex-start}.agent-history-item summary{grid-template-columns:1fr}.agent-history-item .history-status{justify-self:start}}
     @media(max-width:520px){.live-network{grid-template-columns:1fr}.voice-status{width:100%;margin-left:0}}
   </style>
-<link rel="stylesheet" href="improvements.css?v=20261016.4">
+<link rel="stylesheet" href="improvements.css?v=20261016.5">
 </head>
 <body>
 <div class="app">
@@ -251,7 +251,8 @@
       </section>
 
       <section class="view" id="view-leads">
-        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>O Radar encontra empresas públicas com sinais de oportunidade. Você aprova quem entra no funil comercial.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="radarSearchBtn" onclick="openRadarLeadModal()">📡 Buscar com Radar</button><button class="btn" onclick="openLeadModal()">+ Novo lead</button></div></div>
+        <div class="hero"><div><div class="eyebrow">Prospecção</div><h1>Leads</h1><p>O Radar encontra empresas públicas com sinais de oportunidade. Você aprova quem entra no funil comercial.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="radarSearchBtn" onclick="openRadarLeadModal()">📡 Buscar com Radar</button><button class="btn" onclick="openLeadModal()">+ Novo lead</button><button class="btn danger" id="clearAllLeadsBtn" onclick="openClearLeadsModal()">🗑 Limpar todos</button></div></div>
+        <div class="card lead-cleanup-undo" id="leadCleanupUndo" role="status" aria-live="polite" hidden></div>
         <div class="card"><div class="card-head"><h2>📞 Fila de contatos e retornos</h2><span class="tiny muted" id="contactQueueCount"></span></div><div id="contactQueue"></div></div>
         <div class="card radar-box">
           <div class="card-head"><div><h2>📡 Sugestões do Radar</h2><div class="radar-status" id="radarLeadStatus">Nenhuma pesquisa executada.</div></div><div class="row-actions"><button class="btn" id="approveAllRadarBtn" onclick="approveAllLeadCandidates()" style="display:none">Adicionar todos ao funil</button><button class="btn danger" id="clearRadarBtn" onclick="clearLeadCandidates()" style="display:none">Limpar sugestões</button></div></div>
@@ -322,10 +323,10 @@
 <div class="modal" id="agentModal"><div class="modal-card"><div class="modal-head"><h2 id="agentModalTitle">Missão do agente</h2><button class="close" onclick="closeModal('agentModal')">×</button></div><p class="muted tiny" style="margin-top:0">Briefing pronto para usar no ChatGPT/Work.</p><textarea id="agentPrompt" class="prompt-box"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal('agentModal')">Fechar</button><button class="btn primary" onclick="copyPrompt()">Copiar briefing</button></div></div></div>
 
 <script src="../auth.js"></script>
-<script src="core.js?v=20261016.4"></script>
-<script src="sync.js?v=20261016.4"></script>
-<script src="crm.js?v=20261016.4"></script>
-<script src="squad.js?v=20261016.4"></script>
+<script src="core.js?v=20261016.5"></script>
+<script src="sync.js?v=20261016.5"></script>
+<script src="crm.js?v=20261016.5"></script>
+<script src="squad.js?v=20261016.5"></script>
 
 </body>
 </html>

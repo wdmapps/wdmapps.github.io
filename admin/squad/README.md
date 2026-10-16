@@ -53,3 +53,15 @@ O erro real `OPENAI_INCOMPLETE:max_output_tokens` foi identificado no histórico
 Ray e Scott usam agora 8.192 tokens iniciais, o Planner 6.144, respostas estruturadas de leads 12.288 e os demais especialistas 4.096. Modelos GPT-5/6 usam esforço baixo de raciocínio e respostas concisas, mantendo o modelo configurado. Somente a interrupção explícita por tokens permite uma nova tentativa, dobrando o limite até o teto de 24.576. Não há repetição automática por falha de rede ou outro motivo. O consumo das duas tentativas é somado e os IDs individuais são preservados.
 
 O Command exibe o erro em português e oferece retomada direta. Quando a missão mais recente está pendente, não apresenta o relatório de uma missão antiga como se fosse o resultado atual.
+
+## Leads — limpar todos
+
+O botão **Limpar todos**, no topo de Leads, abre uma confirmação com a quantidade de leads do funil e sugestões do Radar. A ação abrange todos os status, independentemente dos filtros. Registros adicionados após abrir a confirmação são preservados.
+
+Antes de remover, o navegador grava uma cópia da última limpeza no armazenamento local. **Desfazer última limpeza** restaura os dados no mesmo navegador, inclusive após recarregar; evita duplicar empresas e preserva edições atuais. Uma nova limpeza substitui essa cópia. Se não for possível gravá-la, nada é removido. Pesquisas/análises em andamento bloqueiam a operação para evitar resultados reaparecendo logo após limpar.
+
+Clientes, missões e tarefas não fazem parte da limpeza. A alteração cria o botão e não remove automaticamente dados existentes. A validação usa dados fictícios:
+
+```powershell
+node --test --experimental-strip-types admin/squad/leads-cleanup.test.cjs admin/squad/squad.test.cjs admin/squad/sync.test.cjs deno-iptv/squad.test.mjs
+```

@@ -459,6 +459,7 @@ function renderLeadCandidates(){
 }
 function renderLeads(){
   if(!state)return;
+  renderLeadCleanup();
   renderLeadCandidates();
   renderCommercial();
   const q=(document.getElementById('leadSearch')?.value||'').toLowerCase(),f=document.getElementById('leadFilter')?.value||'all';
