@@ -156,12 +156,12 @@ function renderCommand(){
     if(now)now.innerHTML='<strong>🧠 Morgan coordenando: '+esc(active.currentLabel||'Operação em andamento')+'</strong><p>'+esc(active.objective||'')+'</p><div class="progress"><span style="width:'+Math.round(Number(active.progress)||0)+'%"></span></div>';
     if(startBtn){startBtn.disabled=true;startBtn.textContent='⏳ Squad em operação'}
   }else{
-    if(stateEl)stateEl.textContent=latest?.status==='Concluída'?'Última missão concluída':'Squad disponível';
+    if(stateEl)stateEl.textContent=latest?.status==='Concluída'?'Última missão concluída':latest&&['Erro','Parcial','Pausada','Interrompida'].includes(latest.status)?'Missão pendente · etapas salvas':'Squad disponível';
     if(now){
       if(latest?.status==='Concluída'){
         now.innerHTML='<strong>✅ Missão concluída — resultado pronto</strong><p>'+esc(latest.objective||'')+'</p><div class="row-actions" style="margin-top:10px"><button class="btn primary" onclick="showMissionResult(\''+latest.id+'\')">👁 Ver resultado da missão</button></div>';
       }else{
-        now.innerHTML=latest?'<strong>🧠 Morgan aguardando</strong><p>'+esc(latest.objective||'Dê uma nova missão por texto ou voz.')+'</p>':'<strong>🧠 Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p>';
+        now.innerHTML=latest?'<strong>🧠 Missão pendente</strong><p>'+esc(latest.objective||'')+'</p>'+(latest.error?'<p class="mission-error">'+esc(friendlySquadError(latest.error))+'</p>':'')+'<div class="row-actions"><button class="btn primary" onclick="resumeMission(\''+latest.id+'\')">▶ Retomar esta missão</button></div>':'<strong>🧠 Morgan aguardando.</strong><p>Dê uma missão por texto ou voz.</p>';
       }
     }
     if(startBtn){startBtn.disabled=false;startBtn.textContent='⚡ Iniciar missão'}
@@ -174,9 +174,8 @@ function renderCommandResult(){
   if(!panel||!body)return;
   const active=(state.missions||[]).some(m=>missionIsRunning(m));
   if(active){panel.classList.remove('show');return}
-  const mission=(commandResultMissionId&&state.missions.find(m=>m.id===commandResultMissionId))||(state.missions||[]).find(m=>m.status==='Concluída');
+  const mission=(commandResultMissionId&&state.missions.find(m=>m.id===commandResultMissionId))||(state.missions||[])[0];
   if(!mission||mission.status!=='Concluída'||!(mission.results||[]).length){panel.classList.remove('show');body.innerHTML='';return}
-  commandResultMissionId=mission.id;
   const client=state.clients.find(c=>c.id===mission.clientId);
   const plan=mission.executionPlan||{};
   const linkedTasks=(state.tasks||[]).filter(t=>t.sourceMissionId===mission.id);
@@ -516,6 +515,12 @@ function dueAfterDays(value){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
 }
+function friendlySquadError(message){
+  const text=String(message||'Falha ao executar a busca.');
+  if(/OPENAI_INCOMPLETE:max_output_tokens/.test(text))return 'A IA atingiu o limite de resposta mesmo após uma tentativa de recuperação. As etapas já concluídas continuam salvas. Retome a missão ou reduza a região/quantidade pesquisada.';
+  if(/OPENAI_INCOMPLETE/.test(text))return 'A IA interrompeu esta etapa antes de concluir. As entregas já salvas foram preservadas; retome a missão.';
+  return text;
+}
 async function squadApiCall(idToken,payload,signal=null){
   if(leaseLost)throw Error("Reserva expirada. Retome a operação após sincronizar.");
   const response=await fetch(SQUAD_API_URL,{
@@ -525,7 +530,7 @@ async function squadApiCall(idToken,payload,signal=null){
     signal:signal||undefined
   });
   let data={};try{data=await response.json()}catch(_){}
-  if(!response.ok||data.ok===false){if(data.telemetry)state.apiUsage.push({id:data.telemetry.responseId||uid(),agentId:payload.agentId,status:'error',error:data.error,...telemetryFrom(data.telemetry)});throw new Error(data.error||('Backend respondeu '+response.status));}
+  if(!response.ok||data.ok===false){if(data.telemetry)state.apiUsage.push({id:data.telemetry.responseId||uid(),agentId:payload.agentId,status:'error',error:data.error,...telemetryFrom(data.telemetry)});throw new Error(friendlySquadError(data.error||('Backend respondeu '+response.status)));}
   if(!String(data.text||'').trim())throw Error('O agente retornou uma resposta vazia.');
   state.apiUsage.push({id:data.responseId||uid(),agentId:payload.agentId,status:'completed',...telemetryFrom(data)});
   return data;
@@ -656,7 +661,7 @@ function renderMissions(){
     const resultButton=m.status==='Concluída'?'<button class="btn primary" onclick="showMissionResult(\''+m.id+'\')">👁 Abrir resultado no Command</button>':'';
     const planButton=(m.status==='Concluída'&&!activeMissionId)?'<button class="btn" onclick="createExecutionPlan(\''+m.id+'\')">'+(plan?'♻ Refazer plano':'✅ Gerar plano e tarefas')+'</button>':'';
     const taskButton=plan?'<button class="btn" onclick="showView(\'tasks\')">📋 Ver tarefas</button>':'';
-    return '<div class="mission-card" id="mission-'+esc(m.id)+'"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(['Preparando','Executando'].includes(m.status)&&!missionIsRunning(m)?'Pausada':m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(m.error)+'</div>':'')+planHtml+results+'<div class="mission-actions">'+resultButton+(!['Concluída'].includes(m.status)&&!activeMissionId?'<button class="btn primary" onclick="resumeMission(\''+m.id+'\')">▶ Retomar etapas pendentes</button>':'')+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
+    return '<div class="mission-card" id="mission-'+esc(m.id)+'"><div class="mission-top"><div><h3>'+esc(client?.name||m.clientName||'Cliente')+'</h3><div class="mission-meta">'+esc(m.objective||'Missão automática')+' · '+(m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR'):'')+'</div></div><span class="badge '+missionStatusClass(m.status)+'">'+esc(['Preparando','Executando'].includes(m.status)&&!missionIsRunning(m)?'Pausada':m.status||'Preparando')+'</span></div><div class="mission-steps">'+steps+'</div><div class="progress"><span style="width:'+pct+'%"></span></div><div class="tiny muted" style="margin-top:6px">'+pct+'% · '+esc(m.currentLabel||'')+'</div>'+(m.error?'<div class="mission-error">⚠ '+esc(friendlySquadError(m.error))+'</div>':'')+planHtml+results+'<div class="mission-actions">'+resultButton+(!['Concluída'].includes(m.status)&&!activeMissionId?'<button class="btn primary" onclick="resumeMission(\''+m.id+'\')">▶ Retomar etapas pendentes</button>':'')+planButton+taskButton+'<button class="btn" onclick="repeatMission(\''+m.id+'\')">↻ Repetir</button><button class="btn danger" onclick="deleteMission(\''+m.id+'\')">Excluir</button></div></div>';
   }).join('');
 }
 function openMissionModal(){
@@ -673,7 +678,7 @@ function openMissionModal(){
 }
 function missionIsRunning(m){return ['Preparando','Executando'].includes(m.status)&&(activeMissionId===m.id||remoteRun?.id===m.id&&remoteRun.expiresAt>Date.now())}
 function missionAgents(m){return (m.agentIds||AGENTS.map(a=>a.id)).map(id=>AGENTS.find(a=>a.id===id)).filter(Boolean)}
-function telemetryFrom(data){return {responseId:data.responseId||'',model:data.model||'',usedWeb:Boolean(data.usedWeb),webSearchCalls:data.webSearchCalls||0,sources:data.sources||[],usage:data.usage||null,durationMs:data.durationMs||0,estimatedCostUsd:data.estimatedCostUsd??null,completedAt:new Date().toISOString()}}
+function telemetryFrom(data){return {attempts:data.attempts||[],responseId:data.responseId||'',model:data.model||'',usedWeb:Boolean(data.usedWeb),webSearchCalls:data.webSearchCalls||0,sources:data.sources||[],usage:data.usage||null,durationMs:data.durationMs||0,estimatedCostUsd:data.estimatedCostUsd??null,completedAt:new Date().toISOString()}}
 async function createExecutionPlan(id){return runFullMission('','',{resumeId:id,redoPlan:true})}
 async function resumeMission(id){return runFullMission('','',{resumeId:id})}
 async function runFullMission(clientId,objective,options={}){
@@ -687,7 +692,7 @@ async function runFullMission(clientId,objective,options={}){
   if(!client)return alert('Cliente não encontrado.');
   if(options.resumeId&&mission.status==='Concluída'&&!options.redoPlan)return showMissionResult(mission.id);
   const runId=mission?.id||uid(),controller=new AbortController();
-  activeMissionId=runId;activeMissionAbortController=controller;
+  activeMissionId=runId;activeMissionAbortController=controller;commandResultMissionId='';
   let claimed=false;
   try{
     await claimRun(runId);claimed=true;

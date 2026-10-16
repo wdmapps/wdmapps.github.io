@@ -69,3 +69,13 @@ test('parser aceita JSON estruturado e mantém compatibilidade com histórico an
 });
 
 test("datas de prazo mantêm o dia informado",()=>{const f=fixture();assert.equal(f.run("fmtDate('2026-10-16')"),"16/10/2026");});
+
+test('erro de tokens aparece em português e oferece recuperação sem descartar etapas',()=>{
+  const f=fixture(),message=f.run("friendlySquadError('OPENAI_INCOMPLETE:max_output_tokens')");assert.match(message,/limite de resposta/);assert.match(message,/continuam salvas/);assert.doesNotMatch(message,/OPENAI_/);
+});
+
+test('missão com erro não exibe como resultado final uma missão antiga',()=>{
+  const f=fixture(),shown=new Set(['show']),body={innerHTML:'Resultado antigo'};
+  f.ctx.document.getElementById=id=>id==='commandResult'?{classList:{remove:v=>shown.delete(v),add:v=>shown.add(v)}}:id==='commandResultBody'?body:{};
+  f.run("state.missions=[{id:'new',status:'Erro',results:[]},{id:'old',status:'Concluída',results:[{agentId:'scout',text:'Antigo'}]}];renderCommandResult()");assert.equal(shown.has('show'),false);assert.equal(body.innerHTML,'');
+});

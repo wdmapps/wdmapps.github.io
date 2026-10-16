@@ -6,7 +6,7 @@ const originalFetch=globalThis.fetch;test.afterEach(()=>{globalThis.fetch=origin
 let apiBodies=[];
 function mock(payload){apiBodies=[];globalThis.fetch=async(url,init)=>{
   if(String(url).includes('identitytoolkit'))return Response.json({users:[{email:'williamwdm@gmail.com'}]});
-  assert.equal(String(url),'https://api.openai.com/v1/responses');apiBodies.push(JSON.parse(init.body));assert.ok(init.signal);return Response.json(payload);
+  assert.equal(String(url),'https://api.openai.com/v1/responses');apiBodies.push(JSON.parse(init.body));assert.ok(init.signal);const value=Array.isArray(payload)?payload[Math.min(apiBodies.length-1,payload.length-1)]:payload;return Response.json(value);
 };}
 const call=(agentId='planner',extra={})=>handleRequest(new Request('https://example.test/squad/agent',{method:'POST',headers:{Authorization:'Bearer fake-token','Content-Type':'application/json'},body:JSON.stringify({agentId,client:{name:'Empresa de teste'},objective:'Teste',...extra})}));
 const plan={summary:'Plano confirmado',nextMove:'Revisar diagnóstico',tasks:[{title:'Revisar',priority:'Alta',daysFromNow:1,why:'Verificar os fatos'}]};
@@ -16,7 +16,7 @@ test('Planner usa schema estrito, retorna uso e não inventa custo',async()=>{
   mock(complete(JSON.stringify(plan)));const res=await call();assert.equal(res.status,200);const data=await res.json();assert.deepEqual(data.structured,plan);assert.equal(data.usage.totalTokens,150);assert.equal(data.estimatedCostUsd,null);assert.equal(data.usedWeb,false);assert.equal(apiBodies[0].text.format.strict,true);assert.equal(apiBodies[0].text.format.type,'json_schema');
 });
 test('resposta incompleta não é tratada como entrega concluída',async()=>{
-  mock({...complete('Texto cortado'),status:'incomplete',incomplete_details:{reason:'max_output_tokens'}});const res=await call('scout');assert.equal(res.status,502);const data=await res.json();assert.match(data.error,/INCOMPLETE/);assert.equal(data.telemetry.usage.totalTokens,150);
+  mock({...complete('Texto cortado'),status:'incomplete',incomplete_details:{reason:'max_output_tokens'}});const res=await call('scout');assert.equal(res.status,502);const data=await res.json();assert.match(data.error,/INCOMPLETE/);assert.equal(data.telemetry.usage.totalTokens,300);assert.equal(apiBodies.length,2);assert.ok(apiBodies[1].max_output_tokens>apiBodies[0].max_output_tokens);
 });
 test('recusa explícita é erro recuperável',async()=>{
   mock({status:'completed',output:[{type:'message',content:[{type:'refusal',refusal:'Recusa'}]}]});assert.equal((await call()).status,502);
@@ -33,4 +33,23 @@ test('lead estruturado exige pesquisa real e mantém fontes da API',async()=>{
   mock(payload);const data=await(await call('radar',{outputFormat:'leads'})).json();assert.equal(data.usedWeb,true);assert.equal(data.sources[0].url,'https://example.org/empresa');assert.deepEqual(data.structured,{leads:[]});assert.equal(apiBodies[0].text.format.name,'lead_candidates');
 });
 
-test("saúde da Squad identifica a versão sem chamar serviços externos",async()=>{globalThis.fetch=async()=>{throw Error("Não deve chamar a rede")};const res=await handleRequest(new Request("https://example.test/squad/health"));assert.deepEqual(await res.json(),{ok:true,version:"2026-10-16.2",structuredOutputs:true});});
+test("saúde da Squad identifica a versão sem chamar serviços externos",async()=>{globalThis.fetch=async()=>{throw Error("Não deve chamar a rede")};const res=await handleRequest(new Request("https://example.test/squad/health"));assert.deepEqual(await res.json(),{ok:true,version:"2026-10-16.4",structuredOutputs:true,tokenRecovery:true});});
+
+test('Ray e Scott reservam espaço para raciocínio e resposta sem trocar o modelo',async()=>{
+  for(const id of ['radar','scout']){mock(complete('Diagnóstico curto'));const res=await call(id);assert.equal(res.status,200);assert.equal(apiBodies.length,1);assert.equal(apiBodies[0].max_output_tokens,8192);assert.equal(apiBodies[0].reasoning.effort,'low');assert.equal(apiBodies[0].text.verbosity,'low');assert.equal(apiBodies[0].model,'gpt-5.6-luna');}
+});
+test('recuperação limitada do Ray preserva consumo e ID de cada tentativa',async()=>{
+  const first={...complete('Parcial'),id:'resp_first',status:'incomplete',incomplete_details:{reason:'max_output_tokens'}};
+  first.usage.output_tokens_details={reasoning_tokens:40};
+  const second={...complete('Resultado completo'),id:'resp_second'};second.usage.output_tokens_details={reasoning_tokens:20};
+  mock([first,second]);const res=await call('radar');assert.equal(res.status,200);const data=await res.json();assert.equal(data.text,'Resultado completo');assert.equal(data.usage.totalTokens,300);assert.equal(data.usage.reasoningTokens,60);assert.deepEqual(data.attempts.map(x=>x.responseId),['resp_first','resp_second']);assert.equal(apiBodies.length,2);assert.equal(apiBodies[1].max_output_tokens,16384);
+});
+test('retry do Planner conserva schema e rejeita resposta final ainda incompleta',async()=>{
+  mock({...complete('{}'),status:'incomplete',incomplete_details:{reason:'max_output_tokens'}});const res=await call();assert.equal(res.status,502);assert.equal(apiBodies.length,2);assert.deepEqual(apiBodies[0].text.format,apiBodies[1].text.format);assert.equal(apiBodies[1].text.verbosity,'low');
+});
+test('interrupção por outro motivo não reinicia a chamada paga',async()=>{
+  mock({...complete('Parcial'),status:'incomplete',incomplete_details:{reason:'content_filter'}});assert.equal((await call('scout')).status,502);assert.equal(apiBodies.length,1);
+});
+test('falha de rede com resultado desconhecido não dispara nova chamada',async()=>{
+  let paidRequests=0;globalThis.fetch=async(url)=>{if(String(url).includes('identitytoolkit'))return Response.json({users:[{email:'williamwdm@gmail.com'}]});paidRequests++;throw Error('Falha de rede simulada')};assert.equal((await call('scout')).status,502);assert.equal(paidRequests,1);
+});

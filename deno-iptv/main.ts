@@ -401,7 +401,9 @@ async function runSquadAgentWithOpenAI(
     "",
     "REGRAS:",
     "- Responda em português do Brasil.",
-    "- Seja prático, organizado e específico.",
+    "- Seja prático, organizado e específico. Use respostas concisas, sem repetir o briefing nem os resultados anteriores.",
+    agentId === "radar" ? "- Pesquise até 5 empresas por rodada quando o objetivo não indicar uma quantidade. Priorize evidências e fontes; declare a cobertura real da busca." : "",
+    agentId === "scout" ? "- Valide os candidatos fornecidos, sem ampliar a pesquisa para novas empresas. Entregue um diagnóstico curto por empresa e sinalize o que não pôde confirmar." : "",
     "- Não invente informações sobre o cliente. Separe fatos com evidência, hipóteses e recomendações.",
     excludedCompanies.length ? "- Não prospecte empresas já cadastradas: " + excludedCompanies.map(x=>cleanText(x,180)).join("; ") : "",
     outputFormat === "leads" ? "- Retorne SOMENTE o JSON do schema leads. Ignore o formato LEAD_START/LEAD_END solicitado no briefing; use os mesmos campos no objeto JSON. Se não verificar uma informação, use NAO_CONFIRMADO ou string vazia. Ausência de um resultado de busca não comprova ausência de site. Cada empresa precisa de uma fonte pública." : "",
@@ -415,46 +417,61 @@ async function runSquadAgentWithOpenAI(
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
     input,
-    max_output_tokens: outputFormat === "leads" ? 6500 : agentId === "planner" ? 2400 : 2400,
+    max_output_tokens: outputFormat === "leads" ? 12288 : agent.web ? 8192 : agentId === "planner" ? 6144 : 4096,
   };
+  if(/^gpt-[56](?:[.-]|$)/i.test(OPENAI_MODEL)){body.reasoning={effort:'low'};body.text={verbosity:'low'};}
   const structuredKind=agentId==='planner'?'planner':outputFormat==='leads'?'leads':'';
-  if(structuredKind)body.text={format:{type:'json_schema',name:structuredKind==='planner'?'execution_plan':'lead_candidates',strict:true,schema:structuredKind==='planner'?PLAN_SCHEMA:LEAD_SCHEMA}};
+  if(structuredKind)body.text={...(body.text as Record<string,unknown>||{}),format:{type:'json_schema',name:structuredKind==='planner'?'execution_plan':'lead_candidates',strict:true,schema:structuredKind==='planner'?PLAN_SCHEMA:LEAD_SCHEMA}};
   if (agent.web){body.tools = [{ type: "web_search" }];body.include=['web_search_call.action.sources'];}
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: signal ? AbortSignal.any([signal,AbortSignal.timeout(180000)]) : AbortSignal.timeout(180000),
-  });
-
-  const raw = await response.text();
-  let payload: any = null;
-  try { payload = JSON.parse(raw); } catch { /* usa a mensagem bruta abaixo */ }
-
-  if (!response.ok) {
-    const apiMessage = cleanText(payload?.error?.message || raw || ("HTTP " + response.status), 900);
-    throw new Error("OPENAI_ERROR:" + response.status + ":" + apiMessage);
+  const attempts: Array<Record<string,any>>=[];
+  let payload:any=null;
+  // Retry only an explicit token exhaustion: network failures have an unknown
+  // outcome and must not silently duplicate a paid request.
+  for(let attempt=0;attempt<2;attempt++){
+    signal?.throwIfAborted();
+    const attemptStartedAt=Date.now();
+    const response=await fetch("https://api.openai.com/v1/responses",{
+      method:"POST",headers:{Authorization:"Bearer "+apiKey,"Content-Type":"application/json"},
+      body:JSON.stringify(body),
+      signal:signal?AbortSignal.any([signal,AbortSignal.timeout(180000)]):AbortSignal.timeout(180000),
+    });
+    const raw=await response.text();
+    try{payload=JSON.parse(raw);}catch{throw Error('OPENAI_INVALID_RESPONSE');}
+    if(!response.ok)throw Error('OPENAI_ERROR:'+response.status+':'+cleanText(payload?.error?.message||raw,900));
+    if(!payload||typeof payload!=='object')throw Error('OPENAI_INVALID_RESPONSE');
+    const usage=payload.usage?{
+      inputTokens:Number(payload.usage.input_tokens)||0,outputTokens:Number(payload.usage.output_tokens)||0,
+      cachedTokens:Number(payload.usage.input_tokens_details?.cached_tokens)||0,
+      reasoningTokens:Number(payload.usage.output_tokens_details?.reasoning_tokens)||0,
+      totalTokens:Number(payload.usage.total_tokens)||0,
+    }:null;
+    attempts.push({responseId:payload.id||'',status:payload.status||'completed',reason:payload.incomplete_details?.reason||'',maxOutputTokens:body.max_output_tokens,usage,durationMs:Date.now()-attemptStartedAt,...responseEvidence(payload)});
+    if(payload.status==='incomplete'&&payload.incomplete_details?.reason==='max_output_tokens'&&attempt===0){
+      body.max_output_tokens=Math.min(24576,Number(body.max_output_tokens)*2);
+      body.input=input+'\nRECUPERAÇÃO: a tentativa anterior atingiu o limite de tokens. Produza uma entrega mais concisa mantendo evidências, fontes e o formato solicitado. Não amplie o escopo da pesquisa.';
+      continue;
+    }
+    break;
   }
-
-  const evidence=responseEvidence(payload);
-  const usage=payload.usage?{inputTokens:Number(payload.usage.input_tokens)||0,outputTokens:Number(payload.usage.output_tokens)||0,cachedTokens:Number(payload.usage.input_tokens_details?.cached_tokens)||0,totalTokens:Number(payload.usage.total_tokens)||0}:null;
+  const sources=new Map<string,any>();for(const attempt of attempts)for(const source of attempt.sources)sources.set(source.url,source);
+  const evidence={usedWeb:attempts.some(x=>x.usedWeb),webSearchCalls:attempts.reduce((n,x)=>n+x.webSearchCalls,0),sources:[...sources.values()].slice(0,100)};
+  const usage=attempts.some(x=>x.usage)?attempts.reduce((sum,x)=>{
+    for(const key of Object.keys(sum))sum[key]+=x.usage?.[key]||0;return sum;
+  },{inputTokens:0,outputTokens:0,cachedTokens:0,reasoningTokens:0,totalTokens:0} as Record<string,number>):null;
   // Prices are optional deployment settings. Never present a guessed tariff as actual spend.
   const inputRate=Number(Deno.env.get('SQUAD_INPUT_USD_PER_MILLION')),outputRate=Number(Deno.env.get('SQUAD_OUTPUT_USD_PER_MILLION')),cachedRate=Number(Deno.env.get('SQUAD_CACHED_USD_PER_MILLION')),webRate=Number(Deno.env.get('SQUAD_WEB_USD_PER_CALL'));
   const priced=usage&&[inputRate,outputRate,cachedRate,webRate].every(x=>Number.isFinite(x)&&x>=0);
   const estimatedCostUsd=priced?((usage!.inputTokens-usage!.cachedTokens)*inputRate+usage!.cachedTokens*cachedRate+usage!.outputTokens*outputRate)/1e6+evidence.webSearchCalls*webRate:null;
 
-  function fail(message:string):never{throw Object.assign(new Error(message),{telemetry:{...evidence,responseId:payload?.id||'',model:OPENAI_MODEL,usage,durationMs:Date.now()-startedAt,estimatedCostUsd}});}
+  function fail(message:string):never{throw Object.assign(new Error(message),{telemetry:{...evidence,responseId:payload?.id||'',model:OPENAI_MODEL,usage,attempts:attempts.map(({sources,...item})=>item),durationMs:Date.now()-startedAt,estimatedCostUsd}});}
   if(payload?.status&&payload.status!=='completed')fail('OPENAI_INCOMPLETE:'+cleanText(payload?.incomplete_details?.reason||payload.status,180));
   if((payload?.output||[]).some((item:any)=>(item.content||[]).some((part:any)=>part.type==='refusal')))fail('OPENAI_REFUSAL');
   const text = extractOpenAIText(payload);
   if (!text) fail("OPENAI_EMPTY");
   let structured=null;
   try{structured=structuredKind?validateStructured(JSON.parse(text),structuredKind):null;}catch(error){fail(cleanText((error as Error).message,250));}
-  if(outputFormat==='leads'&&!evidence.usedWeb)fail('OPENAI_WEB_NOT_USED:Não houve pesquisa web nesta validação. Tente novamente.');
+  if(outputFormat==='leads'&&!responseEvidence(payload).usedWeb)fail('OPENAI_WEB_NOT_USED:Não houve pesquisa web nesta validação. Tente novamente.');
 
   return {
     agentId,
@@ -462,7 +479,7 @@ async function runSquadAgentWithOpenAI(
     role: agent.role,
     model: OPENAI_MODEL,
     ...evidence,
-    responseId:payload.id||"",usage,durationMs:Date.now()-startedAt,estimatedCostUsd,structured,
+    responseId:payload.id||"",usage,attempts:attempts.map(({sources,...item})=>item),durationMs:Date.now()-startedAt,estimatedCostUsd,structured,
     text,
   };
 }
@@ -717,7 +734,7 @@ async function handleRequest(request: Request): Promise<Response> {
   }
 
   const path = url.pathname;
-  if (path === "/squad/health") return request.method === "GET" ? json({ok:true,version:"2026-10-16.2",structuredOutputs:true}) : json({ok:false,error:"Método não permitido."},405);
+  if (path === "/squad/health") return request.method === "GET" ? json({ok:true,version:"2026-10-16.4",structuredOutputs:true,tokenRecovery:true}) : json({ok:false,error:"Método não permitido."},405);
   if (path === "/squad/agent") return handleSquadRequest(request);
   if (path === "/squad/creative") return handleSquadCreativeRequest(request);
 

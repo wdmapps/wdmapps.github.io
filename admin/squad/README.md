@@ -45,3 +45,11 @@ node --test --experimental-strip-types admin/squad/squad.test.cjs admin/squad/sy
 ```
 
 Os testes simulam API e Firestore, sem custo ou dados reais: migração/reabertura, dois aparelhos, conflitos, reserva, histórico, duplicação, retomada, Planner, schemas e consumo. A interface foi conferida com uma fixture local identificada como dados fictícios. A fixture não integra os arquivos publicados.
+
+## Correção 2026-10-16.4 — buscas interrompidas
+
+O erro real `OPENAI_INCOMPLETE:max_output_tokens` foi identificado no histórico da missão. O limite anterior de 2.400 tokens também incluía o raciocínio interno, podendo impedir a primeira entrega.
+
+Ray e Scott usam agora 8.192 tokens iniciais, o Planner 6.144, respostas estruturadas de leads 12.288 e os demais especialistas 4.096. Modelos GPT-5/6 usam esforço baixo de raciocínio e respostas concisas, mantendo o modelo configurado. Somente a interrupção explícita por tokens permite uma nova tentativa, dobrando o limite até o teto de 24.576. Não há repetição automática por falha de rede ou outro motivo. O consumo das duas tentativas é somado e os IDs individuais são preservados.
+
+O Command exibe o erro em português e oferece retomada direta. Quando a missão mais recente está pendente, não apresenta o relatório de uma missão antiga como se fosse o resultado atual.
