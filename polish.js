@@ -11,6 +11,7 @@
     docs: {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'},
     sheets: {title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'},
     leitor: original.leitor,
+    radio: original.radio,
     iptv: original.iptv,
     jogos: original.jogos,
     encontrapet: {...original.encontrapet, mode:'showcase', image:'assets/encontrapet-portfolio.webp', badge:'APLICATIVO ANDROID', meta:['Pets','Comunidade','Google Play']},
