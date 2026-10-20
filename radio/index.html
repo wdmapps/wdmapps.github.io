@@ -51,7 +51,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 <body>
 <div class="container">
   <header class="nav">
-    <a class="brand" href="https://wdmapps.com.br/"><div class="brand-logo" aria-hidden="true">♫</div><div>WDM <span style="color:var(--cyan)">RÁDIO</span><small>UMA RÁDIO WDM APPS</small></div></a>
+    <a class="brand" href="https://wdmapps.com.br/"><div class="brand-logo" aria-hidden="true">♫</div><div>WDM <span style="color:var(--cyan)">RÁDIO MIX</span><small>UMA RÁDIO WDM APPS</small></div></a>
     <a class="nav-link" href="https://wdmapps.com.br/">↗ Voltar à WDM Apps</a>
   </header>
   <section class="prelude">
@@ -89,7 +89,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
         <audio id="stream-audio" preload="none" playsinline></audio>
       </section>
       <aside class="panel side">
-        <h3 class="cardtitle">🎙️ Estúdio WDM <span class="badge">NOSSA IDENTIDADE</span></h3>
+        <h3 class="cardtitle">🎙️ Estúdio WDM <span class="badge">MIX AO VIVO</span></h3>
         <div class="ai-card">
           <div class="mic">🎤</div>
           <div><strong>Todo estilo tem seu lugar!</strong>
@@ -154,7 +154,7 @@ audio.addEventListener("error",()=>{state("error","SINAL INDISPONÍVEL");label.t
 vol.addEventListener("input",()=>{audio.volume=Number(vol.value)/100;});
 audio.volume=Number(vol.value)/100;
 if("mediaSession" in navigator && "MediaMetadata" in window){
-  navigator.mediaSession.metadata=new MediaMetadata({title:"WDM Rádio",artist:"Um pouco de tudo, o tempo todo",album:"Ao vivo",artwork:[{src:"https://wdmapps.com.br/assets/logo.png",sizes:"512x512",type:"image/png"}]});
+  navigator.mediaSession.metadata=new MediaMetadata({title:"WDM Rádio Mix",artist:"Um pouco de tudo, o tempo todo",album:"Ao vivo",artwork:[{src:"https://wdmapps.com.br/assets/logo.png",sizes:"512x512",type:"image/png"}]});
   navigator.mediaSession.setActionHandler("play",start);
   navigator.mediaSession.setActionHandler("pause",()=>audio.pause());
 }
@@ -174,7 +174,7 @@ async function refreshMetadata(){
     if(!song||/^(unknown|sem t[ií]tulo|no title)$/i.test(song))return;
     nowPlaying.textContent="🎵 Agora tocando: "+song.slice(0,180);
     if("mediaSession" in navigator&&"MediaMetadata" in window){
-      navigator.mediaSession.metadata=new MediaMetadata({title:song.slice(0,180),artist:"WDM Rádio",album:"Ao vivo"});
+      navigator.mediaSession.metadata=new MediaMetadata({title:song.slice(0,180),artist:"WDM Rádio Mix",album:"Ao vivo"});
     }
   }catch(err){/* Metadados são opcionais; alguns servidores bloqueiam CORS. */}
 }
@@ -188,7 +188,7 @@ document.getElementById("request").addEventListener("submit",function(event){
   this.reset();
 });
 document.getElementById("share").addEventListener("click",async()=>{
-  const data={title:"WDM Rádio",text:"Vem ouvir a WDM Rádio Mix! Um pouco de tudo, o tempo todo!",url:"https://wdmapps.com.br/radio/"};
+  const data={title:"WDM Rádio Mix",text:"Vem ouvir a WDM Rádio Mix! Um pouco de tudo, o tempo todo!",url:"https://wdmapps.com.br/radio/"};
   if(navigator.share){try{await navigator.share(data);return;}catch(err){if(err.name==="AbortError")return;}}
   try{await navigator.clipboard.writeText(data.url);toast("Link da WDM Rádio copiado!");}catch(err){toast("Copie o endereço: wdmapps.com.br/radio/");}
 });
