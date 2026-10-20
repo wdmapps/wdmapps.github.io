@@ -29,7 +29,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 <section class="panel player"><div class="topline"><div class="live"><i class="dot"></i> MÚSICAS DE TESTE DISPONÍVEIS</div><div class="placeholder">PLAYER COM ÁUDIO</div></div>
 <div class="record-row"><div class="record"><div class="middle">W</div></div><div><span class="chip">📻 WDM RÁDIO AI</span><h2 class="track" id="genre-title">Seleção WDM</h2><div class="muted" id="genre-sub">Aperte PLAY para ouvir o teste da rádio.</div><div id="music-credit" class="muted" style="font-size:12px;margin-top:6px">Músicas com licença aberta.</div><div class="bars" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div></div></div>
 <div class="controls"><button type="button" class="play" id="play" title="Iniciar áudio" aria-label="Tocar">▶</button><button id="next-track" type="button" aria-label="Próxima música" title="Próxima" style="color:#fff;background:#1e3352;border:1px solid #5f7790;border-radius:13px;padding:12px 14px;font-size:22px">⏭</button><div class="button-text"><strong id="action-label">Aperte PLAY para ouvir</strong><span id="time-readout">Playlist de teste · 4 músicas</span></div><label class="volume" for="volume">🔊 <input id="volume" type="range" min="0" max="100" value="75" aria-label="Volume" /></label></div><div class="notice">🎧 Agora o player toca músicas de demonstração. Ainda não é uma rádio ao vivo 24 horas; o servidor de streaming e a IA virão depois.</div></section>
-<aside class="panel side"><h3 class="cardtitle">🎙️ Locução inteligente <span class="badge">FUTURO RECURSO</span></h3><div class="ai-card"><div class="mic">🤖</div><div><strong>Seu locutor de IA</strong><p>“Bom dia, Salto! Você está na WDM Rádio, a sua companhia musical!”</p></div></div><div class="divider"></div><h3 class="cardtitle">🗓️ Exemplo de programação</h3><div class="slot"><span>06:00</span><strong>Bom dia, WDM!</strong></div><div class="slot"><span>10:00</span><strong>Clássicos sem parar</strong></div><div class="slot"><span>14:00</span><strong>Tarde Pop & Rock</strong></div><div class="slot"><span>19:00</span><strong>Flashback Night</strong></div><div class="sponsored"><div><strong>📢 Sua marca no ar</strong><small>Espaço reservado para patrocinadores</small></div><button class="outlined" id="ads">SAIBA MAIS</button></div></aside>
+<aside class="panel side"><h3 class="cardtitle">🎙️ Locução inteligente <span class="badge">TESTE</span></h3><div class="ai-card"><div class="mic">🤖</div><div><strong>Locutor de teste</strong><p>“Bom dia, Salto! Você está na WDM Rádio, a sua companhia musical!”</p><button id="voice-demo" type="button" style="margin-top:12px;background:linear-gradient(125deg,#37e6f2,#4585ef);color:#0a1b32;border:0;border-radius:10px;padding:10px 15px;font-weight:800;cursor:pointer">🎙️ Ouvir locução</button><p class="fine" style="margin-top:6px">Voz sintética do navegador (a IA real vem na próxima fase).</p></div></div><div class="divider"></div><h3 class="cardtitle">🗓️ Exemplo de programação</h3><div class="slot"><span>06:00</span><strong>Bom dia, WDM!</strong></div><div class="slot"><span>10:00</span><strong>Clássicos sem parar</strong></div><div class="slot"><span>14:00</span><strong>Tarde Pop & Rock</strong></div><div class="slot"><span>19:00</span><strong>Flashback Night</strong></div><div class="sponsored"><div><strong>📢 Sua marca no ar</strong><small>Espaço reservado para patrocinadores</small></div><button class="outlined" id="ads">SAIBA MAIS</button></div></aside>
 </div>
 <div class="bottom"><section class="panel lower"><h3>🎼 Escolha o estilo da sua rádio</h3><div class="genres"><button class="genre" data-mode="ragtime">🎹 Ragtime</button><button class="genre" data-mode="rock">🎸 Rock instrumental</button><button class="genre" data-mode="folk">🌿 Instrumental</button><button class="genre selected" data-mode="mix">✨ Mix WDM</button></div><p class="fine">A seleção muda as músicas de verdade. Conteúdo de domínio público ou licenciado em CC0.</p></section><section class="panel lower"><h3>💌 Peça sua música</h3><form class="suggest" id="request"><input id="song" required maxlength="100" placeholder="Qual música você quer ouvir?" aria-label="Música solicitada"><button type="submit">Enviar pedido</button></form><p class="fine">Pedidos musicais serão ativados quando o serviço oficial entrar no ar.</p></section></div>
 </main><footer class="footer"><div>© 2026 WDM Apps · Rádio AI · músicas de demonstração</div><div>www.wdmapps.com.br/radio/</div></footer>
@@ -73,6 +73,27 @@ document.querySelectorAll(".genre").forEach(button=>button.addEventListener("cli
 const clock=document.getElementById("clock");function updateClock(){clock.textContent=new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit"}).format(new Date())}updateClock();setInterval(updateClock,25000);
 document.getElementById("ads").addEventListener("click",()=>toast("📢 Espaço para anunciantes será lançado em breve."));
 document.getElementById("request").addEventListener("submit",e=>{e.preventDefault();toast("💌 O pedido musical estará disponível na rádio oficial.");e.target.reset()});
+
+const voiceButton=document.getElementById("voice-demo");
+voiceButton.addEventListener("click",()=>{
+ if(!("speechSynthesis" in window)){toast("Seu navegador não possui síntese de voz. Tente Chrome ou Edge.");return;}
+ try{
+  window.speechSynthesis.cancel();
+  const hour = new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit"}).format(new Date());
+  const message = "Alô, alô, minha gente! Estamos chegando com a W D M Rádio, a sua nova companhia musical! Diretamente de Salto, interior de São Paulo, para o mundo inteiro! Agora são "+hour+". Aperte o play e venha com a gente!";
+  const voice = new SpeechSynthesisUtterance(message);
+  voice.lang="pt-BR";voice.rate=1.02;voice.pitch=1;voice.volume=Number(vol.value)/100;
+  const options=window.speechSynthesis.getVoices();
+  const br=options.find(v=>v.lang.toLowerCase()==="pt-br")||options.find(v=>v.lang.startsWith("pt"));
+  if(br)voice.voice=br;
+  const wasPlaying=!audio.paused;
+  if(wasPlaying)audio.pause();
+  voiceButton.disabled=true;voiceButton.textContent="🎙️ Falando...";
+  voice.onend=()=>{voiceButton.disabled=false;voiceButton.textContent="🎙️ Ouvir locução";if(wasPlaying)listen()};
+  voice.onerror=()=>{voiceButton.disabled=false;voiceButton.textContent="🎙️ Ouvir locução";toast("A voz não foi reproduzida. Confira a voz portuguesa do navegador.")};
+  window.speechSynthesis.speak(voice);
+ }catch(e){toast("Não foi possível reproduzir a locução.");voiceButton.disabled=false;voiceButton.textContent="🎙️ Ouvir locução";}
+});
 setTrack(0);
 </script>
 </body>
