@@ -26,22 +26,54 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 <section class="prelude"><div><p class="eyebrow">UMA NOVA FREQUÊNCIA DIGITAL</p><h1 class="title">Sua rádio.<br><span>Seu universo.</span></h1><p class="sub">A trilha sonora do seu dia, com programação inteligente e locutores de IA.</p></div><div class="clock"><strong id="clock">--:--</strong><span>SALTO · SÃO PAULO</span></div></section>
 <main>
 <div class="hero">
-<section class="panel player"><div class="topline"><div class="live"><i class="dot"></i> CANAL EM PREPARAÇÃO</div><div class="placeholder">PRÉVIA VISUAL</div></div>
-<div class="record-row"><div class="record"><div class="middle">W</div></div><div><span class="chip">📻 WDM RÁDIO AI</span><h2 class="track" id="genre-title">Clássicos que marcam</h2><div class="muted" id="genre-sub">Dos anos 70 aos 90, grandes emoções.</div><div class="bars" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div></div></div>
-<div class="controls"><button type="button" class="play" id="play" title="Iniciar rádio" aria-label="Iniciar rádio">▶</button><div class="button-text"><strong id="action-label">Ouvir a WDM Rádio</strong><span>Transmissão ainda não configurada</span></div><label class="volume" for="volume">🔊 <input id="volume" type="range" min="0" max="100" value="75" aria-label="Volume" /></label></div><div class="notice">* Layout demonstrativo. Para tocar música de verdade, é necessário integrar um servidor de streaming e regularizar os direitos aplicáveis.</div></section>
+<section class="panel player"><div class="topline"><div class="live"><i class="dot"></i> MÚSICAS DE TESTE DISPONÍVEIS</div><div class="placeholder">PLAYER COM ÁUDIO</div></div>
+<div class="record-row"><div class="record"><div class="middle">W</div></div><div><span class="chip">📻 WDM RÁDIO AI</span><h2 class="track" id="genre-title">Seleção WDM</h2><div class="muted" id="genre-sub">Aperte PLAY para ouvir o teste da rádio.</div><div id="music-credit" class="muted" style="font-size:12px;margin-top:6px">Músicas com licença aberta.</div><div class="bars" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div></div></div>
+<div class="controls"><button type="button" class="play" id="play" title="Iniciar áudio" aria-label="Tocar">▶</button><button id="next-track" type="button" aria-label="Próxima música" title="Próxima" style="color:#fff;background:#1e3352;border:1px solid #5f7790;border-radius:13px;padding:12px 14px;font-size:22px">⏭</button><div class="button-text"><strong id="action-label">Aperte PLAY para ouvir</strong><span id="time-readout">Playlist de teste · 4 músicas</span></div><label class="volume" for="volume">🔊 <input id="volume" type="range" min="0" max="100" value="75" aria-label="Volume" /></label></div><div class="notice">🎧 Agora o player toca músicas de demonstração. Ainda não é uma rádio ao vivo 24 horas; o servidor de streaming e a IA virão depois.</div></section>
 <aside class="panel side"><h3 class="cardtitle">🎙️ Locução inteligente <span class="badge">FUTURO RECURSO</span></h3><div class="ai-card"><div class="mic">🤖</div><div><strong>Seu locutor de IA</strong><p>“Bom dia, Salto! Você está na WDM Rádio, a sua companhia musical!”</p></div></div><div class="divider"></div><h3 class="cardtitle">🗓️ Exemplo de programação</h3><div class="slot"><span>06:00</span><strong>Bom dia, WDM!</strong></div><div class="slot"><span>10:00</span><strong>Clássicos sem parar</strong></div><div class="slot"><span>14:00</span><strong>Tarde Pop & Rock</strong></div><div class="slot"><span>19:00</span><strong>Flashback Night</strong></div><div class="sponsored"><div><strong>📢 Sua marca no ar</strong><small>Espaço reservado para patrocinadores</small></div><button class="outlined" id="ads">SAIBA MAIS</button></div></aside>
 </div>
-<div class="bottom"><section class="panel lower"><h3>🎼 Escolha o estilo da sua rádio</h3><div class="genres"><button class="genre selected" data-mode="classics">🪩 Clássicos</button><button class="genre" data-mode="rock">🎸 Pop & Rock</button><button class="genre" data-mode="brasil">🇧🇷 Brasil</button><button class="genre" data-mode="mix">✨ Mix WDM</button></div><p class="fine">Nesta prévia, a seleção altera apenas o tema visual. As playlists ainda não estão conectadas.</p></section><section class="panel lower"><h3>💌 Peça sua música</h3><form class="suggest" id="request"><input id="song" required maxlength="100" placeholder="Qual música você quer ouvir?" aria-label="Música solicitada"><button type="submit">Enviar pedido</button></form><p class="fine">Formulário ilustrativo. Nenhuma solicitação será enviada nesta prévia.</p></section></div>
-</main><footer class="footer"><div>© 2026 WDM Apps · Rádio AI, projeto em desenvolvimento</div><div>www.wdmapps.com.br/radio/</div></footer>
+<div class="bottom"><section class="panel lower"><h3>🎼 Escolha o estilo da sua rádio</h3><div class="genres"><button class="genre" data-mode="ragtime">🎹 Ragtime</button><button class="genre" data-mode="rock">🎸 Rock instrumental</button><button class="genre" data-mode="folk">🌿 Instrumental</button><button class="genre selected" data-mode="mix">✨ Mix WDM</button></div><p class="fine">A seleção muda as músicas de verdade. Conteúdo de domínio público ou licenciado em CC0.</p></section><section class="panel lower"><h3>💌 Peça sua música</h3><form class="suggest" id="request"><input id="song" required maxlength="100" placeholder="Qual música você quer ouvir?" aria-label="Música solicitada"><button type="submit">Enviar pedido</button></form><p class="fine">Pedidos musicais serão ativados quando o serviço oficial entrar no ar.</p></section></div>
+</main><footer class="footer"><div>© 2026 WDM Apps · Rádio AI · músicas de demonstração</div><div>www.wdmapps.com.br/radio/</div></footer>
 </div><div class="toast" role="status" id="toast"></div>
 <script>
-const modes={classics:['Clássicos que marcam','Dos anos 70 aos 90, grandes emoções.'],rock:['Atitude em cada acorde','Pop, rock e energia em alta frequência.'],brasil:['O som do Brasil','Nossa música, nossa história, nosso ritmo.'],mix:['Todo mundo na mesma sintonia','Uma mistura inteligente para seu dia.']};
-const clock=document.getElementById('clock');function updateClock(){clock.textContent=new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}).format(new Date())}updateClock();setInterval(updateClock,25000);
-let timer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(timer);timer=setTimeout(()=>t.style.display='none',4400)}
-document.getElementById('play').addEventListener('click',()=>toast('🎧 Esta é uma prévia visual. O streaming será integrado na versão real.'));
-document.getElementById('ads').addEventListener('click',()=>toast('📢 Em breve: formulário para anunciantes da WDM Rádio.'));
-document.getElementById('request').addEventListener('submit',e=>{e.preventDefault();toast('💌 Pedido demonstrativo: nenhum dado foi enviado.');e.target.reset()});
-document.querySelectorAll('.genre').forEach(b=>b.addEventListener('click',()=>{document.querySelector('.genre.selected').classList.remove('selected');b.classList.add('selected');const [title,sub]=modes[b.dataset.mode];document.getElementById('genre-title').textContent=title;document.getElementById('genre-sub').textContent=sub;}));
+const catalog = [
+ {title:"Searchlight Rag",artist:"Scott Joplin · interpretação Elektrik Shoos",style:"ragtime",license:"domínio público",src:"https://upload.wikimedia.org/wikipedia/commons/2/27/Searchlight_Rag.ogg",source:"https://commons.wikimedia.org/wiki/File:Searchlight_Rag.ogg"},
+ {title:"The Shimmer",artist:"Monplaisir",style:"rock",license:"CC0 (declarada na fonte)",src:"https://upload.wikimedia.org/wikipedia/commons/4/46/Monplaisir_-_01_-_The_Shimmer.ogg",source:"https://commons.wikimedia.org/wiki/File:Monplaisir_-_01_-_The_Shimmer.ogg"},
+ {title:"Waves",artist:"Monplaisir",style:"folk",license:"CC0 (declarada na fonte)",src:"https://upload.wikimedia.org/wikipedia/commons/1/10/Monplaisir_-_06_-_Waves.ogg",source:"https://commons.wikimedia.org/wiki/File:Monplaisir_-_06_-_Waves.ogg"},
+ {title:"The Yama Yama Man",artist:"Collin Davis · Kurt Hoschna",style:"ragtime",license:"CC0",src:"https://upload.wikimedia.org/wikipedia/commons/7/78/The_Yama_Yama_Man.ogg",source:"https://commons.wikimedia.org/wiki/File:The_Yama_Yama_Man.ogg"}
+];
+const audio=new Audio();audio.preload="none";
+const play=document.getElementById("play"), next=document.getElementById("next-track"),label=document.getElementById("action-label"), time=document.getElementById("time-readout");
+const title=document.getElementById("genre-title"),sub=document.getElementById("genre-sub"),credit=document.getElementById("music-credit"),vol=document.getElementById("volume");
+let selection=[0,1,2,3],index=0,toastTimeout=null;
+function toast(message){const t=document.getElementById("toast");t.textContent=message;t.style.display="block";clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>t.style.display="none",5000)}
+function stamp(n){if(!Number.isFinite(n))return "00:00";const s=Math.floor(n);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function setTrack(i){
+ index=(i+selection.length)%selection.length;
+ const track=catalog[selection[index]];
+ audio.pause();audio.src=track.src;audio.load();
+ title.textContent=track.title;sub.textContent=track.artist;credit.replaceChildren();
+ const a=document.createElement("a");a.href=track.source;a.target="_blank";a.rel="noopener noreferrer";a.style.color="#8ce8f2";a.style.textDecoration="underline";a.textContent="Wikimedia Commons · "+track.license+" ↗";credit.append(a);
+ label.textContent="Aperte PLAY para ouvir";time.textContent="Faixa "+(index+1)+"/"+selection.length;
+}
+async function listen(){try{await audio.play()}catch(error){label.textContent="Não foi possível reproduzir";toast("Áudio indisponível no momento. Tente a próxima música ou atualize a página.")}}
+play.addEventListener("click",()=>audio.paused?listen():audio.pause());
+next.addEventListener("click",()=>{setTrack(index+1);listen()});
+audio.addEventListener("playing",()=>{play.textContent="⏸";play.setAttribute("aria-label","Pausar");label.textContent="Tocando na WDM Rádio 🎵"});
+audio.addEventListener("pause",()=>{play.textContent="▶";play.setAttribute("aria-label","Tocar");if(!audio.ended)label.textContent="Música pausada"});
+audio.addEventListener("waiting",()=>label.textContent="Carregando áudio...");
+audio.addEventListener("error",()=>{label.textContent="Erro no carregamento";toast("Esta faixa não carregou. Aperte ⏭ para avançar.")});
+audio.addEventListener("ended",()=>{setTrack(index+1);listen()});
+audio.addEventListener("timeupdate",()=>time.textContent="Faixa "+(index+1)+"/"+selection.length+" · "+stamp(audio.currentTime)+" / "+stamp(audio.duration));
+vol.addEventListener("input",()=>audio.volume=Number(vol.value)/100);audio.volume=Number(vol.value)/100;
+document.querySelectorAll(".genre").forEach(button=>button.addEventListener("click",()=>{
+ document.querySelectorAll(".genre").forEach(x=>x.classList.remove("selected"));button.classList.add("selected");
+ const style=button.dataset.mode;selection=style==="mix"?[0,1,2,3]:catalog.map((t,i)=>t.style===style?i:-1).filter(i=>i>=0);
+ setTrack(0);toast("Playlist "+button.textContent.trim()+" selecionada!");
+}));
+const clock=document.getElementById("clock");function updateClock(){clock.textContent=new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit"}).format(new Date())}updateClock();setInterval(updateClock,25000);
+document.getElementById("ads").addEventListener("click",()=>toast("📢 Espaço para anunciantes será lançado em breve."));
+document.getElementById("request").addEventListener("submit",e=>{e.preventDefault();toast("💌 O pedido musical estará disponível na rádio oficial.");e.target.reset()});
+setTrack(0);
 </script>
 </body>
 </html>
