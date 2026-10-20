@@ -19,7 +19,7 @@ const apps={
  shopping:{title:'WDM Shopping',label:'Shopping',url:'https://wdmapps.com.br/shopping/',icon:'shopping',mode:'iframe'},
  digitacao:{title:'WDM Digitação',label:'Digitação',url:'https://wdmapps.com.br/digitacao/',icon:'digitacao',mode:'iframe'},
  leitor:{title:'WDM Leitor',label:'Leitor',url:'https://wdmapps.com.br/leitor/',icon:'leitor',mode:'iframe'},
- radio:{title:'WDM Rádio',label:'Rádio',url:'https://wdmapps.com.br/radio/',icon:'radio',mode:'iframe',description:'A WDM Rádio toca os clássicos dos anos 60, 70 e 80 ao vivo.'},
+ radio:{title:'WDM Rádio Mix',label:'Rádio Mix',url:'https://wdmapps.com.br/radio/',icon:'radio',mode:'iframe',description:'A WDM Rádio Mix toca um pouco de tudo: pop, rock, MPB, sertanejo, pagode e muito mais, ao vivo.'},
  iptv:{title:'WDM IPTV',label:'IPTV',url:'https://wdmapps.com.br/iptv/',icon:'iptv',mode:'iframe'},
  jogos:{title:'Jogos WDM',label:'Jogos',url:'https://wdmapps.com.br/jogos/',icon:'jogos',mode:'iframe'},
  docs:{title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'},
