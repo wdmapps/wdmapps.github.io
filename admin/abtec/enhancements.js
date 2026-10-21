@@ -63,6 +63,7 @@
   gradeClassSelect.addEventListener("change", restoreGradeDraft);
   gradeModuleSelect.addEventListener("change", restoreGradeDraft);
   document.addEventListener("abtec-grades-saved", () => { const all = getDrafts(); delete all[gradeDraftId()]; putDrafts(all); });
+  document.addEventListener("abtec-grades-pending", saveGradeDraft);
   $("cancel-grade-edit").addEventListener("click", () => { const all = getDrafts(); delete all[gradeDraftId()]; putDrafts(all); });
   window.WDM_ABTEC_HAS_DRAFT = () => hasLessonDraft() || hasGradeDraft() || Boolean(document.querySelector("#history-edit-dialog[open]"));
   restoreLessonDraft(); restoreGradeDraft();

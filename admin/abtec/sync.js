@@ -138,6 +138,23 @@
     }, () => status("Conexão com a nuvem interrompida. Seus dados locais foram preservados.", "error"));
     return { reload: false };
   }
+  async function confirmAssessment(assessment) {
+    if (!await flush()) return false;
+    try {
+      const key = `grade-${encodeURIComponent(`${assessment.classId}:${assessment.id}`)}`;
+      const doc = await collection.doc(key).get({ source: "server" });
+      const remote = doc.exists ? doc.data() : null;
+      if (!remote || remote.deleted || core.canonical(JSON.parse(remote.payload)) !== core.canonical(assessment)) {
+        status("O salvamento desta avaliação não foi confirmado. A versão local foi preservada.", "error");
+        return false;
+      }
+      status("Sincronizado com a nuvem", "ok");
+      return true;
+    } catch {
+      status("Não foi possível confirmar as notas na nuvem. A versão local foi preservada.", "error");
+      return false;
+    }
+  }
   Storage.prototype.setItem = function (key, value) {
     nativeSet.call(this, key, value);
     if (this === localStorage && Object.values(keys).includes(key)) scheduleWrite();
@@ -146,7 +163,7 @@
   window.addEventListener("offline", () => status("Sem conexão — dados preservados no dispositivo", "error"));
   window.addEventListener("beforeunload", event => { if (dirty || running) { event.preventDefault(); event.returnValue = ""; } });
   document.addEventListener("abtec-app-ready", () => { uiReady = true; status(message, tone); });
-  window.WDM_ABTEC_SYNC = { hydrate, scheduleWrite, flush, backup, localSnapshot, status,
+  window.WDM_ABTEC_SYNC = { hydrate, scheduleWrite, flush, confirmAssessment, backup, localSnapshot, status,
     get dirty() { return dirty || Boolean(running); },
     async refresh() { if (running) await running; clearTimeout(timer); backup("antes-de-atualizar-nuvem"); const next = fromQuery(await collection.get({ source: "server" })); backup("atualizacao-recebida"); dirty = false; pendingRemote = null; apply(next); status("Sincronizado com a nuvem", "ok"); },
     retry() { return flush(); }

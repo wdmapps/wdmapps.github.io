@@ -158,7 +158,9 @@ function renderGrades() {
   renderGradeHistory();
 }
 
-function saveGrades() {
+let gradeSaveInProgress = false;
+async function saveGrades() {
+  if (gradeSaveInProgress) return false;
   const classId = gradeClassSelect.value;
   const module = gradeModuleSelect.value;
   const title = document.getElementById("grade-assessment-title").value.trim();
@@ -179,21 +181,51 @@ function saveGrades() {
     else grades[input.dataset.student] = Math.round(value * 10) / 10;
   });
   if (invalid) return showToast("As notas devem estar entre 0 e 10.");
+  if (!Object.values(grades).some(value => value !== null)) return showToast("Informe pelo menos uma nota antes de salvar.");
 
   const items = getGradeAssessments();
+  const previousAssessmentId = editingAssessmentId;
   if (editingAssessmentId) {
     const index = items.findIndex(item => item.id === editingAssessmentId);
-    if (index >= 0) items[index] = { ...items[index], classId, module, title, date, grades, updatedAt: new Date().toISOString() };
+    if (index < 0) return showToast("Avaliação não encontrada. Seus campos foram preservados.");
+    items[index] = { ...items[index], classId, module, title, date, grades, updatedAt: new Date().toISOString() };
   } else {
-    items.push({ id: Date.now(), classId, module, title, date, grades, savedAt: new Date().toISOString() });
+    editingAssessmentId = Date.now();
+    items.push({ id: editingAssessmentId, classId, module, title, date, grades, savedAt: new Date().toISOString() });
   }
-  saveGradeAssessments(items);
-  editingAssessmentId = null;
-  renderGradesForm();
-  renderGradeHistory();
-  renderDashboard();
-  document.dispatchEvent(new CustomEvent("abtec-grades-saved"));
-  showToast("Notas salvas no dispositivo. Aguarde a confirmação da nuvem.");
+  const assessment = items.find(item => item.id === editingAssessmentId);
+  const button = document.getElementById("save-grades");
+  const controls = [...document.querySelectorAll("#notas-view input, #notas-view select, #notas-view button, .main-nav button")].map(element => [element, element.disabled]);
+  const label = button.innerHTML;
+  let savedLocally = false;
+  gradeSaveInProgress = true;
+  controls.forEach(([element]) => { element.disabled = true; });
+  button.textContent = "Salvando na nuvem…";
+  try {
+    saveGradeAssessments(items);
+    savedLocally = true;
+    document.dispatchEvent(new CustomEvent("abtec-grades-pending"));
+    const confirmed = await window.WDM_ABTEC_SYNC.confirmAssessment(assessment);
+    if (!confirmed) {
+      showToast("A nuvem ainda não confirmou. Suas notas foram mantidas neste dispositivo. Tente salvar novamente.");
+      return false;
+    }
+    editingAssessmentId = null;
+    renderGradesForm();
+    renderGradeHistory();
+    renderDashboard();
+    document.dispatchEvent(new CustomEvent("abtec-grades-saved"));
+    showToast("Notas salvas na nuvem.");
+    return true;
+  } catch {
+    if (!savedLocally) editingAssessmentId = previousAssessmentId;
+    showToast("Não foi possível confirmar o salvamento. Seus campos foram preservados; tente novamente.");
+    return false;
+  } finally {
+    controls.forEach(([element, disabled]) => { element.disabled = disabled; });
+    button.innerHTML = label;
+    gradeSaveInProgress = false;
+  }
 }
 
 function editGradeAssessment(id) {
