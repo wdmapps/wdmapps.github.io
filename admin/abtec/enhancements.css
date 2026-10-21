@@ -24,6 +24,12 @@
 .roster-module-grade.warning > b { color:#86620c; }
 .roster-module-grade.low > b { color:#a33044; }
 .text-button { font-size:12px; min-height:40px; }
+.attendance-toggle button.present, #history-edit-dialog .history-edit-toggle button.present { border-color:#50e99b; color:#075b34; background:#e8fff2; box-shadow:0 0 7px rgba(0,232,119,.22); }
+.attendance-toggle button.absent, #history-edit-dialog .history-edit-toggle button.absent { border-color:#ff8b9b; color:#9c132b; background:#fff0f3; box-shadow:0 0 7px rgba(255,49,85,.2); }
+.attendance-toggle .present.selected, #history-edit-dialog .history-edit-toggle button.present.selected { border-color:#00d86b; color:#003b22; background:linear-gradient(145deg,#4dffa4,#08e979); box-shadow:0 0 0 1px rgba(0,232,119,.3),0 0 17px rgba(0,232,119,.6),inset 0 1px 0 rgba(255,255,255,.7); }
+.attendance-toggle .absent.selected, #history-edit-dialog .history-edit-toggle button.absent.selected { border-color:#ff2345; color:#4a0010; background:linear-gradient(145deg,#ff6572,#ff3d4f); box-shadow:0 0 0 1px rgba(255,49,85,.28),0 0 17px rgba(255,35,69,.55),inset 0 1px 0 rgba(255,255,255,.6); }
+.attendance-toggle button.present:hover, #history-edit-dialog .history-edit-toggle button.present:hover { box-shadow:0 0 14px rgba(0,232,119,.65); }
+.attendance-toggle button.absent:hover, #history-edit-dialog .history-edit-toggle button.absent:hover { box-shadow:0 0 14px rgba(255,35,69,.6); }
 .report-dialog { width:min(1080px,95vw); max-width:95vw; max-height:90vh; padding:24px; }
 .report-actions { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-bottom:18px; }
 .report-table-wrap { overflow:auto; }
