@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>WDM Rádio Mix | Um pouco de tudo, o tempo todo</title>
 <meta name="description" content="Sintonize a WDM Rádio Mix ao vivo! Pop, rock, MPB, sertanejo, pagode, flashbacks e muito mais em uma só rádio.">
-<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="icon" href="/radio/logo-wdm-mix.svg" type="image/svg+xml">
 <meta name="theme-color" content="#070c19">
 <link rel="canonical" href="https://wdmapps.com.br/radio/">
 <style>
@@ -20,6 +20,15 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 @media(max-width:840px){.hero,.bottom{grid-template-columns:1fr}.prelude{align-items:start}.clock strong{font-size:21px}.player{min-height:0}.record{height:140px;width:140px}.record:before{inset:38px}.track{font-size:27px}}
 @media(max-width:525px){.container{padding:0 17px}.nav{padding:15px 0}.prelude{display:block;padding:29px 0 0}.clock{text-align:left;margin-top:19px}.clock strong{display:inline;font-size:19px;margin-right:8px}.hero{margin-top:20px}.player,.side,.lower{padding:20px}.record-row{gap:17px;margin-top:28px}.record{width:102px;height:102px}.record:before{inset:28px}.record .middle{font-size:25px}.track{font-size:23px}.nav-link{padding:9px;font-size:11px}.volume{margin-left:0}.suggest{flex-direction:column}.suggest button{padding:11px}.sponsored{align-items:start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important}}
+
+/* Identidade oficial WDM Rádio Mix */
+.brand-logo-photo{display:block;width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 5px 12px #26bbf645)}
+.record.station-logo{width:182px;height:182px;border:0;background:none;box-shadow:none;border-radius:0;overflow:visible}
+.record.station-logo:before{display:none}
+.record.station-logo img{display:block;max-width:100%;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 22px #30b5ff3b)}
+.record.station-logo.spinning{animation:none}
+@media(max-width:840px){.record.station-logo{width:148px;height:148px}}
+@media(max-width:525px){.record.station-logo{width:106px;height:106px}.brand-logo-photo{width:45px;height:45px}}
 
 /* WDM Rádio – edição oficial no ar */
 .station-tag{color:#8adbe3;font-size:12px;font-weight:800;letter-spacing:.07em}
@@ -61,7 +70,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 <body>
 <div class="container">
   <header class="nav">
-    <a class="brand" href="https://wdmapps.com.br/"><div class="brand-logo" aria-hidden="true">♫</div><div>WDM <span style="color:var(--cyan)">RÁDIO MIX</span><small>UMA RÁDIO WDM APPS</small></div></a>
+    <a class="brand" href="https://wdmapps.com.br/"><img class="brand-logo-photo" src="/radio/logo-wdm-mix.svg" width="58" height="58" alt="Logo WDM Rádio Mix"><div>WDM <span style="color:var(--cyan)">RÁDIO MIX</span><small>UMA RÁDIO WDM APPS</small></div></a>
     <a class="nav-link" href="https://wdmapps.com.br/">↗ Voltar à WDM Apps</a>
   </header>
   <section class="prelude">
@@ -78,7 +87,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
       <section class="panel player" aria-labelledby="player-heading">
         <div class="topline"><div class="live" id="on-air-status" data-state="idle"><i class="dot"></i><span id="live-text">PRONTO PARA SINTONIZAR</span></div><div class="placeholder">📡 SHOUTCAST V2</div></div>
         <div class="record-row">
-          <div class="record" id="record" aria-hidden="true"><div class="middle">W</div></div>
+          <div class="record station-logo" id="record" aria-hidden="true"><img src="/radio/logo-wdm-mix.svg" alt="" width="182" height="182"></div>
           <div>
             <span class="chip">📻 WDM RÁDIO MIX</span>
             <h2 class="track" id="player-heading">WDM Rádio Mix ao vivo</h2>
