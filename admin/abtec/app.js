@@ -1,177 +1,6 @@
-let classes = {
-  segunda18: {
-    name: "Segunda-feira, 18h",
-    shortName: "Segunda 18",
-    time: "18:00",
-    lessons: 6,
-    students: [
-      ["Christiane", 1], ["Mirian", 1], ["Cornelio", 0], ["Danilo", 1],
-      ["Jamile", 0], ["Jamilly", 0], ["Tamiris", 2], ["Maysa", 0],
-      ["Stephany", 1], ["Angela", 1], ["Raissa", 1], ["Adriana", 1]
-    ],
-    history: [
-      ["2026-08-10", "Windows", "Quiz QWDM e chamada"],
-      ["2026-08-03", "Windows", "Inteligência artificial"],
-      ["2026-07-27", "Windows", "Internet"],
-      ["2026-07-06", "Windows", "Introdução"]
-    ],
-    absences: {
-      "2026-08-10": [],
-      "2026-08-03": ["Mirian", "Tamiris", "Adriana"],
-      "2026-07-27": ["Stephany"],
-      "2026-07-06": ["Danilo", "Tamiris"]
-    }
-  },
-  quinta18: {
-    name: "Quinta-feira, 18h",
-    shortName: "Quinta 18",
-    time: "18:00",
-    lessons: 12,
-    students: [
-      ["Eduarda", 3], ["Leylla", 0], ["Luis", 1], ["Maiara", 3],
-      ["Maria Clara", 1], ["Mariana", 1], ["Miguel", 2], ["Mikaele", 2],
-      ["Paulla", 0], ["Reginaldo", 2], ["Victoria", 1]
-    ],
-    history: [
-      ["2026-07-30", "Word", "Atividade página 22"],
-      ["2026-07-23", "Word", "Atividades página 15"],
-      ["2026-07-16", "Word", "Introdução ao Word"],
-      ["2026-07-02", "Windows", "Prova de Windows"],
-      ["2026-06-18", "Windows", "Kahoot"],
-      ["2026-06-11", "Windows", "Atividade página 112"],
-      ["2026-05-21", "Windows", "Atividades página 25"],
-      ["2026-05-14", "Windows", "Atividade página 18"],
-      ["2026-05-07", "Windows", "Introdução Windows"]
-    ],
-    absences: {
-      "2026-07-30": ["Mariana", "Reginaldo"],
-      "2026-07-23": ["Eduarda", "Miguel", "Mikaele"],
-      "2026-07-16": ["Reginaldo", "Victoria"],
-      "2026-07-02": ["Miguel"],
-      "2026-06-18": ["Maria Clara"],
-      "2026-06-11": ["Maiara"],
-      "2026-05-21": [],
-      "2026-05-14": [],
-      "2026-05-07": ["Luis", "Maiara"]
-    }
-  },
-  sexta19: {
-    name: "Sexta-feira, 19h",
-    shortName: "Sexta 19",
-    time: "19:00",
-    lessons: 22,
-    students: [
-      ["Julia", 2], ["Duda", 2], ["Angela", 0], ["Zenaide", 0],
-      ["Gabriel", 0], ["Messias", 0], ["Davi", 2], ["Vitoria", 0],
-      ["Maycon", 4], ["Eduarda", 3], ["Lara", 6], ["Celso", 4]
-    ],
-    history: [
-      ["2026-08-07", "Excel", "Atividade 06 - função SE"],
-      ["2026-08-01", "Excel", "Atividade 05 - gráficos"],
-      ["2026-07-03", "Excel", "Atividade 01 página 16"],
-      ["2026-06-19", "Word", "Revisão para prova"],
-      ["2026-06-12", "Word", "Aula com a Lígia"],
-      ["2026-06-05", "Word", "Mala direta"],
-      ["2026-05-22", "Word", "Requerimentos"],
-      ["2026-05-15", "Word", "Formatações"],
-      ["2026-05-08", "Word", "Introdução Word"],
-      ["2026-04-24", "Windows", "Prova"],
-      ["2026-04-17", "Windows", "Revisão para prova"],
-      ["2026-03-27", "Windows", "Teclado e WordPad"],
-      ["2026-03-20", "Windows", "WordPad"],
-      ["2026-03-13", "Windows", "Como criar pastas"],
-      ["2026-03-06", "Windows", "História do computador"],
-      ["2026-02-27", "Windows", "Introdução Windows"]
-    ],
-    absences: {
-      "2026-08-07": [],
-      "2026-08-01": ["Lara"],
-      "2026-07-03": ["Maycon"],
-      "2026-06-19": ["Julia", "Duda", "Lara", "Celso"],
-      "2026-06-12": [],
-      "2026-06-05": ["Davi"],
-      "2026-05-22": ["Lara"],
-      "2026-05-15": ["Eduarda"],
-      "2026-05-08": [],
-      "2026-04-24": [],
-      "2026-04-17": [],
-      "2026-03-27": ["Maycon"],
-      "2026-03-20": ["Maycon", "Lara", "Celso"],
-      "2026-03-13": [],
-      "2026-03-06": [],
-      "2026-02-27": ["Celso"]
-    }
-  },
-  sabado08: {
-    name: "Sábado, 08h",
-    shortName: "Sábado 08",
-    time: "08:00",
-    lessons: 18,
-    students: [
-      ["Ana Luiza", 1], ["Andressa", 3], ["Enzo", 4], ["Kesia", 4],
-      ["Lara", 0], ["Lucas", 6], ["Maria Eduarda", 11], ["Matheus Martins", 0],
-      ["Matheus Miguel", 1], ["Roseli", 3], ["Lauriza", 1], ["Mirian", 1]
-    ],
-    history: [
-      ["2026-08-01", "Excel", "Introdução Excel"],
-      ["2026-07-11", "Word", "Kahoot e mala direta"],
-      ["2026-07-04", "Word", "Atividades página 84"],
-      ["2026-06-27", "Word", "Atividades página 28"],
-      ["2026-06-20", "Word", "Atividades página 21"],
-      ["2026-06-13", "Word", "Atividade página 15"],
-      ["2026-05-30", "Windows", "Prova"],
-      ["2026-05-23", "Windows", "Revisão para prova"],
-      ["2026-05-09", "Windows", "Atividades página 57"],
-      ["2026-04-18", "Windows", "Atividades página 18"],
-      ["2026-04-11", "Windows", "Introdução Windows"]
-    ],
-    absences: {
-      "2026-08-01": ["Andressa", "Lucas", "Maria Eduarda"],
-      "2026-07-11": ["Kesia", "Maria Eduarda", "Matheus Miguel"],
-      "2026-07-04": ["Maria Eduarda"],
-      "2026-06-27": ["Maria Eduarda"],
-      "2026-06-20": [],
-      "2026-06-13": ["Enzo", "Lucas", "Maria Eduarda", "Roseli"],
-      "2026-05-30": ["Maria Eduarda"],
-      "2026-05-23": ["Lucas"],
-      "2026-05-09": [],
-      "2026-04-18": ["Andressa", "Enzo", "Kesia"],
-      "2026-04-11": []
-    }
-  },
-  sabado13: {
-    name: "Sábado, 13h",
-    shortName: "Sábado 13",
-    time: "13:00",
-    lessons: 9,
-    students: [
-      ["Ana Clara", 0], ["Juliana", 1], ["Marcelo", 0], ["Mariana", 0],
-      ["Miguel", 0], ["Roberta", 3], ["Jakeline", 3], ["Nicoly", 0],
-      ["Julia", 5], ["Beatriz", 4], ["Isabelle", 1], ["Marcilia", 5]
-    ],
-    history: [
-      ["2026-08-08", "Word", "Introdução Word"],
-      ["2026-08-06", "Windows", "Atividades página 29"],
-      ["2026-07-25", "Windows", "Revisão para prova"],
-      ["2026-07-18", "Windows", "Kahoot e exercícios"],
-      ["2026-07-11", "Windows", "Atividades página 70"],
-      ["2026-06-20", "Windows", "Atividades página 18"],
-      ["2026-06-13", "Windows", "Introdução Windows"]
-    ],
-    absences: {
-      "2026-08-08": ["Juliana", "Roberta", "Julia", "Marcilia"],
-      "2026-07-25": ["Julia", "Beatriz"],
-      "2026-07-18": ["Roberta", "Julia", "Beatriz", "Marcilia"],
-      "2026-07-11": ["Julia", "Beatriz"],
-      "2026-06-20": ["Isabelle", "Marcilia"],
-      "2026-06-13": []
-    }
-  }
-};
-
-const importedRosters = Object.fromEntries(
-  Object.entries(classes).map(([classId, item]) => [classId, item.students.map(([name]) => name)])
-);
+/* Student data is loaded only after Firebase authentication. */
+let classes = JSON.parse(JSON.stringify(window.WDM_ABTEC_INITIAL.classes));
+const importedRosters = window.WDM_ABTEC_INITIAL.importedRosters;
 
 const storageKey = "abtec-prototipo-aulas";
 const classStorageKey = "abtec-prototipo-turmas";
@@ -243,7 +72,7 @@ function renderClass() {
   attendance = Object.fromEntries(current.students.map(([name]) => [name, null]));
   el("class-time").textContent = current.time;
   el("student-count").textContent = `${current.students.length} matriculados`;
-  el("class-progress").textContent = `${current.lessons} aulas`;
+  el("class-progress").textContent = `${combinedHistory(selectedClass).length} aulas registradas`;
   el("student-list").innerHTML = current.students.map(([name, absences], index) => `
     <div class="student-row" data-student-index="${index}">
       <div class="student-identity">
@@ -288,7 +117,7 @@ function getSavedLessons() {
 function renderLastLesson() {
   const saved = getSavedLessons().filter(item => item.classId === selectedClass);
   const base = classes[selectedClass].history;
-  const last = saved.length ? saved.sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0] : base[0];
+  const last = combinedHistory(selectedClass)[0];
   if (!last) {
     el("last-lesson").innerHTML = "";
     return;
@@ -307,6 +136,7 @@ function saveLesson() {
   if (unmarked) return showToast(`Marque a chamada dos ${unmarked} alunos restantes.`);
 
   const lessons = getSavedLessons();
+  if (combinedHistory(selectedClass).some(item => item.date === date) && !confirm("Já existe uma aula desta turma nesta data. Deseja registrar outra aula? Para corrigir a anterior, use Editar no Histórico.")) return;
   lessons.push({
     id: Date.now(),
     classId: selectedClass,
@@ -325,11 +155,12 @@ function saveLesson() {
   saveClasses();
   el("lesson-content").value = "";
   el("lesson-note").value = "";
-  renderLastLesson();
+  document.dispatchEvent(new CustomEvent("abtec-lesson-saved"));
+  renderClass();
   renderHistory();
   renderRoster();
   renderDashboard();
-  showToast("Aula salva neste navegador.");
+  showToast("Aula salva no dispositivo. Aguarde a confirmação da nuvem.");
 }
 
 function combinedHistory(classId) {
@@ -413,7 +244,7 @@ function allAttendanceRecords() {
 }
 
 function renderDashboard() {
-  const classEntries = Object.values(classes);
+  const classEntries = Object.entries(classes).map(([id, item]) => ({ ...item, recordedLessons: combinedHistory(id).length }));
   const students = classEntries.flatMap(item => item.students.map(([name, absences]) => ({ name, absences, className: item.name })));
   const totalAbsences = students.reduce((sum, item) => sum + Number(item.absences || 0), 0);
   const attendanceValues = allAttendanceRecords().flatMap(item => Object.values(item.attendance));
@@ -429,7 +260,7 @@ function renderDashboard() {
     return `<div class="dashboard-class-row">
       <strong>${escapeHTML(item.name)}</strong>
       <div class="dashboard-data"><span>Alunos</span><strong>${item.students.length}</strong></div>
-      <div class="dashboard-data"><span>Aulas</span><strong>${item.lessons}</strong></div>
+      <div class="dashboard-data"><span>Aulas</span><strong>${item.recordedLessons}</strong></div>
       <div class="dashboard-data"><span>Faltas</span><strong>${absences}</strong></div>
     </div>`;
   }).join("") || `<div class="empty-state">Nenhuma turma cadastrada.</div>`;

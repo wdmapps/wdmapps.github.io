@@ -109,6 +109,7 @@ function isAbtecPage() {
 }
 
 function updateAbtecCloudLabels() {
+    if (window.WDM_ABTEC_SYNC) return;
     if (!isAbtecPage()) return;
 
     const applyLabels = () => {
@@ -164,6 +165,7 @@ async function writeAbtecSnapshotToCloud() {
 }
 
 function scheduleAbtecCloudWrite() {
+    if (window.WDM_ABTEC_SYNC) return window.WDM_ABTEC_SYNC.scheduleWrite();
     if (!isAbtecPage()) return;
     clearTimeout(abtecSyncTimer);
     abtecSyncTimer = setTimeout(writeAbtecSnapshotToCloud, 350);
@@ -181,6 +183,7 @@ Storage.prototype.setItem = function(key, value) {
 };
 
 async function hydrateAbtecFromCloud() {
+    if (window.WDM_ABTEC_SYNC) return window.WDM_ABTEC_SYNC.hydrate();
     if (!isAbtecPage()) return { reload: false };
 
     const firebaseSdk = await window.WDM_FIREBASE_READY;
@@ -246,8 +249,17 @@ async function requireAuth() {
         }
 
         document.documentElement.style.visibility = "";
+        return true;
     } catch (error) {
-        console.error("Falha ao validar o acesso administrativo:", error);
+        if (window.WDM_ABTEC_SYNC && isAbtecPage()) {
+            document.documentElement.style.visibility = "";
+            const panel = document.createElement("main"); panel.style.cssText = "max-width:650px;margin:10vh auto;padding:24px;font-family:Arial";
+            const title = document.createElement("h1"); title.textContent = "Não foi possível abrir o diário";
+            const text = document.createElement("p"); text.textContent = "A conexão com a base não foi concluída. Seus dados locais foram preservados. Verifique a internet e tente novamente.";
+            const button = document.createElement("button"); button.textContent = "Tentar novamente"; button.onclick = () => window.location.reload();
+            panel.append(title, text, button); document.body.replaceChildren(panel); return false;
+        }
+        console.error("Falha ao validar o acesso administrativo:", error?.code || "unavailable");
         sessionStorage.removeItem("admin_auth");
         window.location.replace("/admin/");
     }

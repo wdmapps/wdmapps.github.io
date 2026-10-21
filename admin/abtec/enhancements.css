@@ -1,0 +1,55 @@
+.diary-tools { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 18px; margin:0 0 20px; border:1px solid #ccdeef; border-radius:12px; background:#fff; }
+.diary-tools > div:first-child { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+.diary-tool-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+.sync-indicator { color:#116245; font-size:13px; font-weight:700; }
+.sync-indicator::before { content:"● "; }
+[data-abtec-sync][data-state="pending"] { color:#86620c; }
+[data-abtec-sync][data-state="error"], [data-abtec-sync][data-state="conflict"] { color:#a33044; }
+.draft-hint { color:#647995; font-size:12px; }
+.history-filters { display:grid; grid-template-columns:2fr 1fr 1fr 1.3fr auto auto; gap:12px; align-items:end; padding:16px 22px; border-bottom:1px solid #d8e4ef; }
+.history-filters label { font-size:12px; color:#4d6480; font-weight:700; }
+.history-filters input, .history-filters select { display:block; margin-top:6px; min-height:42px; padding:9px; }
+#history-filter-count { grid-column:1/-1; margin:0; color:#5a718d; font-size:12px; }
+.history-item[hidden], [hidden] { display:none !important; }
+.history-date, .history-content span, .history-stats span, .student-absence, .roster-row > span { font-size:12px; }
+.history-stats span { padding:7px 10px; }
+.history-delete-button, .history-edit-button { min-height:40px; font-size:12px !important; }
+.roster-row { grid-template-columns:minmax(150px,1.5fr) minmax(60px,1fr) 75px 34px 64px; }
+.roster-frequency { display:block; font-size:12px; font-weight:500; color:#5d738d; margin-top:5px; }
+.text-button { font-size:12px; min-height:40px; }
+.report-dialog { width:min(1080px,95vw); max-width:95vw; max-height:90vh; padding:24px; }
+.report-actions { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-bottom:18px; }
+.report-table-wrap { overflow:auto; }
+.report-dialog table { border-collapse:collapse; width:100%; font-size:13px; }
+.report-dialog th, .report-dialog td { padding:11px 9px; border:1px solid #d6e2ec; text-align:left; }
+.report-dialog th { color:#103759; background:#edf5fc; }
+.report-dialog p { line-height:1.6; font-size:13px; color:#526c85; }
+.planned-lesson-pill { display:block; border-radius:5px; padding:4px; margin-top:4px; font-size:11px; color:#075b83; background:#dcf4ff; overflow:hidden; text-overflow:ellipsis; }
+.planned-event-list { margin:12px 0; padding:12px; border:1px solid #c6e6f3; border-radius:8px; background:#f1faff; }
+.planned-event-list p { font-size:12px; }
+button:focus-visible, a:focus-visible { outline:3px solid #00a2d1; outline-offset:3px; }
+@media(max-width:1100px) { .history-filters { grid-template-columns:repeat(3,minmax(0,1fr)); } .diary-tools { align-items:flex-start; flex-direction:column; } }
+@media(max-width:760px) {
+  .history-filters { grid-template-columns:repeat(2,minmax(0,1fr)); padding:14px; }
+  .history-filters label:first-child { grid-column:1/-1; }
+  .diary-tool-buttons { width:100%; }
+  .diary-tool-buttons button { flex:1 1 120px; }
+  .attendance-toggle button { width:46px; height:44px; font-size:14px; }
+  .roster-row { grid-template-columns:minmax(0,1fr) 55px 34px 58px; gap:8px; }
+  .roster-row .absence-bar { display:none; }
+  .student-profile { max-width:none; padding:6px; }
+  .report-dialog { padding:15px; }
+  .planned-lesson-pill { font-size:10px; }
+}
+@media print {
+  @page { size:landscape; margin:12mm; }
+  body { background:white !important; }
+  body > :not(#diary-report-dialog) { display:none !important; }
+  #diary-report-dialog { position:static; display:block !important; width:100%; max-width:none; max-height:none; margin:0; border:0; box-shadow:none; padding:0; overflow:visible; }
+  #diary-report-dialog::backdrop { background:white; }
+  .report-actions { display:none; }
+  .report-table-wrap { overflow:visible; }
+  .report-dialog table { font-size:10pt; }
+  .report-dialog th, .report-dialog td { padding:6px; }
+  .report-dialog tr { break-inside:avoid; }
+}

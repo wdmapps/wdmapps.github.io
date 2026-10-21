@@ -192,7 +192,8 @@ function saveGrades() {
   renderGradesForm();
   renderGradeHistory();
   renderDashboard();
-  showToast("Notas salvas.");
+  document.dispatchEvent(new CustomEvent("abtec-grades-saved"));
+  showToast("Notas salvas no dispositivo. Aguarde a confirmação da nuvem.");
 }
 
 function editGradeAssessment(id) {
@@ -305,14 +306,3 @@ renderGradesForm();
 renderGradeHistory();
 renderDashboard();
 
-if (!document.querySelector('script[src="schedule.js"]')) {
-  const scheduleScript = document.createElement("script");
-  scheduleScript.src = "schedule.js";
-  document.body.appendChild(scheduleScript);
-}
-
-if (!document.querySelector('script[src="schedule-descriptions.js"]')) {
-  const scheduleDescriptionsScript = document.createElement("script");
-  scheduleDescriptionsScript.src = "schedule-descriptions.js";
-  document.body.appendChild(scheduleDescriptionsScript);
-}

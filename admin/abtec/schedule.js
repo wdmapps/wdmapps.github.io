@@ -11,7 +11,7 @@
   if (!document.querySelector('link[href="schedule.css"]')) {
     const style = document.createElement("link");
     style.rel = "stylesheet";
-    style.href = "schedule.css";
+    style.href = "schedule.css?v=20261021.4";
     document.head.appendChild(style);
   }
 
@@ -284,7 +284,9 @@
     }));
     const administered = getAdministeredDates(classId);
     const administeredCount = schedule.filter(item => administered.has(item.date)).length;
-    if (progress) progress.textContent = `${administeredCount}/${TOTAL_LESSONS} aulas ministradas`;
+    const recordedCount = combinedHistory(classId).length;
+    const outsideCount = combinedHistory(classId).filter(item => !schedule.some(planned => planned.date === item.date)).length;
+    if (progress) progress.textContent = `${recordedCount} aulas registradas · ${administeredCount}/${TOTAL_LESSONS} datas do cronograma concluídas${outsideCount ? ` · ${outsideCount} fora do cronograma` : ""}`;
 
     if (holidayBox) {
       holidayBox.innerHTML = skipped.length
