@@ -4,7 +4,7 @@
   const keys = { classes: "abtec-prototipo-turmas", lessons: "abtec-prototipo-aulas", appointments: "abtec-prototipo-agenda", grades: "abtec-notas-alunos" };
   const core = window.AbtecSyncCore;
   const nativeSet = Storage.prototype.setItem;
-  let db, collection, baseline = new Map(), pendingRemote = null, ready = false, applying = false;
+  let db, collection, baseline = new Map(), pendingRemote = null, ready = false, applying = false, classOrder = [];
   let timer, running = null, dirty = false, uiReady = false, message = "Conectando…", tone = "pending";
   const parse = (raw, fallback) => raw ? JSON.parse(raw) : fallback;
   function localSnapshot() {
@@ -26,6 +26,7 @@
   function apply(map) {
     const value = core.snapshot(map);
     if (!Object.keys(value.classes).length) throw Error("A nuvem não retornou turmas. A cópia local foi preservada.");
+    value.classes = Object.fromEntries([...new Set([...classOrder, ...Object.keys(value.classes)])].filter(id => value.classes[id]).map(id => [id, value.classes[id]]));
     applying = true;
     try { for (const [field, key] of Object.entries(keys)) nativeSet.call(localStorage, key, JSON.stringify(value[field])); }
     finally { applying = false; }
@@ -100,6 +101,7 @@
     const cloud = doc.data();
     const seedClasses = parse(cloud.seedClasses, null), seedRosters = parse(cloud.seedRosters, null);
     if (!seedClasses || !seedRosters) throw Error("Base inicial privada indisponível.");
+    classOrder = Object.keys(parse(cloud.classes, seedClasses));
     window.WDM_ABTEC_INITIAL = { classes: seedClasses, importedRosters: seedRosters };
     if (cloud.schemaVersion !== 2) {
       const legacy = { classes: parse(cloud.classes, seedClasses), lessons: parse(cloud.lessons, []), appointments: parse(cloud.appointments, []), grades: parse(cloud.grades, []) };
