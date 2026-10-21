@@ -130,7 +130,7 @@
   function frequency(classId, name) {
     const records = combinedHistory(classId).filter(item => item.attendance?.[name] === "P" || item.attendance?.[name] === "F");
     const present = records.filter(item => item.attendance[name] === "P").length;
-    return { total: records.length, present, absent: records.length - present, rate: records.length ? Math.round(present / records.length * 100) : null };
+    return { total: records.length, present, absent: records.length - present, rate: records.length ? Math.round(present / records.length * 100) : null, absenceRate: records.length ? Math.round((records.length - present) / records.length * 100) : null };
   }
   const report = document.createElement("dialog"); report.id = "diary-report-dialog"; report.className = "report-dialog";
   report.innerHTML = `<div class="report-actions"><button class="text-button" id="report-print" type="button">Imprimir / Salvar PDF</button><button class="text-button" id="report-csv" type="button">Exportar Excel (CSV)</button><button class="text-button" id="report-close" type="button">Fechar</button></div><div id="diary-report-content"></div>`;
@@ -194,8 +194,22 @@
     const classId = rosterClassSelect.value;
     document.querySelectorAll("#roster-list .roster-row").forEach((row, index) => {
       const name = classes[classId].students[index][0], stat = frequency(classId, name);
-      const detail = document.createElement("small"); detail.className = "roster-frequency"; detail.textContent = stat.rate === null ? "Sem chamada disponível" : `${stat.rate}% de presença nas chamadas`;
+      const detail = document.createElement("small"); detail.className = "roster-frequency"; detail.textContent = stat.rate === null ? "Sem chamada disponível" : `${stat.absenceRate}% de faltas nas chamadas · ${stat.rate}% de presença`;
+      detail.title = stat.total ? `${stat.absent} ${stat.absent === 1 ? "falta" : "faltas"} em ${stat.total} chamadas disponíveis. O total acumulado pode incluir registros anteriores.` : "Ainda não há chamadas disponíveis para calcular a porcentagem.";
       row.querySelector("strong").appendChild(detail);
+      const bar = row.querySelector(".absence-bar");
+      bar.querySelector("span").style.width = `${stat.absenceRate ?? 0}%`;
+      bar.setAttribute("role", "img");
+      bar.setAttribute("aria-label", stat.absenceRate === null ? "Porcentagem de faltas indisponível" : `${stat.absenceRate}% de faltas nas chamadas`);
+      bar.title = detail.title;
+      const moduleGrades = document.createElement("div"); moduleGrades.className = "roster-module-grades";
+      moduleGrades.innerHTML = gradeModules.map(module => {
+        const value = studentAverage(classId, name, module);
+        return `<div class="roster-module-grade ${gradeTone(value)}" data-roster-module="${escapeHTML(module)}" title="${escapeHTML(module)}: ${value === null ? "sem nota lançada" : `média ${formatGrade(value)}`}"><span>${escapeHTML(module)}</span><b>${formatGrade(value)}</b></div>`;
+      }).join("");
+      row.insertBefore(moduleGrades, bar);
+      const accumulated = row.querySelector(":scope > span");
+      if (accumulated) accumulated.title = "Faltas acumuladas, incluindo registros anteriores às chamadas disponíveis.";
       const button = document.createElement("button"); button.type = "button"; button.className = "text-button student-profile"; button.textContent = "Ficha"; button.setAttribute("aria-label", `Ficha de ${name}`); button.addEventListener("click", () => showReport(classId, name)); row.appendChild(button);
     });
   };

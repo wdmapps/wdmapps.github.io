@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261021.7">
-  <link rel="stylesheet" href="grades.css?v=20261021.7">
-  <link rel="stylesheet" href="enhancements.css?v=20261021.7">
-  <script src="sync-core.js?v=20261021.7"></script>
-  <script src="sync.js?v=20261021.7"></script>
-  <script src="../auth.js?v=20261021.7"></script>
+  <link rel="stylesheet" href="styles.css?v=20261021.8">
+  <link rel="stylesheet" href="grades.css?v=20261021.8">
+  <link rel="stylesheet" href="enhancements.css?v=20261021.8">
+  <script src="sync-core.js?v=20261021.8"></script>
+  <script src="sync.js?v=20261021.8"></script>
+  <script src="../auth.js?v=20261021.8"></script>
   <script>window.WDM_PAGE_READY = requireAuth();</script>
 </head>
 <body>
@@ -202,7 +202,7 @@
         <div id="alunos-view" class="view">
           <section class="card roster-card">
             <div class="section-heading history-heading">
-              <div><span class="step">◎</span><div><h2>Resumo dos alunos</h2><p>Frequência e faltas registradas</p></div></div>
+              <div><span class="step">◎</span><div><h2>Resumo dos alunos</h2><p>Faltas nas chamadas e médias por módulo</p></div></div>
               <div class="roster-actions">
                 <select id="roster-class-select" aria-label="Selecionar turma"></select>
                 <button class="utility-button add" id="new-student" type="button">+ Adicionar aluno</button>
@@ -328,7 +328,7 @@
     window.WDM_PAGE_READY.then(async allowed => {
       if (!allowed) return;
       for (const file of ["app.js", "history-actions.js", "grades.js", "schedule.js", "schedule-descriptions.js", "enhancements.js"]) {
-        await new Promise((resolve, reject) => { const script = document.createElement("script"); script.src = file + "?v=20261021.7"; script.onload = resolve; script.onerror = reject; document.body.appendChild(script); });
+        await new Promise((resolve, reject) => { const script = document.createElement("script"); script.src = file + "?v=20261021.8"; script.onload = resolve; script.onerror = reject; document.body.appendChild(script); });
       }
       document.dispatchEvent(new CustomEvent("abtec-app-ready"));
     }).catch(() => { window.WDM_ABTEC_SYNC.status("Falha ao carregar o diário. Recarregue a página; seus dados foram preservados.", "error"); });
