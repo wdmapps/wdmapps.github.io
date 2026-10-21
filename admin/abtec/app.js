@@ -369,7 +369,7 @@ function renderHistory() {
     return `<article class="history-item">
       <button class="history-summary" type="button" aria-expanded="false">
         <span class="history-date">${formatDate(item.date)}</span>
-        <span class="history-content"><strong>${escapeHTML(item.content)}</strong><span>${escapeHTML(item.module)}${item.note ? ` · ${escapeHTML(item.note)}` : ""}${item.imported ? " · importado da planilha" : " · salvo no protótipo"}</span></span>
+        <span class="history-content"><strong>${escapeHTML(item.content)}</strong><span>${escapeHTML(item.module)}${item.note ? ` · ${escapeHTML(item.note)}` : ""}${item.imported ? " · importado da planilha" : ""}</span></span>
         <span class="history-stats">${names ? `<span class="stat-present">${present} ${present === 1 ? "presente" : "presentes"}</span><span class="stat-absent">${absent} ${absent === 1 ? "falta" : "faltas"}</span><span class="expand-label">Ver chamada</span>` : `<span class="stat-missing">Chamada não localizada</span>`}</span>
       </button>
       ${names ? `<div class="attendance-details">
