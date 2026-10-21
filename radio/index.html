@@ -46,6 +46,16 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 #request button{min-height:46px}
 @media(max-width:525px){.placeholder{display:none}.player .record-row{align-items:flex-start}.record{width:94px;height:94px}.record:before{inset:26px}.record .middle{font-size:27px}.volume{width:100%;justify-content:flex-start}.volume input{flex:1}.decade{flex:1;min-width:80px}.decade strong{font-size:24px}}
 
+
+/* WDM Rádio Mix na Alexa */
+.alexa-inline{display:inline-flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:17px;padding:9px 14px;border:1px solid #43cffa6b;border-radius:999px;background:#0a3657a8;color:#dcfaff;font-size:12px;box-shadow:0 0 24px #00caff16}
+.alexa-inline strong{color:#fff;font-weight:900}.alexa-inline span:last-child{color:#a9d7e9}.alexa-dot{width:11px;height:11px;flex:none;border:2px solid #70eaff;border-radius:50%;box-shadow:0 0 0 3px #32cce624}
+.alexa-card{display:flex;gap:15px;align-items:center;padding:17px;border-radius:18px;border:1px solid #39cdfa75;background:linear-gradient(125deg,#0b4260,#152b59 70%,#171a3a);box-shadow:0 8px 28px #00bfff14}
+.alexa-icon{width:70px;height:70px;flex:none;display:grid;place-items:center;border-radius:19px;background:linear-gradient(150deg,#02d4ff,#167dd8);box-shadow:0 8px 23px #04ccfd34}
+.alexa-icon svg{width:52px;height:52px}.alexa-copy{min-width:0}.alexa-label{font-size:10px;letter-spacing:.15em;color:#7de5ff;font-weight:900;display:block;margin-bottom:3px}.alexa-copy strong{font-size:15px;display:block;line-height:1.25}.alexa-copy p{color:#c0d6e9;font-size:12px;margin:7px 0 4px}
+.alexa-phrase{font-size:13px;color:#fff;font-weight:850;line-height:1.35}
+@media(max-width:525px){.alexa-inline{border-radius:15px}.alexa-inline span:last-child{width:100%;padding-left:21px}.alexa-icon{width:60px;height:60px}.alexa-icon svg{width:46px;height:46px}}
+
 </style>
 </head>
 <body>
@@ -59,6 +69,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
       <p class="eyebrow">UMA RÁDIO, TODOS OS RITMOS</p>
       <h1 class="title">Um pouco de tudo.<br><span>O tempo todo.</span></h1>
       <p class="sub">Pop, rock, sertanejo, MPB, pagode, românticas, flashbacks e muito mais. Aqui a boa música não tem um estilo só!</p>
+      <div class="alexa-inline"><span class="alexa-dot" aria-hidden="true"></span><strong>Agora também na Alexa!</strong><span>É só pedir para tocar a WDM Rádio Mix.</span></div>
     </div>
     <div class="clock"><strong id="clock">--:--</strong><span>SALTO · SÃO PAULO</span></div>
   </section>
@@ -90,6 +101,10 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
       </section>
       <aside class="panel side">
         <h3 class="cardtitle">🎙️ Estúdio WDM <span class="badge">MIX AO VIVO</span></h3>
+        <div class="alexa-card" aria-label="WDM Rádio Mix disponível na Alexa">
+          <div class="alexa-icon" aria-hidden="true"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M16 34a18 18 0 1 1 29 14" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><path d="M45 48c-7.5 7-17 9-26 3" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/></svg></div>
+          <div class="alexa-copy"><span class="alexa-label">OUÇA PELA ALEXA</span><strong>Já estamos na Alexa!</strong><p>Diga para sua Alexa:</p><div class="alexa-phrase">“Alexa, toca WDM Rádio Mix”</div></div>
+        </div>
         <div class="ai-card">
           <div class="mic">🎤</div>
           <div><strong>Todo estilo tem seu lugar!</strong>
