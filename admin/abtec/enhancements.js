@@ -136,6 +136,28 @@
   report.innerHTML = `<div class="report-actions"><button class="text-button" id="report-print" type="button">Imprimir / Salvar PDF</button><button class="text-button" id="report-csv" type="button">Exportar Excel (CSV)</button><button class="text-button" id="report-close" type="button">Fechar</button></div><div id="diary-report-content"></div>`;
   document.body.appendChild(report);
   let reportRows = [], reportClass = selectedClass;
+  function studentModules(classId, studentName) {
+    const assessments = getGradeAssessments().filter(item => item.classId === classId)
+      .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    const modules = gradeModules.map(module => ({
+      module,
+      assessments: assessments.filter(item => assessmentModule(item) === module),
+      average: studentAverage(classId, studentName, module)
+    }));
+    const unassigned = assessments.filter(item => !assessmentModule(item));
+    if (unassigned.length) modules.push({ module: "Sem módulo definido", assessments: unassigned, average: null });
+    return modules;
+  }
+  function studentModuleHTML(modules, studentName) {
+    return `<h3 class="student-modules-title">Notas por módulo</h3><div class="student-module-grid">${modules.map(item => `
+      <section class="student-module-card" data-student-module="${escapeHTML(item.module)}">
+        <header><h4>${escapeHTML(item.module)}</h4><span class="student-module-average ${gradeTone(item.average)}">Média: ${formatGrade(item.average)}</span></header>
+        ${item.assessments.length ? `<div class="report-table-wrap"><table><thead><tr><th scope="col">Data</th><th scope="col">Avaliação</th><th scope="col">Nota</th></tr></thead><tbody>${item.assessments.map(assessment => {
+          const value = gradeNumber(assessment.grades?.[studentName]);
+          return `<tr><td>${formatDate(assessment.date)}</td><td>${escapeHTML(assessment.title)}</td><td class="student-module-grade">${value === null ? "Não avaliado" : formatGrade(value)}</td></tr>`;
+        }).join("")}</tbody></table></div>` : `<p class="student-module-empty">Sem nota lançada neste módulo.</p>`}
+      </section>`).join("")}</div>`;
+  }
   function showReport(classId, studentName) {
     reportClass = classId;
     const current = classes[classId];
@@ -143,7 +165,19 @@
     reportRows = [["Aluno", "Presenças", "Faltas nas chamadas", "Faltas acumuladas", "Frequência (%)", ...gradeModules]];
     students.forEach(([name, absences]) => { const stat = frequency(classId, name); reportRows.push([name, stat.present, stat.absent, absences, stat.rate ?? "", ...gradeModules.map(module => { const value = studentAverage(classId, name, module); return value === null ? "" : value.toLocaleString("pt-BR", { maximumFractionDigits: 1 }); })]); });
     const history = studentName ? combinedHistory(classId).filter(item => item.attendance?.[studentName] === "F") : [];
-    $("diary-report-content").innerHTML = `<h2>${escapeHTML(studentName || "Relatório da turma")}</h2><p>${escapeHTML(current.name)} · Emitido em ${formatDate(localDateISO())}</p><p>Frequência calculada apenas nas chamadas disponíveis. Faltas acumuladas podem incluir registros anteriores.</p><div class="report-table-wrap"><table><thead><tr>${reportRows[0].map(value => `<th>${escapeHTML(value)}</th>`).join("")}</tr></thead><tbody>${reportRows.slice(1).map(row => `<tr>${row.map(value => `<td>${escapeHTML(value === "" ? "—" : value)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>${studentName ? `<h3>Datas com falta registrada</h3><p>${history.map(item => formatDate(item.date)).join(" · ") || "Nenhuma falta nas chamadas disponíveis."}</p>` : ""}`;
+    const modules = studentName ? studentModules(classId, studentName) : [];
+    $("diary-report-content").innerHTML = `<h2>${escapeHTML(studentName || "Relatório da turma")}</h2><p>${escapeHTML(current.name)} · Emitido em ${formatDate(localDateISO())}</p><p>Frequência calculada apenas nas chamadas disponíveis. Faltas acumuladas podem incluir registros anteriores.</p><div class="report-table-wrap"><table><thead><tr>${reportRows[0].map(value => `<th>${escapeHTML(value)}</th>`).join("")}</tr></thead><tbody>${reportRows.slice(1).map(row => `<tr>${row.map(value => `<td>${escapeHTML(value === "" ? "—" : value)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>${studentName ? `${studentModuleHTML(modules, studentName)}<h3>Datas com falta registrada</h3><p>${history.map(item => formatDate(item.date)).join(" · ") || "Nenhuma falta nas chamadas disponíveis."}</p>` : ""}`;
+    if (studentName) {
+      const stat = frequency(classId, studentName);
+      const absences = current.students.find(([name]) => name === studentName)?.[1] ?? "";
+      reportRows = [["Aluno", "Turma", "Módulo", "Avaliação", "Data", "Nota", "Média do módulo", "Frequência (%)", "Faltas acumuladas"]];
+      modules.forEach(item => {
+        (item.assessments.length ? item.assessments : [null]).forEach(assessment => {
+          const value = assessment ? gradeNumber(assessment.grades?.[studentName]) : null;
+          reportRows.push([studentName, current.name, item.module, assessment?.title || "", assessment?.date || "", value === null ? "" : formatGrade(value), item.average === null ? "" : formatGrade(item.average), stat.rate ?? "", absences]);
+        });
+      });
+    }
     report.showModal();
   }
   $("diary-report").addEventListener("click", () => {
