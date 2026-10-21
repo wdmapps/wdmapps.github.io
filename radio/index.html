@@ -23,12 +23,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
 
 /* Identidade oficial WDM Rádio Mix */
 .brand-logo-photo{display:block;width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 5px 12px #26bbf645)}
-.record.station-logo{width:182px;height:182px;border:0;background:none;box-shadow:none;border-radius:0;overflow:visible}
-.record.station-logo:before{display:none}
-.record.station-logo img{display:block;max-width:100%;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 22px #30b5ff3b)}
-.record.station-logo.spinning{animation:none}
-@media(max-width:840px){.record.station-logo{width:148px;height:148px}}
-@media(max-width:525px){.record.station-logo{width:106px;height:106px}.brand-logo-photo{width:45px;height:45px}}
+@media(max-width:525px){.brand-logo-photo{width:45px;height:45px}}
 
 /* WDM Rádio – edição oficial no ar */
 .station-tag{color:#8adbe3;font-size:12px;font-weight:800;letter-spacing:.07em}
@@ -87,7 +82,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}button{cu
       <section class="panel player" aria-labelledby="player-heading">
         <div class="topline"><div class="live" id="on-air-status" data-state="idle"><i class="dot"></i><span id="live-text">PRONTO PARA SINTONIZAR</span></div><div class="placeholder">📡 SHOUTCAST V2</div></div>
         <div class="record-row">
-          <div class="record station-logo" id="record" aria-hidden="true"><img src="/radio/logo-wdm-mix.svg" alt="" width="182" height="182"></div>
+          <div class="record" id="record" aria-hidden="true"><div class="middle">W</div></div>
           <div>
             <span class="chip">📻 WDM RÁDIO MIX</span>
             <h2 class="track" id="player-heading">WDM Rádio Mix ao vivo</h2>
