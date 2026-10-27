@@ -1,10 +1,11 @@
-import { STATUSES, MAX_ADS, MAX_PHOTOS, MAX_BACKUP_BYTES, blankProfile, escapeHtml as esc, validateAd, validateBackup, validateProfile, buildShareText, filterAds, mergeAds } from './core.mjs?v=20261027.1';
-import { readState, writeState } from './storage.mjs?v=20261027.1';
+import { STATUSES, MAX_ADS, MAX_PHOTOS, MAX_VIDEO_BYTES, MAX_BACKUP_BYTES, blankProfile, escapeHtml as esc, validateAd, validateBackup, validateProfile, validateVideo, mediaFile, shareFiles, buildShareText, filterAds, mergeAds } from './core.mjs?v=20261027.2';
+import { readState, writeState } from './storage.mjs?v=20261027.2';
 
 const $ = selector => document.querySelector(selector);
 const icon = name => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
 let state = { ads: [], profile: blankProfile() };
-let ready = false, editingId = null, selectedId = null, photos = [], editorDirty = false, photoBusy = false, photoSession = 0;
+let ready = false, editingId = null, selectedId = null, photos = [], video = null, editorDirty = false, photoBusy = false, photoSession = 0;
+const previewSources = new WeakMap();
 let toastTimer, pendingConfirmation;
 const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('wdm-vendezap-web') : null;
 function notify(message, error = false) {
@@ -26,7 +27,7 @@ async function commit(change) {
     const latest = await readState() || state;
     const next = structuredClone(latest);
     change(next);
-    if (new Blob([JSON.stringify({ format: 'vendezap-web', version: 1, exportedAt: new Date().toISOString(), ...next })]).size > MAX_BACKUP_BYTES) {
+    if (new Blob([JSON.stringify({ format: 'vendezap-web', version: 2, exportedAt: new Date().toISOString(), ...next })]).size > MAX_BACKUP_BYTES) {
       throw new Error('Seu acervo atingiu o limite de 100 MB. Exporte um backup e remova anúncios antigos para liberar espaço.');
     }
     await writeState(next);
@@ -55,7 +56,7 @@ function render() {
   $('#emptyState').hidden = state.ads.length > 0;
   $('#noResults').hidden = !state.ads.length || filtered.length > 0;
   $('#adGrid').innerHTML = filtered.map(ad => `<article class="ad-card">
-    ${ad.photos[0] ? `<img class="card-cover" src="${esc(ad.photos[0])}" alt="${esc(ad.product)}" loading="lazy">` : `<div class="card-cover card-placeholder">${icon('image')}</div>`}
+    ${ad.video ? `<div class="card-cover card-placeholder video-cover">${icon('video')}<span>Vídeo do anúncio</span></div>` : ad.photos[0] ? `<img class="card-cover" src="${esc(ad.photos[0])}" alt="${esc(ad.product)}" loading="lazy">` : `<div class="card-cover card-placeholder">${icon('image')}</div>`}
     <div class="card-content"><div class="card-top"><span class="badge ${esc(ad.status)}">${STATUSES[ad.status]}</span><span class="card-category">${esc(ad.category)}</span></div><h3>${esc(ad.product)}</h3><p class="card-price">${esc(ad.price || 'Preço sob consulta')}</p><div class="card-actions"><button class="text-button" data-detail="${esc(ad.id)}">Ver e compartilhar ↗</button><button class="text-button" data-edit="${esc(ad.id)}">Editar</button></div></div></article>`).join('');
 }
 function newEditor(ad) {
@@ -65,16 +66,17 @@ function newEditor(ad) {
   form.reset();
   editingId = ad?.id ?? null;
   photos = [...(ad?.photos || [])];
+  video = ad?.video || null;
+  form.elements.mediaType.value = video ? 'video' : 'photos';
   photoSession++;
-  photoBusy = false;
-  $('#photoInput').disabled = false;
-  $('#saveAd').disabled = false;
+  setMediaBusy(false);
   for (const key of ['product', 'price', 'category', 'tagline', 'description', 'status', 'stock', 'variants', 'templateId']) {
     if (ad) form.elements.namedItem(key).value = ad[key] ?? '';
   }
   $('#editorTitle').textContent = ad ? 'Editar anúncio' : 'Novo anúncio';
   editorDirty = false;
   renderPhotos();
+  renderMediaFields();
   updatePreview();
   $('#editorDialog').showModal();
   form.elements.product.focus();
@@ -82,15 +84,39 @@ function newEditor(ad) {
 function editorValues() {
   const data = new FormData($('#adForm'));
   const values = Object.fromEntries(data.entries());
-  return { product: values.product.trim(), price: values.price.trim(), category: values.category.trim(), tagline: values.tagline.trim(), description: values.description.trim(), variants: values.variants.trim(), status: values.status, stock: values.stock === '' ? null : Number(values.stock), templateId: values.templateId, photos: [...photos] };
+  const isVideo = $('#mediaType').value === 'video';
+  return { product: values.product.trim(), price: values.price.trim(), category: values.category.trim(), tagline: values.tagline.trim(), description: values.description.trim(), variants: values.variants.trim(), status: values.status, stock: values.stock === '' ? null : Number(values.stock), templateId: values.templateId, photos: isVideo ? [] : [...photos], video: isVideo ? video : null };
 }
-function previewMarkup(ad) {
-  return `${ad.photos[0] ? `<img src="${esc(ad.photos[0])}" alt="${esc(ad.product || 'Foto do produto')}">` : `<div class="preview-placeholder">${icon('image')}</div>`}<div class="preview-info"><span class="badge ${esc(ad.status)}">${STATUSES[ad.status]}</span>${ad.tagline ? `<p>${esc(ad.tagline)}</p>` : ''}<h3>${esc(ad.product || 'O nome do seu produto')}</h3><p class="preview-price">${esc(ad.price || 'Preço sob consulta')}</p>${ad.description ? `<p>${esc(ad.description)}</p>` : ''}${ad.variants ? `<p><strong>Opções</strong><br>${esc(ad.variants)}</p>` : ''}${ad.stock !== null ? `<p>Estoque: ${esc(ad.stock)} unidade${ad.stock === 1 ? '' : 's'}</p>` : ''}${state.profile.shopName ? `<p class="preview-shop">${esc(state.profile.shopName)}</p>` : ''}</div>`;
+function previewInfo(ad) {
+  return `<div class="preview-info"><span class="badge ${esc(ad.status)}">${STATUSES[ad.status]}</span>${ad.tagline ? `<p>${esc(ad.tagline)}</p>` : ''}<h3>${esc(ad.product || 'O nome do seu produto')}</h3><p class="preview-price">${esc(ad.price || 'Preço sob consulta')}</p>${ad.description ? `<p>${esc(ad.description)}</p>` : ''}${ad.variants ? `<p><strong>Opções</strong><br>${esc(ad.variants)}</p>` : ''}${ad.stock !== null ? `<p>Estoque: ${esc(ad.stock)} unidade${ad.stock === 1 ? '' : 's'}</p>` : ''}${state.profile.shopName ? `<p class="preview-shop">${esc(state.profile.shopName)}</p>` : ''}</div>`;
+}
+function renderPreview(target, ad) {
+  const source = ad.video || ad.photos[0] || '';
+  // Keep the player alive while editing text so playback does not restart on each keypress.
+  if (previewSources.get(target) === source && target.querySelector('.preview-info')) target.querySelector('.preview-info').outerHTML = previewInfo(ad);
+  else {
+    target.querySelector('video')?.pause();
+    const media = ad.video ? `<video controls playsinline preload="metadata" aria-label="Vídeo do anúncio" src="${esc(ad.video)}"></video>` : ad.photos[0] ? `<img src="${esc(ad.photos[0])}" alt="${esc(ad.product || 'Foto do produto')}">` : `<div class="preview-placeholder">${icon('image')}</div>`;
+    target.innerHTML = media + previewInfo(ad);
+    previewSources.set(target, source);
+  }
 }
 function updatePreview() {
   const ad = editorValues();
   $('#editorPreview').className = `preview-card ${ad.templateId}`;
-  $('#editorPreview').innerHTML = previewMarkup(ad);
+  renderPreview($('#editorPreview'), ad);
+}
+function setMediaBusy(busy) {
+  photoBusy = busy;
+  for (const selector of ['#photoInput', '#videoInput', '#mediaType', '#removeVideo', '#saveAd']) $(selector).disabled = busy;
+}
+function renderMediaFields() {
+  const isVideo = $('#mediaType').value === 'video';
+  $('#photosFields').hidden = isVideo;
+  $('#videoFields').hidden = !isVideo;
+  $('#templateField').hidden = isVideo;
+  $('#removeVideo').hidden = !video;
+  $('#videoInfo').textContent = video ? `Vídeo pronto · ${((video.length - video.indexOf(',') - 1) * .75 / 1024 / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} MB` : 'Nenhum vídeo selecionado.';
 }
 function renderPhotos() {
   $('#photoCount').textContent = `${photos.length} de ${MAX_PHOTOS}`;
@@ -118,6 +144,28 @@ async function compressPhoto(file) {
     if (error.name === 'EncodingError') throw new Error('Não foi possível abrir esta foto. Tente outra imagem.');
     throw error;
   } finally { URL.revokeObjectURL(url); }
+}
+async function readVideo(file) {
+  const type = file.type.toLowerCase() || (/\.mp4$/i.test(file.name) ? 'video/mp4' : /\.webm$/i.test(file.name) ? 'video/webm' : '');
+  if (!['video/mp4', 'video/webm'].includes(type)) throw new Error('Escolha um vídeo MP4 ou WebM.');
+  if (!file.size || file.size > MAX_VIDEO_BYTES) throw new Error('O vídeo deve ter conteúdo e no máximo 25 MB.');
+  const player = document.createElement('video');
+  const url = URL.createObjectURL(file);
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('Não foi possível ler o vídeo. Tente exportá-lo como MP4 e selecione novamente.')), 15000);
+      const finish = error => { clearTimeout(timer); player.onloadeddata = player.onerror = null; error ? reject(error) : resolve(); };
+      player.onloadeddata = () => finish(player.videoWidth > 0 ? null : new Error('Escolha um arquivo com vídeo, e não apenas áudio.'));
+      player.onerror = () => finish(new Error('Este vídeo não pode ser reproduzido neste navegador. Tente exportá-lo como MP4.'));
+      player.preload = 'auto'; player.muted = true; player.src = url;
+    });
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => { try { resolve(validateVideo(reader.result)); } catch (error) { reject(error); } };
+      reader.onerror = () => reject(new Error('Não foi possível ler o arquivo de vídeo.'));
+      reader.readAsDataURL(file.slice(0, file.size, type));
+    });
+  } finally { player.pause(); player.removeAttribute('src'); player.load(); URL.revokeObjectURL(url); }
 }
 function confirmAction(message, label = 'Confirmar') {
   $('#confirmMessage').textContent = message;
@@ -149,9 +197,12 @@ function showDetail(id) {
   const ad = selectedAd();
   $('#detailTitle').textContent = ad.product;
   $('#detailPreview').className = `preview-card ${ad.templateId}`;
-  $('#detailPreview').innerHTML = previewMarkup(ad);
+  renderPreview($('#detailPreview'), ad);
   $('#shareText').textContent = buildShareText(ad, state.profile);
   $('#downloadPhoto').disabled = !ad.photos.length;
+  $('#downloadPhoto').hidden = Boolean(ad.video);
+  $('#downloadArt').hidden = Boolean(ad.video);
+  $('#downloadVideo').hidden = !ad.video;
   $('#detailDialog').showModal();
 }
 function openProfile() {
@@ -170,35 +221,30 @@ function download(blob, name) {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
-function photoFile(data, name) {
-  const [header, encoded] = data.split(',');
-  const bytes = Uint8Array.from(atob(encoded), char => char.charCodeAt(0));
-  const type = header.match(/^data:(image\/(?:jpeg|png|webp));base64$/)[1];
-  return new File([bytes], `${name}.${type === 'image/jpeg' ? 'jpg' : type.split('/')[1]}`, { type });
-}
 async function markShared(id) {
   await commit(next => { const ad = next.ads.find(item => item.id === id); if (ad) ad.lastSharedAt = Date.now(); });
 }
 async function shareSelected() {
   const ad = selectedAd();
   const text = buildShareText(ad, state.profile);
-  const files = ad.photos.map((photo, index) => photoFile(photo, `${safeName(ad.product)}-${index + 1}`));
+  const files = shareFiles(ad, safeName(ad.product));
   // navigator.share is called before awaiting storage so user activation is retained.
   try {
     if (files.length && navigator.canShare?.({ files }) && navigator.share) {
       await navigator.share({ files, text, title: ad.product });
     } else if (navigator.share) {
       await navigator.share({ text, title: ad.product });
+      if (files.length) notify(ad.video ? 'Apenas o texto foi compartilhado. Use Baixar vídeo para anexar o arquivo no WhatsApp.' : 'Apenas o texto foi compartilhado. Baixe a foto ou a arte para anexar no WhatsApp.');
     } else {
       const popup = window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
       if (!popup) throw new Error('O navegador bloqueou a abertura do WhatsApp. Permita a janela ou use Copiar texto.');
       popup.opener = null;
-      notify('WhatsApp aberto com o texto. Baixe a foto ou a arte para anexar à mensagem.');
+      notify(ad.video ? 'WhatsApp aberto com o texto. Use Baixar vídeo para anexar à mensagem.' : 'WhatsApp aberto com o texto. Baixe a foto ou a arte para anexar à mensagem.');
     }
     await markShared(ad.id);
   } catch (error) {
     if (error.name === 'AbortError') return;
-    if (['NotAllowedError', 'SecurityError'].includes(error.name)) throw new Error('O navegador não permitiu compartilhar. Use Copiar texto e Baixar arte, ou abra o VendeZap fora do desktop.');
+    if (['NotAllowedError', 'SecurityError'].includes(error.name)) throw new Error('O navegador não permitiu compartilhar. Copie o texto e baixe a mídia para anexar no WhatsApp, ou abra o VendeZap fora do desktop.');
     throw error;
   }
 }
@@ -267,6 +313,7 @@ document.querySelectorAll('[data-close]').forEach(button => button.addEventListe
   else document.getElementById(button.dataset.close).close();
 }));
 $('#editorDialog').addEventListener('cancel', event => { event.preventDefault(); run(closeEditor); });
+for (const selector of ['#editorDialog', '#detailDialog']) $(selector).addEventListener('close', () => $(selector).querySelectorAll('video').forEach(player => player.pause()));
 $('#confirmDialog').addEventListener('cancel', event => { event.preventDefault(); answerConfirmation(false); });
 $('#confirmNo').onclick = () => answerConfirmation(false);
 $('#confirmYes').onclick = () => answerConfirmation(true);
@@ -276,7 +323,7 @@ $('#adForm').addEventListener('change', () => { editorDirty = true; updatePrevie
 $('#adForm').addEventListener('submit', event => {
   event.preventDefault();
   run(async () => {
-    if (photoBusy) throw new Error('Aguarde o processamento das fotos antes de salvar.');
+    if (photoBusy) throw new Error('Aguarde o processamento da mídia antes de salvar.');
     $('#saveAd').disabled = true;
     try {
       const old = state.ads.find(item => item.id === editingId);
@@ -301,17 +348,33 @@ $('#photoInput').addEventListener('change', event => run(async () => {
   if (!files.length) return;
   if (photos.length + files.length > MAX_PHOTOS) throw new Error('Você pode adicionar até 6 fotos por anúncio.');
   const session = photoSession;
-  photoBusy = true; editorDirty = true;
-  $('#saveAd').disabled = true; $('#photoInput').disabled = true;
+  setMediaBusy(true); editorDirty = true;
   try {
     const added = [];
     for (const file of files) added.push(await compressPhoto(file));
     if (session !== photoSession) return;
     photos.push(...added); renderPhotos(); updatePreview();
   } finally {
-    if (session === photoSession) { photoBusy = false; $('#saveAd').disabled = false; $('#photoInput').disabled = false; }
+    if (session === photoSession) setMediaBusy(false);
   }
 }));
+$('#mediaType').addEventListener('change', renderMediaFields);
+$('#videoInput').addEventListener('change', event => run(async () => {
+  const file = event.target.files[0]; event.target.value = '';
+  if (!file) return;
+  const session = photoSession;
+  setMediaBusy(true); editorDirty = true;
+  $('#videoInfo').textContent = 'Preparando vídeo…';
+  try {
+    const loaded = await readVideo(file);
+    if (session !== photoSession) return;
+    video = loaded;
+    renderMediaFields(); updatePreview();
+  } finally {
+    if (session === photoSession) { setMediaBusy(false); renderMediaFields(); }
+  }
+}));
+$('#removeVideo').onclick = () => { video = null; editorDirty = true; renderMediaFields(); updatePreview(); };
 $('#photoList').addEventListener('click', event => {
   if (photoBusy) return;
   const remove = event.target.closest('[data-remove-photo]');
@@ -348,13 +411,14 @@ $('#duplicateAd').onclick = () => run(async () => {
 });
 $('#deleteAd').onclick = () => run(async () => {
   const ad = selectedAd();
-  if (!await confirmAction(`O anúncio “${ad.product}” e suas fotos serão removidos deste navegador.`, 'Excluir anúncio')) return;
+  if (!await confirmAction(`O anúncio “${ad.product}” e sua mídia serão removidos deste navegador.`, 'Excluir anúncio')) return;
   await commit(next => { next.ads = next.ads.filter(item => item.id !== ad.id); });
   $('#detailDialog').close(); notify('Anúncio excluído.');
 });
 $('#shareAd').onclick = () => { shareSelected().catch(report); };
 $('#copyText').onclick = () => { copySelected().catch(report); };
-$('#downloadPhoto').onclick = () => run(() => { const ad = selectedAd(); if (ad.photos[0]) { const file = photoFile(ad.photos[0], safeName(ad.product)); download(file, file.name); } });
+$('#downloadPhoto').onclick = () => run(() => { const ad = selectedAd(); if (ad.photos[0]) { const file = mediaFile(ad.photos[0], safeName(ad.product)); download(file, file.name); } });
+$('#downloadVideo').onclick = () => run(() => { const ad = selectedAd(); if (ad.video) { const file = mediaFile(ad.video, safeName(ad.product)); download(file, file.name); } });
 $('#downloadArt').onclick = () => run(async () => {
   $('#downloadArt').disabled = true;
   try { const ad = selectedAd(); download(await createArt(ad), `${safeName(ad.product)}-vendezap.png`); notify('Arte gerada! Anexe a imagem à sua divulgação.'); }
@@ -363,8 +427,8 @@ $('#downloadArt').onclick = () => run(async () => {
 $('#backupButton').onclick = () => run(async () => {
   ensureReady();
   const latest = await readState() || state;
-  download(new Blob([JSON.stringify({ format: 'vendezap-web', version: 1, exportedAt: new Date().toISOString(), ...latest })], { type: 'application/json' }), `vendezap-web-${new Date().toISOString().slice(0, 10)}.json`);
-  notify('Backup preparado com seus anúncios, fotos e dados da loja.');
+  download(new Blob([JSON.stringify({ format: 'vendezap-web', version: 2, exportedAt: new Date().toISOString(), ...latest })], { type: 'application/json' }), `vendezap-web-${new Date().toISOString().slice(0, 10)}.json`);
+  notify('Backup preparado com seus anúncios, fotos, vídeos e dados da loja.');
 });
 $('#importButton').onclick = () => run(() => { ensureReady(); $('#backupInput').click(); });
 $('#backupInput').addEventListener('change', event => run(async () => {
@@ -387,7 +451,7 @@ $('#backupInput').addEventListener('change', event => run(async () => {
 async function init() {
   try {
     const saved = await readState();
-    if (saved) state = validateBackup({ format: 'vendezap-web', version: 1, ...saved });
+    if (saved) state = validateBackup({ format: 'vendezap-web', version: 2, ...saved });
     ready = true; render();
   } catch (error) {
     report(error);
