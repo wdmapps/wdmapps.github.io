@@ -1,5 +1,6 @@
-import { STATUSES, MAX_ADS, MAX_PHOTOS, MAX_VIDEO_BYTES, MAX_BACKUP_BYTES, blankProfile, escapeHtml as esc, validateAd, validateBackup, validateProfile, validateVideo, mediaFile, shareFiles, buildShareText, filterAds, mergeAds } from './core.mjs?v=20261027.2';
-import { readState, writeState } from './storage.mjs?v=20261027.2';
+import { STATUSES, MAX_ADS, MAX_PHOTOS, MAX_VIDEO_BYTES, MAX_BACKUP_BYTES, blankProfile, escapeHtml as esc, validateAd, validateBackup, validateProfile, validateVideo, mediaFile, buildShareText, filterAds, mergeAds } from './core.mjs?v=20261027.3';
+import { readState, writeState } from './storage.mjs?v=20261027.3';
+import { mediaShareData, deliverMedia } from './sharing.mjs?v=20261027.3';
 
 const $ = selector => document.querySelector(selector);
 const icon = name => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
@@ -203,6 +204,13 @@ function showDetail(id) {
   $('#downloadPhoto').hidden = Boolean(ad.video);
   $('#downloadArt').hidden = Boolean(ad.video);
   $('#downloadVideo').hidden = !ad.video;
+  const hasMedia = Boolean(ad.video || ad.photos.length);
+  $('#shareHeading').textContent = hasMedia ? (ad.video ? 'Vídeo com legenda' : 'Foto com legenda') : 'Compartilhar texto';
+  $('#shareInstructions').textContent = hasMedia ? '1. Copie a legenda abaixo. 2. Compartilhe a mídia. No WhatsApp, cole no campo “Adicionar legenda” da foto ou vídeo antes de enviar.' : 'Confira o texto e escolha como compartilhar.';
+  $('#copyText').textContent = hasMedia ? '1. Copiar legenda' : 'Copiar texto';
+  $('#shareAd').innerHTML = icon('share') + (ad.video ? '2. Compartilhar vídeo' : ad.photos.length ? '2. Compartilhar foto de capa' : 'Compartilhar texto');
+  $('#shareGallery').hidden = Boolean(ad.video) || ad.photos.length < 2;
+  $('#shareHint').textContent = hasMedia ? 'No computador, se o compartilhamento não estiver disponível, a mídia será baixada. Anexe no WhatsApp como foto/vídeo e cole a legenda na prévia. A legenda precisa ser colada por você.' : 'O envio é concluído por você no aplicativo escolhido.';
   $('#detailDialog').showModal();
 }
 function openProfile() {
@@ -224,22 +232,28 @@ function download(blob, name) {
 async function markShared(id) {
   await commit(next => { const ad = next.ads.find(item => item.id === id); if (ad) ad.lastSharedAt = Date.now(); });
 }
-async function shareSelected() {
+async function shareSelected(gallery = false) {
   const ad = selectedAd();
   const text = buildShareText(ad, state.profile);
-  const files = shareFiles(ad, safeName(ad.product));
   // navigator.share is called before awaiting storage so user activation is retained.
   try {
-    if (files.length && navigator.canShare?.({ files }) && navigator.share) {
-      await navigator.share({ files, text, title: ad.product });
+    if (ad.video || ad.photos.length) {
+      const result = await deliverMedia(mediaShareData(ad, safeName(ad.product), { gallery }), {
+        canShare: navigator.canShare?.bind(navigator),
+        share: navigator.share?.bind(navigator),
+        save: download
+      });
+      if (result === 'cancelled') return;
+      if (result === 'unsupported-gallery') { notify('Este navegador não permite compartilhar a galeria. Use a foto de capa ou abra o anúncio em um navegador com compartilhamento de arquivos.', true); return; }
+      if (result === 'downloaded') { notify('Mídia baixada. Anexe no WhatsApp como foto/vídeo e cole o texto em “Adicionar legenda” antes de enviar.'); return; }
+      notify('No WhatsApp, cole o texto em “Adicionar legenda” na prévia da mídia antes de enviar.');
     } else if (navigator.share) {
       await navigator.share({ text, title: ad.product });
-      if (files.length) notify(ad.video ? 'Apenas o texto foi compartilhado. Use Baixar vídeo para anexar o arquivo no WhatsApp.' : 'Apenas o texto foi compartilhado. Baixe a foto ou a arte para anexar no WhatsApp.');
     } else {
       const popup = window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
       if (!popup) throw new Error('O navegador bloqueou a abertura do WhatsApp. Permita a janela ou use Copiar texto.');
       popup.opener = null;
-      notify(ad.video ? 'WhatsApp aberto com o texto. Use Baixar vídeo para anexar à mensagem.' : 'WhatsApp aberto com o texto. Baixe a foto ou a arte para anexar à mensagem.');
+      notify('WhatsApp aberto com o texto do anúncio.');
     }
     await markShared(ad.id);
   } catch (error) {
@@ -250,7 +264,13 @@ async function shareSelected() {
 }
 async function copySelected() {
   const text = buildShareText(selectedAd(), state.profile);
-  try { await navigator.clipboard.writeText(text); notify('Texto copiado! Agora é só colar na conversa.'); }
+  const ad = selectedAd();
+  const hasMedia = Boolean(ad.video || ad.photos.length);
+  try {
+    await navigator.clipboard.writeText(text);
+    $('#copyText').textContent = hasMedia ? 'Legenda copiada ✓' : 'Texto copiado ✓';
+    notify(hasMedia ? 'Legenda copiada! No WhatsApp, cole em “Adicionar legenda” da foto ou vídeo, antes de enviar.' : 'Texto copiado! Agora é só colar na conversa.');
+  }
   catch {
     const selection = window.getSelection();
     const range = document.createRange();
@@ -416,6 +436,7 @@ $('#deleteAd').onclick = () => run(async () => {
   $('#detailDialog').close(); notify('Anúncio excluído.');
 });
 $('#shareAd').onclick = () => { shareSelected().catch(report); };
+$('#shareGallery').onclick = () => { shareSelected(true).catch(report); };
 $('#copyText').onclick = () => { copySelected().catch(report); };
 $('#downloadPhoto').onclick = () => run(() => { const ad = selectedAd(); if (ad.photos[0]) { const file = mediaFile(ad.photos[0], safeName(ad.product)); download(file, file.name); } });
 $('#downloadVideo').onclick = () => run(() => { const ad = selectedAd(); if (ad.video) { const file = mediaFile(ad.video, safeName(ad.product)); download(file, file.name); } });
