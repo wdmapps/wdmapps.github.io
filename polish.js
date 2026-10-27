@@ -15,7 +15,7 @@
     iptv: original.iptv,
     jogos: original.jogos,
     encontrapet: {...original.encontrapet, mode:'showcase', image:'assets/encontrapet-portfolio.webp', badge:'APLICATIVO ANDROID', meta:['Pets','Comunidade','Google Play']},
-    vendezap: {...original.vendezap, mode:'showcase', image:'assets/vendezap-portfolio.webp', badge:'APLICATIVO ANDROID', meta:['Vendas','WhatsApp','Google Play']},
+    vendezap: original.vendezap,
     contash: {title:'ContasH',label:'ContasH',url:'https://play.google.com/store/apps/details?id=com.wdmgames.contash',icon:'contash',mode:'showcase',image:'assets/contash-portfolio.jpg',badge:'JOGO EDUCATIVO',description:'Um jogo educativo de matemática criado para praticar contas de forma simples, divertida e interativa.',meta:['Android','Matemática','Educação']},
     telhas: {title:'Telhas Porto',label:'Telhas Porto',url:'https://telhasporto.com.br/',icon:'telhas',mode:'showcase',image:'assets/telhas-porto-logo.png',logoMode:true,badge:'SITE INSTITUCIONAL',description:'Projeto web desenvolvido para a Telhas Porto, com presença digital profissional para apresentar produtos, serviços e facilitar o contato com clientes.',meta:['Website','Responsivo','Projeto WDM']},
     ferrarigesso: original.ferrarigesso,
@@ -68,7 +68,7 @@
     if(openWindows.has(appKey)){const d=openWindows.get(appKey);d.win.classList.remove('hidden');focusWindow(d.win,appKey);return}
     const win=document.createElement('section');win.className='window';const offset=(cascade++%7)*26;win.style.left=180+offset+'px';win.style.top=70+offset+'px';win.style.zIndex=++z;win.dataset.id=appKey;
     let body='';
-    if(app.mode==='iframe') body=`<div class="browserview"><div class="loading">Carregando ${app.title}...</div><iframe src="${app.url}" title="${app.title}" loading="eager"></iframe></div>`;
+    if(app.mode==='iframe') body=`<div class="browserview"><div class="loading">Carregando ${app.title}...</div><iframe src="${app.url}" title="${app.title}" loading="eager"${appKey === 'vendezap' ? ' allow="web-share; clipboard-write"' : ''}></iframe></div>`;
     else if(app.mode==='about') body=renderAbout();
     else if(app.mode==='showcase') body=renderShowcase(app);
     else body=`<div class="browserview"><div class="external-card"><div class="external-panel"><div class="big-icon">${icons[app.icon]}</div><h2>${app.title}</h2><p>${app.description||''}</p><a href="${app.url}" target="_blank" rel="noreferrer">Abrir ${app.label} ↗</a></div></div></div>`;
