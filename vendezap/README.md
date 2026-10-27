@@ -10,7 +10,8 @@ Não exige dependências, build, login ou servidor de aplicação. Os arquivos p
 - Fotos reduzidas localmente para até 1.400 px; primeira foto configurável como capa.
 - Prévia, dados da loja e quatro estilos de arte PNG de 1.080 × 1.350 px.
 - Vídeo MP4 ou WebM de até 25 MB, com prévia reproduzível e download do arquivo original. O vídeo precisa ser reproduzível pelo navegador usado; não há conversão ou edição automática. As artes PNG ficam disponíveis para anúncios com fotos.
-- Copiar texto e iniciar compartilhamento nativo com fotos ou vídeo quando o navegador permitir; alternativa pelo WhatsApp com texto e download separado da mídia.
+- Compartilhar uma foto de capa ou vídeo sem enviar o texto como mensagem separada. O fluxo orienta copiar o texto e colar em “Adicionar legenda” na prévia da mídia no WhatsApp. A galeria completa permanece disponível por uma ação separada.
+- Quando o navegador não permite compartilhar mídia, o arquivo é baixado para anexar manualmente no WhatsApp como foto/vídeo. Anúncios sem mídia mantêm o compartilhamento de texto.
 - IndexedDB no navegador, backup JSON com fotos e vídeos e importação aditiva. IDs em conflito recebem outro ID para preservar os dois registros. Importações idênticas são ignoradas.
 
 ## Dados e limites
@@ -21,13 +22,15 @@ O backup JSON da web é independente do ZIP do aplicativo Android. O acervo e o 
 
 O contador de compartilhamentos indica anúncios cujo compartilhamento foi iniciado. Não comprova recebimento ou envio da mensagem. A seleção do destinatário e o envio são feitos pelo usuário. O aplicativo não executa disparos automáticos.
 
+No computador, a Web Share API não possui um campo para controlar a legenda do WhatsApp. O usuário precisa colar o texto no campo de legenda da foto/vídeo antes de enviar. O payload de mídia contém somente `files`, sem `text` nem `title`, para evitar mensagens separadas. O site não promete preencher a legenda automaticamente.
+
 ## Executar e verificar
 
 Na raiz do site:
 
 ```sh
 python -m http.server 4175 --bind 127.0.0.1
-node --test vendezap/core.test.mjs
+node --test vendezap/core.test.mjs vendezap/sharing.test.mjs
 node --check vendezap/app.mjs
 node --check vendezap/storage.mjs
 node --check desktop.js
