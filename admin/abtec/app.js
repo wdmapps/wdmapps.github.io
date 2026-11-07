@@ -12,7 +12,7 @@ try {
 } catch { /* Mantém os dados iniciais caso o armazenamento esteja inválido. */ }
 
 let selectedClass = "segunda18";
-if (!classes[selectedClass]) selectedClass = Object.keys(classes)[0];
+if (!classes[selectedClass] || classes[selectedClass].archivedAt) selectedClass = Object.keys(classes).find(id => !classes[id].archivedAt) || Object.keys(classes)[0];
 let attendance = {};
 let calendarDate = new Date();
 
@@ -42,10 +42,11 @@ function initials(name) {
 }
 
 function populateClassSelects() {
-  const options = Object.entries(classes).map(([key, item]) => `<option value="${key}">${escapeHTML(item.name)}</option>`).join("");
+  const options = Object.entries(classes).filter(([, item]) => !item.archivedAt).map(([key, item]) => `<option value="${key}">${escapeHTML(item.name)}</option>`).join("");
+  const consultationOptions = Object.entries(classes).map(([key, item]) => `<option value="${key}">${item.archivedAt ? "📦 " : ""}${escapeHTML(item.name)}</option>`).join("");
   classSelect.innerHTML = options;
-  historyClassSelect.innerHTML = options;
-  rosterClassSelect.innerHTML = options;
+  historyClassSelect.innerHTML = consultationOptions;
+  rosterClassSelect.innerHTML = consultationOptions;
   classSelect.value = selectedClass;
   historyClassSelect.value = selectedClass;
   rosterClassSelect.value = selectedClass;
@@ -56,7 +57,7 @@ function saveClasses() {
 }
 
 function refreshClassSelectors(classId = selectedClass) {
-  selectedClass = classes[classId] ? classId : Object.keys(classes)[0];
+  selectedClass = classes[classId] && !classes[classId].archivedAt ? classId : Object.keys(classes).find(id => !classes[id].archivedAt);
   populateClassSelects();
   classSelect.value = selectedClass;
   historyClassSelect.value = selectedClass;
@@ -128,6 +129,7 @@ function renderLastLesson() {
 }
 
 function saveLesson() {
+  if (classes[selectedClass]?.archivedAt) return showToast("Turma arquivada: somente consulta.");
   const content = el("lesson-content").value.trim();
   const date = el("lesson-date").value;
   const unmarked = Object.values(attendance).filter(value => !value).length;
@@ -223,13 +225,14 @@ function renderHistory() {
 
 function renderRoster() {
   const current = classes[rosterClassSelect.value || selectedClass];
+  el("new-student").disabled = Boolean(current.archivedAt);
   const max = Math.max(...current.students.map(item => item[1]), 1);
   el("roster-list").innerHTML = current.students.map(([name, absences], index) => `
     <div class="roster-row">
       <strong>${escapeHTML(name)}</strong>
       <div class="absence-bar ${absences >= 5 ? "high" : ""}"><span style="width:${Math.round(absences / max * 100)}%"></span></div>
       <span>${absences} ${absences === 1 ? "falta" : "faltas"}</span>
-      <button class="delete-student" type="button" data-student-index="${index}" aria-label="Excluir ${escapeHTML(name)}" title="Excluir aluno">×</button>
+      <button class="delete-student" type="button" ${current.archivedAt ? "disabled" : ""} data-student-index="${index}" aria-label="Excluir ${escapeHTML(name)}" title="Excluir aluno">×</button>
     </div>
   `).join("") || `<div class="empty-state">Nenhum aluno cadastrado nesta turma.</div>`;
 
@@ -239,12 +242,12 @@ function renderRoster() {
 }
 
 function allAttendanceRecords() {
-  const imported = Object.keys(classes).flatMap(classId => combinedHistory(classId).filter(item => item.attendance));
+  const imported = Object.keys(classes).filter(id => !classes[id].archivedAt).flatMap(classId => combinedHistory(classId).filter(item => item.attendance));
   return imported;
 }
 
 function renderDashboard() {
-  const classEntries = Object.entries(classes).map(([id, item]) => ({ ...item, recordedLessons: combinedHistory(id).length }));
+  const classEntries = Object.entries(classes).filter(([, item]) => !item.archivedAt).map(([id, item]) => ({ ...item, recordedLessons: combinedHistory(id).length }));
   const students = classEntries.flatMap(item => item.students.map(([name, absences]) => ({ name, absences, className: item.name })));
   const totalAbsences = students.reduce((sum, item) => sum + Number(item.absences || 0), 0);
   const attendanceValues = allAttendanceRecords().flatMap(item => Object.values(item.attendance));
@@ -371,6 +374,7 @@ function createClass(event) {
 }
 
 function deleteClass() {
+  if (classes[selectedClass]?.archivedAt) return showToast("Restaure a turma antes de alterá-la.");
   if (Object.keys(classes).length === 1) return showToast("É necessário manter pelo menos uma turma.");
   const current = classes[selectedClass];
   if (!confirm(`Excluir a turma “${current.name}” e seus registros locais?`)) return;
@@ -383,6 +387,7 @@ function deleteClass() {
 
 function createStudent(event) {
   event.preventDefault();
+  if (classes[rosterClassSelect.value]?.archivedAt) return showToast("Turma arquivada: somente consulta.");
   const classId = rosterClassSelect.value;
   const name = el("new-student-name").value.trim();
   if (!name) return;
@@ -401,6 +406,7 @@ function createStudent(event) {
 
 function deleteStudent(name) {
   const classId = rosterClassSelect.value;
+  if (classes[classId]?.archivedAt) return showToast("Turma arquivada: somente consulta.");
   if (!confirm(`Excluir ${name} da turma “${classes[classId].name}”?`)) return;
   classes[classId].students = classes[classId].students.filter(([student]) => student !== name);
   saveClasses();
@@ -418,13 +424,15 @@ function switchView(view) {
     chamada: ["REGISTRO DE AULA", "Diário de classe", "Registre a presença e o conteúdo aplicado em poucos passos."],
     historico: ["CONSULTA", "Histórico de aulas", "Consulte o conteúdo aplicado em cada turma."],
     alunos: ["ACOMPANHAMENTO", "Alunos e faltas", "Veja rapidamente quem precisa de atenção."],
-    agenda: ["PLANEJAMENTO", "Agenda mensal", "Organize aulas, provas e tarefas importantes."]
+    agenda: ["PLANEJAMENTO", "Agenda mensal", "Organize aulas, provas e tarefas importantes."],
+    arquivos: ["ARQUIVO", "Diários arquivados", "Consulte as turmas concluídas e restaure quando necessário."]
   };
   [el("view-eyebrow").textContent, el("view-title").textContent, el("view-description").textContent] = titles[view];
   if (view === "home") renderDashboard();
   if (view === "historico") renderHistory();
   if (view === "alunos") renderRoster();
   if (view === "agenda") renderCalendar();
+  if (view === "arquivos") window.renderArchivedClasses?.();
   document.querySelector(".sidebar").classList.remove("open");
 }
 
