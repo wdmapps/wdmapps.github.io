@@ -106,3 +106,21 @@ button:focus-visible, a:focus-visible { outline:3px solid #00a2d1; outline-offse
 #archive-class { white-space:nowrap; }
 #archive-class:disabled { opacity:.45; cursor:not-allowed; }
 @media(max-width:760px){ .archive-row { align-items:flex-start; flex-direction:column; } .archive-actions { width:100%; } .archive-actions button { flex:1; } .class-select-row { display:flex; flex-wrap:wrap; } .class-select-row select { flex:1 0 100%; } }
+
+/* Diretório de turmas */
+.class-management-heading { flex-wrap:wrap; gap:12px; }
+.classes-list-toolbar { padding:17px 22px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--line); }
+.classes-list-toolbar label { color:#637a99; font-size:11px; font-weight:800; }
+.classes-list-toolbar input { flex:1; min-width:180px; max-width:380px; height:38px; border:1px solid #c6d9ed; border-radius:9px; padding:0 12px; background:#fff; color:#183958; }
+.classes-list-toolbar span { color:#647995; font-size:11px; margin-left:auto; }
+.class-directory-card { padding:20px 22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px; border-bottom:1px solid var(--line); }
+.class-directory-card:last-child { border-bottom:0; }
+.class-directory-info { flex:1; min-width:200px; }
+.class-directory-title { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.class-directory-title strong { font-size:15px; color:#13365f; }
+.class-status-active { border-radius:20px; padding:5px 9px; font-size:10px; font-weight:800; color:#087c6a; background:#e7faf5; }
+.class-directory-details { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; color:#617895; font-size:11px; }
+.class-directory-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.class-directory-actions .primary-button { height:37px; min-width:110px; padding:0 12px; }
+.class-directory-actions .utility-button { height:37px; }
+@media(max-width:760px){ .classes-list-toolbar span { width:100%; margin-left:0; } .class-directory-card { align-items:stretch; } .class-directory-actions { width:100%; } .class-directory-actions button { flex:1; } }
