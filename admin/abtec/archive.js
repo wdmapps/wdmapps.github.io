@@ -72,8 +72,8 @@
   document.addEventListener("click", event => {
     const button = event.target.closest("button");
     if (!button) return;
-    const historyEditing = button.closest("#historico-view") && button.matches("[data-history-edit], [data-history-delete], .history-edit, .history-delete");
-    const gradeEditing = button.closest("#notas-view") && /^(save-grades|cancel-grade-edit)$/.test(button.id);
+    const historyEditing = button.closest("#historico-view") && button.matches(".history-delete-button, [data-history-edit], [data-history-delete], .history-edit, .history-delete");
+    const gradeEditing = button.closest("#notas-view") && (/^(save-grades|cancel-grade-edit)$/.test(button.id) || button.matches("[data-edit-grade], [data-delete-grade]"));
     if ((historyEditing && classes[historyClassSelect.value]?.archivedAt) ||
         (gradeEditing && classes[document.getElementById("grade-class-select")?.value]?.archivedAt)) {
       event.stopImmediatePropagation(); event.preventDefault();
