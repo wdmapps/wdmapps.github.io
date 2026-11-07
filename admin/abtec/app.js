@@ -421,6 +421,7 @@ function switchView(view) {
   document.querySelectorAll(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.view === view));
   const titles = {
     home: ["VISÃO GERAL", "Painel administrativo", "Acompanhe os principais números da escola."],
+    turmas: ["ORGANIZAÇÃO", "Turmas", "Gerencie as turmas em andamento e acesse seus diários."],
     chamada: ["REGISTRO DE AULA", "Diário de classe", "Registre a presença e o conteúdo aplicado em poucos passos."],
     historico: ["CONSULTA", "Histórico de aulas", "Consulte o conteúdo aplicado em cada turma."],
     alunos: ["ACOMPANHAMENTO", "Alunos e faltas", "Veja rapidamente quem precisa de atenção."],
@@ -429,6 +430,7 @@ function switchView(view) {
   };
   [el("view-eyebrow").textContent, el("view-title").textContent, el("view-description").textContent] = titles[view];
   if (view === "home") renderDashboard();
+  if (view === "turmas") window.renderClassesDirectory?.();
   if (view === "historico") renderHistory();
   if (view === "alunos") renderRoster();
   if (view === "agenda") renderCalendar();
