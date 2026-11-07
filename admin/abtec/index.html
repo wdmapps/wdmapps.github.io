@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261021.10">
-  <link rel="stylesheet" href="grades.css?v=20261021.10">
-  <link rel="stylesheet" href="enhancements.css?v=20261021.10">
-  <script src="sync-core.js?v=20261021.10"></script>
-  <script src="sync.js?v=20261021.10"></script>
-  <script src="../auth.js?v=20261021.10"></script>
+  <link rel="stylesheet" href="styles.css?v=20261107.1">
+  <link rel="stylesheet" href="grades.css?v=20261107.1">
+  <link rel="stylesheet" href="enhancements.css?v=20261107.1">
+  <script src="sync-core.js?v=20261107.1"></script>
+  <script src="sync.js?v=20261107.1"></script>
+  <script src="../auth.js?v=20261107.1"></script>
   <script>window.WDM_PAGE_READY = requireAuth();</script>
 </head>
 <body>
@@ -33,6 +33,9 @@
         </button>
         <button class="nav-item" type="button" data-view="historico">
           <span class="nav-icon" aria-hidden="true">▤</span> Histórico
+        </button>
+        <button class="nav-item" type="button" data-view="arquivos">
+          <span class="nav-icon" aria-hidden="true">▣</span> Arquivados
         </button>
         <button class="nav-item" type="button" data-view="alunos">
           <span class="nav-icon" aria-hidden="true">◎</span> Alunos
@@ -119,6 +122,7 @@
               <div class="class-select-row">
                 <select id="class-select"></select>
                 <button class="utility-button add" id="new-class" type="button">+ Turma</button>
+                <button class="utility-button add" id="archive-class" type="button">📦 Arquivar</button>
                 <button class="utility-button delete" id="delete-class" type="button">Excluir</button>
               </div>
             </div>
@@ -196,6 +200,15 @@
               <select id="history-class-select" aria-label="Filtrar turma"></select>
             </div>
             <div id="history-list" class="history-list"></div>
+          </section>
+        </div>
+
+        <div id="arquivos-view" class="view">
+          <section class="card history-card">
+            <div class="section-heading history-heading">
+              <div><span class="step">▣</span><div><h2>Diários arquivados</h2><p>Turmas encerradas, disponíveis para consulta e restauração.</p></div></div>
+            </div>
+            <div id="archives-list" class="history-list"></div>
           </section>
         </div>
 
@@ -327,8 +340,8 @@
   <script>
     window.WDM_PAGE_READY.then(async allowed => {
       if (!allowed) return;
-      for (const file of ["app.js", "history-actions.js", "grades.js", "schedule.js", "schedule-descriptions.js", "enhancements.js"]) {
-        await new Promise((resolve, reject) => { const script = document.createElement("script"); script.src = file + "?v=20261021.10"; script.onload = resolve; script.onerror = reject; document.body.appendChild(script); });
+      for (const file of ["app.js", "history-actions.js", "grades.js", "schedule.js", "schedule-descriptions.js", "enhancements.js", "archive.js"]) {
+        await new Promise((resolve, reject) => { const script = document.createElement("script"); script.src = file + "?v=20261107.1"; script.onload = resolve; script.onerror = reject; document.body.appendChild(script); });
       }
       document.dispatchEvent(new CustomEvent("abtec-app-ready"));
     }).catch(() => { window.WDM_ABTEC_SYNC.status("Falha ao carregar o diário. Recarregue a página; seus dados foram preservados.", "error"); });
