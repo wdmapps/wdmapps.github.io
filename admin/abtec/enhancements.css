@@ -95,3 +95,14 @@ button:focus-visible, a:focus-visible { outline:3px solid #00a2d1; outline-offse
   .report-dialog tr { break-inside:avoid; }
   .student-module-card { break-inside:avoid; }
 }
+
+/* Turmas encerradas: apresentação responsiva da consulta. */
+.archive-row { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:20px 22px; border-bottom:1px solid #e4ebf3; }
+.archive-row:last-child { border-bottom:0; }
+.archive-row strong { color:#15345e; font-size:15px; }
+.archive-row p { margin:6px 0 0; color:#647995; font-size:11px; }
+.archive-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.archive-actions button { white-space:nowrap; }
+#archive-class { white-space:nowrap; }
+#archive-class:disabled { opacity:.45; cursor:not-allowed; }
+@media(max-width:760px){ .archive-row { align-items:flex-start; flex-direction:column; } .archive-actions { width:100%; } .archive-actions button { flex:1; } .class-select-row { display:flex; flex-wrap:wrap; } .class-select-row select { flex:1 0 100%; } }
