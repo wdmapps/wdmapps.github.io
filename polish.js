@@ -11,7 +11,6 @@
     docs: {title:'WDM Docs',label:'Docs',url:'https://wdmapps.com.br/office/?app=docs',icon:'docs',mode:'iframe'},
     sheets: {title:'WDM Planilhas',label:'Planilhas',url:'https://wdmapps.com.br/office/?app=sheets',icon:'sheets',mode:'iframe'},
     leitor: original.leitor,
-    radio: original.radio,
     everycine: original.everycine,
     iptv: original.iptv,
     jogos: original.jogos,
