@@ -1,0 +1,21 @@
+{
+  "id": "/jogos/entregador-maluco/",
+  "name": "Entregador Maluco 3D — WDM Jogos",
+  "short_name": "Motoboy 3D",
+  "description": "40 fases de entregas, garagem e ranking de motoboys",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#123b64",
+  "theme_color": "#123b64",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
