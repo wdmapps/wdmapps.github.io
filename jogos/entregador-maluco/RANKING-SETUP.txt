@@ -1,0 +1,15 @@
+RANKING MUNDIAL — Entregador Maluco 3D
+
+Situação: a interface e o código do Firebase foram preparados, mas o ranking mundial
+só começa a funcionar após a configuração do projeto Firebase do proprietário.
+
+1. Firebase Console: criar ou selecionar um projeto de jogos.
+2. Adicionar app WEB, copiar apiKey, authDomain, projectId e appId.
+3. Authentication > Sign-in method > Anônimo: ativar.
+4. Firestore Database > criar banco e publicar as regras de firestore-ranking.rules.
+   Se o projeto já usa Firestore, mescle SOMENTE o match da coleção.
+5. Em ranking-config.js, preencher window.WDM_RANKING_FIREBASE_CONFIG com os valores reais.
+6. Testar duas abas/navegadores: faça entregas e confira a posição no ranking mundial.
+
+O ranking local continua funcionando mesmo que o banco esteja indisponível.
+A pontuação é enviada a partir do cliente (não é antifraude).
