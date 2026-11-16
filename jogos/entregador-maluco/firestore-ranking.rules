@@ -17,7 +17,7 @@ service cloud.firestore {
           && request.resource.data.deliveries is int && request.resource.data.deliveries >= 0 && request.resource.data.deliveries <= 9999
           && request.resource.data.distance is int && request.resource.data.distance >= 0 && request.resource.data.distance <= 999999
           && request.resource.data.points is int
-          && request.resource.data.points == request.resource.data.stage * 100000 + request.resource.data.deliveries * 100 + (request.resource.data.distance / 50)
+          && request.resource.data.points == request.resource.data.stage * 100000 + request.resource.data.deliveries * 100 + (int((request.resource.data.distance >= 4950 ? 4950 : request.resource.data.distance) / 50))
           && request.resource.data.updatedAt is int;
       }
       allow create: if valid();
