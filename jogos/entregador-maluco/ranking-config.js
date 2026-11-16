@@ -1,10 +1,11 @@
-// Configure a aplicação Web do Firebase aqui. Estes identificadores WEB são públicos,
-// mas as regras do Firestore devem ser aplicadas antes de habilitar o ranking.
-// Authentication > Métodos de login > Anônimo: ATIVAR.
-// Firestore Database: CRIAR e publicar as regras do arquivo firestore-ranking.rules.
-window.WDM_RANKING_FIREBASE_CONFIG = null;
-// Exemplo (substitua pelos dados reais do seu projeto):
-// window.WDM_RANKING_FIREBASE_CONFIG = {
-//   apiKey: "SUA_API_KEY", authDomain: "SEU_PROJETO.firebaseapp.com",
-//   projectId: "SEU_PROJETO", appId: "SEU_APP_ID"
-// };
+// Firebase Web SDK configuration for the WDM Jogos public web app.
+// Security is enforced in Firestore rules and Firebase Authentication.
+window.WDM_RANKING_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAL0DlukNTdKndFcfz__wWQl1nqHiZWgeQ",
+  authDomain: "wdm-jogos.firebaseapp.com",
+  projectId: "wdm-jogos",
+  storageBucket: "wdm-jogos.firebasestorage.app",
+  messagingSenderId: "824558535897",
+  appId: "1:824558535897:web:e884641325e9836489aac8",
+  measurementId: "G-4H01P1C5LR"
+};
